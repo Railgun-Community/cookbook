@@ -1,3 +1,4 @@
+import { RelayAdaptContract } from '../../contract/adapt/relay-adapt';
 import {
   StepInput,
   StepOutputERC20Amount,
@@ -6,10 +7,18 @@ import {
 import { filterSingleERC20AmountInput } from '../../utils/filters';
 import { Step } from '../step';
 import { getWrappedBaseTokenAddress } from './wrap-util';
+import { PopulatedTransaction } from '@ethersproject/contracts';
 
-export class UnwrapBaseTokenStep extends Step {
-  readonly name = 'Unwrap Base Token';
-  readonly description = 'Unwrap wrapped base token into base token.';
+export class TransferBaseTokenStep extends Step {
+  readonly name = 'Transfer Base Token';
+  readonly description = 'Transfers base token to an external public address.';
+
+  private readonly toAddress: string;
+
+  constructor(toAddress: string) {
+    super();
+    this.toAddress = toAddress;
+  }
 
   protected async getStepOutput(
     input: StepInput,
@@ -22,17 +31,22 @@ export class UnwrapBaseTokenStep extends Step {
       filterSingleERC20AmountInput(
         erc20Amounts,
         erc20Amount =>
-          !erc20Amount.isBaseToken &&
+          erc20Amount.isBaseToken &&
           erc20Amount.tokenAddress === wrappedBaseTokenAddress,
       );
 
+    const contract = new RelayAdaptContract(input.networkName);
+
+    const populatedTransactions: PopulatedTransaction[] = [
+      await contract.createBaseTokenTransfer(this.toAddress),
+    ];
     const unwrappedBaseToken: StepOutputERC20Amount = {
       ...erc20AmountForStep,
       isBaseToken: true,
     };
 
     return {
-      populatedTransactions: [],
+      populatedTransactions,
       spentERC20Amounts: [],
       outputERC20Amounts: [unwrappedBaseToken, ...unusedERC20Amounts],
       spentNFTs: [],

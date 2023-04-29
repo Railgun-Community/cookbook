@@ -1,11 +1,15 @@
 import {
   NetworkName,
-  RailgunERC20Amount,
   RailgunERC20AmountRecipient,
   RailgunNFTAmount,
 } from '@railgun-community/shared-models';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
+
+export type CookbookDebugger = {
+  log: (msg: string) => void;
+  error: (error: Error) => void;
+};
 
 export type RecipeERC20Info = {
   tokenAddress: string;
@@ -35,8 +39,8 @@ export type StepInput = {
 export type RecipeOutput = {
   stepOutputs: StepOutput[];
   populatedTransactions: PopulatedTransaction[];
-  shieldERC20Amounts: RailgunERC20Amount[];
-  shieldNFTAmounts: RailgunNFTAmount[];
+  shieldERC20Addresses: string[];
+  shieldNFTs: RailgunNFTAmount[];
   feeERC20AmountRecipients: RailgunERC20AmountRecipient[];
 };
 

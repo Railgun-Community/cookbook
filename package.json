@@ -23,6 +23,7 @@
     "test": "npm run compile-test && NODE_ENV=test mocha"
   },
   "dependencies": {
+    "ethers": "^5.7.2",
     "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@railgun-community/shared-models": "4.1.12"

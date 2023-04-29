@@ -22,7 +22,7 @@ import type {
   TypedEvent,
   TypedEventFilter,
   TypedListener,
-} from './common';
+} from '../common';
 
 export interface ERC721Interface extends Interface {
   functions: {

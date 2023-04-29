@@ -1,7 +1,4 @@
-import {
-  RailgunERC20Amount,
-  RailgunERC20AmountRecipient,
-} from '@railgun-community/shared-models';
+import { RailgunERC20AmountRecipient } from '@railgun-community/shared-models';
 import {
   RecipeInput,
   RecipeOutput,
@@ -11,10 +8,7 @@ import {
 import { ShieldStep } from '../steps/railgun/shield-step';
 import { UnshieldStep } from '../steps/railgun/unshield-step';
 import { Step } from '../steps/step';
-import {
-  convertRecipeFeesToRailgunERC20AmountRecipients,
-  convertStepOutputsToRailgunERC20Amounts,
-} from '../utils/convert';
+import { convertRecipeFeesToRailgunERC20AmountRecipients } from '../utils/convert';
 
 export abstract class Recipe {
   abstract readonly name: string;
@@ -28,6 +22,10 @@ export abstract class Recipe {
     }
 
     this.internalSteps.push(step);
+  }
+
+  addSteps(steps: Step[]): void {
+    steps.forEach(this.addStep);
   }
 
   getFullSteps(): Step[] {
@@ -82,11 +80,26 @@ export abstract class Recipe {
       .map(output => output.populatedTransactions)
       .flat();
 
-    const shieldERC20Amounts: RailgunERC20Amount[] =
-      convertStepOutputsToRailgunERC20Amounts(
-        finalStepOutput.outputERC20Amounts,
-      );
-    const shieldNFTAmounts = finalStepOutput.outputNFTs;
+    // TODO: After callbacks upgrade, remove unshield erc20s to auto re-shield.
+    // Until then, we need all tokens to auto re-shield in case of revert.
+    const shieldERC20Addresses: string[] = [];
+    const tokenAmountsToReshield = [
+      ...input.unshieldERC20Amounts,
+      ...finalStepOutput.outputERC20Amounts,
+    ];
+    tokenAmountsToReshield.forEach(({ tokenAddress, isBaseToken }) => {
+      if (isBaseToken) {
+        return;
+      }
+      if (!shieldERC20Addresses.includes(tokenAddress)) {
+        shieldERC20Addresses.push(tokenAddress);
+      }
+    });
+
+    // TODO: After callbacks upgrade, remove unshield NFTs to auto re-shield.
+    // Until then, we need all tokens to auto re-shield in case of revert.
+    const shieldNFTs = [...input.unshieldNFTs, ...finalStepOutput.outputNFTs];
+
     const feeERC20AmountRecipients: RailgunERC20AmountRecipient[] = stepOutputs
       .map(output =>
         convertRecipeFeesToRailgunERC20AmountRecipients(
@@ -98,8 +111,8 @@ export abstract class Recipe {
     const recipeOutput: RecipeOutput = {
       stepOutputs,
       populatedTransactions,
-      shieldERC20Amounts,
-      shieldNFTAmounts,
+      shieldERC20Addresses,
+      shieldNFTs,
       feeERC20AmountRecipients,
     };
     return recipeOutput;

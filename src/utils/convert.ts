@@ -1,21 +1,13 @@
-import {
-  RailgunERC20Amount,
-  RailgunERC20AmountRecipient,
-} from '@railgun-community/shared-models';
+import { RailgunERC20AmountRecipient } from '@railgun-community/shared-models';
 import {
   RecipeERC20AmountRecipient,
   StepOutputERC20Amount,
 } from '../models/export-models';
 
-export const convertStepOutputsToRailgunERC20Amounts = (
+export const convertStepOutputsToERC20TokenAddresses = (
   outputERC20Amounts: StepOutputERC20Amount[],
-): RailgunERC20Amount[] => {
-  return outputERC20Amounts.map(erc20Amount => {
-    return {
-      ...erc20Amount,
-      amountString: erc20Amount.expectedBalance.toString(),
-    };
-  });
+): string[] => {
+  return outputERC20Amounts.map(erc20Amount => erc20Amount.tokenAddress);
 };
 
 export const convertRecipeFeesToRailgunERC20AmountRecipients = (
