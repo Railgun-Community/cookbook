@@ -1,0 +1,14 @@
+# OSX
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+dist/
+
+# Test
+.nyc_output
+test.db
+coverage/
