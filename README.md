@@ -1,24 +1,17 @@
-[![Node.js CI Actions Status](https://github.com/Railgun-Community/waku-relayer-client/actions/workflows/node.js.yml/badge.svg?branch=main)](https://github.com/Railgun-Community/waku-relayer-client/actions)
+[![Node.js CI Actions Status](https://github.com/Railgun-Community/cookbook/actions/workflows/node.js.yml/badge.svg?branch=main)](https://github.com/Railgun-Community/cookbook/actions)
 
-# RAILGUN Relayer Client with Waku networking layer
+# RAILGUN Cookbook
 
-Compatible with Browser and NodeJS environments.
+Write a recipe in minutes to convert your dApp to a zkApp.
 
-`yarn add @railgun-community/waku-relayer-client`
+## Get the Recipe Builder
 
-## The Basics
+`yarn add @railgun-community/cookbook`
 
-```
-// Initialize the Relayer Client
-await RailgunWakuRelayerClient.start(...)
+## Add a Recipe call with RAILGUN Quickstart
 
-// Wait for Relayers to connect (5-10 sec) and client to collect fees.
-// Relayers broadcast fees through the privacy-safe Waku network.
+TODO
 
-// Get relayer with lowest fee for a given ERC20 token.
-const selectedRelayer = await RailgunWakuRelayerClient.findBestRelayer(...)
+## Write your own Recipe
 
-// Create Relayed transaction and send through selected Relayer.
-const relayerTransaction = await RelayerTransaction.create(...)
-await RelayerTransaction.send(...)
-```
+TODO

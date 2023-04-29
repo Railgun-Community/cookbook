@@ -1,6 +1,6 @@
 import { RailgunConfig } from '../models/railgun-config';
 
-export const initConfig = (
+export const initCookbook = (
   shieldFeeBasisPoints: string,
   unshieldFeeBasisPoints: string,
 ) => {
