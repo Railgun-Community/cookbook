@@ -30,6 +30,10 @@ export class RelayAdaptContract {
     };
   }
 
+  createBaseTokenWrap(amount: BigNumber): Promise<PopulatedTransaction> {
+    return this.contract.populateTransaction.wrapBase(amount);
+  }
+
   createBaseTokenUnwrap(amount: BigNumber): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.unwrapBase(amount);
   }

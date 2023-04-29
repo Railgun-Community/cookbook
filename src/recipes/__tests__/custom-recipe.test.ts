@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { CustomRecipe } from '../custom-recipe';
-import { UnwrapBaseTokenStep } from '../../steps/wrap/unwrap-base-token-step';
+import { UnwrapBaseTokenStep } from '../../steps/adapt/unwrap-base-token-step';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

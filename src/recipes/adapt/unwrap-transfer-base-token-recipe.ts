@@ -1,6 +1,6 @@
-import { UnwrapBaseTokenStep } from '../../steps/relay/unwrap-base-token-step';
+import { UnwrapBaseTokenStep } from '../../steps/adapt/unwrap-base-token-step';
 import { Recipe } from '../recipe';
-import { TransferBaseTokenStep } from '../../steps/relay/transfer-base-token-step';
+import { TransferBaseTokenStep } from '../../steps/adapt/transfer-base-token-step';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export class UnwrapTransferBaseTokenRecipe extends Recipe {
