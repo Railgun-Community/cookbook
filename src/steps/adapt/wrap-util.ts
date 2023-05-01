@@ -21,6 +21,6 @@ export const getWrappedBaseToken = (
 export const getBaseToken = (networkName: NetworkName): RecipeERC20Info => {
   return {
     tokenAddress: getWrappedBaseTokenAddress(networkName),
-    isBaseToken: false,
+    isBaseToken: true,
   };
 };

@@ -84,7 +84,7 @@ export abstract class Step {
       // Note: minBalance === expectedBalance
       if (amount.gt(erc20AmountForStep.expectedBalance)) {
         throw new Error(
-          `Specified amount for step ${amount.toString()} exceeds balance ${erc20AmountForStep.expectedBalance.toString()}.`,
+          `Specified amount ${amount.toString()} exceeds balance ${erc20AmountForStep.expectedBalance.toString()}.`,
         );
       }
     }

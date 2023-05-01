@@ -65,6 +65,7 @@ describe('approve-erc20-spender-step', () => {
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
+    expect(output.populatedTransactions[0].to).to.equal(tokenAddress);
   });
 
   it('Should create approve-erc20-spender step without amount', async () => {
@@ -146,7 +147,7 @@ describe('approve-erc20-spender-step', () => {
     await expect(
       approveStep.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
-      'Approve ERC20 Spender step failed. Specified amount for step 10000 exceeds balance 2000.',
+      'Approve ERC20 Spender step failed. Specified amount 10000 exceeds balance 2000.',
     );
   });
 });
