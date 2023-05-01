@@ -112,6 +112,45 @@ describe('approve-erc20-spender-step', () => {
     ]);
   });
 
+  it('Should create empty approve-erc20-spender step without spender', async () => {
+    const approveStep = new ApproveERC20SpenderStep(undefined, tokenAddress);
+
+    const stepInput: StepInput = {
+      networkName: NetworkName.Ethereum,
+      erc20Amounts: [
+        {
+          tokenAddress,
+          expectedBalance: BigNumber.from('12000'),
+          minBalance: BigNumber.from('12000'),
+          approvedSpender: undefined,
+        },
+      ],
+      nfts: [],
+    };
+    const output = await approveStep.getValidStepOutput(stepInput);
+
+    expect(output.name).to.equal('Approve ERC20 Spender');
+    expect(output.description).to.equal('Approves ERC20 for spender contract.');
+
+    expect(output.spentERC20Amounts).to.deep.equal([]);
+
+    expect(output.outputERC20Amounts).to.deep.equal([
+      {
+        tokenAddress,
+        expectedBalance: BigNumber.from('12000'),
+        minBalance: BigNumber.from('12000'),
+        approvedSpender: undefined,
+      },
+    ]);
+
+    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.outputNFTs).to.deep.equal([]);
+
+    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+
+    expect(output.populatedTransactions).to.deep.equal([]);
+  });
+
   it('Should test approve-erc20-spender step error cases', async () => {
     const approveStep = new ApproveERC20SpenderStep(
       spender,
