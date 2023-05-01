@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { TransferERC20Step } from '../transfer-erc20-step';
+import { ApproveERC20SpenderStep } from '../approve-erc20-spender-step';
 import { BigNumber } from 'ethers';
 import { StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
@@ -8,13 +8,17 @@ import { NetworkName } from '@railgun-community/shared-models';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
+const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
 
-describe('transfer-erc20-step', () => {
-  it('Should create transfer-erc20 step with amount', async () => {
-    const transferStep = new TransferERC20Step(toAddress, tokenAddress, amount);
+describe('approve-erc20-spender-step', () => {
+  it('Should create approve-erc20-spender step with amount', async () => {
+    const approveStep = new ApproveERC20SpenderStep(
+      spender,
+      tokenAddress,
+      amount,
+    );
 
     const stepInput: StepInput = {
       networkName: NetworkName.Ethereum,
@@ -28,25 +32,20 @@ describe('transfer-erc20-step', () => {
       ],
       nfts: [],
     };
-    const output = await transferStep.getValidStepOutput(stepInput);
+    const output = await approveStep.getValidStepOutput(stepInput);
 
-    expect(output.name).to.equal('Transfer ERC20');
-    expect(output.description).to.equal(
-      'Transfers ERC20 token to an external public address.',
-    );
+    expect(output.name).to.equal('Approve ERC20 Spender');
+    expect(output.description).to.equal('Approves ERC20 for spender contract.');
 
-    // Transferred
-    expect(output.spentERC20Amounts).to.deep.equal([
+    expect(output.spentERC20Amounts).to.deep.equal([]);
+
+    expect(output.outputERC20Amounts).to.deep.equal([
       {
-        amount,
-        isBaseToken: false,
-        recipient: toAddress,
+        approvedSpender: spender,
+        expectedBalance: BigNumber.from('10000'),
+        minBalance: BigNumber.from('10000'),
         tokenAddress,
       },
-    ]);
-
-    // Change
-    expect(output.outputERC20Amounts).to.deep.equal([
       {
         approvedSpender: undefined,
         expectedBalance: BigNumber.from('2000'),
@@ -62,14 +61,14 @@ describe('transfer-erc20-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
+        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
   });
 
-  it('Should create transfer-erc20 step without amount', async () => {
-    const transferStep = new TransferERC20Step(toAddress, tokenAddress);
+  it('Should create approve-erc20-spender step without amount', async () => {
+    const approveStep = new ApproveERC20SpenderStep(spender, tokenAddress);
 
     const stepInput: StepInput = {
       networkName: NetworkName.Ethereum,
@@ -83,20 +82,21 @@ describe('transfer-erc20-step', () => {
       ],
       nfts: [],
     };
-    const output = await transferStep.getValidStepOutput(stepInput);
+    const output = await approveStep.getValidStepOutput(stepInput);
 
-    // Transferred
-    expect(output.spentERC20Amounts).to.deep.equal([
+    expect(output.name).to.equal('Approve ERC20 Spender');
+    expect(output.description).to.equal('Approves ERC20 for spender contract.');
+
+    expect(output.spentERC20Amounts).to.deep.equal([]);
+
+    expect(output.outputERC20Amounts).to.deep.equal([
       {
-        amount: BigNumber.from('12000'),
-        isBaseToken: false,
-        recipient: toAddress,
+        approvedSpender: spender,
+        expectedBalance: BigNumber.from('12000'),
+        minBalance: BigNumber.from('12000'),
         tokenAddress,
       },
     ]);
-
-    // Change
-    expect(output.outputERC20Amounts).to.deep.equal([]);
 
     expect(output.spentNFTs).to.deep.equal([]);
     expect(output.outputNFTs).to.deep.equal([]);
@@ -105,14 +105,18 @@ describe('transfer-erc20-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002ee0',
+        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002ee0',
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
   });
 
-  it('Should test transfer erc20 step error cases', async () => {
-    const transferStep = new TransferERC20Step(toAddress, tokenAddress, amount);
+  it('Should test approve-erc20-spender step error cases', async () => {
+    const approveStep = new ApproveERC20SpenderStep(
+      spender,
+      tokenAddress,
+      amount,
+    );
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
@@ -121,9 +125,9 @@ describe('transfer-erc20-step', () => {
       nfts: [],
     };
     await expect(
-      transferStep.getValidStepOutput(stepInputNoERC20s),
+      approveStep.getValidStepOutput(stepInputNoERC20s),
     ).to.be.rejectedWith(
-      'Transfer ERC20 step failed. No erc20 inputs match step filter.',
+      'Approve ERC20 Spender step failed. No erc20 inputs match step filter.',
     );
 
     // Too low balance for erc20 input
@@ -140,9 +144,9 @@ describe('transfer-erc20-step', () => {
       nfts: [],
     };
     await expect(
-      transferStep.getValidStepOutput(stepInputLowBalance),
+      approveStep.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
-      'Transfer ERC20 step failed. Specified amount for step 10000 exceeds balance 2000.',
+      'Approve ERC20 Spender step failed. Specified amount for step 10000 exceeds balance 2000.',
     );
   });
 });

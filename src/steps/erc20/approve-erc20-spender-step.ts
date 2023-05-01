@@ -13,7 +13,7 @@ import { createNoActionStepOutput } from '../outputs/no-action-output';
 
 export class ApproveERC20SpenderStep extends Step {
   readonly config = {
-    name: 'Approve ERC20',
+    name: 'Approve ERC20 Spender',
     description: 'Approves ERC20 for spender contract.',
   };
 
