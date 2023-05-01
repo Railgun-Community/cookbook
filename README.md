@@ -8,10 +8,10 @@ Write a recipe in minutes to convert your dApp to a zkApp.
 
 `yarn add @railgun-community/cookbook`
 
-## Add a Recipe call with RAILGUN Quickstart
+## Cook a Recipe and call it with RAILGUN Quickstart
 
 TODO
 
-## Write your own Recipe
+## Write your own Custom Recipe and Steps
 
 TODO
