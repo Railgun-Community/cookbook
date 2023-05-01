@@ -51,7 +51,7 @@ export abstract class Step {
 
     const numFiltered = erc20AmountsForStep.length;
     if (numFiltered === 0) {
-      throw new Error(`No erc20 inputs match step filter.`);
+      throw new Error(`No erc20 inputs match filter.`);
     }
     if (numFiltered > 1) {
       throw new Error(

@@ -7,7 +7,7 @@ import {
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
 } from '../../models/export-models';
-import { compareERC20Info } from '../../utils/token';
+import { compareERC20Info, isApprovedForSpender } from '../../utils/token';
 import { Step } from '../step';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
@@ -40,7 +40,7 @@ export class ZeroXSwapStep extends Step {
         erc20Amounts,
         erc20Amount =>
           compareERC20Info(erc20Amount, this.sellERC20Info) &&
-          erc20Amount.approvedSpender === this.quote.spender,
+          isApprovedForSpender(erc20Amount, this.quote.spender),
         sellERC20Amount,
       );
 
