@@ -15,24 +15,26 @@ describe('zero-x-quote', () => {
   before(() => {});
 
   it('Should fetch quotes from ZeroX proxy', async () => {
-    const sellTokenAmount: RecipeERC20Amount = {
+    const sellERC20Amount: RecipeERC20Amount = {
       tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       isBaseToken: false,
       amount: BigNumber.from('0x1000000000000000000'),
     };
-    const buyToken: RecipeERC20Info = {
+    const buyERC20Info: RecipeERC20Info = {
       tokenAddress: 'DAI',
       isBaseToken: false,
     };
 
-    const { quote, error } = await zeroXGetSwapQuote({
+    const quote = await zeroXGetSwapQuote({
       networkName: NetworkName.Ethereum,
-      sellTokenAmount,
-      buyToken,
+      sellERC20Amount,
+      buyERC20Info,
       slippagePercentage: 0.01,
     });
 
-    expect(error).to.be.undefined;
     expect(typeof quote === 'object').to.be.true;
+    expect(quote).to.haveOwnProperty('price');
+    expect(quote).to.haveOwnProperty('spender');
+    expect(quote).to.haveOwnProperty('sellTokenValue');
   });
 });

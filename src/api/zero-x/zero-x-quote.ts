@@ -4,15 +4,12 @@ import { getContractAddressesForChainOrThrow } from '@0x/contract-addresses';
 import { BigNumber } from '@ethersproject/bignumber';
 import { parseUnits } from '@ethersproject/units';
 import { getZeroXData, ZeroXApiEndpoint } from './zero-x-fetch';
-import {
-  RecipeERC20Amount,
-  RecipeERC20AmountRecipient,
-  RecipeERC20Info,
-} from '../../models/export-models';
+import { RecipeERC20Amount, RecipeERC20Info } from '../../models/export-models';
+import { PopulatedTransaction } from '@ethersproject/contracts';
 
 export const ZERO_X_PRICE_DECIMALS = 18;
 
-type ZeroXPriceData = {
+type ZeroXAPIPriceData = {
   price: string;
   guaranteedPrice: string;
   buyAmount: string;
@@ -24,7 +21,7 @@ type ZeroXPriceData = {
   sellAmount: string;
 };
 
-type ZeroXQuoteAPIParams = {
+type ZeroXAPIQuoteParams = {
   sellToken: string;
   buyToken: string;
   sellAmount: string;
@@ -33,24 +30,24 @@ type ZeroXQuoteAPIParams = {
 
 export type ZeroXSwapQuoteParams = {
   networkName: NetworkName;
-  sellTokenAmount: RecipeERC20Amount;
-  buyToken: RecipeERC20Info;
+  sellERC20Amount: RecipeERC20Amount;
+  buyERC20Info: RecipeERC20Info;
   slippagePercentage: number;
 };
 
 export type ZeroXSwapQuoteData = {
   price: BigNumber;
   guaranteedPrice: BigNumber;
-  buyERC20AmountRecipient: RecipeERC20AmountRecipient;
+  buyERC20Amount: RecipeERC20Amount;
   minimumBuyAmount: BigNumber;
-  spender: string;
-  to: string;
-  data: string;
-  value: string;
+  spender: Optional<string>;
+  populatedTransaction: PopulatedTransaction;
   slippagePercentage: number;
   sellTokenAddress: string;
   sellTokenValue: string;
 };
+
+const NULL_SPENDER_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const ZERO_X_PROXY_BASE_TOKEN_ADDRESS =
   '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
@@ -98,29 +95,27 @@ const getZeroXQuoteInvalidError = (
 
 export const zeroXGetSwapQuote = async ({
   networkName,
-  sellTokenAmount,
-  buyToken,
+  sellERC20Amount,
+  buyERC20Info,
   slippagePercentage,
-}: ZeroXSwapQuoteParams): Promise<{
-  quote?: ZeroXSwapQuoteData;
-  error?: Error;
-}> => {
+}: ZeroXSwapQuoteParams): Promise<ZeroXSwapQuoteData> => {
+  const sellAmount = sellERC20Amount.amount.toString();
+  if (sellAmount === '0') {
+    throw new Error('Swap sell amount is 0.');
+  }
+  const sellTokenAddress = getZeroXTokenAddress(sellERC20Amount);
+  const buyTokenAddress = getZeroXTokenAddress(buyERC20Info);
+  if (sellTokenAddress === buyTokenAddress) {
+    throw new Error('Swap sell and buy tokens are the same.');
+  }
+  const params: ZeroXAPIQuoteParams = {
+    sellToken: sellTokenAddress,
+    buyToken: buyTokenAddress,
+    sellAmount,
+    slippagePercentage: String(slippagePercentage),
+  };
+
   try {
-    const sellAmount = sellTokenAmount.amount.toString();
-    if (sellAmount === '0') {
-      return {};
-    }
-    const sellTokenAddress = getZeroXTokenAddress(sellTokenAmount);
-    const buyTokenAddress = getZeroXTokenAddress(buyToken);
-    if (sellTokenAddress === buyTokenAddress) {
-      return {};
-    }
-    const params: ZeroXQuoteAPIParams = {
-      sellToken: sellTokenAddress,
-      buyToken: buyTokenAddress,
-      sellAmount,
-      slippagePercentage: String(slippagePercentage),
-    };
     const {
       price,
       buyAmount,
@@ -131,7 +126,7 @@ export const zeroXGetSwapQuote = async ({
       value,
       sellTokenAddress: sellTokenAddressResponse,
       sellAmount: sellTokenValueResponse,
-    } = await getZeroXData<ZeroXPriceData>(
+    } = await getZeroXData<ZeroXAPIPriceData>(
       ZeroXApiEndpoint.GetSwapQuote,
       networkName,
       params,
@@ -144,55 +139,62 @@ export const zeroXGetSwapQuote = async ({
       buyTokenAddress,
     );
     if (invalidError) {
-      return { error: invalidError };
+      throw invalidError;
     }
 
     const minimumBuyAmount = BigNumber.from(buyAmount)
       .mul(10000 - slippagePercentage * 10000)
       .div(10000);
+    const populatedTransaction: PopulatedTransaction = {
+      to: to,
+      data: data,
+      value: BigNumber.from(value),
+    };
+    const spender: Optional<string> =
+      allowanceTarget === NULL_SPENDER_ADDRESS ? undefined : allowanceTarget;
 
     return {
-      quote: {
-        price: parseUnits(price, ZERO_X_PRICE_DECIMALS),
-        guaranteedPrice: parseUnits(guaranteedPrice, ZERO_X_PRICE_DECIMALS),
-        buyERC20AmountRecipient: {
-          ...buyToken,
-          amount: BigNumber.from(buyAmount),
-          recipient: allowanceTarget,
-        },
-        minimumBuyAmount,
-        spender: allowanceTarget,
-        to,
-        data,
-        value,
-        slippagePercentage,
-        sellTokenAddress: sellTokenAddressResponse,
-        sellTokenValue: sellTokenValueResponse,
+      price: parseUnits(price, ZERO_X_PRICE_DECIMALS),
+      guaranteedPrice: parseUnits(guaranteedPrice, ZERO_X_PRICE_DECIMALS),
+      buyERC20Amount: {
+        ...buyERC20Info,
+        amount: BigNumber.from(buyAmount),
       },
+      minimumBuyAmount,
+      spender,
+      populatedTransaction,
+      slippagePercentage,
+      sellTokenAddress: sellTokenAddressResponse,
+      sellTokenValue: sellTokenValueResponse,
     };
   } catch (err) {
     const msg = formatApiError(err);
-    return {
-      error: new Error(msg),
-    };
+    throw new Error(msg);
   }
 };
 
-const formatApiError = (err: AxiosError<any>): string => {
+const formatApiError = (err: AxiosError<any> | Error): string => {
+  if (!(err instanceof AxiosError)) {
+    return err.message;
+  }
   try {
-    // Errors come back as 400 with this format:
+    // Axios Errors come back as 400 with this format:
     // err.response.data.reason
     // err.response.data.validationErrors[].reason
 
-    const data = err.response?.data;
+    const { response } = err as AxiosError<any>;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data = response?.data;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const firstValidationErrorReason = data?.validationErrors[0].reason;
 
     if (firstValidationErrorReason === 'INSUFFICIENT_ASSET_LIQUIDITY') {
       return 'Insufficient liquidity. One of the selected tokens is not supported by the 0x Exchange.';
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    return `0x Exchange: ${err.response?.data.reason}. ${firstValidationErrorReason}.`;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    return `0x Exchange: ${response?.data.reason}. ${firstValidationErrorReason}.`;
   } catch {
     return '0x API request failed.';
   }

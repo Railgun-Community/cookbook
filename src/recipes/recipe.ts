@@ -14,10 +14,12 @@ export abstract class Recipe {
   abstract readonly name: string;
   abstract readonly description: string;
 
-  protected abstract getInternalSteps(): Promise<Step[]>;
+  protected abstract getInternalSteps(
+    firstStepInput: StepInput,
+  ): Promise<Step[]>;
 
-  private async getFullSteps(): Promise<Step[]> {
-    const internalSteps = await this.getInternalSteps();
+  private async getFullSteps(firstStepInput: StepInput): Promise<Step[]> {
+    const internalSteps = await this.getInternalSteps(firstStepInput);
     return [new UnshieldStep(), ...internalSteps, new ShieldStep()];
   }
 
@@ -37,9 +39,10 @@ export abstract class Recipe {
   }
 
   async getStepOutputs(input: RecipeInput): Promise<StepOutput[]> {
-    const steps = await this.getFullSteps();
+    const firstStepInput = this.createFirstStepInput(input);
+    const steps = await this.getFullSteps(firstStepInput);
 
-    let stepInput: StepInput = this.createFirstStepInput(input);
+    let stepInput: StepInput = firstStepInput;
     let stepOutput: Optional<StepOutput>;
 
     const stepOutputs: StepOutput[] = [];

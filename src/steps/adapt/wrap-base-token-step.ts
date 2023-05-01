@@ -33,23 +33,28 @@ export class WrapBaseTokenStep extends Step {
         compareERC20Info(erc20Amount, baseToken),
       );
 
+    if (this.amount && this.amount.gt(erc20AmountForStep.minBalance)) {
+      throw new Error(
+        'Wrap amount exceeds the expected minimum balance at this step',
+      );
+    }
+
     const contract = new RelayAdaptContract(input.networkName);
 
-    // TODO: Calculate additional output (for unused array).
-    const wrapAmount = this.amount ?? erc20AmountForStep.minBalance;
-
     const populatedTransactions: PopulatedTransaction[] = [
-      await contract.createBaseTokenWrap(wrapAmount),
+      await contract.createBaseTokenWrap(this.amount),
     ];
-    const wrappedBaseToken: StepOutputERC20Amount = {
+    const wrappedBaseERC20Amount: StepOutputERC20Amount = {
       ...erc20AmountForStep,
       isBaseToken: false,
+      expectedBalance: this.amount ?? erc20AmountForStep.expectedBalance,
+      minBalance: this.amount ?? erc20AmountForStep.minBalance,
     };
 
     return {
       populatedTransactions,
       spentERC20Amounts: [],
-      outputERC20Amounts: [wrappedBaseToken, ...unusedERC20Amounts],
+      outputERC20Amounts: [wrappedBaseERC20Amount, ...unusedERC20Amounts],
       spentNFTs: [],
       outputNFTs: input.nfts,
       feeERC20AmountRecipients: [],

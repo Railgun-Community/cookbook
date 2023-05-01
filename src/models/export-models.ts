@@ -52,7 +52,7 @@ export type StepOutputERC20Amount = RecipeERC20Info & {
 
 export type UnvalidatedStepOutput = {
   populatedTransactions: PopulatedTransaction[];
-  spentERC20Amounts: RecipeERC20Amount[];
+  spentERC20Amounts: RecipeERC20AmountRecipient[];
   outputERC20Amounts: StepOutputERC20Amount[];
   spentNFTs: RailgunNFTAmount[];
   outputNFTs: RailgunNFTAmount[];

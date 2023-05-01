@@ -30,12 +30,18 @@ export class RelayAdaptContract {
     };
   }
 
-  createBaseTokenWrap(amount: BigNumber): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.wrapBase(amount);
+  createBaseTokenWrap(amount?: BigNumber): Promise<PopulatedTransaction> {
+    return this.contract.populateTransaction.wrapBase(
+      // 0 will automatically wrap full balance.
+      amount ?? BigNumber.from(0),
+    );
   }
 
-  createBaseTokenUnwrap(amount: BigNumber): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.unwrapBase(amount);
+  createBaseTokenUnwrap(amount?: BigNumber): Promise<PopulatedTransaction> {
+    return this.contract.populateTransaction.unwrapBase(
+      // 0 will automatically unwrap full balance.
+      amount ?? BigNumber.from(0),
+    );
   }
 
   createBaseTokenTransfer(toAddress: string): Promise<PopulatedTransaction> {
