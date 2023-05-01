@@ -20,6 +20,9 @@ export class UnshieldStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const { outputERC20Amounts, feeERC20AmountRecipients } =
       this.getOutputERC20AmountsAndFees(input.erc20Amounts);
+    if (!outputERC20Amounts.every(erc20Amount => !erc20Amount.isBaseToken)) {
+      throw new Error('Cannot unshield base token.');
+    }
 
     return {
       populatedTransactions: [],
@@ -35,7 +38,7 @@ export class UnshieldStep extends Step {
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
     if (RailgunConfig.UNSHIELD_FEE_BASIS_POINTS == null) {
-      throw new Error('No unshield fee set - run init script');
+      throw new Error('No unshield fee set - run initCookbook.');
     }
     const unshieldFeeBasisPoints = Number(
       RailgunConfig.UNSHIELD_FEE_BASIS_POINTS,
@@ -56,7 +59,7 @@ export class UnshieldStep extends Step {
 
       const feeAmount = erc20Amount.expectedBalance.sub(unshieldedAmount);
       feeERC20AmountRecipients.push({
-        ...erc20Amount,
+        tokenAddress: erc20Amount.tokenAddress,
         amount: feeAmount,
         recipient: 'RAILGUN Unshield Fee',
       });

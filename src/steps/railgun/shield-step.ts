@@ -18,6 +18,9 @@ export class ShieldStep extends Step {
   async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
     const { outputERC20Amounts, feeERC20AmountRecipients } =
       this.getOutputERC20AmountsAndFees(input.erc20Amounts);
+    if (!outputERC20Amounts.every(erc20Amount => !erc20Amount.isBaseToken)) {
+      throw new Error('Cannot shield base token.');
+    }
 
     return {
       populatedTransactions: [],
@@ -33,7 +36,7 @@ export class ShieldStep extends Step {
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
     if (RailgunConfig.SHIELD_FEE_BASIS_POINTS == null) {
-      throw new Error('No shield fee set - run init script');
+      throw new Error('No shield fee set - run initCookbook.');
     }
     const shieldFeeBasisPoints = Number(RailgunConfig.SHIELD_FEE_BASIS_POINTS);
 
@@ -52,7 +55,7 @@ export class ShieldStep extends Step {
 
       const feeAmount = erc20Amount.expectedBalance.sub(shieldedAmount);
       feeERC20AmountRecipients.push({
-        ...erc20Amount,
+        tokenAddress: erc20Amount.tokenAddress,
         amount: feeAmount,
         recipient: 'RAILGUN Shield Fee',
       });
