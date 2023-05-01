@@ -3,16 +3,17 @@ import {
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
-} from '../../models';
-import { filterSingleERC20AmountInput } from '../../utils/filters';
+} from '../../models/export-models';
 import { compareERC20Info } from '../../utils/token';
 import { Step } from '../step';
 import { getWrappedBaseToken } from './wrap-util';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
 export class TransferBaseTokenStep extends Step {
-  readonly name = 'Transfer Base Token';
-  readonly description = 'Transfers base token to an external public address.';
+  readonly config = {
+    name: 'Transfer Base Token',
+    description: 'Transfers base token to an external public address.',
+  };
 
   private readonly toAddress: string;
 
@@ -29,7 +30,7 @@ export class TransferBaseTokenStep extends Step {
     const wrappedBaseToken = getWrappedBaseToken(networkName);
 
     const { erc20AmountForStep, unusedERC20Amounts } =
-      filterSingleERC20AmountInput(erc20Amounts, erc20Amount =>
+      this.getValidInputERC20Amount(erc20Amounts, erc20Amount =>
         compareERC20Info(erc20Amount, wrappedBaseToken),
       );
 

@@ -11,13 +11,14 @@ import {
   RecipeERC20Info,
   StepInput,
   StepOutputERC20Amount,
-} from '../../models';
+} from '../../models/export-models';
 import { compareERC20Info } from '../../utils/token';
 
 export class ZeroXSwapRecipe extends Recipe {
-  readonly name = '0x Exchange Swap';
-  readonly description =
-    'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.';
+  readonly config = {
+    name: '0x Exchange Swap',
+    description: 'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.',
+  };
 
   private readonly sellERC20Info: RecipeERC20Info;
   private readonly buyERC20Info: RecipeERC20Info;

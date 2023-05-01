@@ -36,5 +36,5 @@ describe('zero-x-quote', () => {
     expect(quote).to.haveOwnProperty('price');
     expect(quote).to.haveOwnProperty('spender');
     expect(quote).to.haveOwnProperty('sellTokenValue');
-  });
+  }).timeout(10000);
 });

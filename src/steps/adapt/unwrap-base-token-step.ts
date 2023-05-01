@@ -3,8 +3,7 @@ import {
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
-} from '../../models';
-import { filterSingleERC20AmountInput } from '../../utils/filters';
+} from '../../models/export-models';
 import { Step } from '../step';
 import { getWrappedBaseToken } from './wrap-util';
 import { PopulatedTransaction } from '@ethersproject/contracts';
@@ -12,9 +11,10 @@ import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
 import { compareERC20Info } from '../../utils/token';
 
 export class UnwrapBaseTokenStep extends Step {
-  readonly name = 'Unwrap Base Token';
-  readonly description =
-    'Unwraps wrapped token into base token, ie WETH to ETH.';
+  readonly config = {
+    name: 'Unwrap Base Token',
+    description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
+  };
 
   private readonly amount: Optional<BigNumber>;
 
@@ -30,7 +30,7 @@ export class UnwrapBaseTokenStep extends Step {
 
     const wrappedBaseToken = getWrappedBaseToken(networkName);
     const { erc20AmountForStep, unusedERC20Amounts } =
-      filterSingleERC20AmountInput(erc20Amounts, erc20Amount =>
+      this.getValidInputERC20Amount(erc20Amounts, erc20Amount =>
         compareERC20Info(erc20Amount, wrappedBaseToken),
       );
 

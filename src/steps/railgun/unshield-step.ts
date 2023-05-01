@@ -3,14 +3,15 @@ import {
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
-} from '../../models';
+} from '../../models/export-models';
 import { Step } from '../step';
 import { RailgunConfig } from '../../models/railgun-config';
 
 export class UnshieldStep extends Step {
-  readonly name = 'Unshield';
-  readonly description =
-    'Unshield ERC20s and NFTs from private RAILGUN balance.';
+  readonly config = {
+    name: 'Unshield',
+    description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
+  };
 
   readonly canAddStep = false;
 

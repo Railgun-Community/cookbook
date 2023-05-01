@@ -63,3 +63,14 @@ export type StepOutput = UnvalidatedStepOutput & {
   name: string;
   description: string;
 };
+
+export type StepConfig = {
+  name: string;
+  description: string;
+  hasNonDeterministicOutput?: boolean;
+};
+
+export type RecipeConfig = {
+  name: string;
+  description: string;
+};

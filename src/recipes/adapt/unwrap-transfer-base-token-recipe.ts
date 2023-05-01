@@ -5,9 +5,11 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Step } from '../../steps';
 
 export class UnwrapTransferBaseTokenRecipe extends Recipe {
-  readonly name = 'Unwrap Base Token and Transfer';
-  readonly description =
-    'Unwraps wrapped token into base token, and transfers base token to an external public address.';
+  readonly config = {
+    name: 'Unwrap Base Token and Transfer',
+    description:
+      'Unwraps wrapped token into base token, and transfers base token to an external public address.',
+  };
 
   private readonly toAddress: string;
   private readonly amount: Optional<BigNumber>;

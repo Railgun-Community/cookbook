@@ -1,4 +1,4 @@
-import { RecipeERC20Info } from '../models';
+import { RecipeERC20Info } from '../models/export-models';
 
 export const compareERC20Info = (
   tokenA: RecipeERC20Info,

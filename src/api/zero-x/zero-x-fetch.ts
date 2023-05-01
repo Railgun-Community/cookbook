@@ -1,6 +1,9 @@
 import { NetworkName } from '@railgun-community/shared-models';
 import axios from 'axios';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type APIParams = Record<string, any>;
+
 export enum ZeroXApiEndpoint {
   GetSwapQuote = 'swap/v1/quote',
 }
@@ -36,7 +39,7 @@ export const zeroXSupportsNetwork = (networkName: NetworkName): boolean => {
   }
 };
 
-const paramString = (params?: Record<string, any>) => {
+const paramString = (params?: APIParams) => {
   if (!params) {
     return '';
   }
@@ -47,7 +50,7 @@ const paramString = (params?: Record<string, any>) => {
 export const createZeroXUrl = (
   endpoint: ZeroXApiEndpoint,
   networkName: NetworkName,
-  params?: Record<string, any>,
+  params?: APIParams,
 ) => {
   const url = `${zeroXApiUrl(networkName)}${endpoint}${paramString(params)}`;
   return url;
@@ -56,7 +59,7 @@ export const createZeroXUrl = (
 export const getZeroXData = async <T>(
   endpoint: ZeroXApiEndpoint,
   networkName: NetworkName,
-  params?: Record<string, any>,
+  params?: APIParams,
 ): Promise<T> => {
   const url = createZeroXUrl(endpoint, networkName, params);
   const rsp = await axios.get(url);

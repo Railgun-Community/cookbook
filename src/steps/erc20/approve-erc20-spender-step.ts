@@ -4,8 +4,7 @@ import {
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
-} from '../../models';
-import { filterSingleERC20AmountInput } from '../../utils/filters';
+} from '../../models/export-models';
 import { Step } from '../step';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { ERC20Contract } from '../../contract/token/erc20-contract';
@@ -13,8 +12,10 @@ import { compareERC20Info } from '../../utils/token';
 import { createNoActionStepOutput } from '../default/no-action-output';
 
 export class ApproveERC20SpenderStep extends Step {
-  readonly name = 'Approve ERC20';
-  readonly description = 'Approves ERC20 for spender contract.';
+  readonly config = {
+    name: 'Approve ERC20',
+    description: 'Approves ERC20 for spender contract.',
+  };
 
   private readonly spender: Optional<string>;
   private readonly tokenAddress: string;
@@ -46,7 +47,7 @@ export class ApproveERC20SpenderStep extends Step {
     };
 
     const { erc20AmountForStep, unusedERC20Amounts } =
-      filterSingleERC20AmountInput(
+      this.getValidInputERC20Amount(
         erc20Amounts,
         erc20Amount =>
           compareERC20Info(erc20Amount, erc20ForApproval) &&

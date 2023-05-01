@@ -1,17 +1,15 @@
+import { RecipeConfig } from '../models/export-models';
 import { Step } from '../steps/step';
 import { Recipe } from './recipe';
 
 export class CustomRecipe extends Recipe {
-  readonly name: string;
-  readonly description: string;
+  readonly config: RecipeConfig;
 
   private internalSteps: Step[] = [];
 
-  constructor(name: string, description: string) {
+  constructor(config: RecipeConfig) {
     super();
-
-    this.name = name;
-    this.description = description;
+    this.config = config;
   }
 
   protected async getInternalSteps(): Promise<Step[]> {
@@ -20,7 +18,7 @@ export class CustomRecipe extends Recipe {
 
   addStep(step: Step): void {
     if (!step.canAddStep) {
-      throw new Error(`Cannot add Recipe Step: ${step.name}`);
+      throw new Error(`Cannot add Recipe Step: ${step.config.name}`);
     }
 
     this.internalSteps.push(step);

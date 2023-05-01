@@ -8,8 +8,10 @@ import { Step } from '../step';
 import { RailgunConfig } from '../../models/railgun-config';
 
 export class ShieldStep extends Step {
-  readonly name = 'Shield';
-  readonly description = 'Shield ERC20s and NFTs into private RAILGUN balance.';
+  readonly config = {
+    name: 'Shield',
+    description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+  };
 
   readonly canAddStep = false;
 

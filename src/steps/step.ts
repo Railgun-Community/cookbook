@@ -1,13 +1,15 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   StepInput,
   StepOutput,
+  StepConfig,
   UnvalidatedStepOutput,
+  StepOutputERC20Amount,
 } from '../models/export-models';
+import { ERC20AmountFilter, filterERC20AmountInputs } from '../utils/filters';
+import { validateStepOutput } from '../validators/step-validator';
 
 export abstract class Step {
-  abstract readonly name: string;
-  abstract readonly description: string;
+  abstract readonly config: StepConfig;
 
   readonly canAddStep: boolean = true;
 
@@ -18,66 +20,54 @@ export abstract class Step {
   async getValidStepOutput(input: StepInput): Promise<StepOutput> {
     try {
       const output: UnvalidatedStepOutput = await this.getStepOutput(input);
-      this.validateStepOutput(input, output);
+      validateStepOutput(input, output);
 
       return {
         ...output,
-        name: this.name,
-        description: this.description,
+        name: this.config.name,
+        description: this.config.description,
       };
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      throw new Error(`Step ${this.name} failed: ${err.message}`);
+      throw new Error(`Step ${this.config.name} failed: ${err.message}`);
     }
   }
 
-  private validateStepOutput(input: StepInput, output: UnvalidatedStepOutput) {
-    const inputERC20AmountMap: Record<string, BigNumber> = {};
-    const outputERC20AmountMap: Record<string, BigNumber> = {};
-
-    // Add all erc20 inputs.
-    input.erc20Amounts.forEach(({ tokenAddress, expectedBalance }) => {
-      inputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-      inputERC20AmountMap[tokenAddress] =
-        inputERC20AmountMap[tokenAddress].add(expectedBalance);
-    });
-
-    // Add all erc20 outputs.
-    output.outputERC20Amounts.forEach(
-      ({ tokenAddress, expectedBalance, minBalance }) => {
-        outputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-        outputERC20AmountMap[tokenAddress] =
-          outputERC20AmountMap[tokenAddress].add(expectedBalance);
-        if (expectedBalance.lt(minBalance)) {
-          throw new Error('Min balance must be >= expected balance.');
-        }
-      },
+  getValidInputERC20Amount(
+    inputERC20Amounts: StepOutputERC20Amount[],
+    filter: ERC20AmountFilter,
+  ): {
+    erc20AmountForStep: StepOutputERC20Amount;
+    unusedERC20Amounts: StepOutputERC20Amount[];
+  } {
+    const { erc20AmountsForStep, unusedERC20Amounts } = filterERC20AmountInputs(
+      inputERC20Amounts,
+      filter,
     );
-    output.spentERC20Amounts.forEach(({ tokenAddress, amount }) => {
-      outputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-      outputERC20AmountMap[tokenAddress] =
-        outputERC20AmountMap[tokenAddress].add(amount);
-    });
-    output.feeERC20AmountRecipients.forEach(({ tokenAddress, amount }) => {
-      outputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-      outputERC20AmountMap[tokenAddress] =
-        outputERC20AmountMap[tokenAddress].add(amount);
-    });
 
-    for (const tokenAddress in inputERC20AmountMap) {
+    const numFiltered = erc20AmountsForStep.length;
+    if (numFiltered !== 1) {
+      throw new Error(
+        `Expected one erc20 amount for step input - received ${numFiltered}.`,
+      );
+    }
+
+    const erc20AmountForStep = erc20AmountsForStep[0];
+
+    // If this step has a non-deterministic output, we must provide deterministic inputs.
+    // Otherwise, the expected balances become too complicated.
+    if (this.config.hasNonDeterministicOutput) {
       if (
-        !inputERC20AmountMap[tokenAddress].eq(
-          outputERC20AmountMap[tokenAddress],
-        )
+        !erc20AmountForStep.expectedBalance.eq(erc20AmountForStep.minBalance)
       ) {
         throw new Error(
-          `Validation Error: Input ERC20 amounts for ${tokenAddress} do not map to total outputs/spent/fees.`,
+          `Non-deterministic step must have deterministic inputs - you may not stack non-deterministic steps in a single recipe.`,
         );
       }
     }
 
-    // TODO: Validate NFT inputs and outputs.  No duplicates in outputs array. Every input mapped to an output.
+    return { erc20AmountForStep, unusedERC20Amounts };
   }
 }

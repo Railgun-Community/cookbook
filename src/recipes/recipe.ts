@@ -1,5 +1,6 @@
 import { RailgunERC20AmountRecipient } from '@railgun-community/shared-models';
 import {
+  RecipeConfig,
   RecipeInput,
   RecipeOutput,
   StepInput,
@@ -11,8 +12,7 @@ import { Step } from '../steps/step';
 import { convertRecipeFeesToRailgunERC20AmountRecipients } from '../utils/convert';
 
 export abstract class Recipe {
-  abstract readonly name: string;
-  abstract readonly description: string;
+  abstract readonly config: RecipeConfig;
 
   protected abstract getInternalSteps(
     firstStepInput: StepInput,
