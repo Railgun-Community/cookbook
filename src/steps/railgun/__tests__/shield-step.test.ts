@@ -17,7 +17,7 @@ describe('shield-step', () => {
     initCookbook('25', '25');
   });
 
-  it('Should create shield step with amount', async () => {
+  it('Should create shield step', async () => {
     const step = new ShieldStep();
 
     const stepInput: StepInput = {
@@ -45,10 +45,10 @@ describe('shield-step', () => {
     expect(output.outputERC20Amounts).to.deep.equal([
       {
         tokenAddress,
-        isBaseToken: false,
         expectedBalance: BigNumber.from('11970'),
         minBalance: BigNumber.from('11970'),
         approvedSpender: undefined,
+        isBaseToken: false,
       },
     ]);
 

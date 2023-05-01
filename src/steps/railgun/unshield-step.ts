@@ -52,9 +52,11 @@ export class UnshieldStep extends Step {
         .mul(10000 - unshieldFeeBasisPoints)
         .div(10000);
       outputERC20Amounts.push({
-        ...erc20Amount,
+        tokenAddress: erc20Amount.tokenAddress,
+        isBaseToken: erc20Amount.isBaseToken,
         expectedBalance: unshieldedAmount,
         minBalance: unshieldedAmount,
+        approvedSpender: undefined,
       });
 
       const feeAmount = erc20Amount.expectedBalance.sub(unshieldedAmount);

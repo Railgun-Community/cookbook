@@ -54,6 +54,9 @@ const validateStepOutputERC20Amounts = (
   );
 
   for (const id in inputERC20AmountMap) {
+    if (!outputERC20AmountMap[id]) {
+      throw new Error(`Missing output for ${id}.`);
+    }
     if (!inputERC20AmountMap[id].eq(outputERC20AmountMap[id])) {
       throw new Error(
         `Input erc20 amounts for ${id} must match total outputs/spent/fees.`,
