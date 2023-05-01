@@ -48,9 +48,12 @@ export class UnshieldStep extends Step {
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = [];
 
     inputERC20Amounts.forEach(erc20Amount => {
-      const unshieldedAmount = erc20Amount.expectedBalance
-        .mul(10000 - unshieldFeeBasisPoints)
+      const unshieldFeeAmount = erc20Amount.expectedBalance
+        .mul(unshieldFeeBasisPoints)
         .div(10000);
+      const unshieldedAmount =
+        erc20Amount.expectedBalance.sub(unshieldFeeAmount);
+
       outputERC20Amounts.push({
         tokenAddress: erc20Amount.tokenAddress,
         isBaseToken: erc20Amount.isBaseToken,
@@ -59,10 +62,9 @@ export class UnshieldStep extends Step {
         approvedSpender: undefined,
       });
 
-      const feeAmount = erc20Amount.expectedBalance.sub(unshieldedAmount);
       feeERC20AmountRecipients.push({
         tokenAddress: erc20Amount.tokenAddress,
-        amount: feeAmount,
+        amount: unshieldFeeAmount,
         recipient: 'RAILGUN Unshield Fee',
       });
     });

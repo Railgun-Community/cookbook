@@ -1,5 +1,12 @@
 {
   "all": true,
   "include": ["src/**/*.ts"],
-  "exclude": ["src/**/__tests__/**", "dist/**", "node_modules/**", "**/*.d.ts"]
+  "exclude": [
+    "src/**/__tests__/**",
+    "dist/**",
+    "node_modules/**",
+    "**/*.d.ts",
+    "src/abi/**",
+    "src/models/**"
+  ]
 }

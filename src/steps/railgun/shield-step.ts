@@ -44,9 +44,11 @@ export class ShieldStep extends Step {
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = [];
 
     inputERC20Amounts.forEach(erc20Amount => {
-      const shieldedAmount = erc20Amount.expectedBalance
-        .mul(10000 - shieldFeeBasisPoints)
+      const shieldFeeAmount = erc20Amount.expectedBalance
+        .mul(shieldFeeBasisPoints)
         .div(10000);
+      const shieldedAmount = erc20Amount.expectedBalance.sub(shieldFeeAmount);
+
       outputERC20Amounts.push({
         tokenAddress: erc20Amount.tokenAddress,
         isBaseToken: erc20Amount.isBaseToken,
@@ -55,10 +57,9 @@ export class ShieldStep extends Step {
         minBalance: shieldedAmount, // Actual min amount doesn't matter - any amount will get auto-shielded.
       });
 
-      const feeAmount = erc20Amount.expectedBalance.sub(shieldedAmount);
       feeERC20AmountRecipients.push({
         tokenAddress: erc20Amount.tokenAddress,
-        amount: feeAmount,
+        amount: shieldFeeAmount,
         recipient: 'RAILGUN Shield Fee',
       });
     });

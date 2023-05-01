@@ -2,9 +2,9 @@ import { Recipe } from '../recipe';
 import { ApproveERC20SpenderStep } from '../../steps/erc20/approve-erc20-spender-step';
 import { Step } from '../../steps/step';
 import {
+  ZeroXQuote,
   ZeroXSwapQuoteData,
   ZeroXSwapQuoteParams,
-  zeroXGetSwapQuote,
 } from '../../api/zero-x/zero-x-quote';
 import { ZeroXSwapStep } from '../../steps/zero-x/zero-x-swap-step';
 import {
@@ -55,7 +55,7 @@ export class ZeroXSwapRecipe extends Recipe {
     }
     return {
       tokenAddress: inputERC20Amount.tokenAddress,
-      amount: inputERC20Amount.minBalance,
+      amount: inputERC20Amount.expectedBalance,
     };
   }
 
@@ -69,7 +69,7 @@ export class ZeroXSwapRecipe extends Recipe {
       buyERC20Info: this.buyERC20Info,
       slippagePercentage: this.slippagePercentage,
     };
-    this.quote = await zeroXGetSwapQuote(quoteParams);
+    this.quote = await ZeroXQuote.getSwapQuote(quoteParams);
 
     return [
       new ApproveERC20SpenderStep(

@@ -134,7 +134,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
         description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
         feeERC20AmountRecipients: [
           {
-            amount: BigNumber.from('5'),
+            amount: BigNumber.from('4'),
             recipient: 'RAILGUN Shield Fee',
             tokenAddress,
           },
@@ -142,8 +142,8 @@ describe('unwrap-transfer-base-token-recipe', () => {
         outputERC20Amounts: [
           {
             approvedSpender: undefined,
-            expectedBalance: BigNumber.from('1965'),
-            minBalance: BigNumber.from('1965'),
+            expectedBalance: BigNumber.from('1966'),
+            minBalance: BigNumber.from('1966'),
             tokenAddress,
             isBaseToken: false,
           },

@@ -1,5 +1,5 @@
 import { NetworkName } from '@railgun-community/shared-models';
-import { zeroXGetSwapQuote } from '../zero-x-quote';
+import { ZeroXQuote } from '../zero-x-quote';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import {
@@ -25,7 +25,7 @@ describe('zero-x-quote', () => {
       isBaseToken: false,
     };
 
-    const quote = await zeroXGetSwapQuote({
+    const quote = await ZeroXQuote.getSwapQuote({
       networkName: NetworkName.Ethereum,
       sellERC20Amount,
       buyERC20Info,
