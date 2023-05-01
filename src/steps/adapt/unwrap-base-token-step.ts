@@ -45,7 +45,7 @@ export class UnwrapBaseTokenStep extends Step {
 
     const unwrappedBaseERC20Amount: StepOutputERC20Amount = {
       ...erc20AmountForStep,
-      isBaseToken: false,
+      isBaseToken: true,
       expectedBalance: this.amount ?? erc20AmountForStep.expectedBalance,
       minBalance: this.amount ?? erc20AmountForStep.minBalance,
     };

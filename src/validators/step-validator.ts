@@ -14,6 +14,10 @@ export const validateStepOutput = (
   }
 };
 
+const getTokenId = (tokenAddress: string, isBaseToken?: boolean) => {
+  return `${tokenAddress}-${isBaseToken ? 'base' : ''}`;
+};
+
 const validateStepOutputERC20Amounts = (
   input: StepInput,
   output: UnvalidatedStepOutput,
@@ -22,40 +26,42 @@ const validateStepOutputERC20Amounts = (
   const outputERC20AmountMap: Record<string, BigNumber> = {};
 
   // Add all erc20 inputs.
-  input.erc20Amounts.forEach(({ tokenAddress, expectedBalance }) => {
-    inputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-    inputERC20AmountMap[tokenAddress] =
-      inputERC20AmountMap[tokenAddress].add(expectedBalance);
-  });
+  input.erc20Amounts.forEach(
+    ({ tokenAddress, expectedBalance, isBaseToken }) => {
+      const id = getTokenId(tokenAddress, isBaseToken);
+      inputERC20AmountMap[id] ??= BigNumber.from(0);
+      inputERC20AmountMap[id] = inputERC20AmountMap[id].add(expectedBalance);
+    },
+  );
 
   // Add all erc20 outputs.
   output.outputERC20Amounts.forEach(
-    ({ tokenAddress, expectedBalance, minBalance }) => {
-      outputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-      outputERC20AmountMap[tokenAddress] =
-        outputERC20AmountMap[tokenAddress].add(expectedBalance);
+    ({ tokenAddress, expectedBalance, minBalance, isBaseToken }) => {
+      const id = getTokenId(tokenAddress, isBaseToken);
+      outputERC20AmountMap[id] ??= BigNumber.from(0);
+      outputERC20AmountMap[id] = outputERC20AmountMap[id].add(expectedBalance);
       if (expectedBalance.lt(minBalance)) {
         throw new Error('Min balance must be >= expected balance.');
       }
     },
   );
   [...output.spentERC20Amounts, ...output.feeERC20AmountRecipients].forEach(
-    ({ tokenAddress, amount }) => {
-      outputERC20AmountMap[tokenAddress] ??= BigNumber.from(0);
-      outputERC20AmountMap[tokenAddress] =
-        outputERC20AmountMap[tokenAddress].add(amount);
+    ({ tokenAddress, amount, isBaseToken }) => {
+      const id = getTokenId(tokenAddress, isBaseToken);
+      outputERC20AmountMap[id] ??= BigNumber.from(0);
+      outputERC20AmountMap[id] = outputERC20AmountMap[id].add(amount);
     },
   );
 
-  for (const tokenAddress in inputERC20AmountMap) {
-    if (
-      !inputERC20AmountMap[tokenAddress].eq(outputERC20AmountMap[tokenAddress])
-    ) {
+  for (const id in inputERC20AmountMap) {
+    if (!inputERC20AmountMap[id].eq(outputERC20AmountMap[id])) {
       throw new Error(
-        `Input erc20 amounts for ${tokenAddress} must match total outputs/spent/fees.`,
+        `Input erc20 amounts for ${id} must match total outputs/spent/fees.`,
       );
     }
   }
+
+  // TODO: Combine outputs for same tokens.
 };
 
 const validateStepOutputNFTs = (

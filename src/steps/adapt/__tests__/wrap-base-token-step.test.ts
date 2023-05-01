@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { TransferBaseTokenStep } from '../transfer-base-token-step';
+import { WrapBaseTokenStep } from '../wrap-base-token-step';
 import { BigNumber } from 'ethers';
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
@@ -8,14 +8,13 @@ import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
 const tokenAddress =
   NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
 
-describe('transfer-base-token-step', () => {
-  it('Should create transfer-base-token step with amount', async () => {
-    const step = new TransferBaseTokenStep(toAddress, amount);
+describe('wrap-base-token-step', () => {
+  it('Should create wrap-base-token step with amount', async () => {
+    const step = new WrapBaseTokenStep(amount);
 
     const stepInput: StepInput = {
       networkName: NetworkName.Ethereum,
@@ -32,9 +31,9 @@ describe('transfer-base-token-step', () => {
     };
     const output = await step.getValidStepOutput(stepInput);
 
-    expect(output.name).to.equal('Transfer Base Token');
+    expect(output.name).to.equal('Wrap Base Token');
     expect(output.description).to.equal(
-      'Transfers base token to an external public address.',
+      'Wraps base token into wrapped token, ie ETH to WETH.',
     );
 
     // Transferred
@@ -42,14 +41,22 @@ describe('transfer-base-token-step', () => {
       {
         amount,
         isBaseToken: true,
-        recipient: toAddress,
+        recipient: 'Wrapped Token Contract',
         tokenAddress,
       },
     ]);
 
-    // Change
     expect(output.outputERC20Amounts).to.deep.equal([
       {
+        // Wrapped - WETH
+        approvedSpender: undefined,
+        isBaseToken: false,
+        expectedBalance: amount,
+        minBalance: amount,
+        tokenAddress,
+      },
+      {
+        // Change - ETH
         approvedSpender: undefined,
         isBaseToken: true,
         expectedBalance: BigNumber.from('2000'),
@@ -65,7 +72,7 @@ describe('transfer-base-token-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
+        data: '0xe9a059a30000000000000000000000000000000000000000000000000000000000002710',
         to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
       },
     ]);
@@ -74,8 +81,8 @@ describe('transfer-base-token-step', () => {
     );
   });
 
-  it('Should create transfer-base-token step without amount', async () => {
-    const step = new TransferBaseTokenStep(toAddress);
+  it('Should create wrap-base-token step without amount', async () => {
+    const step = new WrapBaseTokenStep();
 
     const stepInput: StepInput = {
       networkName: NetworkName.Ethereum,
@@ -97,13 +104,21 @@ describe('transfer-base-token-step', () => {
       {
         amount: BigNumber.from('12000'),
         isBaseToken: true,
-        recipient: toAddress,
+        recipient: 'Wrapped Token Contract',
         tokenAddress,
       },
     ]);
 
-    // Change
-    expect(output.outputERC20Amounts).to.deep.equal([]);
+    // Wrapped
+    expect(output.outputERC20Amounts).to.deep.equal([
+      {
+        expectedBalance: BigNumber.from('12000'),
+        minBalance: BigNumber.from('12000'),
+        isBaseToken: false,
+        tokenAddress,
+        approvedSpender: undefined,
+      },
+    ]);
 
     expect(output.spentNFTs).to.deep.equal([]);
     expect(output.outputNFTs).to.deep.equal([]);
@@ -112,14 +127,14 @@ describe('transfer-base-token-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
+        data: '0xe9a059a30000000000000000000000000000000000000000000000000000000000000000',
         to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
       },
     ]);
   });
 
-  it('Should test transfer-base-token step error cases', async () => {
-    const step = new TransferBaseTokenStep(toAddress, amount);
+  it('Should test wrap-base-token step error cases', async () => {
+    const step = new WrapBaseTokenStep(amount);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
@@ -136,7 +151,7 @@ describe('transfer-base-token-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Transfer Base Token step failed. No erc20 inputs match step filter.',
+      'Wrap Base Token step failed. No erc20 inputs match step filter.',
     );
 
     // Too low balance for erc20 input
@@ -156,7 +171,7 @@ describe('transfer-base-token-step', () => {
     await expect(
       step.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
-      'Transfer Base Token step failed. Specified amount 10000 exceeds balance 2000.',
+      'Wrap Base Token step failed. Specified amount 10000 exceeds balance 2000.',
     );
   });
 });

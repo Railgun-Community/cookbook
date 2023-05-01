@@ -14,7 +14,7 @@ const amount = BigNumber.from('10000');
 
 describe('transfer-erc20-step', () => {
   it('Should create transfer-erc20 step with amount', async () => {
-    const transferStep = new TransferERC20Step(toAddress, tokenAddress, amount);
+    const step = new TransferERC20Step(toAddress, tokenAddress, amount);
 
     const stepInput: StepInput = {
       networkName: NetworkName.Ethereum,
@@ -28,7 +28,7 @@ describe('transfer-erc20-step', () => {
       ],
       nfts: [],
     };
-    const output = await transferStep.getValidStepOutput(stepInput);
+    const output = await step.getValidStepOutput(stepInput);
 
     expect(output.name).to.equal('Transfer ERC20');
     expect(output.description).to.equal(
@@ -70,7 +70,7 @@ describe('transfer-erc20-step', () => {
   });
 
   it('Should create transfer-erc20 step without amount', async () => {
-    const transferStep = new TransferERC20Step(toAddress, tokenAddress);
+    const step = new TransferERC20Step(toAddress, tokenAddress);
 
     const stepInput: StepInput = {
       networkName: NetworkName.Ethereum,
@@ -84,7 +84,7 @@ describe('transfer-erc20-step', () => {
       ],
       nfts: [],
     };
-    const output = await transferStep.getValidStepOutput(stepInput);
+    const output = await step.getValidStepOutput(stepInput);
 
     // Transferred
     expect(output.spentERC20Amounts).to.deep.equal([
@@ -113,7 +113,7 @@ describe('transfer-erc20-step', () => {
   });
 
   it('Should test transfer-erc20 step error cases', async () => {
-    const transferStep = new TransferERC20Step(toAddress, tokenAddress, amount);
+    const step = new TransferERC20Step(toAddress, tokenAddress, amount);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
@@ -121,9 +121,7 @@ describe('transfer-erc20-step', () => {
       erc20Amounts: [],
       nfts: [],
     };
-    await expect(
-      transferStep.getValidStepOutput(stepInputNoERC20s),
-    ).to.be.rejectedWith(
+    await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
       'Transfer ERC20 step failed. No erc20 inputs match step filter.',
     );
 
@@ -141,7 +139,7 @@ describe('transfer-erc20-step', () => {
       nfts: [],
     };
     await expect(
-      transferStep.getValidStepOutput(stepInputLowBalance),
+      step.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
       'Transfer ERC20 step failed. Specified amount 10000 exceeds balance 2000.',
     );
