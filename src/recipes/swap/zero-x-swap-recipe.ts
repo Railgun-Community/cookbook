@@ -42,25 +42,25 @@ export class ZeroXSwapRecipe extends Recipe {
     return this.quote;
   }
 
-  private getSellERC20Amount(
-    erc20Amounts: StepOutputERC20Amount[],
+  private findInputSellERC20Amount(
+    inputERC20Amounts: StepOutputERC20Amount[],
   ): RecipeERC20Amount {
-    const outputERC20Amount = erc20Amounts.find(erc20Amount =>
+    const inputERC20Amount = inputERC20Amounts.find(erc20Amount =>
       compareERC20Info(erc20Amount, this.sellERC20Info),
     );
-    if (!outputERC20Amount) {
+    if (!inputERC20Amount) {
       throw new Error(
         `Swap Recipe inputs must contain sell ERC20 Amount: ${this.sellERC20Info.tokenAddress}`,
       );
     }
     return {
-      tokenAddress: outputERC20Amount.tokenAddress,
-      amount: outputERC20Amount.minBalance,
+      tokenAddress: inputERC20Amount.tokenAddress,
+      amount: inputERC20Amount.minBalance,
     };
   }
 
   protected async getInternalSteps(firstStepInput: StepInput): Promise<Step[]> {
-    const sellERC20Amount = this.getSellERC20Amount(
+    const sellERC20Amount = this.findInputSellERC20Amount(
       firstStepInput.erc20Amounts,
     );
     const quoteParams: ZeroXSwapQuoteParams = {
@@ -69,7 +69,6 @@ export class ZeroXSwapRecipe extends Recipe {
       buyERC20Info: this.buyERC20Info,
       slippagePercentage: this.slippagePercentage,
     };
-
     this.quote = await zeroXGetSwapQuote(quoteParams);
 
     return [
