@@ -95,7 +95,7 @@ const validateStepOutputNFTs = (
     for (const tokenSubID in inputNFTMap[nftAddress]) {
       if (!outputNFTMap[nftAddress]?.[tokenSubID]) {
         throw new Error(
-          `Input NFT ${nftAddress}:${tokenSubID} not mapped to NFT output.`,
+          `Input NFT ${nftAddress}:${tokenSubID} does not map to NFT output.`,
         );
       }
     }

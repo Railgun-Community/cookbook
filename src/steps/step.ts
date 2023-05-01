@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import {
   StepInput,
   StepOutput,
@@ -38,6 +39,7 @@ export abstract class Step {
   getValidInputERC20Amount(
     inputERC20Amounts: StepOutputERC20Amount[],
     filter: ERC20AmountFilter,
+    amount?: BigNumber,
   ): {
     erc20AmountForStep: StepOutputERC20Amount;
     unusedERC20Amounts: StepOutputERC20Amount[];
@@ -56,16 +58,43 @@ export abstract class Step {
 
     const erc20AmountForStep = erc20AmountsForStep[0];
 
+    const hasNonDeterministicInput = !erc20AmountForStep.expectedBalance.eq(
+      erc20AmountForStep.minBalance,
+    );
+
     // If this step has a non-deterministic output, we must provide deterministic inputs.
-    // Otherwise, the expected balances become too complicated.
-    if (this.config.hasNonDeterministicOutput) {
-      if (
-        !erc20AmountForStep.expectedBalance.eq(erc20AmountForStep.minBalance)
-      ) {
+    // Otherwise, the expected balances become too complicated and variable.
+    if (this.config.hasNonDeterministicOutput && hasNonDeterministicInput) {
+      throw new Error(
+        `Non-deterministic step must have deterministic inputs - you may not stack non-deterministic steps in a single recipe.`,
+      );
+    }
+
+    if (amount) {
+      // If we have a specified amount, we must have a deterministic input in order to generate the change outputs.
+      if (hasNonDeterministicInput) {
         throw new Error(
-          `Non-deterministic step must have deterministic inputs - you may not stack non-deterministic steps in a single recipe.`,
+          'Cannot specify amount for step if it has non-deterministic inputs.',
         );
       }
+      // Note: minBalance === expectedBalance
+      if (amount.gt(erc20AmountForStep.expectedBalance)) {
+        throw new Error(
+          `Specified amount ${amount.toString()} exceeds expected/minimum balance ${erc20AmountForStep.expectedBalance.toString()}.`,
+        );
+      }
+    }
+
+    // Add change output.
+    if (amount?.lt(erc20AmountForStep.expectedBalance)) {
+      const changeBalance = erc20AmountForStep.expectedBalance.sub(amount);
+      unusedERC20Amounts.push({
+        ...erc20AmountForStep,
+        expectedBalance: changeBalance,
+        minBalance: changeBalance,
+      });
+      erc20AmountForStep.expectedBalance = amount;
+      erc20AmountForStep.minBalance = amount;
     }
 
     return { erc20AmountForStep, unusedERC20Amounts };

@@ -44,16 +44,17 @@ export class RelayAdaptContract {
     );
   }
 
-  createBaseTokenTransfer(toAddress: string): Promise<PopulatedTransaction> {
+  createBaseTokenTransfer(
+    toAddress: string,
+    amount?: BigNumber,
+  ): Promise<PopulatedTransaction> {
     const baseTokenData = this.createERC20TokenData(ZERO_ADDRESS);
-
-    // Automatically transfers full balance.
-    const value = BigNumber.from(0);
 
     const baseTokenTransfer: RelayAdapt.TokenTransferStruct = {
       token: baseTokenData,
       to: toAddress,
-      value,
+      // 0 will automatically transfer full balance.
+      value: amount ?? BigNumber.from(0),
     };
     return this.contract.populateTransaction.transfer([baseTokenTransfer]);
   }

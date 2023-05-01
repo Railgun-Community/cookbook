@@ -23,6 +23,10 @@ export abstract class Recipe {
     return [new UnshieldStep(), ...internalSteps, new ShieldStep()];
   }
 
+  private hasDeterministicOutput(steps: Step[]): boolean {
+    return steps.every(step => !step.config.hasNonDeterministicOutput);
+  }
+
   private createFirstStepInput(input: RecipeInput): StepInput {
     return {
       networkName: input.networkName,
@@ -38,10 +42,10 @@ export abstract class Recipe {
     };
   }
 
-  async getStepOutputs(input: RecipeInput): Promise<StepOutput[]> {
-    const firstStepInput = this.createFirstStepInput(input);
-    const steps = await this.getFullSteps(firstStepInput);
-
+  async getStepOutputs(
+    firstStepInput: StepInput,
+    steps: Step[],
+  ): Promise<StepOutput[]> {
     let stepInput: StepInput = firstStepInput;
     let stepOutput: Optional<StepOutput>;
 
@@ -63,10 +67,14 @@ export abstract class Recipe {
   }
 
   async getRecipeOutput(input: RecipeInput): Promise<RecipeOutput> {
-    const stepOutputs = await this.getStepOutputs(input);
+    const firstStepInput = this.createFirstStepInput(input);
+    const steps = await this.getFullSteps(firstStepInput);
+
+    const stepOutputs = await this.getStepOutputs(firstStepInput, steps);
     if (!stepOutputs.length) {
       throw new Error('No step outputs were generated.');
     }
+
     const finalStepOutput = stepOutputs[stepOutputs.length - 1];
 
     const populatedTransactions = stepOutputs
@@ -76,11 +84,11 @@ export abstract class Recipe {
     // TODO: After callbacks upgrade, remove unshield erc20s to auto re-shield.
     // Until then, we need all tokens to auto re-shield in case of revert.
     const shieldERC20Addresses: string[] = [];
-    const tokenAmountsToReshield = [
+    const erc20AmountsToReshield = [
       ...input.unshieldERC20Amounts,
       ...finalStepOutput.outputERC20Amounts,
     ];
-    tokenAmountsToReshield.forEach(({ tokenAddress, isBaseToken }) => {
+    erc20AmountsToReshield.forEach(({ tokenAddress, isBaseToken }) => {
       if (isBaseToken) {
         return;
       }

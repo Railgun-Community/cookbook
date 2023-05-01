@@ -2,16 +2,20 @@ import { Contract } from '@ethersproject/contracts';
 import { abi } from '../../abi/abi';
 import { ERC721 } from '../../abi/token/ERC721';
 import { PopulatedTransaction } from '@ethersproject/contracts';
+import { validateAddress } from '../../utils/address';
 
 export class ERC721Contract {
   private readonly contract: ERC721;
 
-  constructor(tokenAddress: string) {
-    if (!tokenAddress) {
+  constructor(nftAddress: string) {
+    if (!nftAddress) {
       throw new Error('NFT address is required for ERC721 Contract');
     }
+    if (!validateAddress(nftAddress)) {
+      throw new Error('Invalid ERC20 address for contract');
+    }
     this.contract = new Contract(
-      tokenAddress,
+      nftAddress,
       abi.token.erc721,
     ) as unknown as ERC721;
   }

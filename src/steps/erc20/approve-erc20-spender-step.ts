@@ -9,7 +9,7 @@ import { Step } from '../step';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { ERC20Contract } from '../../contract/token/erc20-contract';
 import { compareERC20Info } from '../../utils/token';
-import { createNoActionStepOutput } from '../default/no-action-output';
+import { createNoActionStepOutput } from '../outputs/no-action-output';
 
 export class ApproveERC20SpenderStep extends Step {
   readonly config = {
@@ -55,7 +55,7 @@ export class ApproveERC20SpenderStep extends Step {
       );
 
     const contract = new ERC20Contract(erc20AmountForStep.tokenAddress);
-    const approveAmount = this.amount ?? erc20AmountForStep.minBalance;
+    const approveAmount = this.amount ?? erc20AmountForStep.expectedBalance;
 
     const populatedTransactions: PopulatedTransaction[] = [
       await contract.createSpenderApproval(this.spender, approveAmount),

@@ -2,6 +2,7 @@ import { Recipe } from '../recipe';
 import { ApproveERC20SpenderStep } from '../../steps/erc20/approve-erc20-spender-step';
 import { Step } from '../../steps/step';
 import {
+  ZeroXSwapQuoteData,
   ZeroXSwapQuoteParams,
   zeroXGetSwapQuote,
 } from '../../api/zero-x/zero-x-quote';
@@ -24,6 +25,8 @@ export class ZeroXSwapRecipe extends Recipe {
   private readonly buyERC20Info: RecipeERC20Info;
   private readonly slippagePercentage: number;
 
+  private quote: Optional<ZeroXSwapQuoteData>;
+
   constructor(
     sellERC20Info: RecipeERC20Info,
     buyERC20Info: RecipeERC20Info,
@@ -43,7 +46,7 @@ export class ZeroXSwapRecipe extends Recipe {
     );
     if (!outputERC20Amount) {
       throw new Error(
-        `Swap Recipe Input must contain sell ERC20 Amount: ${this.sellERC20Info.tokenAddress}`,
+        `Swap Recipe inputs must contain sell ERC20 Amount: ${this.sellERC20Info.tokenAddress}`,
       );
     }
     return {
@@ -62,11 +65,15 @@ export class ZeroXSwapRecipe extends Recipe {
       buyERC20Info: this.buyERC20Info,
       slippagePercentage: this.slippagePercentage,
     };
-    const quote = await zeroXGetSwapQuote(quoteParams);
+
+    this.quote = await zeroXGetSwapQuote(quoteParams);
 
     return [
-      new ApproveERC20SpenderStep(quote.spender, sellERC20Amount.tokenAddress),
-      new ZeroXSwapStep(quote),
+      new ApproveERC20SpenderStep(
+        this.quote.spender,
+        sellERC20Amount.tokenAddress,
+      ),
+      new ZeroXSwapStep(this.quote),
     ];
   }
 }
