@@ -9,7 +9,6 @@ import {
 } from '../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../utils/token';
 import { Step } from '../step';
-import { PopulatedTransaction } from '@ethersproject/contracts';
 
 export class ZeroXSwapStep extends Step {
   readonly config = {
