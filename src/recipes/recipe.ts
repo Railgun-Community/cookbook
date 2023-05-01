@@ -14,22 +14,11 @@ export abstract class Recipe {
   abstract readonly name: string;
   abstract readonly description: string;
 
-  private internalSteps: Step[] = [];
+  protected abstract getInternalSteps(): Promise<Step[]>;
 
-  addStep(step: Step): void {
-    if (!step.canAddStep) {
-      throw new Error(`Cannot add Recipe Step: ${step.name}`);
-    }
-
-    this.internalSteps.push(step);
-  }
-
-  addSteps(steps: Step[]): void {
-    steps.forEach(this.addStep);
-  }
-
-  getFullSteps(): Step[] {
-    return [new UnshieldStep(), ...this.internalSteps, new ShieldStep()];
+  private async getFullSteps(): Promise<Step[]> {
+    const internalSteps = await this.getInternalSteps();
+    return [new UnshieldStep(), ...internalSteps, new ShieldStep()];
   }
 
   private createFirstStepInput(input: RecipeInput): StepInput {
@@ -40,6 +29,7 @@ export abstract class Recipe {
           ...erc20Amount,
           expectedBalance: erc20Amount.amount,
           minBalance: erc20Amount.amount,
+          approvedForSpender: undefined,
         };
       }),
       nfts: input.unshieldNFTs,
@@ -47,7 +37,7 @@ export abstract class Recipe {
   }
 
   async getStepOutputs(input: RecipeInput): Promise<StepOutput[]> {
-    const steps = this.getFullSteps();
+    const steps = await this.getFullSteps();
 
     let stepInput: StepInput = this.createFirstStepInput(input);
     let stepOutput: Optional<StepOutput>;

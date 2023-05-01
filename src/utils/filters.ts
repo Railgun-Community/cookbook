@@ -13,6 +13,9 @@ export const filterERC20AmountInputs = (
   const unusedERC20Amounts = inputERC20Amounts.filter(
     erc20Amount => !filter(erc20Amount),
   );
+
+  // TODO: Calculate unused amount with optional amount param.
+
   return { erc20AmountsForStep, unusedERC20Amounts };
 };
 

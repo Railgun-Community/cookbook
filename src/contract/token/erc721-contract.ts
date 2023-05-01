@@ -3,7 +3,7 @@ import { abi } from '../../abi/abi';
 import { ERC721 } from '../../abi/token/ERC721';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
-export class RelayAdaptContract {
+export class ERC721Contract {
   private readonly contract: ERC721;
 
   constructor(tokenAddress: string) {
@@ -16,7 +16,7 @@ export class RelayAdaptContract {
     ) as unknown as ERC721;
   }
 
-  approveSpender(spender: string): Promise<PopulatedTransaction> {
+  createSpenderApproval(spender: string): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.setApprovalForAll(spender, true);
   }
 }

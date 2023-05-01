@@ -12,7 +12,10 @@ describe('recipe', () => {
 
     recipe.addStep(new UnwrapBaseTokenStep());
 
-    expect(recipe.getFullSteps().map(step => step.name)).to.deep.equal([
+    // @ts-ignore - private accessor
+    const steps = await recipe.getFullSteps();
+
+    expect(steps.map(step => step.name)).to.deep.equal([
       'Unshield',
       'Unwrap Base Token',
       'Shield',

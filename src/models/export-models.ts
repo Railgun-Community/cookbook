@@ -13,7 +13,7 @@ export type CookbookDebugger = {
 
 export type RecipeERC20Info = {
   tokenAddress: string;
-  isBaseToken: boolean;
+  isBaseToken?: boolean;
 };
 
 export type RecipeERC20Amount = RecipeERC20Info & {
@@ -47,6 +47,7 @@ export type RecipeOutput = {
 export type StepOutputERC20Amount = RecipeERC20Info & {
   expectedBalance: BigNumber;
   minBalance: BigNumber;
+  approvedForSpender: Optional<string>;
 };
 
 export type UnvalidatedStepOutput = {

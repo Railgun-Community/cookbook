@@ -4,7 +4,7 @@ import { ERC20 } from '../../abi/token/ERC20';
 import { BigNumber } from '@ethersproject/bignumber';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
-export class RelayAdaptContract {
+export class ERC20Contract {
   private readonly contract: ERC20;
 
   constructor(tokenAddress: string) {
@@ -17,7 +17,7 @@ export class RelayAdaptContract {
     ) as unknown as ERC20;
   }
 
-  approveSpender(
+  createSpenderApproval(
     spender: string,
     amount: BigNumber,
   ): Promise<PopulatedTransaction> {

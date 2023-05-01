@@ -6,9 +6,10 @@ import {
 } from '../../models';
 import { filterSingleERC20AmountInput } from '../../utils/filters';
 import { Step } from '../step';
-import { getWrappedBaseTokenAddress } from './wrap-util';
+import { getWrappedBaseToken } from './wrap-util';
 import { PopulatedTransaction } from '@ethersproject/contracts';
-import { RelayAdaptContract } from '../../contract/adapt/relay-adapt';
+import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
+import { compareERC20Info } from '../../utils/token';
 
 export class UnwrapBaseTokenStep extends Step {
   readonly name = 'Unwrap Base Token';
@@ -27,14 +28,10 @@ export class UnwrapBaseTokenStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const { networkName, erc20Amounts } = input;
 
-    const wrappedBaseTokenAddress = getWrappedBaseTokenAddress(networkName);
-
+    const wrappedBaseToken = getWrappedBaseToken(networkName);
     const { erc20AmountForStep, unusedERC20Amounts } =
-      filterSingleERC20AmountInput(
-        erc20Amounts,
-        erc20Amount =>
-          !erc20Amount.isBaseToken &&
-          erc20Amount.tokenAddress === wrappedBaseTokenAddress,
+      filterSingleERC20AmountInput(erc20Amounts, erc20Amount =>
+        compareERC20Info(erc20Amount, wrappedBaseToken),
       );
 
     const contract = new RelayAdaptContract(input.networkName);
