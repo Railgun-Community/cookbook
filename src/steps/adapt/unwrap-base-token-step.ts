@@ -31,8 +31,10 @@ export class UnwrapBaseTokenStep extends Step {
 
     const wrappedBaseToken = getWrappedBaseToken(networkName);
     const { erc20AmountForStep, unusedERC20Amounts } =
-      this.getValidInputERC20Amount(erc20Amounts, erc20Amount =>
-        compareERC20Info(erc20Amount, wrappedBaseToken),
+      this.getValidInputERC20Amount(
+        erc20Amounts,
+        erc20Amount => compareERC20Info(erc20Amount, wrappedBaseToken),
+        this.amount,
       );
 
     const contract = new RelayAdaptContract(input.networkName);

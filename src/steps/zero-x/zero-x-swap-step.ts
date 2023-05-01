@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import { ZeroXSwapQuoteData } from '../../api/zero-x';
 import {
   RecipeERC20AmountRecipient,
@@ -19,9 +20,12 @@ export class ZeroXSwapStep extends Step {
 
   private readonly quote: ZeroXSwapQuoteData;
 
-  constructor(quote: ZeroXSwapQuoteData) {
+  private readonly sellERC20Info: RecipeERC20Info;
+
+  constructor(quote: ZeroXSwapQuoteData, sellERC20Info: RecipeERC20Info) {
     super();
     this.quote = quote;
+    this.sellERC20Info = sellERC20Info;
   }
 
   protected async getStepOutput(
@@ -29,17 +33,15 @@ export class ZeroXSwapStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const { erc20Amounts } = input;
 
-    const sellToken: RecipeERC20Info = {
-      tokenAddress: this.quote.sellTokenAddress,
-      isBaseToken: false,
-    };
+    const sellERC20Amount = BigNumber.from(this.quote.sellTokenValue);
 
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
         erc20Amount =>
-          compareERC20Info(erc20Amount, sellToken) &&
-          erc20Amount.approvedForSpender === this.quote.spender,
+          compareERC20Info(erc20Amount, this.sellERC20Info) &&
+          erc20Amount.approvedSpender === this.quote.spender,
+        sellERC20Amount,
       );
 
     const populatedTransactions: PopulatedTransaction[] = [
@@ -49,7 +51,7 @@ export class ZeroXSwapStep extends Step {
     const { buyERC20Amount, minimumBuyAmount } = this.quote;
 
     const sellERC20AmountRecipient: RecipeERC20AmountRecipient = {
-      tokenAddress: erc20AmountForStep.tokenAddress,
+      ...this.sellERC20Info,
       amount: erc20AmountForStep.expectedBalance,
       recipient: '0x Exchange',
     };
@@ -58,7 +60,7 @@ export class ZeroXSwapStep extends Step {
       isBaseToken: buyERC20Amount.isBaseToken,
       expectedBalance: buyERC20Amount.amount,
       minBalance: minimumBuyAmount,
-      approvedForSpender: undefined,
+      approvedSpender: undefined,
     };
 
     return {

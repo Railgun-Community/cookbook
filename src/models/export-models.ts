@@ -47,7 +47,7 @@ export type RecipeOutput = {
 export type StepOutputERC20Amount = RecipeERC20Info & {
   expectedBalance: BigNumber;
   minBalance: BigNumber;
-  approvedForSpender: Optional<string>;
+  approvedSpender: Optional<string>;
 };
 
 export type UnvalidatedStepOutput = {

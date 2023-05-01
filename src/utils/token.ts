@@ -6,6 +6,6 @@ export const compareERC20Info = (
 ): boolean => {
   return (
     tokenA.tokenAddress.toLowerCase() === tokenB.tokenAddress.toLowerCase() &&
-    tokenA.isBaseToken == tokenB.isBaseToken
+    !!tokenA.isBaseToken === !!tokenB.isBaseToken
   );
 };

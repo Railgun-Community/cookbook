@@ -40,8 +40,10 @@ export class TransferERC20Step extends Step {
     };
 
     const { erc20AmountForStep, unusedERC20Amounts } =
-      this.getValidInputERC20Amount(erc20Amounts, erc20Amount =>
-        compareERC20Info(erc20Amount, erc20Info),
+      this.getValidInputERC20Amount(
+        erc20Amounts,
+        erc20Amount => compareERC20Info(erc20Amount, erc20Info),
+        this.amount,
       );
 
     const contract = new ERC20Contract(this.tokenAddress);

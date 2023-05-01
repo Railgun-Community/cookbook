@@ -35,7 +35,7 @@ export abstract class Recipe {
           ...erc20Amount,
           expectedBalance: erc20Amount.amount,
           minBalance: erc20Amount.amount,
-          approvedForSpender: undefined,
+          approvedSpender: undefined,
         };
       }),
       nfts: input.unshieldNFTs,

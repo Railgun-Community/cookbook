@@ -51,7 +51,8 @@ export class ApproveERC20SpenderStep extends Step {
         erc20Amounts,
         erc20Amount =>
           compareERC20Info(erc20Amount, erc20ForApproval) &&
-          erc20Amount.approvedForSpender !== this.spender,
+          erc20Amount.approvedSpender !== this.spender,
+        this.amount,
       );
 
     const contract = new ERC20Contract(erc20AmountForStep.tokenAddress);
@@ -64,7 +65,7 @@ export class ApproveERC20SpenderStep extends Step {
       ...erc20AmountForStep,
       expectedBalance: approveAmount,
       minBalance: approveAmount,
-      approvedForSpender: this.spender,
+      approvedSpender: this.spender,
     };
 
     return {

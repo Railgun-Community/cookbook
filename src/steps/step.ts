@@ -32,14 +32,14 @@ export abstract class Step {
       if (!(err instanceof Error)) {
         throw err;
       }
-      throw new Error(`Step ${this.config.name} failed: ${err.message}`);
+      throw new Error(`${this.config.name} step failed. ${err.message}`);
     }
   }
 
-  getValidInputERC20Amount(
+  protected getValidInputERC20Amount(
     inputERC20Amounts: StepOutputERC20Amount[],
     filter: ERC20AmountFilter,
-    amount?: BigNumber,
+    amount: Optional<BigNumber>,
   ): {
     erc20AmountForStep: StepOutputERC20Amount;
     unusedERC20Amounts: StepOutputERC20Amount[];
@@ -50,13 +50,17 @@ export abstract class Step {
     );
 
     const numFiltered = erc20AmountsForStep.length;
-    if (numFiltered !== 1) {
+    if (numFiltered === 0) {
+      throw new Error(`No erc20 inputs match step filter.`);
+    }
+    if (numFiltered > 1) {
       throw new Error(
         `Expected one erc20 amount for step input - received ${numFiltered}.`,
       );
     }
 
-    const erc20AmountForStep = erc20AmountsForStep[0];
+    // Copy values to new object.
+    const erc20AmountForStep = { ...erc20AmountsForStep[0] };
 
     const hasNonDeterministicInput = !erc20AmountForStep.expectedBalance.eq(
       erc20AmountForStep.minBalance,
@@ -80,7 +84,7 @@ export abstract class Step {
       // Note: minBalance === expectedBalance
       if (amount.gt(erc20AmountForStep.expectedBalance)) {
         throw new Error(
-          `Specified amount ${amount.toString()} exceeds expected/minimum balance ${erc20AmountForStep.expectedBalance.toString()}.`,
+          `Specified amount for step ${amount.toString()} exceeds balance ${erc20AmountForStep.expectedBalance.toString()}.`,
         );
       }
     }

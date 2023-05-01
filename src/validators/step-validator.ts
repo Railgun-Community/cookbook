@@ -52,7 +52,7 @@ const validateStepOutputERC20Amounts = (
       !inputERC20AmountMap[tokenAddress].eq(outputERC20AmountMap[tokenAddress])
     ) {
       throw new Error(
-        `Input ERC20 amounts for ${tokenAddress} do not map to total outputs/spent/fees.`,
+        `Input erc20 amounts for ${tokenAddress} must match total outputs/spent/fees.`,
       );
     }
   }
@@ -95,7 +95,7 @@ const validateStepOutputNFTs = (
     for (const tokenSubID in inputNFTMap[nftAddress]) {
       if (!outputNFTMap[nftAddress]?.[tokenSubID]) {
         throw new Error(
-          `Input NFT ${nftAddress}:${tokenSubID} does not map to NFT output.`,
+          `Input NFT ${nftAddress}:${tokenSubID} must match NFT output.`,
         );
       }
     }

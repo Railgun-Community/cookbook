@@ -38,6 +38,10 @@ export class ZeroXSwapRecipe extends Recipe {
     this.slippagePercentage = slippagePercentage;
   }
 
+  getLatestQuote(): Optional<ZeroXSwapQuoteData> {
+    return this.quote;
+  }
+
   private getSellERC20Amount(
     erc20Amounts: StepOutputERC20Amount[],
   ): RecipeERC20Amount {
@@ -73,7 +77,7 @@ export class ZeroXSwapRecipe extends Recipe {
         this.quote.spender,
         sellERC20Amount.tokenAddress,
       ),
-      new ZeroXSwapStep(this.quote),
+      new ZeroXSwapStep(this.quote, this.sellERC20Info),
     ];
   }
 }
