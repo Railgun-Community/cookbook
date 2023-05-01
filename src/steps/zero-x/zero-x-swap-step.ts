@@ -31,24 +31,25 @@ export class ZeroXSwapStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
+    const {
+      buyERC20Amount,
+      minimumBuyAmount,
+      populatedTransaction,
+      sellTokenValue,
+      spender,
+    } = this.quote;
     const { erc20Amounts } = input;
 
-    const sellERC20Amount = BigNumber.from(this.quote.sellTokenValue);
+    const sellERC20Amount = BigNumber.from(sellTokenValue);
 
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
         erc20Amount =>
           compareERC20Info(erc20Amount, this.sellERC20Info) &&
-          isApprovedForSpender(erc20Amount, this.quote.spender),
+          isApprovedForSpender(erc20Amount, spender),
         sellERC20Amount,
       );
-
-    const populatedTransactions: PopulatedTransaction[] = [
-      this.quote.populatedTransaction,
-    ];
-
-    const { buyERC20Amount, minimumBuyAmount } = this.quote;
 
     const sellERC20AmountRecipient: RecipeERC20AmountRecipient = {
       ...this.sellERC20Info,
@@ -64,7 +65,7 @@ export class ZeroXSwapStep extends Step {
     };
 
     return {
-      populatedTransactions,
+      populatedTransactions: [populatedTransaction],
       spentERC20Amounts: [sellERC20AmountRecipient],
       outputERC20Amounts: [outputBuyERC20Amount, ...unusedERC20Amounts],
       spentNFTs: [],
