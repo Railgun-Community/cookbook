@@ -35,125 +35,128 @@ describe('unwrap-transfer-base-token-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs).to.deep.equal([
-      {
-        name: 'Unshield',
-        description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
-        feeERC20AmountRecipients: [
-          {
-            amount: BigNumber.from('30'),
-            recipient: 'RAILGUN Unshield Fee',
-            tokenAddress,
-          },
-        ],
-        outputERC20Amounts: [
-          {
-            tokenAddress,
-            expectedBalance: BigNumber.from('11970'),
-            minBalance: BigNumber.from('11970'),
-            approvedSpender: undefined,
-            isBaseToken: false,
-          },
-        ],
-        outputNFTs: [],
-        populatedTransactions: [],
-        spentERC20Amounts: [],
-        spentNFTs: [],
-      },
-      {
-        name: 'Unwrap Base Token',
-        description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
-        feeERC20AmountRecipients: [],
-        outputERC20Amounts: [
-          {
-            // Wrapped - ETH
-            approvedSpender: undefined,
-            isBaseToken: true,
-            expectedBalance: amount, // 10000
-            minBalance: amount, // 10000
-            tokenAddress,
-          },
-          {
-            // Change - WETH
-            approvedSpender: undefined,
-            expectedBalance: BigNumber.from('1970'),
-            minBalance: BigNumber.from('1970'),
-            tokenAddress,
-            isBaseToken: false,
-          },
-        ],
-        outputNFTs: [],
-        populatedTransactions: [
-          {
-            data: '0xd5774a280000000000000000000000000000000000000000000000000000000000002710',
-            to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
-          },
-        ],
-        spentERC20Amounts: [
-          {
-            amount: BigNumber.from('10000'),
-            isBaseToken: false,
-            recipient: 'Wrapped Token Contract',
-            tokenAddress,
-          },
-        ],
-        spentNFTs: [],
-      },
-      {
-        name: 'Transfer Base Token',
-        description: 'Transfers base token to an external public address.',
-        feeERC20AmountRecipients: [],
-        outputERC20Amounts: [
-          {
-            approvedSpender: undefined,
-            expectedBalance: BigNumber.from('1970'),
-            minBalance: BigNumber.from('1970'),
-            tokenAddress,
-            isBaseToken: false,
-          },
-        ],
-        outputNFTs: [],
-        populatedTransactions: [
-          {
-            data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-            to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
-          },
-        ],
-        spentERC20Amounts: [
-          {
-            amount: BigNumber.from('10000'),
-            isBaseToken: true,
-            tokenAddress,
-            recipient: toAddress,
-          },
-        ],
-        spentNFTs: [],
-      },
-      {
-        name: 'Shield',
-        description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
-        feeERC20AmountRecipients: [
-          {
-            amount: BigNumber.from('4'),
-            recipient: 'RAILGUN Shield Fee',
-            tokenAddress,
-          },
-        ],
-        outputERC20Amounts: [
-          {
-            approvedSpender: undefined,
-            expectedBalance: BigNumber.from('1966'),
-            minBalance: BigNumber.from('1966'),
-            tokenAddress,
-            isBaseToken: false,
-          },
-        ],
-        outputNFTs: [],
-        populatedTransactions: [],
-        spentERC20Amounts: [],
-        spentNFTs: [],
-      },
-    ]);
+    expect(output.stepOutputs.length).to.equal(4);
+
+    expect(output.stepOutputs[0]).to.deep.equal({
+      name: 'Unshield',
+      description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
+      feeERC20AmountRecipients: [
+        {
+          amount: BigNumber.from('30'),
+          recipient: 'RAILGUN Unshield Fee',
+          tokenAddress,
+        },
+      ],
+      outputERC20Amounts: [
+        {
+          tokenAddress,
+          expectedBalance: BigNumber.from('11970'),
+          minBalance: BigNumber.from('11970'),
+          approvedSpender: undefined,
+          isBaseToken: false,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [],
+      spentERC20Amounts: [],
+      spentNFTs: [],
+    });
+
+    expect(output.stepOutputs[1]).to.deep.equal({
+      name: 'Unwrap Base Token',
+      description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
+      feeERC20AmountRecipients: [],
+      outputERC20Amounts: [
+        {
+          // Wrapped - ETH
+          approvedSpender: undefined,
+          isBaseToken: true,
+          expectedBalance: amount, // 10000
+          minBalance: amount, // 10000
+          tokenAddress,
+        },
+        {
+          // Change - WETH
+          approvedSpender: undefined,
+          expectedBalance: BigNumber.from('1970'),
+          minBalance: BigNumber.from('1970'),
+          tokenAddress,
+          isBaseToken: false,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [
+        {
+          data: '0xd5774a280000000000000000000000000000000000000000000000000000000000002710',
+          to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: BigNumber.from('10000'),
+          isBaseToken: false,
+          recipient: 'Wrapped Token Contract',
+          tokenAddress,
+        },
+      ],
+      spentNFTs: [],
+    });
+
+    expect(output.stepOutputs[2]).to.deep.equal({
+      name: 'Transfer Base Token',
+      description: 'Transfers base token to an external public address.',
+      feeERC20AmountRecipients: [],
+      outputERC20Amounts: [
+        {
+          approvedSpender: undefined,
+          expectedBalance: BigNumber.from('1970'),
+          minBalance: BigNumber.from('1970'),
+          tokenAddress,
+          isBaseToken: false,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [
+        {
+          data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
+          to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: BigNumber.from('10000'),
+          isBaseToken: true,
+          tokenAddress,
+          recipient: toAddress,
+        },
+      ],
+      spentNFTs: [],
+    });
+
+    expect(output.stepOutputs[3]).to.deep.equal({
+      name: 'Shield',
+      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      feeERC20AmountRecipients: [
+        {
+          amount: BigNumber.from('4'),
+          recipient: 'RAILGUN Shield Fee',
+          tokenAddress,
+        },
+      ],
+      outputERC20Amounts: [
+        {
+          approvedSpender: undefined,
+          expectedBalance: BigNumber.from('1966'),
+          minBalance: BigNumber.from('1966'),
+          tokenAddress,
+          isBaseToken: false,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [],
+      spentERC20Amounts: [],
+      spentNFTs: [],
+    });
 
     expect(output.shieldERC20Addresses).to.deep.equal([tokenAddress]);
 
@@ -173,7 +176,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
         tokenAddress,
       },
       {
-        amountString: '5',
+        amountString: '4',
         recipientAddress: 'RAILGUN Shield Fee',
         tokenAddress,
       },
@@ -196,95 +199,96 @@ describe('unwrap-transfer-base-token-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs).to.deep.equal([
-      {
-        name: 'Unshield',
-        description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
-        feeERC20AmountRecipients: [
-          {
-            amount: BigNumber.from('30'),
-            recipient: 'RAILGUN Unshield Fee',
-            tokenAddress,
-          },
-        ],
-        outputERC20Amounts: [
-          {
-            tokenAddress,
-            expectedBalance: BigNumber.from('11970'),
-            minBalance: BigNumber.from('11970'),
-            approvedSpender: undefined,
-            isBaseToken: false,
-          },
-        ],
-        outputNFTs: [],
-        populatedTransactions: [],
-        spentERC20Amounts: [],
-        spentNFTs: [],
-      },
-      {
-        name: 'Unwrap Base Token',
-        description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
-        feeERC20AmountRecipients: [],
-        outputERC20Amounts: [
-          {
-            // Wrapped - ETH
-            approvedSpender: undefined,
-            isBaseToken: true,
-            expectedBalance: BigNumber.from('11970'),
-            minBalance: BigNumber.from('11970'),
-            tokenAddress,
-          },
-        ],
-        outputNFTs: [],
-        populatedTransactions: [
-          {
-            data: '0xd5774a280000000000000000000000000000000000000000000000000000000000000000',
-            to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
-          },
-        ],
-        spentERC20Amounts: [
-          {
-            amount: BigNumber.from('11970'),
-            isBaseToken: false,
-            recipient: 'Wrapped Token Contract',
-            tokenAddress,
-          },
-        ],
-        spentNFTs: [],
-      },
-      {
-        name: 'Transfer Base Token',
-        description: 'Transfers base token to an external public address.',
-        feeERC20AmountRecipients: [],
-        outputERC20Amounts: [],
-        outputNFTs: [],
-        populatedTransactions: [
-          {
-            data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-            to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
-          },
-        ],
-        spentERC20Amounts: [
-          {
-            amount: BigNumber.from('11970'),
-            isBaseToken: true,
-            tokenAddress,
-            recipient: toAddress,
-          },
-        ],
-        spentNFTs: [],
-      },
-      {
-        name: 'Shield',
-        description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
-        feeERC20AmountRecipients: [],
-        outputERC20Amounts: [],
-        outputNFTs: [],
-        populatedTransactions: [],
-        spentERC20Amounts: [],
-        spentNFTs: [],
-      },
-    ]);
+    expect(output.stepOutputs[0]).to.deep.equal({
+      name: 'Unshield',
+      description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
+      feeERC20AmountRecipients: [
+        {
+          amount: BigNumber.from('30'),
+          recipient: 'RAILGUN Unshield Fee',
+          tokenAddress,
+        },
+      ],
+      outputERC20Amounts: [
+        {
+          tokenAddress,
+          expectedBalance: BigNumber.from('11970'),
+          minBalance: BigNumber.from('11970'),
+          approvedSpender: undefined,
+          isBaseToken: false,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [],
+      spentERC20Amounts: [],
+      spentNFTs: [],
+    });
+
+    expect(output.stepOutputs[1]).to.deep.equal({
+      name: 'Unwrap Base Token',
+      description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
+      feeERC20AmountRecipients: [],
+      outputERC20Amounts: [
+        {
+          // Wrapped - ETH
+          approvedSpender: undefined,
+          isBaseToken: true,
+          expectedBalance: BigNumber.from('11970'),
+          minBalance: BigNumber.from('11970'),
+          tokenAddress,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [
+        {
+          data: '0xd5774a280000000000000000000000000000000000000000000000000000000000000000',
+          to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: BigNumber.from('11970'),
+          isBaseToken: false,
+          recipient: 'Wrapped Token Contract',
+          tokenAddress,
+        },
+      ],
+      spentNFTs: [],
+    });
+
+    expect(output.stepOutputs[2]).to.deep.equal({
+      name: 'Transfer Base Token',
+      description: 'Transfers base token to an external public address.',
+      feeERC20AmountRecipients: [],
+      outputERC20Amounts: [],
+      outputNFTs: [],
+      populatedTransactions: [
+        {
+          data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
+          to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: BigNumber.from('11970'),
+          isBaseToken: true,
+          tokenAddress,
+          recipient: toAddress,
+        },
+      ],
+      spentNFTs: [],
+    });
+
+    expect(output.stepOutputs[3]).to.deep.equal({
+      name: 'Shield',
+      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      feeERC20AmountRecipients: [],
+      outputERC20Amounts: [],
+      outputNFTs: [],
+      populatedTransactions: [],
+      spentERC20Amounts: [],
+      spentNFTs: [],
+    });
 
     expect(output.shieldERC20Addresses).to.deep.equal([tokenAddress]);
 
