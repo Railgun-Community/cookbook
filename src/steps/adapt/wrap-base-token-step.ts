@@ -38,7 +38,6 @@ export class WrapBaseTokenStep extends Step {
       );
 
     const contract = new RelayAdaptContract(input.networkName);
-
     const populatedTransactions: PopulatedTransaction[] = [
       await contract.createBaseTokenWrap(this.amount),
     ];

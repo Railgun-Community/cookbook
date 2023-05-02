@@ -38,7 +38,6 @@ export class TransferERC20Step extends Step {
       tokenAddress: this.tokenAddress,
       isBaseToken: false,
     };
-
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
@@ -47,7 +46,6 @@ export class TransferERC20Step extends Step {
       );
 
     const contract = new ERC20Contract(this.tokenAddress);
-
     const populatedTransactions: PopulatedTransaction[] = [
       await contract.createTransfer(
         this.toAddress,

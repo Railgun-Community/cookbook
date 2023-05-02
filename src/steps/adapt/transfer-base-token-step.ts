@@ -17,7 +17,6 @@ export class TransferBaseTokenStep extends Step {
   };
 
   private readonly toAddress: string;
-
   private readonly amount: Optional<BigNumber>;
 
   constructor(toAddress: string, amount?: BigNumber) {
@@ -32,7 +31,6 @@ export class TransferBaseTokenStep extends Step {
     const { networkName, erc20Amounts } = input;
 
     const baseToken = getBaseToken(networkName);
-
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
@@ -41,7 +39,6 @@ export class TransferBaseTokenStep extends Step {
       );
 
     const contract = new RelayAdaptContract(input.networkName);
-
     const populatedTransactions: PopulatedTransaction[] = [
       await contract.createBaseTokenTransfer(this.toAddress, this.amount),
     ];

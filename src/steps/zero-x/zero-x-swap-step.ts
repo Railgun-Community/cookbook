@@ -18,7 +18,6 @@ export class ZeroXSwapStep extends Step {
   };
 
   private readonly quote: ZeroXSwapQuoteData;
-
   private readonly sellERC20Info: RecipeERC20Info;
 
   constructor(quote: ZeroXSwapQuoteData, sellERC20Info: RecipeERC20Info) {
@@ -40,7 +39,6 @@ export class ZeroXSwapStep extends Step {
     const { erc20Amounts } = input;
 
     const sellERC20Amount = BigNumber.from(sellTokenValue);
-
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
