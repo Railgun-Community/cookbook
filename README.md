@@ -12,19 +12,20 @@ Write a recipe in minutes to convert your dApp to a zkApp.
 
 ```
 // Set up initial parameters.
-const networkName = 'Ethereum';
 const sellToken = {tokenAddress: 'DAI'};
 const buyToken = {tokenAddress: 'WETH'};
 const slippagePercentage = 0.01;
-const amount = BigNumber.from(10).pow(18).mul(3000); // 3000 DAI
-const unshieldERC20Amounts = [{ tokenAddress: 'DAI', amount }];
 
 // Use RAILGUN Cookbook to generate auto-validated multi-call transactions from a recipe.
 const swap = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+
+// Pass inputs that will be unshielded from private balance.
+const amount = BigNumber.from(10).pow(18).mul(3000); // 3000 DAI
+const unshieldERC20Amounts = [{ tokenAddress: 'DAI', amount }];
 const recipeInput = {networkName, unshieldERC20Amounts};
 const {populatedTransactions, shieldERC20Addresses} = await swap.getRecipeOutput(recipeInput);
 
-// Use RAILGUN Quickstart to generate a private call enclosing the recipe.
+// Use RAILGUN Quickstart to generate a private [unshield -> call -> re-shield] enclosing the recipe.
 const crossContractCallsSerialized = populatedTransactions.map(
     serializeUnsignedTransaction,
 )
