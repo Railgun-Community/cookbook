@@ -42,7 +42,7 @@ describe.only('FORK-unwrap-transfer-base-token-recipe', () => {
     await restoreGanacheSnapshot(snapshot);
   });
 
-  it('[FORK] Should create unwrap-transfer-base-token-recipe with amount', async function run() {
+  it('[FORK] Should run unwrap-transfer-base-token-recipe with amount', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
       this.skip();
       return;
@@ -85,7 +85,7 @@ describe.only('FORK-unwrap-transfer-base-token-recipe', () => {
     // TODO: Assert things about the transaction
   });
 
-  it('[FORK] Should create unwrap-transfer-base-token-recipe without amount', async function run() {
+  it('[FORK] Should run unwrap-transfer-base-token-recipe without amount', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
       this.skip();
       return;

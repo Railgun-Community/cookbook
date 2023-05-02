@@ -59,12 +59,14 @@ export class ZeroXSwapRecipe extends Recipe {
     };
   }
 
-  protected async getInternalSteps(firstStepInput: StepInput): Promise<Step[]> {
+  protected async getInternalSteps(
+    firstInternalStepInput: StepInput,
+  ): Promise<Step[]> {
     const sellERC20Amount = this.findInputSellERC20Amount(
-      firstStepInput.erc20Amounts,
+      firstInternalStepInput.erc20Amounts,
     );
     const quoteParams: ZeroXSwapQuoteParams = {
-      networkName: firstStepInput.networkName,
+      networkName: firstInternalStepInput.networkName,
       sellERC20Amount,
       buyERC20Info: this.buyERC20Info,
       slippagePercentage: this.slippagePercentage,

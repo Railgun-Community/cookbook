@@ -18,12 +18,31 @@ export abstract class Recipe {
   abstract readonly config: RecipeConfig;
 
   protected abstract getInternalSteps(
-    firstStepInput: StepInput,
+    firstInternalStepInput: StepInput,
   ): Promise<Step[]>;
 
   private async getFullSteps(firstStepInput: StepInput): Promise<Step[]> {
-    const internalSteps = await this.getInternalSteps(firstStepInput);
-    return [new UnshieldStep(), ...internalSteps, new ShieldStep()];
+    const unshieldStep = new UnshieldStep();
+    const unshieldOutput = await unshieldStep.getValidStepOutput(
+      firstStepInput,
+    );
+    const firstInternalStepInput = this.createNextStepInput(
+      firstStepInput,
+      unshieldOutput,
+    );
+    const internalSteps = await this.getInternalSteps(firstInternalStepInput);
+    return [unshieldStep, ...internalSteps, new ShieldStep()];
+  }
+
+  private createNextStepInput(
+    firstStepInput: StepInput,
+    stepOutput: StepOutput,
+  ): StepInput {
+    return {
+      networkName: firstStepInput.networkName,
+      erc20Amounts: stepOutput.outputERC20Amounts,
+      nfts: stepOutput.outputNFTs,
+    };
   }
 
   private createFirstStepInput(input: RecipeInput): StepInput {
