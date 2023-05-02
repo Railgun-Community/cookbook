@@ -9,7 +9,6 @@ import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
-import { ZERO_ADDRESS } from '../../../models/constants';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

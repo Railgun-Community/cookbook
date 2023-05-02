@@ -1,6 +1,6 @@
 import ganache from 'ganache';
 import { ganacheConfig } from './ganache-config.test';
-import { Web3Provider } from '@ethersproject/providers';
+import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers';
 import { solidityKeccak256 } from 'ethers/lib/utils';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import debug from 'debug';
@@ -13,10 +13,16 @@ export let ganacheEthersProvider: Optional<Web3Provider>;
 export const setupGanacheEthereumRPCAndWallets = async () => {
   dbgGanacheEthereum('Starting Ganache Ethereum RPC...');
 
+  // Get fork block (10000 blocks behind)
+  const jsonRpcProvider = new JsonRpcProvider(ganacheConfig.ethereumForkRPC);
+  const blockNumber = await jsonRpcProvider.getBlockNumber();
+  const ganacheForkBlock = blockNumber - 10000;
+
   const ganacheServer = ganache.server({
     server: {},
     fork: {
       url: ganacheConfig.ethereumForkRPC,
+      blockNumber: ganacheForkBlock,
     },
     wallet: {
       mnemonic: ganacheConfig.mnemonic,

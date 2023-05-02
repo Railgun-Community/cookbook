@@ -30,9 +30,10 @@ import { AbstractWallet } from '@railgun-community/engine';
 import { getTestEthersWallet } from './shared.test';
 import { TransactionRequest } from '@ethersproject/providers';
 
-const dbgRailgunEngine = debug('railgun:engine');
-dbgRailgunEngine.enabled = false;
 const dbgRailgunSetup = debug('railgun:setup');
+
+const dbgRailgunQuickstart = debug('railgun:quickstart');
+dbgRailgunQuickstart.enabled = ganacheConfig.showVerboseLogs;
 
 const ENGINE_TEST_DB = 'test.db';
 const db = new LevelDOWN(ENGINE_TEST_DB);
@@ -79,8 +80,8 @@ export const startRailgunForTests = () => {
   );
 
   setLoggers(
-    (msg: string) => dbgRailgunEngine(msg),
-    (error: string | Error) => dbgRailgunEngine(error),
+    (msg: string) => dbgRailgunQuickstart(msg),
+    (error: string | Error) => dbgRailgunQuickstart(error),
   );
 
   if (error) {
@@ -218,7 +219,7 @@ const trySendShieldTransaction = async (
 
 export const waitForShieldedTokenBalances = async () => {
   const onBalancesUpdate = (balancesEvent: RailgunBalancesEvent) => {
-    dbgRailgunEngine('onBalancesUpdate', balancesEvent);
+    dbgRailgunQuickstart('onBalancesUpdate', balancesEvent);
   };
   setOnBalanceUpdateCallback(onBalancesUpdate);
 

@@ -8,6 +8,7 @@ import {
 import {
   EVMGasType,
   NetworkName,
+  TransactionGasDetailsSerialized,
   deserializeTransaction,
   serializeUnsignedTransaction,
 } from '@railgun-community/shared-models';
@@ -46,6 +47,14 @@ export const restoreGanacheSnapshot = async (snapshot: number) => {
   await getProvider().send('evm_revert', [snapshot]);
 };
 
+export const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2: TransactionGasDetailsSerialized =
+  {
+    evmGasType: EVMGasType.Type2,
+    gasEstimateString: '0x00',
+    maxFeePerGasString: '0x1234567890',
+    maxPriorityFeePerGasString: '0x123456',
+  };
+
 export const createQuickstartCrossContractCallsForTest = async (
   networkName: NetworkName,
   recipeOutput: RecipeOutput,
@@ -77,11 +86,7 @@ export const createQuickstartCrossContractCallsForTest = async (
       shieldERC20Addresses,
       shieldNFTs,
       crossContractCallsSerialized,
-      {
-        gasPriceString: '0x1000',
-        gasEstimateString: '0x00',
-        evmGasType: EVMGasType.Type0,
-      },
+      MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
       undefined, // feeTokenDetails
       sendWithPublicWallet,
     );
