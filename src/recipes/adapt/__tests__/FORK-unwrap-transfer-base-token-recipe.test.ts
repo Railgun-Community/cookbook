@@ -25,7 +25,7 @@ const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 let snapshot: number;
 
-describe.only('HH-unwrap-transfer-base-token-recipe', () => {
+describe.only('FORK-unwrap-transfer-base-token-recipe', () => {
   before(async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
       this.skip();
@@ -40,7 +40,7 @@ describe.only('HH-unwrap-transfer-base-token-recipe', () => {
     await restoreGanacheSnapshot(snapshot);
   });
 
-  it('[HH] Should create unwrap-transfer-base-token-recipe with amount', async function run() {
+  it('[FORK] Should create unwrap-transfer-base-token-recipe with amount', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
       this.skip();
       return;

@@ -58,9 +58,8 @@ TODO
 
 ## Run unit tests
 
-`yarn test` to run tests without Hardhat
+`yarn test` to run tests without Ganache Fork.
 
 ## Run integration tests
 
-1. Run hardhat Ethereum fork: `npx hardhat node --fork ETHEREUM_RPC_URL` (requires an RPC)
-2. Run `yarn test-hardhat` (separate terminal) to trigger all tests, including Hardhat tests.
+`yarn test-fork` to run all tests, including Ganache Fork tests.
