@@ -1,14 +1,15 @@
 import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi/abi';
-import { ERC20 } from '../../abi/token/ERC20';
+import { abi } from '../../abi-typechain/abi';
+import { ERC20 } from '../../abi-typechain/token/ERC20';
 import { BigNumber } from '@ethersproject/bignumber';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { validateAddress } from '../../utils/address';
+import { BaseProvider } from '@ethersproject/providers';
 
 export class ERC20Contract {
   private readonly contract: ERC20;
 
-  constructor(tokenAddress: string) {
+  constructor(tokenAddress: string, provider?: BaseProvider) {
     if (!tokenAddress) {
       throw new Error('Token address is required for ERC20 Contract');
     }
@@ -18,6 +19,7 @@ export class ERC20Contract {
     this.contract = new Contract(
       tokenAddress,
       abi.token.erc20,
+      provider,
     ) as unknown as ERC20;
   }
 
@@ -33,5 +35,9 @@ export class ERC20Contract {
     amount: BigNumber,
   ): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.transfer(toAddress, amount);
+  }
+
+  balanceOf(account: string): Promise<BigNumber> {
+    return this.contract.balanceOf(account);
   }
 }

@@ -5,6 +5,10 @@ import { BigNumber } from 'ethers';
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { initCookbook } from '../../../init';
+import {
+  MOCK_SHIELD_FEE_BASIS_POINTS,
+  MOCK_UNSHIELD_FEE_BASIS_POINTS,
+} from '../../../test/mocks.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -14,7 +18,7 @@ const tokenAddress =
 
 describe('shield-step', () => {
   before(() => {
-    initCookbook('25', '25');
+    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
   });
 
   it('Should create shield step', async () => {

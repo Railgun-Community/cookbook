@@ -1,6 +1,9 @@
 import { Contract, PopulatedTransaction } from '@ethersproject/contracts';
-import { abi } from '../../abi/abi';
-import { RelayAdapt, TokenDataStruct } from '../../abi/adapt/RelayAdapt';
+import { abi } from '../../abi-typechain/abi';
+import {
+  RelayAdapt,
+  TokenDataStruct,
+} from '../../abi-typechain/adapt/RelayAdapt';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ZERO_ADDRESS } from '../../models/constants';

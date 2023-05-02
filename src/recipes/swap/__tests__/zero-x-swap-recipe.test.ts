@@ -7,6 +7,10 @@ import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { initCookbook } from '../../../init';
 import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
 import Sinon, { SinonStub } from 'sinon';
+import {
+  MOCK_SHIELD_FEE_BASIS_POINTS,
+  MOCK_UNSHIELD_FEE_BASIS_POINTS,
+} from '../../../test/mocks.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -54,7 +58,7 @@ let stub0xQuote: SinonStub;
 
 describe('zero-x-swap-recipe', () => {
   before(() => {
-    initCookbook('25', '25');
+    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
     stub0xQuote = Sinon.stub(ZeroXQuote, 'getSwapQuote').resolves(quote);
   });
 

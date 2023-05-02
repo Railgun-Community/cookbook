@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi/abi';
-import { ERC721 } from '../../abi/token/ERC721';
+import { abi } from '../../abi-typechain/abi';
+import { ERC721 } from '../../abi-typechain/token/ERC721';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { validateAddress } from '../../utils/address';
 
