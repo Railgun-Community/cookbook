@@ -1,6 +1,7 @@
 import {
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
+  removeTestDB,
   shieldAllTokensForTests,
   startRailgunForTests,
   waitForShieldedTokenBalances,
@@ -9,15 +10,16 @@ import { setupGanacheEthereumRPCAndWallets } from './ganache-setup.test';
 
 before(async function run() {
   if (process.env.RUN_GANACHE_TESTS) {
-    this.timeout(100000);
+    this.timeout(2 * 60 * 1000); // 2 min timeout for setup.
+    removeTestDB();
     await setupGanacheQuickstartTests();
   }
 });
 
 after(() => {
-  // Uncomment to reset database and artifacts after each test run.
-  // Not recommended, as balances will need to rescan.
-  // removeTestFiles();
+  if (process.env.RUN_GANACHE_TESTS) {
+    removeTestDB();
+  }
 });
 
 export const setupGanacheQuickstartTests = async () => {
@@ -29,10 +31,9 @@ export const setupGanacheQuickstartTests = async () => {
   await loadLocalhostFallbackProviderForTests();
 
   // Wallet setup and initial shield
-  const { id: railgunWalletID, railgunAddress } =
-    await createRailgunWalletForTests();
-  await shieldAllTokensForTests(railgunAddress);
+  await createRailgunWalletForTests();
+  await shieldAllTokensForTests();
 
   // Make sure shielded balances are updated
-  await waitForShieldedTokenBalances(railgunWalletID);
+  await waitForShieldedTokenBalances();
 };

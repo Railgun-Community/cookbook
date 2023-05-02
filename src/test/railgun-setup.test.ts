@@ -17,7 +17,7 @@ import {
   NetworkName,
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
-  RailgunWalletInfo,
+  delay,
   deserializeTransaction,
   poll,
 } from '@railgun-community/shared-models';
@@ -25,21 +25,23 @@ import { ganacheConfig } from './ganache-config.test';
 import { BigNumber, Wallet } from 'ethers';
 import { ganacheEthersProvider } from './ganache-setup.test';
 import { debug } from 'debug';
+import { ERC20Contract } from '../contract/token/erc20-contract';
+import { AbstractWallet } from '@railgun-community/engine';
+import { getTestEthersWallet } from './shared.test';
+import { TransactionRequest } from '@ethersproject/providers';
 
 const dbgRailgunEngine = debug('railgun:engine');
+dbgRailgunEngine.enabled = false;
 const dbgRailgunSetup = debug('railgun:setup');
 
 const ENGINE_TEST_DB = 'test.db';
 const db = new LevelDOWN(ENGINE_TEST_DB);
 
-export const removeTestFiles = () => {
-  const { warn } = console;
+export let testRailgunWallet: AbstractWallet;
+
+export const removeTestDB = () => {
   fs.rm(ENGINE_TEST_DB, { recursive: true }, () => {
-    warn('Error removing test db.');
-  });
-  fs.rm('artifacts-v2.1', { recursive: true }, () => {
-    // Note: expect this error when we aren't running artifact download tests.
-    warn('Error removing test artifacts.');
+    // console.warn('Error removing test db.');
   });
 };
 
@@ -86,61 +88,91 @@ export const startRailgunForTests = () => {
   }
 };
 
-const localhostProviderConfig: FallbackProviderJsonConfig = {
-  chainId: 31337,
-  providers: [
-    {
-      provider: ganacheConfig.ganacheLocalhostRPC,
-      priority: 1,
-      weight: 2,
-    },
-  ],
-};
-
 export const loadLocalhostFallbackProviderForTests = async () => {
-  dbgRailgunSetup('Loading ganache provider to RAILGUN Engine.');
+  if (!ganacheEthersProvider) {
+    throw new Error('Ganache provider not initialized.');
+  }
+  const chainId = (await ganacheEthersProvider.getNetwork()).chainId;
+  const localhostProviderConfig: FallbackProviderJsonConfig = {
+    chainId,
+    providers: [
+      {
+        provider: ganacheConfig.ganacheLocalhostRPC,
+        priority: 1,
+        weight: 2,
+      },
+    ],
+  };
+
+  dbgRailgunSetup(
+    `Loading ganache provider for chain ${chainId} to RAILGUN Engine.`,
+  );
   const { error } = await loadProvider(
     localhostProviderConfig,
     NetworkName.Ethereum,
-    false, // shouldDebug
+    true, // shouldDebug
   );
   if (error) {
     throw new Error(error);
   }
 };
 
-export const createRailgunWalletForTests =
-  async (): Promise<RailgunWalletInfo> => {
-    const { railgunWalletInfo } = await createRailgunWallet(
-      ganacheConfig.encryptionKey,
-      ganacheConfig.mnemonic,
-      {},
-    );
-    if (!railgunWalletInfo) {
-      throw new Error('Error creating Railgun wallet.');
-    }
-    dbgRailgunSetup('RAILGUN wallet created.');
-    return railgunWalletInfo;
-  };
+export const createRailgunWalletForTests = async () => {
+  const { railgunWalletInfo } = await createRailgunWallet(
+    ganacheConfig.encryptionKey,
+    ganacheConfig.mnemonic,
+    {},
+  );
+  if (!railgunWalletInfo) {
+    throw new Error('Error creating Railgun wallet.');
+  }
 
-export const shieldAllTokensForTests = async (railgunAddress: string) => {
-  dbgRailgunSetup('Shielding WETH, DAI, and RAIL tokens...');
+  testRailgunWallet = walletForID(railgunWalletInfo.id);
+  dbgRailgunSetup('RAILGUN wallet created.');
+};
+
+const approveShield = async (wallet: Wallet, tokenAddress: string) => {
+  const token = new ERC20Contract(tokenAddress, ganacheEthersProvider);
+  const tx = await token.createSpenderApproval(
+    ganacheConfig.contractsEthereum.proxy,
+    BigNumber.from(10).pow(18).mul(10000000), // 1 MM approved
+  );
+  return wallet.sendTransaction(tx);
+};
+
+export const shieldAllTokensForTests = async () => {
+  if (!ganacheEthersProvider) {
+    throw new Error('No ganache ethers provider');
+  }
+  const wallet = getTestEthersWallet();
+
+  dbgRailgunSetup('Approving WETH, DAI, and RAIL tokens for shielding...');
+
+  await approveShield(wallet, ganacheConfig.contractsEthereum.weth9);
+  await approveShield(wallet, ganacheConfig.contractsEthereum.dai);
+  await approveShield(wallet, ganacheConfig.contractsEthereum.rail);
+
+  dbgRailgunSetup(
+    'Shielding WETH, DAI, and RAIL tokens... This may take 10-15 seconds.',
+  );
+
+  const railgunAddress = testRailgunWallet.getAddress();
 
   const oneThousand18Decimals = '1000000000000000000000';
   const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [
     {
       tokenAddress: ganacheConfig.contractsEthereum.weth9,
-      amountString: oneThousand18Decimals, // 1000
+      amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
       recipientAddress: railgunAddress,
     },
     {
       tokenAddress: ganacheConfig.contractsEthereum.dai,
-      amountString: oneThousand18Decimals, // 1000
+      amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
       recipientAddress: railgunAddress,
     },
     {
       tokenAddress: ganacheConfig.contractsEthereum.rail,
-      amountString: oneThousand18Decimals, // 1000
+      amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
       recipientAddress: railgunAddress,
     },
   ];
@@ -153,45 +185,55 @@ export const shieldAllTokensForTests = async (railgunAddress: string) => {
     [], // nftAmountRecipients
   );
   if (error) {
-    throw new Error(error);
+    throw new Error(`Error populating shield: ${error}`);
   }
   if (!serializedTransaction) {
     throw new Error('No populated shield');
   }
 
-  if (!ganacheEthersProvider) {
-    throw new Error('No ganache ethers provider');
-  }
-  const wallet = Wallet.fromMnemonic(ganacheConfig.mnemonic);
-  const chainId = 1;
-  const populatedTransaction = deserializeTransaction(
-    serializedTransaction,
-    undefined,
-    chainId,
-  );
-  const signedTransaction = wallet.signTransaction(populatedTransaction);
-  await ganacheEthersProvider.sendTransaction(signedTransaction);
+  const chainId = (await ganacheEthersProvider.getNetwork()).chainId;
+  const tx = deserializeTransaction(serializedTransaction, undefined, chainId);
+
+  await trySendShieldTransaction(wallet, tx);
 
   dbgRailgunSetup('Shielded WETH, DAI, and RAIL tokens.');
 };
 
-export const waitForShieldedTokenBalances = async (railgunWalletID: string) => {
+const trySendShieldTransaction = async (
+  wallet: Wallet,
+  transaction: TransactionRequest,
+  retryCount = 0,
+): Promise<void> => {
+  try {
+    await wallet.sendTransaction(transaction);
+  } catch (err) {
+    if (retryCount < 3) {
+      await delay(500);
+      return trySendShieldTransaction(wallet, transaction, retryCount + 1);
+    }
+    dbgRailgunSetup(err);
+    throw new Error(`Could not send SHIELD transaction. See error output.`);
+  }
+};
+
+export const waitForShieldedTokenBalances = async () => {
   const onBalancesUpdate = (balancesEvent: RailgunBalancesEvent) => {
-    dbgRailgunSetup('onBalancesUpdate', balancesEvent);
+    dbgRailgunEngine('onBalancesUpdate', balancesEvent);
   };
   setOnBalanceUpdateCallback(onBalancesUpdate);
 
-  dbgRailgunSetup(
-    'Scanning private balances and populating test.db... This may take a while on the first test run.',
-  );
-  const wallet = walletForID(railgunWalletID);
+  dbgRailgunSetup('Scanning private balances and populating test.db...');
 
   const tokenBalanceGetter = (
     tokenAddress: string,
   ): (() => Promise<Optional<BigNumber>>) => {
     dbgRailgunSetup(`Polling for updated token balance... ${tokenAddress}`);
     return () =>
-      balanceForERC20Token(wallet, NetworkName.Ethereum, tokenAddress);
+      balanceForERC20Token(
+        testRailgunWallet,
+        NetworkName.Ethereum,
+        tokenAddress,
+      );
   };
 
   // Wait for initial balance update - WETH.
@@ -215,4 +257,7 @@ export const waitForShieldedTokenBalances = async (railgunWalletID: string) => {
     100, // Delay in MS
     5, // Iterations
   );
+
+  dbgRailgunSetup('---');
+  dbgRailgunSetup('Shielded token balances found. Test setup complete.');
 };

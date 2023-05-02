@@ -7,7 +7,7 @@ export const ganacheConfig = {
   ganachePort: PORT,
   ganacheLocalhostRPC: `http://localhost:${PORT}`,
 
-  showVerboseLogs: true,
+  showVerboseLogs: false,
 
   // Mock wallet for tests
   mnemonic: 'test test test test test test test test test test test junk',

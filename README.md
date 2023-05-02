@@ -29,7 +29,7 @@ const {populatedTransactions, shieldERC20Addresses} = await swap.getRecipeOutput
 const crossContractCallsSerialized = populatedTransactions.map(
     serializeUnsignedTransaction,
 )
-const {gasEstimateString} = await generateCrossContractCallsProof(
+const {gasEstimateString} = await gasEstimateForUnprovenCrossContractCalls(
     ...
     crossContractCallsSerialized,
     ...
@@ -61,6 +61,13 @@ TODO
 
 `yarn test` to run tests without Ganache Fork.
 
-## Run integration tests
+## Run integration tests (beta)
 
 `yarn test-fork` to run all tests, including Ganache Fork tests.
+
+These tests are currently in beta - there are a number of issues with test setup.
+
+If you see one of the following error messages, please run the test suite again:
+
+1. "socket hang up"
+2. "Error: RPC connection error."

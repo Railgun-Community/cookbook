@@ -28,14 +28,14 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: NetworkName.Ethereum,
-      unshieldERC20Amounts: [
+      unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldNFTs: [],
+      unshieldRecipeNFTs: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -192,14 +192,14 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: NetworkName.Ethereum,
-      unshieldERC20Amounts: [
+      unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldNFTs: [],
+      unshieldRecipeNFTs: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -320,13 +320,13 @@ describe('unwrap-transfer-base-token-recipe', () => {
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
       networkName: NetworkName.Ethereum,
-      unshieldERC20Amounts: [
+      unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldNFTs: [],
+      unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
       'Unwrap Base Token step failed. No erc20 inputs match filter.',
@@ -335,14 +335,14 @@ describe('unwrap-transfer-base-token-recipe', () => {
     // Too low balance for erc20 input
     const recipeInputTooLow: RecipeInput = {
       networkName: NetworkName.Ethereum,
-      unshieldERC20Amounts: [
+      unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
           isBaseToken: false,
           amount: BigNumber.from('2000'),
         },
       ],
-      unshieldNFTs: [],
+      unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputTooLow)).to.be.rejectedWith(
       'Unwrap Base Token step failed. Specified amount 10000 exceeds balance 1995.',

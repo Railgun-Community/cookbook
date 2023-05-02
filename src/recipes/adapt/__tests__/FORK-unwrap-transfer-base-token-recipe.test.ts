@@ -2,12 +2,14 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UnwrapTransferBaseTokenRecipe } from '../unwrap-transfer-base-token-recipe';
 import { BigNumber } from 'ethers';
-import { RecipeInput } from '../../../models/export-models';
+import { RecipeERC20Amount, RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { initCookbook } from '../../../init';
 import {
   takeGanacheSnapshot,
   restoreGanacheSnapshot,
+  createQuickstartCrossContractCallsForTest,
+  getTestEthersWallet,
 } from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -48,44 +50,81 @@ describe.only('FORK-unwrap-transfer-base-token-recipe', () => {
 
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
 
-    const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
-      unshieldERC20Amounts: [
-        {
-          tokenAddress,
-          isBaseToken: false,
-          amount: BigNumber.from('12000'),
-        },
-      ],
-      unshieldNFTs: [],
-    };
-    const output = await recipe.getRecipeOutput(recipeInput);
-
-    expect(output.stepOutputs.length).to.equal(4);
-  });
-
-  it('Should create unwrap-transfer-base-token-recipe without amount', async function run() {
-    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
-
-    const unshieldERC20Amounts = [
+    const unshieldRecipeERC20Amounts: RecipeERC20Amount[] = [
       {
         tokenAddress,
-        isBaseToken: false,
         amount: BigNumber.from('12000'),
       },
     ];
 
     const recipeInput: RecipeInput = {
       networkName: NetworkName.Ethereum,
-      unshieldERC20Amounts,
-      unshieldNFTs: [],
+      unshieldRecipeERC20Amounts,
+      unshieldRecipeNFTs: [],
     };
-    const output = await recipe.getRecipeOutput(recipeInput);
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs.length).to.equal(4);
+    expect(recipeOutput.stepOutputs.length).to.equal(4);
 
-    const { populatedTransactions, shieldERC20Addresses, shieldNFTs } = output;
+    const { gasEstimateString, transaction } =
+      await createQuickstartCrossContractCallsForTest(
+        networkName,
+        recipeOutput,
+      );
+
+    console.log(gasEstimateString);
+    console.log(transaction);
+
+    expect(BigNumber.from(gasEstimateString)).to.be.gte(1_000_000);
+    expect(BigNumber.from(gasEstimateString)).to.be.lte(2_000_000);
+
+    const wallet = getTestEthersWallet();
+    const txResponse = await wallet.sendTransaction(transaction);
+    await txResponse.wait();
+
+    // TODO: Assert things about the transaction
   });
 
-  after(() => {});
+  it('[FORK] Should create unwrap-transfer-base-token-recipe without amount', async function run() {
+    if (!process.env.RUN_GANACHE_TESTS) {
+      this.skip();
+      return;
+    }
+
+    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
+
+    const unshieldRecipeERC20Amounts: RecipeERC20Amount[] = [
+      {
+        tokenAddress,
+        amount: BigNumber.from('12000'),
+      },
+    ];
+
+    const recipeInput: RecipeInput = {
+      networkName,
+      unshieldRecipeERC20Amounts,
+      unshieldRecipeNFTs: [],
+    };
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+
+    expect(recipeOutput.stepOutputs.length).to.equal(4);
+
+    const { gasEstimateString, transaction } =
+      await createQuickstartCrossContractCallsForTest(
+        networkName,
+        recipeOutput,
+      );
+
+    console.log(gasEstimateString);
+    console.log(transaction);
+
+    expect(BigNumber.from(gasEstimateString)).to.be.gte(1_000_000);
+    expect(BigNumber.from(gasEstimateString)).to.be.lte(2_000_000);
+
+    const wallet = getTestEthersWallet();
+    const txResponse = await wallet.sendTransaction(transaction);
+    await txResponse.wait();
+
+    // TODO: Assert things about the transaction
+  });
 });

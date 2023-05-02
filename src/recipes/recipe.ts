@@ -1,4 +1,7 @@
-import { RailgunERC20AmountRecipient } from '@railgun-community/shared-models';
+import {
+  RailgunERC20Amount,
+  RailgunERC20AmountRecipient,
+} from '@railgun-community/shared-models';
 import {
   RecipeConfig,
   RecipeInput,
@@ -23,22 +26,19 @@ export abstract class Recipe {
     return [new UnshieldStep(), ...internalSteps, new ShieldStep()];
   }
 
-  private hasDeterministicOutput(steps: Step[]): boolean {
-    return steps.every(step => !step.config.hasNonDeterministicOutput);
-  }
-
   private createFirstStepInput(input: RecipeInput): StepInput {
     return {
       networkName: input.networkName,
-      erc20Amounts: input.unshieldERC20Amounts.map(erc20Amount => {
+      erc20Amounts: input.unshieldRecipeERC20Amounts.map(erc20Amount => {
         return {
-          ...erc20Amount,
+          tokenAddress: erc20Amount.tokenAddress,
+          isBaseToken: erc20Amount.isBaseToken,
           expectedBalance: erc20Amount.amount,
           minBalance: erc20Amount.amount,
           approvedSpender: undefined,
         };
       }),
-      nfts: input.unshieldNFTs,
+      nfts: input.unshieldRecipeNFTs,
     };
   }
 
@@ -81,11 +81,18 @@ export abstract class Recipe {
       .map(output => output.populatedTransactions)
       .flat();
 
+    const unshieldERC20Amounts: RailgunERC20Amount[] =
+      input.unshieldRecipeERC20Amounts.map(unshieldERC20RecipeAmount => ({
+        tokenAddress: unshieldERC20RecipeAmount.tokenAddress,
+        amountString: unshieldERC20RecipeAmount.amount.toHexString(),
+      }));
+    const unshieldNFTs = input.unshieldRecipeNFTs;
+
     // TODO: After callbacks upgrade, remove unshield erc20s to auto re-shield.
     // Until then, we need all tokens to auto re-shield in case of revert.
     const shieldERC20Addresses: string[] = [];
     const erc20AmountsToReshield = [
-      ...input.unshieldERC20Amounts,
+      ...input.unshieldRecipeERC20Amounts,
       ...finalStepOutput.outputERC20Amounts,
     ];
     erc20AmountsToReshield.forEach(({ tokenAddress, isBaseToken }) => {
@@ -99,7 +106,10 @@ export abstract class Recipe {
 
     // TODO: After callbacks upgrade, remove unshield NFTs to auto re-shield.
     // Until then, we need all tokens to auto re-shield in case of revert.
-    const shieldNFTs = [...input.unshieldNFTs, ...finalStepOutput.outputNFTs];
+    const shieldNFTs = [
+      ...input.unshieldRecipeNFTs,
+      ...finalStepOutput.outputNFTs,
+    ];
 
     const feeERC20AmountRecipients: RailgunERC20AmountRecipient[] = stepOutputs
       .map(output =>
@@ -112,6 +122,8 @@ export abstract class Recipe {
     const recipeOutput: RecipeOutput = {
       stepOutputs,
       populatedTransactions,
+      unshieldERC20Amounts,
+      unshieldNFTs,
       shieldERC20Addresses,
       shieldNFTs,
       feeERC20AmountRecipients,

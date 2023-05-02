@@ -1,5 +1,6 @@
 import {
   NetworkName,
+  RailgunERC20Amount,
   RailgunERC20AmountRecipient,
   RailgunNFTAmount,
 } from '@railgun-community/shared-models';
@@ -26,8 +27,8 @@ export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
 
 export type RecipeInput = {
   networkName: NetworkName;
-  unshieldERC20Amounts: RecipeERC20Amount[];
-  unshieldNFTs: RailgunNFTAmount[];
+  unshieldRecipeERC20Amounts: RecipeERC20Amount[];
+  unshieldRecipeNFTs: RailgunNFTAmount[];
 };
 
 export type StepInput = {
@@ -39,6 +40,8 @@ export type StepInput = {
 export type RecipeOutput = {
   stepOutputs: StepOutput[];
   populatedTransactions: PopulatedTransaction[];
+  unshieldERC20Amounts: RailgunERC20Amount[];
+  unshieldNFTs: RailgunNFTAmount[];
   shieldERC20Addresses: string[];
   shieldNFTs: RailgunNFTAmount[];
   feeERC20AmountRecipients: RailgunERC20AmountRecipient[];

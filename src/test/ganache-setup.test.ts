@@ -3,27 +3,33 @@ import { ganacheConfig } from './ganache-config.test';
 import { Web3Provider } from '@ethersproject/providers';
 import { solidityKeccak256 } from 'ethers/lib/utils';
 import { ERC20Contract } from '../contract/token/erc20-contract';
-import { Wallet } from 'ethers';
 import debug from 'debug';
+import { getTestEthersWallet } from './shared.test';
 
 const dbgGanacheEthereum = debug('ganache:ethereum');
 
 export let ganacheEthersProvider: Optional<Web3Provider>;
 
 export const setupGanacheEthereumRPCAndWallets = async () => {
+  dbgGanacheEthereum('Starting Ganache Ethereum RPC...');
+
   const ganacheServer = ganache.server({
     server: {},
     fork: {
       url: ganacheConfig.ethereumForkRPC,
     },
     wallet: {
-      seed: ganacheConfig.mnemonic,
+      mnemonic: ganacheConfig.mnemonic,
     },
     logging: {
       logger: {
-        log: msg => dbgGanacheEthereum(msg),
+        log: msg => {
+          if (!ganacheConfig.showVerboseLogs) {
+            return;
+          }
+          dbgGanacheEthereum(msg);
+        },
       },
-      quiet: !ganacheConfig.showVerboseLogs,
     },
   });
 
@@ -34,7 +40,7 @@ export const setupGanacheEthereumRPCAndWallets = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   ganacheEthersProvider = new Web3Provider(ganacheProvider as any);
 
-  const wallet = Wallet.fromMnemonic(ganacheConfig.mnemonic);
+  const wallet = getTestEthersWallet();
   const oneThousand18Decimals = '1000000000000000000000';
 
   await setTokenBalance(
