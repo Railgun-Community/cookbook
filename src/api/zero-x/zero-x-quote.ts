@@ -71,7 +71,7 @@ export class ZeroXQuote {
     return addresses.exchangeProxy;
   };
 
-  static zeroXSupportsNetwork = (networkName: NetworkName) => {
+  static supportsNetwork = (networkName: NetworkName) => {
     try {
       zeroXApiSubdomain(networkName);
       return true;
