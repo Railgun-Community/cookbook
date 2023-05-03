@@ -1,7 +1,9 @@
 import {
   ArtifactStore,
+  Groth16,
   balanceForERC20Token,
   createRailgunWallet,
+  getProver,
   getRandomBytes,
   loadProvider,
   populateShield,
@@ -29,6 +31,7 @@ import { ERC20Contract } from '../contract/token/erc20-contract';
 import { AbstractWallet } from '@railgun-community/engine';
 import { getTestEthersWallet } from './shared.test';
 import { TransactionRequest } from '@ethersproject/providers';
+import { groth16 } from 'snarkjs';
 
 const dbgRailgunSetup = debug('railgun:setup');
 
@@ -84,6 +87,8 @@ export const startRailgunForTests = () => {
     (error: string | Error) => dbgRailgunQuickstart(error),
   );
 
+  getProver().setSnarkJSGroth16(groth16 as Groth16);
+
   if (error) {
     throw new Error(error);
   }
@@ -121,7 +126,7 @@ export const loadLocalhostFallbackProviderForTests = async () => {
 export const createRailgunWalletForTests = async () => {
   const { railgunWalletInfo } = await createRailgunWallet(
     ganacheConfig.encryptionKey,
-    ganacheConfig.mnemonic,
+    ganacheConfig.railgunMnemonic,
     {},
   );
   if (!railgunWalletInfo) {
@@ -261,4 +266,5 @@ export const waitForShieldedTokenBalances = async () => {
 
   dbgRailgunSetup('---');
   dbgRailgunSetup('Shielded token balances found. Test setup complete.');
+  dbgRailgunSetup('---');
 };

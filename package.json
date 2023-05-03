@@ -20,7 +20,8 @@
     "tsc-test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
     "compile-test": "npm run clean && npm run tsc-test",
     "test-coverage": "npm run compile-test && c8 mocha",
-    "test": "npm run compile-test && NODE_ENV=test mocha"
+    "test": "npm run compile-test && NODE_ENV=test mocha",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@0x/contract-addresses": "^8.5.0",
@@ -54,8 +55,10 @@
     "leveldown": "^6.1.1",
     "madge": "^5.0.1",
     "mocha": "^10.2.0",
+    "patch-package": "^7.0.0",
     "prettier": "^2.8.3",
     "sinon": "^15.0.1",
+    "snarkjs": "^0.6.10",
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.2",
     "typescript": "^4.8.3"

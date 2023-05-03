@@ -14,19 +14,23 @@ export const setupGanacheEthereumRPCAndWallets = async () => {
   dbgGanacheEthereum('Starting Ganache Ethereum RPC...');
 
   // Get fork block (10000 blocks behind)
-  const jsonRpcProvider = new JsonRpcProvider(ganacheConfig.ethereumForkRPC);
-  const blockNumber = await jsonRpcProvider.getBlockNumber();
-  const ganacheForkBlock = blockNumber - 10000;
+  // const jsonRpcProvider = new JsonRpcProvider(ganacheConfig.ethereumForkRPC);
+  // const blockNumber = await jsonRpcProvider.getBlockNumber();
+  // const ganacheForkBlock = blockNumber - 10000;
 
   const ganacheServer = ganache.server({
     server: {},
     fork: {
       url: ganacheConfig.ethereumForkRPC,
-      blockNumber: ganacheForkBlock,
+      // blockNumber: ganacheForkBlock,
     },
     wallet: {
-      mnemonic: ganacheConfig.mnemonic,
+      mnemonic: ganacheConfig.signerMnemonic,
     },
+    chain: {
+      chainId: 1,
+    },
+    defaultTransactionGasLimit: 30_000_000,
     logging: {
       logger: {
         log: msg => {

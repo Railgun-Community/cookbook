@@ -7,10 +7,12 @@ export const ganacheConfig = {
   ganachePort: PORT,
   ganacheLocalhostRPC: `http://localhost:${PORT}`,
 
-  showVerboseLogs: true,
+  showVerboseLogs: false,
 
-  // Mock wallet for tests
-  mnemonic: 'test test test test test test test test test test test junk',
+  // Mock wallets for tests
+  signerMnemonic: 'test test test test test test test test test test test junk',
+  railgunMnemonic:
+    'test test test test test test test test test test test junk',
   encryptionKey:
     '0101010101010101010101010101010101010101010101010101010101010101',
 
@@ -26,3 +28,11 @@ export const ganacheConfig = {
     rail: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
   },
 };
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, global-require, @typescript-eslint/no-var-requires
+  const overrides = require('./ganache-config-overrides.test');
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  Object.assign(ganacheConfig, overrides ?? {});
+  // eslint-disable-next-line no-empty
+} catch {}

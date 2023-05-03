@@ -16,7 +16,7 @@ const { expect } = chai;
 const tokenAddress =
   NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
 
-describe.only('empty-recipe', () => {
+describe('empty-recipe', () => {
   before(() => {
     initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
   });

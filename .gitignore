@@ -7,10 +7,13 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 dist/
+.env
 
 # Test
 .nyc_output
-test.db
 coverage/
+src/test/ganache-config-overrides.test.ts
 
-.env
+# Quickstart assets
+test.db
+artifacts-*

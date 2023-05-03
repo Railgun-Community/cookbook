@@ -17,7 +17,7 @@ import { testRailgunWallet } from './railgun-setup.test';
 import { ganacheConfig } from './ganache-config.test';
 import { RecipeOutput } from '../models';
 
-const getProvider = (): Web3Provider => {
+export const getGanacheProvider = (): Web3Provider => {
   const provider = ganacheEthersProvider;
   if (!provider) {
     throw new Error('No ganache ethers provider');
@@ -25,9 +25,9 @@ const getProvider = (): Web3Provider => {
   return provider;
 };
 
-export const getTestEthersWallet = () => {
-  const provider = getProvider();
-  return Wallet.fromMnemonic(ganacheConfig.mnemonic).connect(provider);
+export const getTestEthersWallet = (): Wallet => {
+  const provider = getGanacheProvider();
+  return Wallet.fromMnemonic(ganacheConfig.signerMnemonic).connect(provider);
 };
 
 export const getTestRailgunWallet = () => {
@@ -40,14 +40,14 @@ export const getTestRailgunWallet = () => {
 
 export const takeGanacheSnapshot = async (): Promise<number> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  return (await getProvider().send('evm_snapshot', [])) as number;
+  return (await getGanacheProvider().send('evm_snapshot', [])) as number;
 };
 
 export const restoreGanacheSnapshot = async (snapshot: number) => {
-  await getProvider().send('evm_revert', [snapshot]);
+  await getGanacheProvider().send('evm_revert', [snapshot]);
 };
 
-export const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2: TransactionGasDetailsSerialized =
+const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2: TransactionGasDetailsSerialized =
   {
     evmGasType: EVMGasType.Type2,
     gasEstimateString: '0x00',
@@ -59,7 +59,7 @@ export const createQuickstartCrossContractCallsForTest = async (
   networkName: NetworkName,
   recipeOutput: RecipeOutput,
 ) => {
-  const provider = getProvider();
+  const provider = getGanacheProvider();
   const railgunWallet = getTestRailgunWallet();
 
   const {
@@ -128,9 +128,8 @@ export const createQuickstartCrossContractCallsForTest = async (
       sendWithPublicWallet,
       undefined, // overallBatchMinGasPrice
       {
-        gasPriceString: '0x1000',
+        ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
         gasEstimateString,
-        evmGasType: EVMGasType.Type0,
       },
     );
   if (populateCallsError) {
