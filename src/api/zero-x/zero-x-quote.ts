@@ -3,7 +3,11 @@ import { AxiosError } from 'axios';
 import { getContractAddressesForChainOrThrow } from '@0x/contract-addresses';
 import { BigNumber } from '@ethersproject/bignumber';
 import { parseUnits } from '@ethersproject/units';
-import { getZeroXData, ZeroXApiEndpoint } from './zero-x-fetch';
+import {
+  getZeroXData,
+  ZeroXApiEndpoint,
+  zeroXApiSubdomain,
+} from './zero-x-fetch';
 import { RecipeERC20Amount, RecipeERC20Info } from '../../models/export-models';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
@@ -65,6 +69,15 @@ export class ZeroXQuote {
     const { chain } = NETWORK_CONFIG[networkName];
     const addresses = getContractAddressesForChainOrThrow(chain.id);
     return addresses.exchangeProxy;
+  };
+
+  static zeroXSupportsNetwork = (networkName: NetworkName) => {
+    try {
+      zeroXApiSubdomain(networkName);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   private static getZeroXQuoteInvalidError = (

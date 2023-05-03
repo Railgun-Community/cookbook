@@ -9,7 +9,7 @@ export enum ZeroXApiEndpoint {
   GetSwapQuote = 'swap/v1/quote',
 }
 
-const zeroXApiSubdomain = (networkName: NetworkName): string => {
+export const zeroXApiSubdomain = (networkName: NetworkName): string => {
   switch (networkName) {
     case NetworkName.Ethereum:
       return 'api';
@@ -33,15 +33,6 @@ const zeroXApiSubdomain = (networkName: NetworkName): string => {
 
 const zeroXApiUrl = (networkName: NetworkName): string => {
   return `https://${zeroXApiSubdomain(networkName)}.0x.org/`;
-};
-
-export const zeroXSupportsNetwork = (networkName: NetworkName): boolean => {
-  try {
-    zeroXApiSubdomain(networkName);
-    return true;
-  } catch {
-    return false;
-  }
 };
 
 const paramString = (params?: APIParams) => {
