@@ -7,7 +7,7 @@ import {
 } from '../../models/export-models';
 import { compareERC20Info } from '../../utils/token';
 import { Step } from '../step';
-import { getBaseToken } from './wrap-util';
+import { getBaseToken } from '../../utils/wrap-util';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
 export class TransferBaseTokenStep extends Step {

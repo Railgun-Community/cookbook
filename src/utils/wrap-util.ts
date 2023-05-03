@@ -1,5 +1,5 @@
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { RecipeERC20Info } from '../../models/export-models';
+import { RecipeERC20Info } from '../models/export-models';
 
 const getWrappedBaseTokenAddress = (networkName: NetworkName): string => {
   const network = NETWORK_CONFIG[networkName];

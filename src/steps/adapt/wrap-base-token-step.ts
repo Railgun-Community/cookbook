@@ -8,7 +8,7 @@ import {
 import { Step } from '../step';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
-import { getBaseToken } from './wrap-util';
+import { getBaseToken } from '../../utils/wrap-util';
 import { compareERC20Info } from '../../utils/token';
 
 export class WrapBaseTokenStep extends Step {

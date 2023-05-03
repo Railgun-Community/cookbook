@@ -6,7 +6,7 @@ import {
   UnvalidatedStepOutput,
 } from '../../models/export-models';
 import { Step } from '../step';
-import { getWrappedBaseToken } from './wrap-util';
+import { getWrappedBaseToken } from '../../utils/wrap-util';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
 import { compareERC20Info } from '../../utils/token';

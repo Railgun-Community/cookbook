@@ -1,4 +1,4 @@
-import { StepInput, UnvalidatedStepOutput } from '../../models/export-models';
+import { StepInput, UnvalidatedStepOutput } from '../models/export-models';
 
 export const createNoActionStepOutput = (
   input: StepInput,
