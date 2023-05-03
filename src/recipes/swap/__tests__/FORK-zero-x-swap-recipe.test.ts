@@ -5,10 +5,7 @@ import { BigNumber } from 'ethers';
 import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { initCookbook } from '../../../init';
-import {
-  getGanacheProvider,
-  getTestRailgunWallet,
-} from '../../../test/shared.test';
+import { getTestRailgunWallet } from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
@@ -16,7 +13,6 @@ import {
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
 import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
-import { ERC20Contract } from '../../../contract/token/erc20-contract';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

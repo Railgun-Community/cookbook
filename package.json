@@ -11,7 +11,7 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && patch-package && tsc",
     "prepare": "npm run build",
     "check-circular-deps": "madge --circular .",
     "eslint": "eslint src --ext .ts,.tsx --fix",
@@ -20,8 +20,7 @@
     "tsc-test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
     "compile-test": "npm run clean && npm run tsc-test",
     "test-coverage": "npm run compile-test && c8 mocha",
-    "test": "npm run compile-test && NODE_ENV=test mocha",
-    "postinstall": "patch-package"
+    "test": "npm run compile-test && NODE_ENV=test mocha"
   },
   "dependencies": {
     "@0x/contract-addresses": "^8.5.0",
