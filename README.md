@@ -66,9 +66,11 @@ TODO
 
 `yarn test-fork` to run all tests, including Ganache Fork tests.
 
-These tests are currently in beta - there are a number of issues with test setup.
+These tests are currently in beta - there are a number of minor issues with test setup scripts.
+Note that the Ganache fork and setup scripts take about 40 sec to complete.
 
-If you see one of the following error messages, please run the test suite again:
+If you see one of the following error messages during the setup scripts, please run the test suite again:
 
 1. "socket hang up"
-2. "Error: RPC connection error."
+2. "Error: cannot estimate gas; ..."
+3. "Error: RPC connection error."
