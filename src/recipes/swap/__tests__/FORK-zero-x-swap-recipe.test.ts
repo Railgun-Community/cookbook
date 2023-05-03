@@ -5,14 +5,18 @@ import { BigNumber } from 'ethers';
 import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { initCookbook } from '../../../init';
-import { getTestRailgunWallet } from '../../../test/shared.test';
+import {
+  getGanacheProvider,
+  getTestRailgunWallet,
+} from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { ZeroXSwapQuoteData } from '../../../api/zero-x';
+import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
 import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
+import { ERC20Contract } from '../../../contract/token/erc20-contract';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -82,6 +86,12 @@ describe('FORK-zero-x-swap-recipe', function run() {
 
     const quote = recipe.getLatestQuote() as ZeroXSwapQuoteData;
     expect(quote).to.not.be.undefined;
+    const expectedSpender =
+      ZeroXQuote.zeroXExchangeProxyContractAddress(networkName);
+    expect(quote.spender).to.equal(
+      expectedSpender,
+      '0x Exchange contract does not match.',
+    );
 
     // REQUIRED TESTS:
 

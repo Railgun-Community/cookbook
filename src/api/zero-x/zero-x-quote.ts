@@ -60,9 +60,7 @@ export class ZeroXQuote {
     return erc20.tokenAddress;
   };
 
-  private static zeroXExchangeProxyContractAddress = (
-    networkName: NetworkName,
-  ) => {
+  static zeroXExchangeProxyContractAddress = (networkName: NetworkName) => {
     const { chain } = NETWORK_CONFIG[networkName];
     const addresses = getContractAddressesForChainOrThrow(chain.id);
     return addresses.exchangeProxy;

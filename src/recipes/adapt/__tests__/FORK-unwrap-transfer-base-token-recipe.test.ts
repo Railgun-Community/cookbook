@@ -110,9 +110,10 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
     // 2. Add External Balance expectations.
 
     const toAddressETHBalance = await provider.getBalance(toAddress);
-    const expectedToAddressETHBalance = initialToAddressETHBalance.add(amount); // Sent amount
+    const expectedToAddressETHBalance = initialToAddressETHBalance.add('11970'); // Full unshield balance minus fee
     expect(toAddressETHBalance.toString()).to.equal(
       expectedToAddressETHBalance.toString(),
+      'to-address ETH balance is incorrect',
     );
   });
 });
