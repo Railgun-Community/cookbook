@@ -33,6 +33,7 @@ export type ZeroXSwapQuoteParams = {
   sellERC20Amount: RecipeERC20Amount;
   buyERC20Info: RecipeERC20Info;
   slippagePercentage: number;
+  isRailgun: boolean;
 };
 
 export type ZeroXSwapQuoteData = {
@@ -99,6 +100,7 @@ export class ZeroXQuote {
     sellERC20Amount,
     buyERC20Info,
     slippagePercentage,
+    isRailgun,
   }: ZeroXSwapQuoteParams): Promise<ZeroXSwapQuoteData> => {
     const sellAmount = sellERC20Amount.amount.toString();
     if (sellAmount === '0') {
@@ -130,6 +132,7 @@ export class ZeroXQuote {
       } = await getZeroXData<ZeroXAPIPriceData>(
         ZeroXApiEndpoint.GetSwapQuote,
         networkName,
+        isRailgun,
         params,
       );
 

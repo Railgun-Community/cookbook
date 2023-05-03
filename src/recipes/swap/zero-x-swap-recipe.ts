@@ -70,6 +70,7 @@ export class ZeroXSwapRecipe extends Recipe {
       sellERC20Amount,
       buyERC20Info: this.buyERC20Info,
       slippagePercentage: this.slippagePercentage,
+      isRailgun: true,
     };
     this.quote = await ZeroXQuote.getSwapQuote(quoteParams);
 

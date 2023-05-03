@@ -7,6 +7,7 @@ import {
   RecipeERC20Info,
 } from '../../../models/export-models';
 import { BigNumber } from 'ethers';
+import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -14,7 +15,9 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 
 describe('zero-x-quote', () => {
-  before(() => {});
+  before(() => {
+    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+  });
 
   it('Should fetch quotes from ZeroX proxy', async () => {
     const sellERC20Amount: RecipeERC20Amount = {
@@ -32,6 +35,7 @@ describe('zero-x-quote', () => {
       sellERC20Amount,
       buyERC20Info,
       slippagePercentage: 0.01,
+      isRailgun: true,
     });
 
     expect(typeof quote === 'object').to.be.true;

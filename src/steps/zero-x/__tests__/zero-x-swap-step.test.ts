@@ -5,6 +5,7 @@ import { BigNumber } from 'ethers';
 import { RecipeERC20Info, StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { ZeroXSwapQuoteData } from '../../../api/zero-x';
+import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -44,6 +45,10 @@ const quote: ZeroXSwapQuoteData = {
 };
 
 describe('zero-x-swap-step', () => {
+  before(() => {
+    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+  });
+
   it('Should create zero-x-swap step with spender', async () => {
     const step = new ZeroXSwapStep(quote, sellToken);
 

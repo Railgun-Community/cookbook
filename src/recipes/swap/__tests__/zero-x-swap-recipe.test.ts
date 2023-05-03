@@ -11,6 +11,7 @@ import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
+import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -64,6 +65,8 @@ describe('zero-x-swap-recipe', () => {
       MOCK_UNSHIELD_FEE_BASIS_POINTS,
     );
     stub0xQuote = Sinon.stub(ZeroXQuote, 'getSwapQuote').resolves(quote);
+
+    ZeroXConfig.PROXY_API_DOMAIN = undefined;
   });
 
   after(() => {

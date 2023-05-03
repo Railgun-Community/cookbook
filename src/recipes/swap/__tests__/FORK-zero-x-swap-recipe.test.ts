@@ -13,6 +13,7 @@ import {
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
 import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
+import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -46,9 +47,9 @@ describe('FORK-zero-x-swap-recipe', function run() {
       MOCK_SHIELD_FEE_BASIS_POINTS,
       MOCK_UNSHIELD_FEE_BASIS_POINTS,
     );
-  });
 
-  beforeEach(async () => {});
+    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+  });
 
   it('[FORK] Should run zero-x-swap-recipe', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
