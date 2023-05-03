@@ -1,31 +1,23 @@
-import chai, { assert } from 'chai';
+import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
 import { BigNumber } from 'ethers';
 import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
-import {
-  NETWORK_CONFIG,
-  NetworkName,
-  delay,
-} from '@railgun-community/shared-models';
+import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { initCookbook } from '../../../init';
-import {
-  createQuickstartCrossContractCallsForTest,
-  getTestEthersWallet,
-  getTestRailgunWallet,
-} from '../../../test/shared.test';
+import { getTestRailgunWallet } from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import { ZeroXSwapQuoteData } from '../../../api/zero-x';
+import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const { chain } = NETWORK_CONFIG[networkName];
 const sellTokenAddress =
   NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
 const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
@@ -41,9 +33,6 @@ const buyToken: RecipeERC20Info = {
 
 const slippagePercentage = 0.01;
 
-let initialPrivateWETHBalance: BigNumber;
-let initialPrivateRAILBalance: BigNumber;
-
 describe('FORK-zero-x-swap-recipe', function run() {
   this.timeout(120000);
 
@@ -56,23 +45,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
     initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
   });
 
-  beforeEach(async () => {
-    // Get initial balances for comparison.
-    const railgunWallet = getTestRailgunWallet();
-    initialPrivateWETHBalance = (await balanceForERC20Token(
-      railgunWallet,
-      networkName,
-      sellToken.tokenAddress,
-    )) as BigNumber;
-    assert(initialPrivateWETHBalance != null);
-
-    initialPrivateRAILBalance = (await balanceForERC20Token(
-      railgunWallet,
-      networkName,
-      buyToken.tokenAddress,
-    )) as BigNumber;
-    assert(initialPrivateRAILBalance != null);
-  });
+  beforeEach(async () => {});
 
   it('[FORK] Should run zero-x-swap-recipe', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
@@ -81,7 +54,6 @@ describe('FORK-zero-x-swap-recipe', function run() {
     }
 
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
-
     const recipeInput: RecipeInput = {
       networkName: NetworkName.Ethereum,
       unshieldRecipeERC20Amounts: [
@@ -93,55 +65,34 @@ describe('FORK-zero-x-swap-recipe', function run() {
       ],
       unshieldRecipeNFTs: [],
     };
-    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
 
-    const quote = recipe.getLatestQuote() as ZeroXSwapQuoteData;
-    expect(quote).to.not.be.undefined;
-
-    expect(recipeOutput.stepOutputs.length).to.equal(4);
-
-    const { gasEstimateString, transaction } =
-      await createQuickstartCrossContractCallsForTest(
-        networkName,
-        recipeOutput,
-      );
-
-    expect(BigNumber.from(gasEstimateString).toNumber()).to.be.gte(2_750_000);
-    expect(BigNumber.from(gasEstimateString).toNumber()).to.be.lte(2_850_000);
-
-    const wallet = getTestEthersWallet();
-    const txResponse = await wallet.sendTransaction(transaction);
-    await txResponse.wait();
-
-    // Re-scan private balances
-    await delay(5000);
     const railgunWallet = getTestRailgunWallet();
-    await railgunWallet.scanBalances(chain, () => {});
-    const privateWETHBalance = (await balanceForERC20Token(
-      railgunWallet,
-      networkName,
-      sellToken.tokenAddress,
-    )) as BigNumber;
-    const privateRAILBalance = (await balanceForERC20Token(
+    const initialPrivateRAILBalance = (await balanceForERC20Token(
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
     )) as BigNumber;
 
-    //
-    // REQUIRED TESTS:
-    //
-
-    // 1. Add Private Balance expectations.
-
-    // Expect WETH balance down by unshield amount, up by leftover shielded amount.
-    // See unwrap-transfer-base-token-recipe.test.ts for these exact amounts in step outputs.
-    const expectedPrivateWETHBalance = initialPrivateWETHBalance
-      .sub('12000') // Unshielded amount
-      .add('0'); // Shielded amount
-    expect(privateWETHBalance.toString()).to.equal(
-      expectedPrivateWETHBalance.toString(),
+    await executeRecipeAndAssertUnshieldBalances(
+      networkName,
+      recipe,
+      recipeInput,
+      2_800_000, // expectedGasWithin50K
     );
+
+    const quote = recipe.getLatestQuote() as ZeroXSwapQuoteData;
+    expect(quote).to.not.be.undefined;
+
+    // REQUIRED TESTS:
+
+    // 1. Add New Private Balance expectations.
+    // Expect new swapped token in private balance.
+
+    const privateRAILBalance = (await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      buyToken.tokenAddress,
+    )) as BigNumber;
 
     const minimumBuyAmount = quote.minimumBuyAmount;
     const minimumShieldFee = minimumBuyAmount
@@ -156,7 +107,6 @@ describe('FORK-zero-x-swap-recipe', function run() {
     );
 
     // 2. Add External Balance expectations.
-
     // N/A
   });
 });
