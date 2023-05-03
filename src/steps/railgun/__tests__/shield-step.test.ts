@@ -4,7 +4,7 @@ import { ShieldStep } from '../shield-step';
 import { BigNumber } from 'ethers';
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
@@ -13,19 +13,23 @@ import {
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const tokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const networkName = NetworkName.Ethereum;
+const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('shield-step', () => {
   before(() => {
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
   it('Should create shield step', async () => {
     const step = new ShieldStep();
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName: networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -75,7 +79,7 @@ describe('shield-step', () => {
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName: networkName,
       erc20Amounts: [
         {
           tokenAddress,

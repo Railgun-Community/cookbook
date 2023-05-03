@@ -1,16 +1,19 @@
+import { NetworkName } from '@railgun-community/shared-models';
 import { CookbookDebugger } from '../models/export-models';
 import { RailgunConfig } from '../models/railgun-config';
 import { CookbookDebug } from '../utils/cookbook-debug';
 
-export const initCookbook = (
+export const setRailgunFees = (
+  networkName: NetworkName,
   shieldFeeBasisPoints: string,
   unshieldFeeBasisPoints: string,
-  cookbookDebugger?: CookbookDebugger,
 ) => {
-  RailgunConfig.SHIELD_FEE_BASIS_POINTS = shieldFeeBasisPoints;
-  RailgunConfig.UNSHIELD_FEE_BASIS_POINTS = unshieldFeeBasisPoints;
+  RailgunConfig.SHIELD_FEE_BASIS_POINTS_FOR_NETWORK[networkName] =
+    shieldFeeBasisPoints;
+  RailgunConfig.UNSHIELD_FEE_BASIS_POINTS_FOR_NETWORK[networkName] =
+    unshieldFeeBasisPoints;
+};
 
-  if (cookbookDebugger) {
-    CookbookDebug.setDebugger(cookbookDebugger);
-  }
+export const setCookbookDebugger = (cookbookDebugger: CookbookDebugger) => {
+  CookbookDebug.setDebugger(cookbookDebugger);
 };

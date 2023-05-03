@@ -8,17 +8,17 @@ import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
-const tokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('transfer-base-token-step', () => {
   it('Should create transfer-base-token step with amount', async () => {
     const step = new TransferBaseTokenStep(toAddress, amount);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -70,7 +70,7 @@ describe('transfer-base-token-step', () => {
       },
     ]);
     expect(output.populatedTransactions[0].to).to.equal(
-      NETWORK_CONFIG[NetworkName.Ethereum].relayAdaptContract,
+      NETWORK_CONFIG[networkName].relayAdaptContract,
     );
   });
 
@@ -78,7 +78,7 @@ describe('transfer-base-token-step', () => {
     const step = new TransferBaseTokenStep(toAddress);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -123,7 +123,7 @@ describe('transfer-base-token-step', () => {
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -141,7 +141,7 @@ describe('transfer-base-token-step', () => {
 
     // Too low balance for erc20 input
     const stepInputLowBalance: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,

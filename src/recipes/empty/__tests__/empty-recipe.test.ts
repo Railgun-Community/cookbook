@@ -4,7 +4,7 @@ import { EmptyRecipe } from '../empty-recipe';
 import { BigNumber } from 'ethers';
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
@@ -13,19 +13,23 @@ import {
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const tokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const networkName = NetworkName.Ethereum;
+const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('empty-recipe', () => {
   before(() => {
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
   it('Should create empty-recipe with amount', async () => {
     const recipe = new EmptyRecipe();
 
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName: networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,

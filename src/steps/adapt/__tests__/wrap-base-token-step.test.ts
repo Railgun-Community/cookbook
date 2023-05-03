@@ -8,16 +8,16 @@ import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const amount = BigNumber.from('10000');
-const tokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('wrap-base-token-step', () => {
   it('Should create wrap-base-token step with amount', async () => {
     const step = new WrapBaseTokenStep(amount);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -77,7 +77,7 @@ describe('wrap-base-token-step', () => {
       },
     ]);
     expect(output.populatedTransactions[0].to).to.equal(
-      NETWORK_CONFIG[NetworkName.Ethereum].relayAdaptContract,
+      NETWORK_CONFIG[networkName].relayAdaptContract,
     );
   });
 
@@ -85,7 +85,7 @@ describe('wrap-base-token-step', () => {
     const step = new WrapBaseTokenStep();
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -138,7 +138,7 @@ describe('wrap-base-token-step', () => {
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -156,7 +156,7 @@ describe('wrap-base-token-step', () => {
 
     // Too low balance for erc20 input
     const stepInputLowBalance: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,

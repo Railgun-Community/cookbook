@@ -4,7 +4,7 @@ import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
 import { BigNumber } from 'ethers';
 import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
 import Sinon, { SinonStub } from 'sinon';
 import {
@@ -15,9 +15,9 @@ import {
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-const sellTokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const sellTokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
 const sellToken: RecipeERC20Info = {
@@ -58,7 +58,11 @@ let stub0xQuote: SinonStub;
 
 describe('zero-x-swap-recipe', () => {
   before(() => {
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
     stub0xQuote = Sinon.stub(ZeroXQuote, 'getSwapQuote').resolves(quote);
   });
 
@@ -70,7 +74,7 @@ describe('zero-x-swap-recipe', () => {
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
 
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName: networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,
@@ -247,7 +251,7 @@ describe('zero-x-swap-recipe', () => {
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName: networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
@@ -262,7 +266,7 @@ describe('zero-x-swap-recipe', () => {
 
     // Too low balance for erc20 input
     const recipeInputTooLow: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName: networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,

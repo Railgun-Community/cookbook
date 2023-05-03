@@ -6,6 +6,7 @@ import {
 } from '../../models/export-models';
 import { Step } from '../step';
 import { RailgunConfig } from '../../models/railgun-config';
+import { NetworkName } from '@railgun-community/shared-models';
 
 export class ShieldStep extends Step {
   readonly config = {
@@ -17,7 +18,7 @@ export class ShieldStep extends Step {
 
   async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
     const { outputERC20Amounts, feeERC20AmountRecipients } =
-      this.getOutputERC20AmountsAndFees(input.erc20Amounts);
+      this.getOutputERC20AmountsAndFees(input.networkName, input.erc20Amounts);
     if (!outputERC20Amounts.every(erc20Amount => !erc20Amount.isBaseToken)) {
       throw new Error('Cannot shield base token.');
     }
@@ -33,12 +34,11 @@ export class ShieldStep extends Step {
   }
 
   private getOutputERC20AmountsAndFees(
+    networkName: NetworkName,
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
-    if (RailgunConfig.SHIELD_FEE_BASIS_POINTS == null) {
-      throw new Error('No shield fee set - run initCookbook.');
-    }
-    const shieldFeeBasisPoints = Number(RailgunConfig.SHIELD_FEE_BASIS_POINTS);
+    const shieldFeeBasisPoints =
+      RailgunConfig.getShieldFeeBasisPoints(networkName);
 
     const outputERC20Amounts: StepOutputERC20Amount[] = [];
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = [];

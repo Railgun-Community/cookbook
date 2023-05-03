@@ -8,6 +8,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 const amount = BigNumber.from('10000');
@@ -17,7 +18,7 @@ describe('transfer-erc20-step', () => {
     const step = new TransferERC20Step(toAddress, tokenAddress, amount);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -73,7 +74,7 @@ describe('transfer-erc20-step', () => {
     const step = new TransferERC20Step(toAddress, tokenAddress);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -117,7 +118,7 @@ describe('transfer-erc20-step', () => {
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [],
       nfts: [],
     };
@@ -127,7 +128,7 @@ describe('transfer-erc20-step', () => {
 
     // Too low balance for erc20 input
     const stepInputLowBalance: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,

@@ -1,12 +1,12 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { initCookbook } from '../index';
+import { setRailgunFees } from '../index';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 describe('index', () => {
   it('Should load index', async () => {
-    expect(initCookbook).to.be.a('function');
+    expect(setRailgunFees).to.be.a('function');
   });
 });

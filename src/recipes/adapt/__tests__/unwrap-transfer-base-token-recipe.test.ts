@@ -4,7 +4,7 @@ import { UnwrapTransferBaseTokenRecipe } from '../unwrap-transfer-base-token-rec
 import { BigNumber } from 'ethers';
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
@@ -13,21 +13,25 @@ import {
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
-const tokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('unwrap-transfer-base-token-recipe', () => {
   before(() => {
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
   it('Should create unwrap-transfer-base-token-recipe with amount', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
 
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
@@ -191,7 +195,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
 
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
@@ -319,7 +323,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
@@ -334,7 +338,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     // Too low balance for erc20 input
     const recipeInputTooLow: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,

@@ -6,6 +6,7 @@ import {
 } from '../../models/export-models';
 import { Step } from '../step';
 import { RailgunConfig } from '../../models/railgun-config';
+import { NetworkName } from '@railgun-community/shared-models';
 
 export class UnshieldStep extends Step {
   readonly config = {
@@ -19,7 +20,7 @@ export class UnshieldStep extends Step {
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
     const { outputERC20Amounts, feeERC20AmountRecipients } =
-      this.getOutputERC20AmountsAndFees(input.erc20Amounts);
+      this.getOutputERC20AmountsAndFees(input.networkName, input.erc20Amounts);
     if (!outputERC20Amounts.every(erc20Amount => !erc20Amount.isBaseToken)) {
       throw new Error('Cannot unshield base token.');
     }
@@ -35,14 +36,11 @@ export class UnshieldStep extends Step {
   }
 
   private getOutputERC20AmountsAndFees(
+    networkName: NetworkName,
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
-    if (RailgunConfig.UNSHIELD_FEE_BASIS_POINTS == null) {
-      throw new Error('No unshield fee set - run initCookbook.');
-    }
-    const unshieldFeeBasisPoints = Number(
-      RailgunConfig.UNSHIELD_FEE_BASIS_POINTS,
-    );
+    const unshieldFeeBasisPoints =
+      RailgunConfig.getUnshieldFeeBasisPoints(networkName);
 
     const outputERC20Amounts: StepOutputERC20Amount[] = [];
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = [];

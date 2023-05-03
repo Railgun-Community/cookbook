@@ -8,6 +8,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
@@ -21,7 +22,7 @@ describe('approve-erc20-spender-step', () => {
     );
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -72,7 +73,7 @@ describe('approve-erc20-spender-step', () => {
     const approveStep = new ApproveERC20SpenderStep(spender, tokenAddress);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -116,7 +117,7 @@ describe('approve-erc20-spender-step', () => {
     const approveStep = new ApproveERC20SpenderStep(undefined, tokenAddress);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,
@@ -160,7 +161,7 @@ describe('approve-erc20-spender-step', () => {
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [],
       nfts: [],
     };
@@ -172,7 +173,7 @@ describe('approve-erc20-spender-step', () => {
 
     // Too low balance for erc20 input
     const stepInputLowBalance: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress,

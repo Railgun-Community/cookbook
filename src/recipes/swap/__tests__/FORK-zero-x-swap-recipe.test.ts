@@ -4,7 +4,7 @@ import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
 import { BigNumber } from 'ethers';
 import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import { getTestRailgunWallet } from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -18,8 +18,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const sellTokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const sellTokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
 const sellToken: RecipeERC20Info = {
@@ -42,7 +41,11 @@ describe('FORK-zero-x-swap-recipe', function run() {
       return;
     }
 
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
   beforeEach(async () => {});
@@ -55,7 +58,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
 
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,

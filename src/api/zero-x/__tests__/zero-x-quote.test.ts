@@ -11,6 +11,8 @@ import { BigNumber } from 'ethers';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
+
 describe('zero-x-quote', () => {
   before(() => {});
 
@@ -26,7 +28,7 @@ describe('zero-x-quote', () => {
     };
 
     const quote = await ZeroXQuote.getSwapQuote({
-      networkName: NetworkName.Ethereum,
+      networkName,
       sellERC20Amount,
       buyERC20Info,
       slippagePercentage: 0.01,

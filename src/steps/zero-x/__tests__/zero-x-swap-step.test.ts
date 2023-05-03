@@ -9,9 +9,9 @@ import { ZeroXSwapQuoteData } from '../../../api/zero-x';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-const sellTokenAddress =
-  NETWORK_CONFIG[NetworkName.Ethereum].baseToken.wrappedAddress;
+const sellTokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 const amount = BigNumber.from('10000');
 
@@ -48,7 +48,7 @@ describe('zero-x-swap-step', () => {
     const step = new ZeroXSwapStep(quote, sellToken);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           // Approved for swapping
@@ -122,7 +122,7 @@ describe('zero-x-swap-step', () => {
     const step = new ZeroXSwapStep({ ...quote, spender: undefined }, sellToken);
 
     const stepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
@@ -188,7 +188,7 @@ describe('zero-x-swap-step', () => {
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           // Non-base token
@@ -204,7 +204,7 @@ describe('zero-x-swap-step', () => {
       '0x Exchange Swap step failed. No erc20 inputs match filter.',
     );
     const stepInputNoSpender: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           // No spender
@@ -225,7 +225,7 @@ describe('zero-x-swap-step', () => {
 
     // Too low balance for erc20 input
     const stepInputLowBalance: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,

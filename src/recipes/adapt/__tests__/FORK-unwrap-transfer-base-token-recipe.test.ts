@@ -4,7 +4,7 @@ import { UnwrapTransferBaseTokenRecipe } from '../unwrap-transfer-base-token-rec
 import { BigNumber } from 'ethers';
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import { getGanacheProvider } from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -29,7 +29,11 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
       this.skip();
       return;
     }
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
   it('[FORK] Should run unwrap-transfer-base-token-recipe with amount', async function run() {
@@ -40,7 +44,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
 
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,

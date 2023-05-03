@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 import { BigNumber } from 'ethers';
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { initCookbook } from '../../../init';
+import { setRailgunFees } from '../../../init';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
@@ -25,7 +25,11 @@ describe('FORK-empty-recipe', function run() {
       return;
     }
 
-    initCookbook(MOCK_SHIELD_FEE_BASIS_POINTS, MOCK_UNSHIELD_FEE_BASIS_POINTS);
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
   it('[FORK] Should run empty-recipe', async function run() {
@@ -36,7 +40,7 @@ describe('FORK-empty-recipe', function run() {
 
     const recipe = new EmptyRecipe();
     const recipeInput: RecipeInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,

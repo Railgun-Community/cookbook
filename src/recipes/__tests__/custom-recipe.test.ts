@@ -4,11 +4,18 @@ import { CustomRecipe } from '../custom-recipe';
 import { UnwrapBaseTokenStep } from '../../steps/adapt/unwrap-base-token-step';
 import { StepInput } from '../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
+import { setRailgunFees } from '../../init';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const networkName = NetworkName.Ethereum;
+
 describe('custom-recipe', () => {
+  before(() => {
+    setRailgunFees(networkName, '25', '25');
+  });
+
   it('Should add custom recipe steps', async () => {
     const recipe = new CustomRecipe({
       name: 'custom',
@@ -18,7 +25,7 @@ describe('custom-recipe', () => {
     recipe.addStep(new UnwrapBaseTokenStep());
 
     const firstStepInput: StepInput = {
-      networkName: NetworkName.Ethereum,
+      networkName,
       erc20Amounts: [],
       nfts: [],
     };
