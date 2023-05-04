@@ -37,7 +37,7 @@ const buyToken: RecipeERC20Info = {
 
 const slippagePercentage = 0.01;
 
-describe('FORK-zero-x-swap-recipe', function run() {
+describe.only('FORK-zero-x-swap-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
