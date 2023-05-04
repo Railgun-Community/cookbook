@@ -49,12 +49,19 @@ export class ShieldStep extends Step {
         .div(10000);
       const shieldedAmount = erc20Amount.expectedBalance.sub(shieldFeeAmount);
 
+      const shieldFeeAmountMinimum = erc20Amount.minBalance
+        .mul(shieldFeeBasisPoints)
+        .div(10000);
+      const shieldedAmountMinimum = erc20Amount.minBalance.sub(
+        shieldFeeAmountMinimum,
+      );
+
       outputERC20Amounts.push({
         tokenAddress: erc20Amount.tokenAddress,
         isBaseToken: erc20Amount.isBaseToken,
         approvedSpender: erc20Amount.approvedSpender,
         expectedBalance: shieldedAmount,
-        minBalance: shieldedAmount, // Actual min amount doesn't matter - any amount will get auto-shielded.
+        minBalance: shieldedAmountMinimum,
       });
 
       feeERC20AmountRecipients.push({

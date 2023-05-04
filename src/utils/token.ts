@@ -3,12 +3,16 @@ import {
   StepOutputERC20Amount,
 } from '../models/export-models';
 
+const compareTokenAddress = (a: string, b: string): boolean => {
+  return a.toLowerCase() === b.toLowerCase();
+};
+
 export const compareERC20Info = (
   tokenA: RecipeERC20Info,
   tokenB: RecipeERC20Info,
 ): boolean => {
   return (
-    tokenA.tokenAddress.toLowerCase() === tokenB.tokenAddress.toLowerCase() &&
+    compareTokenAddress(tokenA.tokenAddress, tokenB.tokenAddress) &&
     !!tokenA.isBaseToken === !!tokenB.isBaseToken
   );
 };

@@ -2,11 +2,14 @@ import { NetworkName } from '@railgun-community/shared-models';
 import {
   RecipeERC20Amount,
   RecipeERC20Info,
+  RecipeOutput,
   StepOutputERC20Amount,
   SwapQuoteData,
 } from '../../models/export-models';
 import { compareERC20Info } from '../../utils';
 import { Recipe } from '../recipe';
+import { CookbookDebug } from '../../utils/cookbook-debug';
+import { BigNumber } from 'ethers';
 
 export abstract class SwapRecipe extends Recipe {
   protected quote: Optional<SwapQuoteData>;
@@ -38,5 +41,53 @@ export abstract class SwapRecipe extends Recipe {
       tokenAddress: inputERC20Amount.tokenAddress,
       amount: inputERC20Amount.expectedBalance,
     };
+  }
+
+  getBuySellAmountsFromRecipeOutput(recipeOutput: RecipeOutput): Optional<{
+    sellERC20Fee: BigNumber;
+    buyERC20Amount: BigNumber;
+    buyERC20Minimum: BigNumber;
+    buyERC20Fee: BigNumber;
+  }> {
+    try {
+      const unshieldStepOutput = recipeOutput.stepOutputs[0];
+      const unshieldFee = unshieldStepOutput.feeERC20AmountRecipients.find(
+        fee => {
+          return compareERC20Info(fee, this.sellERC20Info);
+        },
+      );
+      if (!unshieldFee) {
+        throw new Error('Expected unshield fee to match sell token.');
+      }
+
+      const shieldStepOutput =
+        recipeOutput.stepOutputs[recipeOutput.stepOutputs.length - 1];
+      const shieldFee = shieldStepOutput.feeERC20AmountRecipients.find(fee => {
+        return compareERC20Info(fee, this.buyERC20Info);
+      });
+      if (!shieldFee) {
+        throw new Error('Expected shield fee to match buy token.');
+      }
+
+      const output = shieldStepOutput.outputERC20Amounts.find(outputAmount => {
+        return compareERC20Info(outputAmount, this.buyERC20Info);
+      });
+      if (!output) {
+        throw new Error('Expected output to match buy token.');
+      }
+
+      return {
+        sellERC20Fee: unshieldFee.amount,
+        buyERC20Amount: output.expectedBalance,
+        buyERC20Minimum: output.minBalance,
+        buyERC20Fee: shieldFee.amount,
+      };
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      CookbookDebug.error(err);
+      return undefined;
+    }
   }
 }
