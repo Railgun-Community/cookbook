@@ -96,10 +96,10 @@ describe('zero-x-swap-recipe', () => {
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
-      sellERC20Fee: BigNumber.from('30'),
-      buyERC20Amount: BigNumber.from('499'),
-      buyERC20Minimum: BigNumber.from('494'),
-      buyERC20Fee: BigNumber.from('1'),
+      sellFee: BigNumber.from('30'),
+      buyAmount: BigNumber.from('499'),
+      buyMinimum: BigNumber.from('494'),
+      buyFee: BigNumber.from('1'),
     });
 
     expect(output.stepOutputs[0]).to.deep.equal({

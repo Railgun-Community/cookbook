@@ -83,10 +83,10 @@ export abstract class SwapRecipe extends Recipe {
       }
 
       return {
-        sellERC20Fee: unshieldFee.amount,
-        buyERC20Amount: output.expectedBalance,
-        buyERC20Minimum: output.minBalance,
-        buyERC20Fee: shieldFee.amount,
+        sellFee: unshieldFee.amount,
+        buyAmount: output.expectedBalance,
+        buyMinimum: output.minBalance,
+        buyFee: shieldFee.amount,
       };
     } catch (err) {
       if (!(err instanceof Error)) {
