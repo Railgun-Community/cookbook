@@ -43,13 +43,19 @@ export abstract class SwapRecipe extends Recipe {
     };
   }
 
-  getBuySellAmountsFromRecipeOutput(recipeOutput: RecipeOutput): Optional<{
+  getBuySellAmountsFromRecipeOutput(
+    recipeOutput: Optional<RecipeOutput>,
+  ): Optional<{
     sellERC20Fee: BigNumber;
     buyERC20Amount: BigNumber;
     buyERC20Minimum: BigNumber;
     buyERC20Fee: BigNumber;
   }> {
     try {
+      if (!recipeOutput) {
+        return undefined;
+      }
+
       const unshieldStepOutput = recipeOutput.stepOutputs[0];
       const unshieldFee = unshieldStepOutput.feeERC20AmountRecipients.find(
         fee => {
