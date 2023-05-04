@@ -24,7 +24,7 @@ export abstract class SwapRecipe extends Recipe {
     sellERC20Amount: RecipeERC20Amount,
   ): Promise<SwapQuoteData>;
 
-  protected findInputSellERC20Amount(
+  protected findFirstInputSellERC20Amount(
     inputERC20Amounts: StepOutputERC20Amount[],
   ): RecipeERC20Amount {
     const inputERC20Amount = inputERC20Amounts.find(erc20Amount =>

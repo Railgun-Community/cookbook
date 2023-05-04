@@ -54,7 +54,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     firstInternalStepInput: StepInput,
   ): Promise<Step[]> {
     const { networkName } = firstInternalStepInput;
-    const sellERC20Amount = this.findInputSellERC20Amount(
+    const sellERC20Amount = this.findFirstInputSellERC20Amount(
       firstInternalStepInput.erc20Amounts,
     );
     this.quote = await this.getSwapQuote(networkName, sellERC20Amount);
