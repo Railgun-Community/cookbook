@@ -46,10 +46,10 @@ export abstract class SwapRecipe extends Recipe {
   getBuySellAmountsFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,
   ): Optional<{
-    sellERC20Fee: BigNumber;
-    buyERC20Amount: BigNumber;
-    buyERC20Minimum: BigNumber;
-    buyERC20Fee: BigNumber;
+    sellFee: BigNumber;
+    buyAmount: BigNumber;
+    buyMinimum: BigNumber;
+    buyFee: BigNumber;
   }> {
     try {
       if (!recipeOutput) {
