@@ -1,5 +1,4 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { ganacheEthersProvider } from './ganache-setup.test';
 import {
   gasEstimateForUnprovenCrossContractCalls,
   generateCrossContractCallsProof,
@@ -13,9 +12,20 @@ import {
   serializeUnsignedTransaction,
 } from '@railgun-community/shared-models';
 import { Wallet } from 'ethers';
-import { testRailgunWallet } from './railgun-setup.test';
 import { ganacheConfig } from './ganache-config.test';
 import { RecipeOutput } from '../models';
+import { AbstractWallet } from '@railgun-community/engine';
+
+export let ganacheEthersProvider: Optional<Web3Provider>;
+export let testRailgunWallet: AbstractWallet;
+
+export const setSharedGanacheProvider = (provider: Web3Provider) => {
+  ganacheEthersProvider = provider;
+};
+
+export const setSharedTestRailgunWallet = (wallet: AbstractWallet) => {
+  testRailgunWallet = wallet;
+};
 
 export const getGanacheProvider = (): Web3Provider => {
   const provider = ganacheEthersProvider;

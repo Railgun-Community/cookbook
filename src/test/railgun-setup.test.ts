@@ -25,11 +25,15 @@ import {
 } from '@railgun-community/shared-models';
 import { ganacheConfig } from './ganache-config.test';
 import { BigNumber, Wallet } from 'ethers';
-import { ganacheEthersProvider } from './ganache-setup.test';
 import { debug } from 'debug';
 import { ERC20Contract } from '../contract/token/erc20-contract';
-import { AbstractWallet } from '@railgun-community/engine';
-import { getTestEthersWallet } from './shared.test';
+import {
+  ganacheEthersProvider,
+  getGanacheProvider,
+  getTestEthersWallet,
+  getTestRailgunWallet,
+  setSharedTestRailgunWallet,
+} from './shared.test';
 import { TransactionRequest } from '@ethersproject/providers';
 import { groth16 } from 'snarkjs';
 
@@ -40,8 +44,6 @@ dbgRailgunQuickstart.enabled = ganacheConfig.showVerboseLogs;
 
 const ENGINE_TEST_DB = 'test.db';
 const db = new LevelDOWN(ENGINE_TEST_DB);
-
-export let testRailgunWallet: AbstractWallet;
 
 export const removeTestDB = () => {
   fs.rm(ENGINE_TEST_DB, { recursive: true }, () => {
@@ -95,10 +97,8 @@ export const startRailgunForTests = () => {
 };
 
 export const loadLocalhostFallbackProviderForTests = async () => {
-  if (!ganacheEthersProvider) {
-    throw new Error('Ganache provider not initialized.');
-  }
-  const chainId = (await ganacheEthersProvider.getNetwork()).chainId;
+  const provider = getGanacheProvider();
+  const chainId = (await provider.getNetwork()).chainId;
   const localhostProviderConfig: FallbackProviderJsonConfig = {
     chainId,
     providers: [
@@ -133,7 +133,8 @@ export const createRailgunWalletForTests = async () => {
     throw new Error('Error creating Railgun wallet.');
   }
 
-  testRailgunWallet = walletForID(railgunWalletInfo.id);
+  const railgunWallet = walletForID(railgunWalletInfo.id);
+  setSharedTestRailgunWallet(railgunWallet);
   dbgRailgunSetup('RAILGUN wallet created.');
 };
 
@@ -147,9 +148,6 @@ const approveShield = async (wallet: Wallet, tokenAddress: string) => {
 };
 
 export const shieldAllTokensForTests = async () => {
-  if (!ganacheEthersProvider) {
-    throw new Error('No ganache ethers provider');
-  }
   const wallet = getTestEthersWallet();
 
   dbgRailgunSetup('Approving WETH, DAI, and RAIL tokens for shielding...');
@@ -162,6 +160,7 @@ export const shieldAllTokensForTests = async () => {
     'Shielding WETH, DAI, and RAIL tokens... This may take 10-15 seconds.',
   );
 
+  const testRailgunWallet = getTestRailgunWallet();
   const railgunAddress = testRailgunWallet.getAddress();
 
   const oneThousand18Decimals = '1000000000000000000000';
@@ -197,7 +196,8 @@ export const shieldAllTokensForTests = async () => {
     throw new Error('No populated shield');
   }
 
-  const chainId = (await ganacheEthersProvider.getNetwork()).chainId;
+  const provider = getGanacheProvider();
+  const chainId = (await provider.getNetwork()).chainId;
   const tx = deserializeTransaction(serializedTransaction, undefined, chainId);
 
   await trySendShieldTransaction(wallet, tx);
@@ -229,6 +229,8 @@ export const waitForShieldedTokenBalances = async () => {
   setOnBalanceUpdateCallback(onBalancesUpdate);
 
   dbgRailgunSetup('Scanning private balances and populating test.db...');
+
+  const testRailgunWallet = getTestRailgunWallet();
 
   const tokenBalanceGetter = (
     tokenAddress: string,

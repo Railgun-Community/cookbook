@@ -1,5 +1,4 @@
 import {
-  RecipeERC20Amount,
   RecipeERC20Info,
   StepOutputERC20Amount,
 } from '../models/export-models';

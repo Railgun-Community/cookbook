@@ -2,7 +2,6 @@ import { NetworkName } from '@railgun-community/shared-models';
 import {
   RecipeERC20Amount,
   RecipeERC20Info,
-  StepInput,
   StepOutputERC20Amount,
   SwapQuoteData,
 } from '../../models/export-models';
