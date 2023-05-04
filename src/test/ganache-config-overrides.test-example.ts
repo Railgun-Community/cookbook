@@ -1,4 +1,4 @@
 export default {
-  // Add your config overrides here.
-  // Copy file to ganache-config-overrides.test.ts.
+  // Copy this file to `ganache-config-overrides.test.ts` to add git-ignored local configs.
+  // Add ganache-config overrides here.
 };
