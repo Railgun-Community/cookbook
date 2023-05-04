@@ -1,10 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ZeroXSwapQuoteData } from '../../api/zero-x';
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
   StepInput,
   StepOutputERC20Amount,
+  SwapQuoteData,
   UnvalidatedStepOutput,
 } from '../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../utils/token';
@@ -17,10 +17,10 @@ export class ZeroXSwapStep extends Step {
     hasNonDeterministicOutput: true,
   };
 
-  private readonly quote: ZeroXSwapQuoteData;
+  private readonly quote: SwapQuoteData;
   private readonly sellERC20Info: RecipeERC20Info;
 
-  constructor(quote: ZeroXSwapQuoteData, sellERC20Info: RecipeERC20Info) {
+  constructor(quote: SwapQuoteData, sellERC20Info: RecipeERC20Info) {
     super();
     this.quote = quote;
     this.sellERC20Info = sellERC20Info;

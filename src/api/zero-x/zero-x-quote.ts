@@ -8,7 +8,11 @@ import {
   ZeroXApiEndpoint,
   zeroXApiSubdomain,
 } from './zero-x-fetch';
-import { RecipeERC20Amount, RecipeERC20Info } from '../../models/export-models';
+import {
+  RecipeERC20Amount,
+  RecipeERC20Info,
+  SwapQuoteData,
+} from '../../models/export-models';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
 export const ZERO_X_PRICE_DECIMALS = 18;
@@ -38,18 +42,6 @@ export type ZeroXSwapQuoteParams = {
   buyERC20Info: RecipeERC20Info;
   slippagePercentage: number;
   isRailgun: boolean;
-};
-
-export type ZeroXSwapQuoteData = {
-  price: BigNumber;
-  guaranteedPrice: BigNumber;
-  buyERC20Amount: RecipeERC20Amount;
-  minimumBuyAmount: BigNumber;
-  spender: Optional<string>;
-  populatedTransaction: PopulatedTransaction;
-  slippagePercentage: number;
-  sellTokenAddress: string;
-  sellTokenValue: string;
 };
 
 const NULL_SPENDER_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -114,7 +106,7 @@ export class ZeroXQuote {
     buyERC20Info,
     slippagePercentage,
     isRailgun,
-  }: ZeroXSwapQuoteParams): Promise<ZeroXSwapQuoteData> => {
+  }: ZeroXSwapQuoteParams): Promise<SwapQuoteData> => {
     const sellAmount = sellERC20Amount.amount.toString();
     if (sellAmount === '0') {
       throw new Error('Swap sell amount is 0.');

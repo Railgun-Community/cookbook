@@ -77,3 +77,15 @@ export type RecipeConfig = {
   name: string;
   description: string;
 };
+
+export type SwapQuoteData = {
+  price: BigNumber;
+  guaranteedPrice: BigNumber;
+  buyERC20Amount: RecipeERC20Amount;
+  minimumBuyAmount: BigNumber;
+  spender: Optional<string>;
+  populatedTransaction: PopulatedTransaction;
+  slippagePercentage: number;
+  sellTokenAddress: string;
+  sellTokenValue: string;
+};

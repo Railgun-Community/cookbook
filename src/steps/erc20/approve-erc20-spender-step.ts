@@ -18,39 +18,34 @@ export class ApproveERC20SpenderStep extends Step {
   };
 
   private readonly spender: Optional<string>;
-  private readonly tokenAddress: string;
+  private readonly tokenInfo: RecipeERC20Info;
   private readonly amount: Optional<BigNumber>;
 
   constructor(
     spender: Optional<string>,
-    tokenAddress: string,
+    tokenInfo: RecipeERC20Info,
     amount?: BigNumber,
   ) {
     super();
     this.spender = spender;
-    this.tokenAddress = tokenAddress;
+    this.tokenInfo = tokenInfo;
     this.amount = amount;
   }
 
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
-    if (!this.spender) {
+    if (!this.spender || this.tokenInfo.isBaseToken) {
       return createNoActionStepOutput(input);
     }
 
     const { erc20Amounts } = input;
 
-    const erc20ForApproval: RecipeERC20Info = {
-      tokenAddress: this.tokenAddress,
-      isBaseToken: false,
-    };
-
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
         erc20Amount =>
-          compareERC20Info(erc20Amount, erc20ForApproval) &&
+          compareERC20Info(erc20Amount, this.tokenInfo) &&
           erc20Amount.approvedSpender !== this.spender,
         this.amount,
       );

@@ -2,9 +2,12 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapStep } from '../zero-x-swap-step';
 import { BigNumber } from 'ethers';
-import { RecipeERC20Info, StepInput } from '../../../models/export-models';
+import {
+  RecipeERC20Info,
+  StepInput,
+  SwapQuoteData,
+} from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { ZeroXSwapQuoteData } from '../../../api/zero-x';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
@@ -21,7 +24,7 @@ const sellToken: RecipeERC20Info = {
   isBaseToken: true,
 };
 
-const quote: ZeroXSwapQuoteData = {
+const quote: SwapQuoteData = {
   sellTokenValue: '10000',
   spender,
   populatedTransaction: {

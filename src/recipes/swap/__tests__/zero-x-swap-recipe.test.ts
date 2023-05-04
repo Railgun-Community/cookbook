@@ -2,10 +2,14 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
 import { BigNumber } from 'ethers';
-import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
+import {
+  RecipeERC20Info,
+  RecipeInput,
+  SwapQuoteData,
+} from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
-import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
+import { ZeroXQuote } from '../../../api/zero-x';
 import Sinon, { SinonStub } from 'sinon';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -32,7 +36,7 @@ const buyToken: RecipeERC20Info = {
 
 const slippagePercentage = 0.01;
 
-const quote: ZeroXSwapQuoteData = {
+const quote: SwapQuoteData = {
   sellTokenValue: '10000',
   spender,
   populatedTransaction: {
@@ -264,7 +268,7 @@ describe('zero-x-swap-recipe', () => {
       unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'Swap Recipe inputs must contain sell ERC20 Amount: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      'SwapRecipe first input must contain sell ERC20 Amount: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     );
 
     // Too low balance for erc20 input

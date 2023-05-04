@@ -2,7 +2,11 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
 import { BigNumber } from 'ethers';
-import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
+import {
+  RecipeERC20Info,
+  RecipeInput,
+  SwapQuoteData,
+} from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import { getTestRailgunWallet } from '../../../test/shared.test';
@@ -11,7 +15,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { ZeroXQuote, ZeroXSwapQuoteData } from '../../../api/zero-x';
+import { ZeroXQuote } from '../../../api/zero-x';
 import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 
@@ -84,7 +88,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
       2_800_000, // expectedGasWithin50K
     );
 
-    const quote = recipe.getLatestQuote() as ZeroXSwapQuoteData;
+    const quote = recipe.getLatestQuote() as SwapQuoteData;
     expect(quote).to.not.be.undefined;
     const expectedSpender =
       ZeroXQuote.zeroXExchangeProxyContractAddress(networkName);

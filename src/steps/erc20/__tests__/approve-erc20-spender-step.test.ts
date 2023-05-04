@@ -9,23 +9,21 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
+const tokenInfo = {
+  tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+};
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
 
 describe('approve-erc20-spender-step', () => {
   it('Should create approve-erc20-spender step with amount', async () => {
-    const approveStep = new ApproveERC20SpenderStep(
-      spender,
-      tokenAddress,
-      amount,
-    );
+    const approveStep = new ApproveERC20SpenderStep(spender, tokenInfo, amount);
 
     const stepInput: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: tokenInfo.tokenAddress,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -42,16 +40,16 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
+        tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: spender,
         expectedBalance: BigNumber.from('10000'),
         minBalance: BigNumber.from('10000'),
-        tokenAddress,
       },
       {
+        tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: undefined,
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
-        tokenAddress,
       },
     ]);
 
@@ -66,17 +64,17 @@ describe('approve-erc20-spender-step', () => {
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
-    expect(output.populatedTransactions[0].to).to.equal(tokenAddress);
+    expect(output.populatedTransactions[0].to).to.equal(tokenInfo.tokenAddress);
   });
 
   it('Should create approve-erc20-spender step without amount', async () => {
-    const approveStep = new ApproveERC20SpenderStep(spender, tokenAddress);
+    const approveStep = new ApproveERC20SpenderStep(spender, tokenInfo);
 
     const stepInput: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: tokenInfo.tokenAddress,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -93,10 +91,10 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
+        tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: spender,
         expectedBalance: BigNumber.from('12000'),
         minBalance: BigNumber.from('12000'),
-        tokenAddress,
       },
     ]);
 
@@ -114,13 +112,13 @@ describe('approve-erc20-spender-step', () => {
   });
 
   it('Should create empty approve-erc20-spender step without spender', async () => {
-    const approveStep = new ApproveERC20SpenderStep(undefined, tokenAddress);
+    const approveStep = new ApproveERC20SpenderStep(undefined, tokenInfo);
 
     const stepInput: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: tokenInfo.tokenAddress,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -137,7 +135,7 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
-        tokenAddress,
+        tokenAddress: tokenInfo.tokenAddress,
         expectedBalance: BigNumber.from('12000'),
         minBalance: BigNumber.from('12000'),
         approvedSpender: undefined,
@@ -153,11 +151,7 @@ describe('approve-erc20-spender-step', () => {
   });
 
   it('Should test approve-erc20-spender step error cases', async () => {
-    const approveStep = new ApproveERC20SpenderStep(
-      spender,
-      tokenAddress,
-      amount,
-    );
+    const approveStep = new ApproveERC20SpenderStep(spender, tokenInfo, amount);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
@@ -176,7 +170,7 @@ describe('approve-erc20-spender-step', () => {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: tokenInfo.tokenAddress,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),
           approvedSpender: undefined,
