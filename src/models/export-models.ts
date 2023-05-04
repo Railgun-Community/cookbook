@@ -89,3 +89,15 @@ export type SwapQuoteData = {
   sellTokenAddress: string;
   sellTokenValue: string;
 };
+
+export type SwapQuoteParams = {
+  networkName: NetworkName;
+  sellERC20Amount: RecipeERC20Amount;
+  buyERC20Info: RecipeERC20Info;
+  slippagePercentage: number;
+  isRailgun: boolean;
+};
+
+export type GetSwapQuote = (
+  swapQuoteParams: SwapQuoteParams,
+) => Promise<SwapQuoteData>;

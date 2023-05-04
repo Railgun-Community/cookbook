@@ -9,9 +9,10 @@ import {
   zeroXApiSubdomain,
 } from './zero-x-fetch';
 import {
-  RecipeERC20Amount,
+  GetSwapQuote,
   RecipeERC20Info,
   SwapQuoteData,
+  SwapQuoteParams,
 } from '../../models/export-models';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
@@ -34,14 +35,6 @@ type ZeroXAPIQuoteParams = {
   buyToken: string;
   sellAmount: string;
   slippagePercentage: string;
-};
-
-export type ZeroXSwapQuoteParams = {
-  networkName: NetworkName;
-  sellERC20Amount: RecipeERC20Amount;
-  buyERC20Info: RecipeERC20Info;
-  slippagePercentage: number;
-  isRailgun: boolean;
 };
 
 const NULL_SPENDER_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -100,13 +93,13 @@ export class ZeroXQuote {
     }
   };
 
-  static getSwapQuote = async ({
+  static getSwapQuote: GetSwapQuote = async ({
     networkName,
     sellERC20Amount,
     buyERC20Info,
     slippagePercentage,
     isRailgun,
-  }: ZeroXSwapQuoteParams): Promise<SwapQuoteData> => {
+  }: SwapQuoteParams): Promise<SwapQuoteData> => {
     const sellAmount = sellERC20Amount.amount.toString();
     if (sellAmount === '0') {
       throw new Error('Swap sell amount is 0.');
