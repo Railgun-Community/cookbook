@@ -48,155 +48,157 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     );
   });
 
-  it.only(
-    '[FORK] Should run beefy-deposit-recipe and beefy-withdraw-recipe',
-    async function run() {
-      if (!process.env.RUN_GANACHE_TESTS) {
-        this.skip();
-        return;
-      }
+  it('[FORK] Should run beefy-deposit-recipe', async function run() {
+    if (!process.env.RUN_GANACHE_TESTS) {
+      this.skip();
+      return;
+    }
 
-      const vault = await BeefyAPI.getBeefyVaultForID(vaultID, networkName);
-      expect(
-        compareTokenAddress(vault.vaultTokenAddress, vaultTokenAddress),
-      ).to.equal(true);
+    const vault = await BeefyAPI.getBeefyVaultForID(vaultID, networkName);
+    expect(
+      compareTokenAddress(vault.vaultTokenAddress, vaultTokenAddress),
+    ).to.equal(true);
 
-      // --------------------------------------
-      // START DEPOSIT RECIPE
-      // --------------------------------------
+    const depositRecipe = new BeefyDepositRecipe(vaultID);
+    const depositRecipeInput: RecipeInput = {
+      networkName,
+      unshieldRecipeERC20Amounts: [
+        {
+          tokenAddress,
+          amount: oneWithDecimals,
+        },
+      ],
+      unshieldRecipeNFTs: [],
+    };
 
-      const depositRecipe = new BeefyDepositRecipe(vaultID);
-      const depositRecipeInput: RecipeInput = {
-        networkName,
-        unshieldRecipeERC20Amounts: [
-          {
-            tokenAddress,
-            amount: oneWithDecimals,
-          },
-        ],
-        unshieldRecipeNFTs: [],
-      };
-
-      const railgunWallet = getTestRailgunWallet();
-      const initialPrivateVaultTokenBalance =
-        (await balanceForERC20Token(
-          railgunWallet,
-          networkName,
-          vaultTokenAddress,
-        )) ?? BigNumber.from(0);
-
-      await executeRecipeAndAssertUnshieldBalances(
-        depositRecipe,
-        depositRecipeInput,
-        2_950_000, // expectedGasWithin50K
-      );
-
-      // REQUIRED TESTS:
-
-      // 1. Add New Private Balance expectations.
-      // Expect new swapped token in private balance.
-
-      const privateVaultTokenBalance = (await balanceForERC20Token(
+    const railgunWallet = getTestRailgunWallet();
+    const initialPrivateVaultTokenBalance =
+      (await balanceForERC20Token(
         railgunWallet,
         networkName,
         vaultTokenAddress,
-      )) as BigNumber;
+      )) ?? BigNumber.from(0);
 
-      const unshieldFee = oneWithDecimals
-        .mul(MOCK_UNSHIELD_FEE_BASIS_POINTS)
-        .div(10000);
-      const depositAmountAfterUnshieldFee = oneWithDecimals.sub(unshieldFee);
+    await executeRecipeAndAssertUnshieldBalances(
+      depositRecipe,
+      depositRecipeInput,
+      2_950_000, // expectedGasWithin50K
+    );
 
-      const { receivedVaultTokenAmount } = calculateOutputsForBeefyDeposit(
-        depositAmountAfterUnshieldFee,
-        vault.depositFee,
-        vault.depositERC20Decimals,
-        vault.vaultRate,
-      );
+    // REQUIRED TESTS:
 
-      const shieldFee = receivedVaultTokenAmount
-        .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
-        .div(10000);
+    // 1. Add New Private Balance expectations.
+    // Expect new swapped token in private balance.
 
-      const expectedPrivateVaultTokenBalance = initialPrivateVaultTokenBalance
-        .add(receivedVaultTokenAmount) // Vault tokens acquired by deposit
-        .sub(shieldFee); // Shield fee
+    const privateVaultTokenBalance = (await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      vaultTokenAddress,
+    )) as BigNumber;
 
-      expect(expectedPrivateVaultTokenBalance.toString()).to.equal(
-        privateVaultTokenBalance.toString(),
-        'Private vault token balance incorrect after deposit',
-      );
+    const unshieldFee = oneWithDecimals
+      .mul(MOCK_UNSHIELD_FEE_BASIS_POINTS)
+      .div(10000);
+    const depositAmountAfterUnshieldFee = oneWithDecimals.sub(unshieldFee);
 
-      // 2. Add External Balance expectations.
-      // N/A
+    const { receivedVaultTokenAmount } = calculateOutputsForBeefyDeposit(
+      depositAmountAfterUnshieldFee,
+      vault.depositFee,
+      vault.depositERC20Decimals,
+      vault.vaultRate,
+    );
 
-      // --------------------------------------
-      // START WITHDRAW RECIPE
-      // --------------------------------------
+    const shieldFee = receivedVaultTokenAmount
+      .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
+      .div(10000);
 
-      const withdrawRecipe = new BeefyWithdrawRecipe(vaultID);
-      const withdrawRecipeInput: RecipeInput = {
-        networkName,
-        unshieldRecipeERC20Amounts: [
-          {
-            tokenAddress: vault.vaultTokenAddress,
-            amount: privateVaultTokenBalance,
-          },
-        ],
-        unshieldRecipeNFTs: [],
-      };
+    const expectedPrivateVaultTokenBalance = initialPrivateVaultTokenBalance
+      .add(receivedVaultTokenAmount) // Vault tokens acquired by deposit
+      .sub(shieldFee); // Shield fee
 
-      const initialDepositTokenBalance = (await balanceForERC20Token(
-        railgunWallet,
-        networkName,
-        tokenAddress,
-      )) as BigNumber;
+    expect(expectedPrivateVaultTokenBalance.toString()).to.equal(
+      privateVaultTokenBalance.toString(),
+      'Private vault token balance incorrect after deposit',
+    );
 
-      await executeRecipeAndAssertUnshieldBalances(
-        withdrawRecipe,
-        withdrawRecipeInput,
-        2_800_000, // expectedGasWithin50K
-      );
+    // 2. Add External Balance expectations.
+    // N/A
+  }).timeout(240000);
 
-      // REQUIRED TESTS:
+  it.only('[FORK] Should run beefy-withdraw-recipe', async function run() {
+    if (!process.env.RUN_GANACHE_TESTS) {
+      this.skip();
+      return;
+    }
 
-      // 1. Add New Private Balance expectations.
-      // Expect new swapped token in private balance.
+    const vault = await BeefyAPI.getBeefyVaultForID(vaultID, networkName);
+    expect(
+      compareTokenAddress(vault.vaultTokenAddress, vaultTokenAddress),
+    ).to.equal(true);
 
-      const privateDepositTokenBalance = (await balanceForERC20Token(
-        railgunWallet,
-        networkName,
-        tokenAddress,
-      )) as BigNumber;
+    const withdrawRecipe = new BeefyWithdrawRecipe(vaultID);
+    const withdrawRecipeInput: RecipeInput = {
+      networkName,
+      unshieldRecipeERC20Amounts: [
+        {
+          tokenAddress: vault.vaultTokenAddress,
+          amount: oneWithDecimals,
+        },
+      ],
+      unshieldRecipeNFTs: [],
+    };
 
-      const unshieldFeeWithdraw = expectedPrivateVaultTokenBalance
-        .mul(MOCK_UNSHIELD_FEE_BASIS_POINTS)
-        .div(10000);
-      const withdrawAmountAfterUnshieldFee =
-        expectedPrivateVaultTokenBalance.sub(unshieldFeeWithdraw);
+    const railgunWallet = getTestRailgunWallet();
+    const initialDepositTokenBalance = (await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      tokenAddress,
+    )) as BigNumber;
 
-      const { withdrawAmountAfterFee } = calculateOutputsForBeefyWithdraw(
-        withdrawAmountAfterUnshieldFee,
-        vault.depositFee,
-        vault.depositERC20Decimals,
-        vault.vaultRate,
-      );
+    await executeRecipeAndAssertUnshieldBalances(
+      withdrawRecipe,
+      withdrawRecipeInput,
+      2_800_000, // expectedGasWithin50K
+    );
 
-      const shieldFeeWithdraw = withdrawAmountAfterFee
-        .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
-        .div(10000);
+    // REQUIRED TESTS:
 
-      const expectedPrivateDepositTokenBalance = initialDepositTokenBalance
-        .add(withdrawAmountAfterFee) // Vault tokens acquired by withdraw
-        .sub(shieldFeeWithdraw); // Shield fee
+    // 1. Add New Private Balance expectations.
+    // Expect new swapped token in private balance.
 
-      expect(expectedPrivateDepositTokenBalance.toString()).to.equal(
-        privateDepositTokenBalance.toString(),
-        'Private vault token balance incorrect after withdraw',
-      );
+    const privateDepositTokenBalance = (await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      tokenAddress,
+    )) as BigNumber;
 
-      // 2. Add External Balance expectations.
-      // N/A
-    },
-  ).timeout(240000);
+    const unshieldFeeWithdraw = oneWithDecimals
+      .mul(MOCK_UNSHIELD_FEE_BASIS_POINTS)
+      .div(10000);
+    const withdrawAmountAfterUnshieldFee =
+      oneWithDecimals.sub(unshieldFeeWithdraw);
+
+    const { withdrawAmountAfterFee } = calculateOutputsForBeefyWithdraw(
+      withdrawAmountAfterUnshieldFee,
+      vault.depositFee,
+      vault.depositERC20Decimals,
+      vault.vaultRate,
+    );
+
+    const shieldFeeWithdraw = withdrawAmountAfterFee
+      .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
+      .div(10000);
+
+    const expectedPrivateDepositTokenBalance = initialDepositTokenBalance
+      .add(withdrawAmountAfterFee) // Vault tokens acquired by withdraw
+      .sub(shieldFeeWithdraw); // Shield fee
+
+    expect(expectedPrivateDepositTokenBalance.toString()).to.equal(
+      privateDepositTokenBalance.toString(),
+      'Private vault token balance incorrect after withdraw',
+    );
+
+    // 2. Add External Balance expectations.
+    // N/A
+  }).timeout(240000);
 });

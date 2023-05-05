@@ -26,7 +26,10 @@ export const ganacheConfig = {
     // Tokens
     dai: '0x6b175474e89094c44da98b954eedeac495271d0f',
     rail: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+
+    // Vault tokens
     crvCRVETH: '0xEd4064f376cB8d68F770FB1Ff088a3d0F3FF5c4d',
+    crvCRVETHVaultToken: '0x245186CaA063b13d0025891c0d513aCf552fB38E',
   },
 };
 

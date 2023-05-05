@@ -128,7 +128,7 @@ export const executeRecipeAndAssertUnshieldBalances = async (
 
       expect(postBalance.toString()).to.equal(
         expectedBalance.toString(),
-        `${recipe.config.name}: Did not get expected balance for unshielded (and possibly re-shielded) token`,
+        `${recipe.config.name}: Did not get expected balance token ${tokenAddress}`,
       );
     }),
   );
