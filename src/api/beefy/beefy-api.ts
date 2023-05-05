@@ -2,6 +2,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { BeefyApiEndpoint, getBeefyAPIData } from './beefy-fetch';
 import { compareTokenAddress } from '../../utils';
 import { CookbookDebug } from '../../utils/cookbook-debug';
+import { removeUndefineds } from '@railgun-community/quickstart';
 
 export type BeefyNetwork =
   | 'ethereum'
@@ -41,6 +42,22 @@ type BeefyVaultAPIData = {
   pricePerFullShare: string;
 };
 
+type BeefyFeesAPIData = Record<
+  string,
+  {
+    performance: {
+      total: number;
+      call: number;
+      strategist: number;
+      treasury: number;
+      stakers: number;
+    };
+    withdraw?: number;
+    deposit?: number;
+    lastUpdated: number;
+  }
+>;
+
 export type BeefyVaultData = {
   vaultID: string;
   vaultName: string;
@@ -51,6 +68,8 @@ export type BeefyVaultData = {
   vaultTokenAddress: string;
   vaultContractAddress: string;
   vaultRate: string;
+  depositFee: number;
+  withdrawFee: number;
 };
 
 export class BeefyAPI {
@@ -100,22 +119,42 @@ export class BeefyAPI {
     if (this.cachedVaultData && !this.cacheExpired()) {
       return this.cachedVaultData;
     }
-    const beefyApiData = await getBeefyAPIData<BeefyVaultAPIData[]>(
+
+    const beefyVaultAPIData = await getBeefyAPIData<BeefyVaultAPIData[]>(
       BeefyApiEndpoint.GetVaults,
     );
-    const vaultData = beefyApiData.map(apiData => ({
-      vaultID: apiData.id,
-      vaultName: apiData.name,
-      chain: apiData.chain,
-      network: apiData.network,
-      depositERC20Address: apiData.tokenAddress,
-      depositERC20Decimals: apiData.tokenDecimals,
-      vaultTokenAddress: apiData.earnedTokenAddress,
-      vaultContractAddress: apiData.earnContractAddress,
-      vaultRate: apiData.pricePerFullShare,
-    }));
+    const beefyFeesAPIData = await getBeefyAPIData<BeefyFeesAPIData>(
+      BeefyApiEndpoint.GetFees,
+    );
+
+    const vaultData: BeefyVaultData[] = removeUndefineds(
+      beefyVaultAPIData.map(vaultAPIData => {
+        const feesData = beefyFeesAPIData[vaultAPIData.id];
+        if (!feesData) {
+          return undefined;
+        }
+        if (vaultAPIData.status !== 'active') {
+          return undefined;
+        }
+        return {
+          vaultID: vaultAPIData.id,
+          vaultName: vaultAPIData.name,
+          chain: vaultAPIData.chain,
+          network: vaultAPIData.network,
+          depositERC20Address: vaultAPIData.tokenAddress,
+          depositERC20Decimals: vaultAPIData.tokenDecimals,
+          vaultTokenAddress: vaultAPIData.earnedTokenAddress,
+          vaultContractAddress: vaultAPIData.earnContractAddress,
+          vaultRate: vaultAPIData.pricePerFullShare,
+          depositFee: feesData?.deposit ?? 0,
+          withdrawFee: feesData?.withdraw ?? 0,
+        };
+      }),
+    );
+
     this.cachedVaultData = vaultData;
     this.cacheTimestamp = Date.now();
+
     return vaultData;
   }
 

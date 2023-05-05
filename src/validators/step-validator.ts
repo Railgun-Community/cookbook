@@ -15,7 +15,7 @@ export const validateStepOutput = (
 };
 
 const getTokenId = (tokenAddress: string, isBaseToken?: boolean) => {
-  return `${tokenAddress}-${isBaseToken ? 'base' : ''}`;
+  return isBaseToken ? `${tokenAddress}-base` : tokenAddress;
 };
 
 const validateStepOutputERC20Amounts = (
@@ -59,7 +59,11 @@ const validateStepOutputERC20Amounts = (
     }
     if (!inputERC20AmountMap[id].eq(outputERC20AmountMap[id])) {
       throw new Error(
-        `Input erc20 amounts for ${id} must match total outputs/spent/fees.`,
+        `Input erc20 amounts for ${id} (${inputERC20AmountMap[
+          id
+        ].toString()}) must match total outputs/spent/fees (${outputERC20AmountMap[
+          id
+        ].toString()}).`,
       );
     }
   }

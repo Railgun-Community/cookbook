@@ -2,6 +2,7 @@ import axios from 'axios';
 
 export enum BeefyApiEndpoint {
   GetVaults = 'vaults',
+  GetFees = 'fees',
 }
 
 const BEEFY_API_URL = 'https://api.beefy.finance';

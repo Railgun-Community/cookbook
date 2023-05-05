@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers';
 import { NetworkName } from '@railgun-community/shared-models';
 import { StepInput } from '../../../../models/export-models';
 import { BeefyVaultData } from '../../../../api/beefy/beefy-api';
-import { BeefyDepositStep } from '../beefy-deposit-step';
+import { BeefyWithdrawStep } from '../beefy-withdraw-step';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -23,29 +23,21 @@ const vault: BeefyVaultData = {
   vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultRate: '2000000000000000000', // 2x
-  depositFee: 0.1,
-  withdrawFee: 0,
+  depositFee: 0,
+  withdrawFee: 0.1,
 };
 
-describe('beefy-deposit-step', () => {
-  it('Should create beefy-deposit step', async () => {
-    const step = new BeefyDepositStep(vault);
+describe('beefy-withdraw-step', () => {
+  it('Should create beefy-withdraw step', async () => {
+    const step = new BeefyWithdrawStep(vault);
 
     const stepInput: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          // Approved for swapping
-          tokenAddress,
+          tokenAddress: vault.vaultTokenAddress,
           expectedBalance: BigNumber.from('10000'),
           minBalance: BigNumber.from('10000'),
-          approvedSpender: vault.vaultContractAddress,
-        },
-        {
-          // Same token, unapproved
-          tokenAddress,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
           approvedSpender: undefined,
         },
       ],
@@ -53,17 +45,17 @@ describe('beefy-deposit-step', () => {
     };
     const output = await step.getValidStepOutput(stepInput);
 
-    expect(output.name).to.equal('Beefy Vault Deposit');
+    expect(output.name).to.equal('Beefy Vault Withdraw');
     expect(output.description).to.equal(
-      'Deposits into a Beefy Vault to earn yield.',
+      'Withdraws from a yield-bearing Beefy Vault.',
     );
 
-    // Deposited
+    // Withdrawn
     expect(output.spentERC20Amounts).to.deep.equal([
       {
-        amount: BigNumber.from('9000'),
+        amount: BigNumber.from('10000'),
         recipient: 'Vault Name (id)',
-        tokenAddress,
+        tokenAddress: vault.vaultTokenAddress,
       },
     ]);
 
@@ -71,14 +63,8 @@ describe('beefy-deposit-step', () => {
     expect(output.outputERC20Amounts).to.deep.equal([
       {
         approvedSpender: undefined,
-        expectedBalance: BigNumber.from('4500'),
-        minBalance: BigNumber.from('4500'),
-        tokenAddress: vault.vaultTokenAddress,
-      },
-      {
-        approvedSpender: undefined,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
+        expectedBalance: BigNumber.from('18000'),
+        minBalance: BigNumber.from('18000'),
         tokenAddress,
       },
     ]);
@@ -89,8 +75,8 @@ describe('beefy-deposit-step', () => {
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
         tokenAddress,
-        amount: BigNumber.from('1000'),
-        recipient: 'Vault Name Fee',
+        amount: BigNumber.from('2000'),
+        recipient: 'Beefy Fee',
       },
     ]);
 
@@ -102,15 +88,15 @@ describe('beefy-deposit-step', () => {
     ]);
   });
 
-  it('Should test beefy-deposit step error cases', async () => {
-    const step = new BeefyDepositStep(vault);
+  it('Should test beefy-withdraw step error cases', async () => {
+    const step = new BeefyWithdrawStep(vault);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: vault.vaultContractAddress,
@@ -119,26 +105,7 @@ describe('beefy-deposit-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Beefy Vault Deposit step failed. No erc20 inputs match filter.',
-    );
-    const stepInputNoSpender: StepInput = {
-      networkName,
-      erc20Amounts: [
-        {
-          // No spender
-          tokenAddress,
-          isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
-          approvedSpender: undefined,
-        },
-      ],
-      nfts: [],
-    };
-    await expect(
-      step.getValidStepOutput(stepInputNoSpender),
-    ).to.be.rejectedWith(
-      'Beefy Vault Deposit step failed. No erc20 inputs match filter.',
+      'Beefy Vault Withdraw step failed. No erc20 inputs match filter.',
     );
   });
 });

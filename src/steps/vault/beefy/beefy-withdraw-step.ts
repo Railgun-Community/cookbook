@@ -6,15 +6,15 @@ import {
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
-import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
+import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
 import { BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy-vault-contract';
 
-export class BeefyDepositStep extends Step {
+export class BeefyWithdrawStep extends Step {
   readonly config = {
-    name: 'Beefy Vault Deposit',
-    description: 'Deposits into a Beefy Vault to earn yield.',
+    name: 'Beefy Vault Withdraw',
+    description: 'Withdraws from a yield-bearing Beefy Vault.',
   };
 
   private readonly vault: BeefyVaultData;
@@ -35,52 +35,51 @@ export class BeefyDepositStep extends Step {
       vaultContractAddress,
       vaultTokenAddress,
       vaultRate,
-      depositFee,
+      withdrawFee,
     } = this.vault;
     const { erc20Amounts } = input;
 
-    const depositERC20Info: RecipeERC20Info = {
-      tokenAddress: depositERC20Address,
+    const withdrawERC20Info: RecipeERC20Info = {
+      tokenAddress: vaultTokenAddress,
     };
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
-        erc20Amount =>
-          compareERC20Info(erc20Amount, depositERC20Info) &&
-          isApprovedForSpender(erc20Amount, vaultContractAddress),
+        erc20Amount => compareERC20Info(erc20Amount, withdrawERC20Info),
         undefined, // amount
       );
 
     const contract = new BeefyVaultContract(vaultContractAddress);
     const populatedTransaction = await contract.createDepositAll();
 
-    const depositFeeBasisPoints = BigNumber.from(depositFee * 10000);
-    const depositAmount = erc20AmountForStep.expectedBalance;
-    const depositFeeAmount = BigNumber.from(depositAmount)
-      .mul(depositFeeBasisPoints)
-      .div(10000);
-    const depositAmountAfterFee = depositAmount.sub(depositFeeAmount);
-
     const decimalsAdjustment = BigNumber.from(10).pow(depositERC20Decimals);
-    const expectedBalance = BigNumber.from(depositAmountAfterFee)
-      .mul(decimalsAdjustment)
-      .div(vaultRate);
+    const vaultWithdrawAmount = erc20AmountForStep.expectedBalance;
+    const receivedWithdrawAmount = BigNumber.from(vaultWithdrawAmount)
+      .mul(vaultRate)
+      .div(decimalsAdjustment);
+
+    const withdrawFeeBasisPoints = BigNumber.from(withdrawFee * 10000);
+    const withdrawFeeAmount = BigNumber.from(receivedWithdrawAmount)
+      .mul(withdrawFeeBasisPoints)
+      .div(10000);
+    const withdrawAmountAfterFee =
+      receivedWithdrawAmount.sub(withdrawFeeAmount);
 
     const spentERC20AmountRecipient: RecipeERC20AmountRecipient = {
-      ...depositERC20Info,
-      amount: depositAmountAfterFee,
+      ...withdrawERC20Info,
+      amount: vaultWithdrawAmount,
       recipient: `${vaultName} (${vaultID})`,
     };
     const outputERC20Amount: StepOutputERC20Amount = {
-      tokenAddress: vaultTokenAddress,
-      expectedBalance,
-      minBalance: expectedBalance,
+      tokenAddress: depositERC20Address,
+      expectedBalance: withdrawAmountAfterFee,
+      minBalance: withdrawAmountAfterFee,
       approvedSpender: undefined,
     };
     const feeERC20Amount: RecipeERC20AmountRecipient = {
-      ...depositERC20Info,
-      amount: depositFeeAmount,
-      recipient: `${vaultName} Fee`,
+      tokenAddress: depositERC20Address,
+      amount: withdrawFeeAmount,
+      recipient: `Beefy Fee`,
     };
 
     return {
