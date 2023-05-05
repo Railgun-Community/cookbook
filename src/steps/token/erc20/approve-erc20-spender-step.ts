@@ -4,12 +4,12 @@ import {
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
-} from '../../models/export-models';
-import { Step } from '../step';
+} from '../../../models/export-models';
+import { Step } from '../../step';
 import { PopulatedTransaction } from '@ethersproject/contracts';
-import { ERC20Contract } from '../../contract/token/erc20-contract';
-import { compareERC20Info } from '../../utils/token';
-import { createNoActionStepOutput } from '../../utils/no-action-output';
+import { ERC20Contract } from '../../../contract/token/erc20-contract';
+import { compareERC20Info } from '../../../utils/token';
+import { createNoActionStepOutput } from '../../../utils/no-action-output';
 
 export class ApproveERC20SpenderStep extends Step {
   readonly config = {

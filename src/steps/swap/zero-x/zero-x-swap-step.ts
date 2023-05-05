@@ -6,9 +6,9 @@ import {
   StepOutputERC20Amount,
   SwapQuoteData,
   UnvalidatedStepOutput,
-} from '../../models/export-models';
-import { compareERC20Info, isApprovedForSpender } from '../../utils/token';
-import { Step } from '../step';
+} from '../../../models/export-models';
+import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
+import { Step } from '../../step';
 
 export class ZeroXSwapStep extends Step {
   readonly config = {

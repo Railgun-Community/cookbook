@@ -6,9 +6,9 @@ import {
   RecipeERC20Info,
   StepInput,
   SwapQuoteData,
-} from '../../../models/export-models';
+} from '../../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
-import { ZeroXConfig } from '../../../models/zero-x-config';
+import { ZeroXConfig } from '../../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

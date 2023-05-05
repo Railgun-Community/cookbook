@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { TransferERC20Step } from '../transfer-erc20-step';
 import { BigNumber } from 'ethers';
-import { StepInput } from '../../../models/export-models';
+import { StepInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 
 chai.use(chaiAsPromised);

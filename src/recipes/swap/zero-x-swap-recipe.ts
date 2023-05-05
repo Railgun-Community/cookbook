@@ -1,7 +1,7 @@
-import { ApproveERC20SpenderStep } from '../../steps/erc20/approve-erc20-spender-step';
+import { ApproveERC20SpenderStep } from '../../steps/token/erc20/approve-erc20-spender-step';
 import { Step } from '../../steps/step';
 import { ZeroXQuote } from '../../api/zero-x/zero-x-quote';
-import { ZeroXSwapStep } from '../../steps/zero-x/zero-x-swap-step';
+import { ZeroXSwapStep } from '../../steps/swap/zero-x/zero-x-swap-step';
 import {
   RecipeERC20Amount,
   RecipeERC20Info,

@@ -42,14 +42,15 @@ type BeefyVaultAPIData = {
 };
 
 export type BeefyVaultData = {
-  id: string;
-  name: string;
+  vaultID: string;
+  vaultName: string;
   chain: BeefyChain;
   network: BeefyNetwork;
   depositERC20Address: string;
   depositERC20Decimals: number;
   vaultTokenAddress: string;
   vaultContractAddress: string;
+  vaultRate: string;
 };
 
 export class BeefyAPI {
@@ -103,14 +104,15 @@ export class BeefyAPI {
       BeefyApiEndpoint.GetVaults,
     );
     const vaultData = beefyApiData.map(apiData => ({
-      id: apiData.id,
-      name: apiData.name,
+      vaultID: apiData.id,
+      vaultName: apiData.name,
       chain: apiData.chain,
       network: apiData.network,
       depositERC20Address: apiData.tokenAddress,
       depositERC20Decimals: apiData.tokenDecimals,
       vaultTokenAddress: apiData.earnedTokenAddress,
       vaultContractAddress: apiData.earnContractAddress,
+      vaultRate: apiData.pricePerFullShare,
     }));
     this.cachedVaultData = vaultData;
     this.cacheTimestamp = Date.now();
