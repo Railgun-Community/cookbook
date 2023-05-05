@@ -193,4 +193,17 @@ export class BeefyAPI {
       throw new Error(err.message);
     }
   }
+
+  static async getBeefyVaultForID(
+    vaultID: string,
+    networkName: NetworkName,
+  ): Promise<BeefyVaultData> {
+    const beefyVaults = await this.getFilteredBeefyVaults(networkName);
+
+    const beefyVault = beefyVaults.find(vault => vault.vaultID === vaultID);
+    if (!beefyVault) {
+      throw new Error(`Beefy vault not found for ID: ${vaultID}.`);
+    }
+    return beefyVault;
+  }
 }
