@@ -55,7 +55,7 @@ describe('beefy-deposit-step', () => {
 
     expect(output.name).to.equal('Beefy Vault Deposit');
     expect(output.description).to.equal(
-      'Deposits into a Beefy Vault to earn yield.',
+      'Deposits into a yield-bearing Beefy Vault.',
     );
 
     // Deposited

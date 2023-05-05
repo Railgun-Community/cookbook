@@ -14,7 +14,7 @@ import { BeefyVaultContract } from '../../../contract/vault/beefy-vault-contract
 export class BeefyDepositStep extends Step {
   readonly config = {
     name: 'Beefy Vault Deposit',
-    description: 'Deposits into a Beefy Vault to earn yield.',
+    description: 'Deposits into a yield-bearing Beefy Vault.',
   };
 
   private readonly vault: BeefyVaultData;
