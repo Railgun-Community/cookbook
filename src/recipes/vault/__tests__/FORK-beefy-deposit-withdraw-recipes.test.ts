@@ -124,7 +124,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     // N/A
   });
 
-  it.only('[FORK] Should run beefy-withdraw-recipe', async function run() {
+  it('[FORK] Should run beefy-withdraw-recipe', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
       this.skip();
       return;
