@@ -12,6 +12,10 @@ export class EmptyRecipe extends Recipe {
     super();
   }
 
+  protected supportsNetwork(): boolean {
+    return true;
+  }
+
   protected async getInternalSteps(): Promise<Step[]> {
     return [new EmptyTransferBaseTokenStep()];
   }

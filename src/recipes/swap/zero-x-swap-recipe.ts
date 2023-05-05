@@ -34,6 +34,10 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     this.slippagePercentage = slippagePercentage;
   }
 
+  protected supportsNetwork(networkName: NetworkName): boolean {
+    return ZeroXQuote.supportsNetwork(networkName);
+  }
+
   async getSwapQuote(
     networkName: NetworkName,
     sellERC20Amount: RecipeERC20Amount,

@@ -20,6 +20,10 @@ export class UnwrapTransferBaseTokenRecipe extends Recipe {
     this.amount = amount;
   }
 
+  protected supportsNetwork(): boolean {
+    return true;
+  }
+
   protected async getInternalSteps(): Promise<Step[]> {
     return [
       new UnwrapBaseTokenStep(this.amount),

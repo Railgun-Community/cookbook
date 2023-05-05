@@ -1,3 +1,4 @@
+import { NetworkName } from '@railgun-community/shared-models';
 import { RecipeConfig } from '../models/export-models';
 import { Step } from '../steps/step';
 import { Recipe } from './recipe';
@@ -5,15 +6,22 @@ import { Recipe } from './recipe';
 export class CustomRecipe extends Recipe {
   readonly config: RecipeConfig;
 
+  private readonly supportedNetworks: NetworkName[] = [];
+
   private internalSteps: Step[] = [];
 
-  constructor(config: RecipeConfig) {
+  constructor(config: RecipeConfig, supportedNetworks: NetworkName[]) {
     super();
     this.config = config;
+    this.supportedNetworks = supportedNetworks;
   }
 
   protected async getInternalSteps(): Promise<Step[]> {
     return this.internalSteps;
+  }
+
+  protected supportsNetwork(networkName: NetworkName): boolean {
+    return this.supportedNetworks.includes(networkName);
   }
 
   addStep(step: Step): void {

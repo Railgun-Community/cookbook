@@ -1,4 +1,5 @@
 import {
+  NetworkName,
   RailgunERC20Amount,
   RailgunERC20AmountRecipient,
 } from '@railgun-community/shared-models';
@@ -20,6 +21,8 @@ export abstract class Recipe {
   protected abstract getInternalSteps(
     firstInternalStepInput: StepInput,
   ): Promise<Step[]>;
+
+  protected abstract supportsNetwork(networkName: NetworkName): boolean;
 
   private async getFullSteps(firstStepInput: StepInput): Promise<Step[]> {
     const unshieldStep = new UnshieldStep();
@@ -86,6 +89,12 @@ export abstract class Recipe {
   }
 
   async getRecipeOutput(input: RecipeInput): Promise<RecipeOutput> {
+    if (!this.supportsNetwork(input.networkName)) {
+      throw new Error(
+        `Recipe ${this.config.name} does not support network: ${input.networkName}.`,
+      );
+    }
+
     const firstStepInput = this.createFirstStepInput(input);
     const steps = await this.getFullSteps(firstStepInput);
 

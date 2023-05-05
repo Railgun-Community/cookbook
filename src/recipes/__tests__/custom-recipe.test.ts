@@ -17,10 +17,15 @@ describe('custom-recipe', () => {
   });
 
   it('Should add custom recipe steps', async () => {
-    const recipe = new CustomRecipe({
-      name: 'custom',
-      description: 'this is a custom recipe',
-    });
+    const supportedNetworks = [networkName];
+
+    const recipe = new CustomRecipe(
+      {
+        name: 'custom',
+        description: 'this is a custom recipe',
+      },
+      supportedNetworks,
+    );
 
     recipe.addStep(new UnwrapBaseTokenStep());
 
