@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
@@ -29,7 +28,6 @@ export class BeefyWithdrawStep extends Step {
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
     const {
-      vaultID,
       vaultName,
       depositERC20Address,
       depositERC20Decimals,
