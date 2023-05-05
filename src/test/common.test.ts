@@ -33,11 +33,11 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   await Promise.all(
     recipeInput.unshieldRecipeERC20Amounts.map(
       async ({ tokenAddress, amount }) => {
-        const balance = (await balanceForERC20Token(
+        const balance = await balanceForERC20Token(
           railgunWallet,
           networkName,
           tokenAddress,
-        )) as BigNumber;
+        );
 
         preRecipeUnshieldMap[tokenAddress] = {
           unshieldAmount: amount,
@@ -48,8 +48,8 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   );
 
   const recipeOutput = await recipe.getRecipeOutput(recipeInput);
-  console.log(recipeOutput);
-  console.log(JSON.stringify(recipeOutput.stepOutputs));
+  // console.log(recipeOutput);
+  // console.log(JSON.stringify(recipeOutput.stepOutputs));
 
   const { gasEstimateString, transaction } =
     await createQuickstartCrossContractCallsForTest(networkName, recipeOutput);
@@ -70,38 +70,13 @@ export const executeRecipeAndAssertUnshieldBalances = async (
 
   const wallet = getTestEthersWallet();
   const txResponse = await wallet.sendTransaction(transaction);
-  const txReceipt = await txResponse.wait();
-  console.log(txReceipt);
-  console.log(JSON.stringify(txReceipt));
+  await txResponse.wait();
 
   // Wait for private balances to re-scan.
   // TODO: Possible race condition - maybe watch for scan events instead.
   await delay(SCAN_BALANCE_DELAY);
   const { chain } = NETWORK_CONFIG[networkName];
   await railgunWallet.scanBalances(chain, () => {});
-
-  console.log('Post recipe balances:');
-  console.log('orig crv token:');
-  console.log(
-    (
-      await balanceForERC20Token(
-        railgunWallet,
-        networkName,
-        '0xEd4064f376cB8d68F770FB1Ff088a3d0F3FF5c4d',
-      )
-    )?.toString(),
-  );
-  console.log('vault token:');
-  console.log(
-    (
-      await balanceForERC20Token(
-        railgunWallet,
-        networkName,
-        '0x245186CaA063b13d0025891c0d513aCf552fB38E',
-      )
-    )?.toString(),
-  );
-  console.log(recipeInput.unshieldRecipeERC20Amounts);
 
   const shieldTokenMap: Record<string, BigNumber> = {};
   const shieldStepOutput =
@@ -113,11 +88,11 @@ export const executeRecipeAndAssertUnshieldBalances = async (
 
   await Promise.all(
     recipeInput.unshieldRecipeERC20Amounts.map(async ({ tokenAddress }) => {
-      const postBalance = (await balanceForERC20Token(
+      const postBalance = await balanceForERC20Token(
         railgunWallet,
         networkName,
         tokenAddress,
-      )) as BigNumber;
+      );
       const { originalBalance, unshieldAmount } =
         preRecipeUnshieldMap[tokenAddress];
 

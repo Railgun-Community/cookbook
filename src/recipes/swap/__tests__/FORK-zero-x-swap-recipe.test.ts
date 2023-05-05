@@ -75,11 +75,11 @@ describe('FORK-zero-x-swap-recipe', function run() {
     };
 
     const railgunWallet = getTestRailgunWallet();
-    const initialPrivateRAILBalance = (await balanceForERC20Token(
+    const initialPrivateRAILBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
-    )) as BigNumber;
+    );
 
     await executeRecipeAndAssertUnshieldBalances(
       recipe,
@@ -101,11 +101,11 @@ describe('FORK-zero-x-swap-recipe', function run() {
     // 1. Add New Private Balance expectations.
     // Expect new swapped token in private balance.
 
-    const privateRAILBalance = (await balanceForERC20Token(
+    const privateRAILBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
-    )) as BigNumber;
+    );
 
     const minimumBuyAmount = quote.minimumBuyAmount;
     const minimumShieldFee = minimumBuyAmount

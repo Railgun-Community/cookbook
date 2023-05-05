@@ -72,12 +72,11 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     };
 
     const railgunWallet = getTestRailgunWallet();
-    const initialPrivateVaultTokenBalance =
-      (await balanceForERC20Token(
-        railgunWallet,
-        networkName,
-        vaultTokenAddress,
-      )) ?? BigNumber.from(0);
+    const initialPrivateVaultTokenBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      vaultTokenAddress,
+    );
 
     await executeRecipeAndAssertUnshieldBalances(
       depositRecipe,
@@ -90,11 +89,11 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     // 1. Add New Private Balance expectations.
     // Expect new swapped token in private balance.
 
-    const privateVaultTokenBalance = (await balanceForERC20Token(
+    const privateVaultTokenBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
       vaultTokenAddress,
-    )) as BigNumber;
+    );
 
     const unshieldFee = oneWithDecimals
       .mul(MOCK_UNSHIELD_FEE_BASIS_POINTS)
@@ -123,7 +122,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
 
     // 2. Add External Balance expectations.
     // N/A
-  }).timeout(240000);
+  });
 
   it.only('[FORK] Should run beefy-withdraw-recipe', async function run() {
     if (!process.env.RUN_GANACHE_TESTS) {
@@ -149,11 +148,11 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     };
 
     const railgunWallet = getTestRailgunWallet();
-    const initialDepositTokenBalance = (await balanceForERC20Token(
+    const initialTokenBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
       tokenAddress,
-    )) as BigNumber;
+    );
 
     await executeRecipeAndAssertUnshieldBalances(
       withdrawRecipe,
@@ -166,11 +165,11 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     // 1. Add New Private Balance expectations.
     // Expect new swapped token in private balance.
 
-    const privateDepositTokenBalance = (await balanceForERC20Token(
+    const privateDepositTokenBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
       tokenAddress,
-    )) as BigNumber;
+    );
 
     const unshieldFeeWithdraw = oneWithDecimals
       .mul(MOCK_UNSHIELD_FEE_BASIS_POINTS)
@@ -180,7 +179,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
 
     const { withdrawAmountAfterFee } = calculateOutputsForBeefyWithdraw(
       withdrawAmountAfterUnshieldFee,
-      vault.depositFee,
+      vault.withdrawFee,
       vault.depositERC20Decimals,
       vault.vaultRate,
     );
@@ -189,7 +188,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
       .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
       .div(10000);
 
-    const expectedPrivateDepositTokenBalance = initialDepositTokenBalance
+    const expectedPrivateDepositTokenBalance = initialTokenBalance
       .add(withdrawAmountAfterFee) // Vault tokens acquired by withdraw
       .sub(shieldFeeWithdraw); // Shield fee
 
@@ -200,5 +199,5 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
 
     // 2. Add External Balance expectations.
     // N/A
-  }).timeout(240000);
+  });
 });

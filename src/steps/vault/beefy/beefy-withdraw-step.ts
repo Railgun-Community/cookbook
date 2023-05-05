@@ -51,7 +51,7 @@ export class BeefyWithdrawStep extends Step {
       );
 
     const contract = new BeefyVaultContract(vaultContractAddress);
-    const populatedTransaction = await contract.createDepositAll();
+    const populatedTransaction = await contract.createWithdrawAll();
 
     const { withdrawFeeAmount, withdrawAmountAfterFee } =
       calculateOutputsForBeefyWithdraw(

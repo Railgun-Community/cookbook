@@ -115,8 +115,10 @@ export class BeefyAPI {
     );
   }
 
-  private static async getBeefyVaultDataAllChains(): Promise<BeefyVaultData[]> {
-    if (this.cachedVaultData && !this.cacheExpired()) {
+  private static async getBeefyVaultDataAllChains(
+    skipCache: boolean,
+  ): Promise<BeefyVaultData[]> {
+    if (!skipCache && this.cachedVaultData && !this.cacheExpired()) {
       return this.cachedVaultData;
     }
 
@@ -160,11 +162,12 @@ export class BeefyAPI {
 
   static async getFilteredBeefyVaults(
     networkName: NetworkName,
+    skipCache: boolean,
     depositERC20Address?: string,
     vaultTokenAddress?: string,
   ): Promise<BeefyVaultData[]> {
     try {
-      const beefyVaultData = await this.getBeefyVaultDataAllChains();
+      const beefyVaultData = await this.getBeefyVaultDataAllChains(skipCache);
 
       const beefyChainInfo = this.getBeefyChainInfoForNetwork(networkName);
       let filtered = beefyVaultData.filter(
@@ -198,7 +201,10 @@ export class BeefyAPI {
     vaultID: string,
     networkName: NetworkName,
   ): Promise<BeefyVaultData> {
-    const beefyVaults = await this.getFilteredBeefyVaults(networkName);
+    const beefyVaults = await this.getFilteredBeefyVaults(
+      networkName,
+      true, // skipCache
+    );
 
     const beefyVault = beefyVaults.find(vault => vault.vaultID === vaultID);
     if (!beefyVault) {

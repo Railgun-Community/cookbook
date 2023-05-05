@@ -25,9 +25,8 @@ after(() => {
 
 export const setupGanacheQuickstartTests = async () => {
   const tokenAddresses: string[] = [
-    // ganacheConfig.contractsEthereum.weth9,
-    // ganacheConfig.contractsEthereum.dai,
-    // ganacheConfig.contractsEthereum.rail,
+    // // ganacheConfig.contractsEthereum.weth9,
+    // // ganacheConfig.contractsEthereum.rail,
     // ganacheConfig.contractsEthereum.crvCRVETH,
     ganacheConfig.contractsEthereum.crvCRVETHVaultToken,
   ];

@@ -1009,10 +1009,10 @@
     levelup "^5.1.1"
     msgpack-lite "^0.1.26"
 
-"@railgun-community/quickstart@^4.3.23":
-  version "4.3.23"
-  resolved "https://registry.yarnpkg.com/@railgun-community/quickstart/-/quickstart-4.3.23.tgz#257e375358807c330819832240b36874d9afe354"
-  integrity sha512-4xq1Pr9ad8NN6NcDC2iwo4HMOayJiSE5eTpcKqMAf2tOfjQb8x9LBW+vlpH/86wcVm4qtqffIB4OQ2QJu4QjFA==
+"@railgun-community/quickstart@^4.3.24":
+  version "4.3.24"
+  resolved "https://registry.yarnpkg.com/@railgun-community/quickstart/-/quickstart-4.3.24.tgz#2587cd2d0074cc69ede23df127c5fc552489c672"
+  integrity sha512-ImAVfiRJs8TO3gmdd8oXEi56avRaXl2eIWr//JoqTCWrEBBXoRJFzUpq8jMV5QbgKp+ud6EANxTGtdy+SmJcMQ==
   dependencies:
     "@graphql-mesh/cache-localforage" "^0.7.20"
     "@graphql-mesh/cross-helpers" "^0.3.4"

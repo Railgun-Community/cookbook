@@ -20,19 +20,24 @@ describe('beefy-api', () => {
 
     await Promise.all(
       supportedNetworks.map(async networkName => {
-        const chainVaults = await BeefyAPI.getFilteredBeefyVaults(networkName);
+        const chainVaults = await BeefyAPI.getFilteredBeefyVaults(
+          networkName,
+          false, // skipCache
+        );
         expect(chainVaults.length).to.be.greaterThan(10);
       }),
     );
 
     const vaultsForEthereumToken = await BeefyAPI.getFilteredBeefyVaults(
       NetworkName.Ethereum,
+      false, // skipCache
       '0xEcd5e75AFb02eFa118AF914515D6521aaBd189F1'.toUpperCase(),
     );
     expect(vaultsForEthereumToken.length).to.equal(1);
 
     const vaultsForPolygonToken = await BeefyAPI.getFilteredBeefyVaults(
       NetworkName.Polygon,
+      false, // skipCache
       '0xEcd5e75AFb02eFa118AF914515D6521aaBd189F1'.toUpperCase(),
     );
     expect(vaultsForPolygonToken.length).to.equal(0);

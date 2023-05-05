@@ -223,7 +223,7 @@ export const waitForShieldedTokenBalances = async (
 
   const tokenBalanceGetter = (
     tokenAddress: string,
-  ): (() => Promise<Optional<BigNumber>>) => {
+  ): (() => Promise<BigNumber>) => {
     dbgRailgunSetup(`Polling for updated token balance... ${tokenAddress}`);
     return () =>
       balanceForERC20Token(
@@ -237,7 +237,7 @@ export const waitForShieldedTokenBalances = async (
     tokenAddresses.map(async tokenAddress => {
       const balance = await poll(
         tokenBalanceGetter(tokenAddress),
-        balance => (balance ? balance.gte('997500000000000000000') : false),
+        balance => balance.gte('997500000000000000000'),
         100, // Delay in MS
         300, // Iterations - 30sec total
       );
