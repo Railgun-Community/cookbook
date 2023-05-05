@@ -3,7 +3,10 @@ import {
   StepOutputERC20Amount,
 } from '../models/export-models';
 
-const compareTokenAddress = (a: string, b: string): boolean => {
+export const compareTokenAddress = (a: string, b: string): boolean => {
+  if (!a || !b) {
+    return false;
+  }
   return a.toLowerCase() === b.toLowerCase();
 };
 
