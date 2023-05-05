@@ -52,7 +52,7 @@ describe('beefy-deposit-recipe', () => {
     beefyVaultForIDStub.restore();
   });
 
-  it('Should create beefy-deposit-recipe with amount', async () => {
+  it('Should create beefy-deposit-recipe', async () => {
     const recipe = new BeefyDepositRecipe(vault.vaultID);
 
     const recipeInput: RecipeInput = {
@@ -200,7 +200,7 @@ describe('beefy-deposit-recipe', () => {
       },
       {
         amountString: '997',
-        recipientAddress: 'VAULT_NAME Fee',
+        recipientAddress: 'VAULT_NAME Vault Deposit Fee',
         tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
       {

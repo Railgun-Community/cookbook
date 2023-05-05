@@ -52,7 +52,7 @@ describe('beefy-withdraw-recipe', () => {
     beefyVaultForIDStub.restore();
   });
 
-  it('Should create beefy-withdraw-recipe with amount', async () => {
+  it('Should create beefy-withdraw-recipe', async () => {
     const recipe = new BeefyWithdrawRecipe(vault.vaultID);
 
     const recipeInput: RecipeInput = {
@@ -115,7 +115,7 @@ describe('beefy-withdraw-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0xde5f6268',
+          data: '0x853828b6',
           to: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
         },
       ],

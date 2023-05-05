@@ -82,7 +82,7 @@ describe('beefy-withdraw-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xde5f6268',
+        data: '0x853828b6',
         to: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
       },
     ]);
