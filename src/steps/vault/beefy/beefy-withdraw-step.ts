@@ -10,6 +10,7 @@ import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
 import { BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy-vault-contract';
+import { calculateOutputsForBeefyWithdraw } from './beefy-util';
 
 export class BeefyWithdrawStep extends Step {
   readonly config = {
@@ -52,23 +53,18 @@ export class BeefyWithdrawStep extends Step {
     const contract = new BeefyVaultContract(vaultContractAddress);
     const populatedTransaction = await contract.createDepositAll();
 
-    const decimalsAdjustment = BigNumber.from(10).pow(depositERC20Decimals);
-    const vaultWithdrawAmount = erc20AmountForStep.expectedBalance;
-    const receivedWithdrawAmount = BigNumber.from(vaultWithdrawAmount)
-      .mul(vaultRate)
-      .div(decimalsAdjustment);
-
-    const withdrawFeeBasisPoints = BigNumber.from(withdrawFee * 10000);
-    const withdrawFeeAmount = BigNumber.from(receivedWithdrawAmount)
-      .mul(withdrawFeeBasisPoints)
-      .div(10000);
-    const withdrawAmountAfterFee =
-      receivedWithdrawAmount.sub(withdrawFeeAmount);
+    const { withdrawFeeAmount, withdrawAmountAfterFee } =
+      calculateOutputsForBeefyWithdraw(
+        erc20AmountForStep.expectedBalance,
+        withdrawFee,
+        depositERC20Decimals,
+        vaultRate,
+      );
 
     const spentERC20AmountRecipient: RecipeERC20AmountRecipient = {
       ...withdrawERC20Info,
-      amount: vaultWithdrawAmount,
-      recipient: `${vaultName} (${vaultID})`,
+      amount: erc20AmountForStep.expectedBalance,
+      recipient: `${vaultName} Vault`,
     };
     const outputERC20Amount: StepOutputERC20Amount = {
       tokenAddress: depositERC20Address,
@@ -79,7 +75,7 @@ export class BeefyWithdrawStep extends Step {
     const feeERC20Amount: RecipeERC20AmountRecipient = {
       tokenAddress: depositERC20Address,
       amount: withdrawFeeAmount,
-      recipient: `Beefy Fee`,
+      recipient: `Beefy Vault Withdraw Fee`,
     };
 
     return {

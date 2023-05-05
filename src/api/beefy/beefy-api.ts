@@ -109,9 +109,9 @@ export class BeefyAPI {
   }
 
   private static cacheExpired(): boolean {
-    // 15 min
+    // 3 min cache
     return (
-      !this.cacheTimestamp || this.cacheTimestamp < Date.now() - 15 * 60 * 1000
+      !this.cacheTimestamp || this.cacheTimestamp < Date.now() - 3 * 60 * 1000
     );
   }
 

@@ -7,6 +7,7 @@ import {
   waitForShieldedTokenBalances,
 } from './railgun-setup.test';
 import { setupGanacheEthereumRPCAndWallets } from './ganache-setup.test';
+import { ganacheConfig } from './ganache-config.test';
 
 before(async function run() {
   if (process.env.RUN_GANACHE_TESTS) {
@@ -23,8 +24,15 @@ after(() => {
 });
 
 export const setupGanacheQuickstartTests = async () => {
+  const tokenAddresses: string[] = [
+    ganacheConfig.contractsEthereum.weth9,
+    ganacheConfig.contractsEthereum.dai,
+    ganacheConfig.contractsEthereum.rail,
+    ganacheConfig.contractsEthereum.crvCRVETH,
+  ];
+
   // Ganache forked Ethereum RPC setup
-  await setupGanacheEthereumRPCAndWallets();
+  await setupGanacheEthereumRPCAndWallets(tokenAddresses);
 
   // Quickstart setup
   startRailgunForTests();
@@ -32,8 +40,8 @@ export const setupGanacheQuickstartTests = async () => {
 
   // Wallet setup and initial shield
   await createRailgunWalletForTests();
-  await shieldAllTokensForTests();
+  await shieldAllTokensForTests(tokenAddresses);
 
   // Make sure shielded balances are updated
-  await waitForShieldedTokenBalances();
+  await waitForShieldedTokenBalances(tokenAddresses);
 };

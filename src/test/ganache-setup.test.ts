@@ -1,14 +1,16 @@
 import ganache from 'ganache';
 import { ganacheConfig } from './ganache-config.test';
 import { Web3Provider } from '@ethersproject/providers';
-import { solidityKeccak256 } from 'ethers/lib/utils';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import debug from 'debug';
 import { getTestEthersWallet, setSharedGanacheProvider } from './shared.test';
+import { ethers } from 'ethers';
 
 const dbgGanacheEthereum = debug('ganache:ethereum');
 
-export const setupGanacheEthereumRPCAndWallets = async () => {
+export const setupGanacheEthereumRPCAndWallets = async (
+  tokenAddresses: string[],
+) => {
   dbgGanacheEthereum('Starting Ganache Ethereum RPC...');
 
   // Get fork block (10000 blocks behind)
@@ -20,6 +22,7 @@ export const setupGanacheEthereumRPCAndWallets = async () => {
     server: {},
     fork: {
       url: ganacheConfig.ethereumForkRPC,
+      // requestsPerSecond: 100,
       // blockNumber: ganacheForkBlock,
     },
     wallet: {
@@ -52,30 +55,22 @@ export const setupGanacheEthereumRPCAndWallets = async () => {
   const wallet = getTestEthersWallet();
   const oneThousand18Decimals = '1000000000000000000000';
 
-  await setTokenBalance(
-    ganacheEthersProvider,
-    wallet.address,
-    ganacheConfig.contractsEthereum.weth9,
-    oneThousand18Decimals, // 1000 WETH
-  );
-  await setTokenBalance(
-    ganacheEthersProvider,
-    wallet.address,
-    ganacheConfig.contractsEthereum.dai,
-    oneThousand18Decimals, // 1000 DAI
-  );
-  await setTokenBalance(
-    ganacheEthersProvider,
-    wallet.address,
-    ganacheConfig.contractsEthereum.rail,
-    oneThousand18Decimals, // 1000 RAIL
+  await Promise.all(
+    tokenAddresses.map(async tokenAddress => {
+      await setTokenBalance(
+        ganacheEthersProvider,
+        wallet.address,
+        tokenAddress,
+        oneThousand18Decimals, // 1000 WETH
+      );
+    }),
   );
 };
 
 const setTokenBalance = async (
   provider: Web3Provider,
-  address: string,
-  token: string,
+  walletAddress: string,
+  tokenAddress: string,
   balance: string,
 ) => {
   // Format balance
@@ -84,7 +79,7 @@ const setTokenBalance = async (
     .padStart(64, '0')}`;
 
   // Get token interface
-  const erc20 = new ERC20Contract(token, provider);
+  const erc20 = new ERC20Contract(tokenAddress, provider);
 
   // Get RPC command to set storage
   let setRPCCommand = 'evm_setAccountStorageAt'; // Default
@@ -104,25 +99,67 @@ const setTokenBalance = async (
     // eslint-disable-next-line no-console
   }
 
-  // Loop through storage slots and try to change balance
-  for (let i = 0; i < 1000; i += 1) {
-    // Calculate storage slot
-    const storageSlot = solidityKeccak256(['uint256', 'uint256'], [address, i]);
-
+  /**
+   * Attempt to change ERC20 balance with storage slot
+   */
+  const attemptERC20BalanceChange = async (storageSlot: string) => {
     // Get storage before
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const before = await provider.send('eth_getStorageAt', [
-      token,
+    const before: string = await provider.send('eth_getStorageAt', [
+      tokenAddress,
       storageSlot,
     ]);
 
     // Set storage
-    await provider.send(setRPCCommand, [token, storageSlot, balanceFormatted]);
+    await provider.send(setRPCCommand, [
+      tokenAddress,
+      storageSlot,
+      balanceFormatted,
+    ]);
 
     // Check if token balance changed
-    if ((await erc20.balanceOf(address)).toBigInt() === BigInt(balance)) break;
+    if ((await erc20.balanceOf(walletAddress)).toBigInt() === BigInt(balance))
+      return true;
 
     // Restore storage before going to next slot
-    await provider.send(setRPCCommand, [token, storageSlot, before]);
+    await provider.send(setRPCCommand, [tokenAddress, storageSlot, before]);
+
+    return false;
+  };
+
+  // Loop through storage slots and try to change balance
+  let success = false;
+
+  // Loop through storage slots
+  for (let i = 0; i < 1000; i += 1) {
+    // Try to change for solidity storage layout
+    if (
+      await attemptERC20BalanceChange(
+        ethers.utils.solidityKeccak256(
+          ['uint256', 'uint256'],
+          [walletAddress, i],
+        ),
+      )
+    ) {
+      success = true;
+      break;
+    }
+
+    // Try to change for vyper storage layout
+    if (
+      await attemptERC20BalanceChange(
+        ethers.utils.solidityKeccak256(
+          ['uint256', 'uint256'],
+          [i, walletAddress],
+        ),
+      )
+    ) {
+      success = true;
+      break;
+    }
+  }
+
+  if (!success) {
+    throw new Error(`Could not set token balance for ${tokenAddress}`);
   }
 };

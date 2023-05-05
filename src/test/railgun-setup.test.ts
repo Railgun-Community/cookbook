@@ -147,40 +147,27 @@ const approveShield = async (wallet: Wallet, tokenAddress: string) => {
   return wallet.sendTransaction(tx);
 };
 
-export const shieldAllTokensForTests = async () => {
+export const shieldAllTokensForTests = async (tokenAddresses: string[]) => {
   const wallet = getTestEthersWallet();
 
-  dbgRailgunSetup('Approving WETH, DAI, and RAIL tokens for shielding...');
+  dbgRailgunSetup('Approving all tokens for shielding...');
 
-  await approveShield(wallet, ganacheConfig.contractsEthereum.weth9);
-  await approveShield(wallet, ganacheConfig.contractsEthereum.dai);
-  await approveShield(wallet, ganacheConfig.contractsEthereum.rail);
+  for (let i = 0; i < tokenAddresses.length; i++) {
+    await approveShield(wallet, tokenAddresses[i]);
+  }
 
-  dbgRailgunSetup(
-    'Shielding WETH, DAI, and RAIL tokens... This may take 10-15 seconds.',
-  );
+  dbgRailgunSetup('Shielding tokens... This may take 10-15 seconds.');
 
   const testRailgunWallet = getTestRailgunWallet();
   const railgunAddress = testRailgunWallet.getAddress();
 
   const oneThousand18Decimals = '1000000000000000000000';
-  const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [
-    {
-      tokenAddress: ganacheConfig.contractsEthereum.weth9,
+  const erc20AmountRecipients: RailgunERC20AmountRecipient[] =
+    tokenAddresses.map(tokenAddress => ({
+      tokenAddress,
       amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
       recipientAddress: railgunAddress,
-    },
-    {
-      tokenAddress: ganacheConfig.contractsEthereum.dai,
-      amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
-      recipientAddress: railgunAddress,
-    },
-    {
-      tokenAddress: ganacheConfig.contractsEthereum.rail,
-      amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
-      recipientAddress: railgunAddress,
-    },
-  ];
+    }));
 
   const shieldPrivateKey = getRandomBytes(32);
   const { serializedTransaction, error } = await populateShield(
@@ -202,7 +189,7 @@ export const shieldAllTokensForTests = async () => {
 
   await trySendShieldTransaction(wallet, tx);
 
-  dbgRailgunSetup('Shielded WETH, DAI, and RAIL tokens.');
+  dbgRailgunSetup('Shielded tokens.');
 };
 
 const trySendShieldTransaction = async (
@@ -222,7 +209,9 @@ const trySendShieldTransaction = async (
   }
 };
 
-export const waitForShieldedTokenBalances = async () => {
+export const waitForShieldedTokenBalances = async (
+  tokenAddresses: string[],
+) => {
   const onBalancesUpdate = (balancesEvent: RailgunBalancesEvent) => {
     dbgRailgunQuickstart('onBalancesUpdate', balancesEvent);
   };
@@ -244,26 +233,18 @@ export const waitForShieldedTokenBalances = async () => {
       );
   };
 
-  // Wait for initial balance update - WETH.
-  await poll(
-    tokenBalanceGetter(ganacheConfig.contractsEthereum.weth9),
-    balance => (balance ? balance.gte('997500000000000000000') : false),
-    1000, // Delay in MS
-    100, // Iterations
-  );
-
-  // Make sure other tokens have balances.
-  await poll(
-    tokenBalanceGetter(ganacheConfig.contractsEthereum.dai),
-    balance => (balance ? balance.gte('997500000000000000000') : false),
-    100, // Delay in MS
-    5, // Iterations
-  );
-  await poll(
-    tokenBalanceGetter(ganacheConfig.contractsEthereum.rail),
-    balance => (balance ? balance.gte('997500000000000000000') : false),
-    100, // Delay in MS
-    5, // Iterations
+  await Promise.all(
+    tokenAddresses.map(async tokenAddress => {
+      const balance = await poll(
+        tokenBalanceGetter(tokenAddress),
+        balance => (balance ? balance.gte('997500000000000000000') : false),
+        100, // Delay in MS
+        300, // Iterations - 30sec total
+      );
+      if (!balance) {
+        throw new Error(`Could not find shielded balance for ${tokenAddress}`);
+      }
+    }),
   );
 
   dbgRailgunSetup('---');

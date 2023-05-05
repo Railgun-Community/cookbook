@@ -58,7 +58,6 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
     const initialToAddressETHBalance = await provider.getBalance(toAddress);
 
     await executeRecipeAndAssertUnshieldBalances(
-      networkName,
       recipe,
       recipeInput,
       2_800_000, // expectedGasWithin50K
@@ -100,7 +99,6 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
     const initialToAddressETHBalance = await provider.getBalance(toAddress);
 
     await executeRecipeAndAssertUnshieldBalances(
-      networkName,
       recipe,
       recipeInput,
       2_800_000, // expectedGasWithin50K

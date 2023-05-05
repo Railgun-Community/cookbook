@@ -1,9 +1,5 @@
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import {
-  NETWORK_CONFIG,
-  NetworkName,
-  delay,
-} from '@railgun-community/shared-models';
+import { NETWORK_CONFIG, delay } from '@railgun-community/shared-models';
 import { BigNumber } from 'ethers';
 import { RecipeInput } from '../models/export-models';
 import { Recipe } from '../recipes';
@@ -21,12 +17,13 @@ const { expect } = chai;
 const SCAN_BALANCE_DELAY = 5000;
 
 export const executeRecipeAndAssertUnshieldBalances = async (
-  networkName: NetworkName,
   recipe: Recipe,
   recipeInput: RecipeInput,
   expectedGasWithin50K: number,
 ) => {
   const railgunWallet = getTestRailgunWallet();
+
+  const { networkName } = recipeInput;
 
   // Get original balances for all unshielded ERC20s.
   const preRecipeUnshieldMap: Record<
@@ -51,32 +48,60 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   );
 
   const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+  console.log(recipeOutput);
+  console.log(JSON.stringify(recipeOutput.stepOutputs));
 
   const { gasEstimateString, transaction } =
     await createQuickstartCrossContractCallsForTest(networkName, recipeOutput);
+  // console.log(`Gas estimate: ${gasEstimateString}`);
 
   expect(
     BigNumber.from(gasEstimateString).gte(expectedGasWithin50K - 50_000),
   ).to.equal(
     true,
-    `Gas estimate lower than expected range: expected within 50k of ${expectedGasWithin50K}`,
+    `${recipe.config.name}: Gas estimate lower than expected range: expected within 50k of ${expectedGasWithin50K}`,
   );
   expect(
     BigNumber.from(gasEstimateString).lte(expectedGasWithin50K + 50_000),
   ).to.equal(
     true,
-    `Gas estimate higher than expected range: expected within 50k of ${expectedGasWithin50K}`,
+    `${recipe.config.name}: Gas estimate higher than expected range: expected within 50k of ${expectedGasWithin50K}`,
   );
 
   const wallet = getTestEthersWallet();
   const txResponse = await wallet.sendTransaction(transaction);
-  await txResponse.wait();
+  const txReceipt = await txResponse.wait();
+  console.log(txReceipt);
+  console.log(JSON.stringify(txReceipt));
 
   // Wait for private balances to re-scan.
   // TODO: Possible race condition - maybe watch for scan events instead.
   await delay(SCAN_BALANCE_DELAY);
   const { chain } = NETWORK_CONFIG[networkName];
   await railgunWallet.scanBalances(chain, () => {});
+
+  console.log('Post recipe balances:');
+  console.log('orig crv token:');
+  console.log(
+    (
+      await balanceForERC20Token(
+        railgunWallet,
+        networkName,
+        '0xEd4064f376cB8d68F770FB1Ff088a3d0F3FF5c4d',
+      )
+    )?.toString(),
+  );
+  console.log('vault token:');
+  console.log(
+    (
+      await balanceForERC20Token(
+        railgunWallet,
+        networkName,
+        '0x245186CaA063b13d0025891c0d513aCf552fB38E',
+      )
+    )?.toString(),
+  );
+  console.log(recipeInput.unshieldRecipeERC20Amounts);
 
   const shieldTokenMap: Record<string, BigNumber> = {};
   const shieldStepOutput =
@@ -103,7 +128,7 @@ export const executeRecipeAndAssertUnshieldBalances = async (
 
       expect(postBalance.toString()).to.equal(
         expectedBalance.toString(),
-        'Did not get expected balance for unshielded (possibly reshielded) token',
+        `${recipe.config.name}: Did not get expected balance for unshielded (and possibly re-shielded) token`,
       );
     }),
   );

@@ -10,6 +10,7 @@ import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
 import { Step } from '../../step';
 import { BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy-vault-contract';
+import { calculateOutputsForBeefyDeposit } from './beefy-util';
 
 export class BeefyDepositStep extends Step {
   readonly config = {
@@ -54,33 +55,32 @@ export class BeefyDepositStep extends Step {
     const contract = new BeefyVaultContract(vaultContractAddress);
     const populatedTransaction = await contract.createDepositAll();
 
-    const depositFeeBasisPoints = BigNumber.from(depositFee * 10000);
-    const depositAmount = erc20AmountForStep.expectedBalance;
-    const depositFeeAmount = BigNumber.from(depositAmount)
-      .mul(depositFeeBasisPoints)
-      .div(10000);
-    const depositAmountAfterFee = depositAmount.sub(depositFeeAmount);
-
-    const decimalsAdjustment = BigNumber.from(10).pow(depositERC20Decimals);
-    const expectedBalance = BigNumber.from(depositAmountAfterFee)
-      .mul(decimalsAdjustment)
-      .div(vaultRate);
+    const {
+      depositFeeAmount,
+      depositAmountAfterFee,
+      receivedVaultTokenAmount,
+    } = calculateOutputsForBeefyDeposit(
+      erc20AmountForStep.expectedBalance,
+      depositFee,
+      depositERC20Decimals,
+      vaultRate,
+    );
 
     const spentERC20AmountRecipient: RecipeERC20AmountRecipient = {
       ...depositERC20Info,
       amount: depositAmountAfterFee,
-      recipient: `${vaultName} (${vaultID})`,
+      recipient: `${vaultName} Vault`,
     };
     const outputERC20Amount: StepOutputERC20Amount = {
       tokenAddress: vaultTokenAddress,
-      expectedBalance,
-      minBalance: expectedBalance,
+      expectedBalance: receivedVaultTokenAmount,
+      minBalance: receivedVaultTokenAmount,
       approvedSpender: undefined,
     };
     const feeERC20Amount: RecipeERC20AmountRecipient = {
       ...depositERC20Info,
       amount: depositFeeAmount,
-      recipient: `${vaultName} Fee`,
+      recipient: `${vaultName} Vault Deposit Fee`,
     };
 
     return {

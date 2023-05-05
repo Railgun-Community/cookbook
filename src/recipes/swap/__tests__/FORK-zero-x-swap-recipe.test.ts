@@ -82,7 +82,6 @@ describe('FORK-zero-x-swap-recipe', function run() {
     )) as BigNumber;
 
     await executeRecipeAndAssertUnshieldBalances(
-      networkName,
       recipe,
       recipeInput,
       2_800_000, // expectedGasWithin50K

@@ -52,7 +52,6 @@ describe('FORK-empty-recipe', function run() {
     };
 
     await executeRecipeAndAssertUnshieldBalances(
-      networkName,
       recipe,
       recipeInput,
       2_800_000, // expectedGasWithin50K

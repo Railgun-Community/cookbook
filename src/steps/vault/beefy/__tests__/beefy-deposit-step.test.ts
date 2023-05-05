@@ -15,7 +15,7 @@ const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
 const vault: BeefyVaultData = {
   vaultID: 'id',
-  vaultName: 'Vault Name',
+  vaultName: 'VAULT_NAME',
   chain: 'ethereum',
   network: 'ethereum',
   depositERC20Address: tokenAddress,
@@ -62,7 +62,7 @@ describe('beefy-deposit-step', () => {
     expect(output.spentERC20Amounts).to.deep.equal([
       {
         amount: BigNumber.from('9000'),
-        recipient: 'Vault Name (id)',
+        recipient: 'VAULT_NAME Vault',
         tokenAddress,
       },
     ]);
@@ -90,7 +90,7 @@ describe('beefy-deposit-step', () => {
       {
         tokenAddress,
         amount: BigNumber.from('1000'),
-        recipient: 'Vault Name Fee',
+        recipient: 'VAULT_NAME Vault Deposit Fee',
       },
     ]);
 
