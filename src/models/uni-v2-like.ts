@@ -1,10 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
-export enum UniswapV2Fork {
-  Uniswap = 'Uniswap',
-  Sushiswap = 'Sushiswap',
-}
-
 export type PairDataWithRate = {
   tokenAddressA: string;
   tokenSymbolA: string;

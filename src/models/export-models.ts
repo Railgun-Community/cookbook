@@ -102,3 +102,18 @@ export type SwapQuoteParams = {
 export type GetSwapQuote = (
   swapQuoteParams: SwapQuoteParams,
 ) => Promise<SwapQuoteData>;
+
+export type RecipeAddLiquidityData = {
+  erc20AmountA: RecipeERC20Amount;
+  erc20AmountB: RecipeERC20Amount;
+  expectedLPBalance: BigNumber;
+  slippagePercentage: number;
+  routerContract: string;
+  pairAddress: string;
+  deadlineTimestamp: number;
+};
+
+export enum UniswapV2Fork {
+  Uniswap = 'Uniswap',
+  Sushiswap = 'Sushiswap',
+}

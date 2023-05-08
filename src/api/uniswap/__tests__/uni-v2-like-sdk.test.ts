@@ -2,10 +2,9 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { NetworkName } from '@railgun-community/shared-models';
 import { UniV2LikeSDK } from '../uni-v2-like-sdk';
-import { RecipeERC20Info } from '../../../models';
+import { RecipeERC20Info, UniswapV2Fork } from '../../../models/export-models';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'ethers';
-import { UniswapV2Fork } from '../../../models/uni-v2-like';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

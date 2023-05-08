@@ -15,6 +15,7 @@ import {
   SwapQuoteParams,
 } from '../../models/export-models';
 import { PopulatedTransaction } from '@ethersproject/contracts';
+import { minBalanceAfterSlippage } from '../../utils/number';
 
 export const ZERO_X_PRICE_DECIMALS = 18;
 
@@ -144,9 +145,10 @@ export class ZeroXQuote {
         throw invalidError;
       }
 
-      const minimumBuyAmount = BigNumber.from(buyAmount)
-        .mul(10000 - slippagePercentage * 10000)
-        .div(10000);
+      const minimumBuyAmount = minBalanceAfterSlippage(
+        BigNumber.from(buyAmount),
+        slippagePercentage,
+      );
       const populatedTransaction: PopulatedTransaction = {
         to: to,
         data: data,

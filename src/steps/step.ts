@@ -90,17 +90,82 @@ export abstract class Step {
     }
 
     // Add change output.
-    if (amount?.lt(erc20AmountForStep.expectedBalance)) {
-      const changeBalance = erc20AmountForStep.expectedBalance.sub(amount);
-      unusedERC20Amounts.push({
-        ...erc20AmountForStep,
-        expectedBalance: changeBalance,
-        minBalance: changeBalance,
-      });
-      erc20AmountForStep.expectedBalance = amount;
-      erc20AmountForStep.minBalance = amount;
+    const changeOutputs = this.getChangeOutputs(erc20AmountForStep, amount);
+    if (changeOutputs) {
+      unusedERC20Amounts.push(changeOutputs.changeOutput);
+      erc20AmountForStep.expectedBalance = changeOutputs.expectedBalance;
+      erc20AmountForStep.minBalance = changeOutputs.minBalance;
     }
 
     return { erc20AmountForStep, unusedERC20Amounts };
+  }
+
+  private getChangeOutputs(
+    erc20AmountForStep: StepOutputERC20Amount,
+    amountUsed: Optional<BigNumber>,
+  ) {
+    if (!amountUsed || amountUsed.gte(erc20AmountForStep.expectedBalance)) {
+      return undefined;
+    }
+
+    const changeBalance = erc20AmountForStep.expectedBalance.sub(amountUsed);
+    const changeOutput: StepOutputERC20Amount = {
+      ...erc20AmountForStep,
+      expectedBalance: changeBalance,
+      minBalance: changeBalance,
+    };
+    return {
+      expectedBalance: amountUsed,
+      minBalance: amountUsed,
+      changeOutput,
+    };
+  }
+
+  protected getValidInputERC20Amounts(
+    inputERC20Amounts: StepOutputERC20Amount[],
+    filters: ERC20AmountFilter[],
+    amounts: Optional<BigNumber>[],
+  ): {
+    erc20AmountsForStep: StepOutputERC20Amount[];
+    unusedERC20Amounts: StepOutputERC20Amount[];
+  } {
+    if (amounts.length !== filters.length) {
+      throw new Error(
+        'getValidInputERC20Amounts requires one amount for each filter (can be array of undefineds).',
+      );
+    }
+
+    const anyFilterPasses = (erc20Amount: StepOutputERC20Amount) => {
+      return (
+        filters.find(filter => {
+          return filter(erc20Amount);
+        }) != null
+      );
+    };
+
+    const { erc20AmountsForStep, unusedERC20Amounts } = filterERC20AmountInputs(
+      inputERC20Amounts,
+      anyFilterPasses,
+    );
+
+    const numFiltered = erc20AmountsForStep.length;
+    if (numFiltered !== filters.length) {
+      throw new Error(
+        `Recipe does not include a balance for each filtered token.`,
+      );
+    }
+
+    // Add change outputs.
+    erc20AmountsForStep.forEach((erc20AmountForStep, index) => {
+      const amount = amounts[index];
+      const changeOutputs = this.getChangeOutputs(erc20AmountForStep, amount);
+      if (changeOutputs) {
+        unusedERC20Amounts.push(changeOutputs.changeOutput);
+        erc20AmountForStep.expectedBalance = changeOutputs.expectedBalance;
+        erc20AmountForStep.minBalance = changeOutputs.minBalance;
+      }
+    });
+
+    return { erc20AmountsForStep, unusedERC20Amounts };
   }
 }

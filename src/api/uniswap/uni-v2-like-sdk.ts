@@ -1,16 +1,18 @@
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { Pair } from 'custom-uniswap-v2-sdk';
 import { Token } from '@uniswap/sdk-core';
-import { RecipeERC20Info } from '../../models';
+import { RecipeERC20Info, UniswapV2Fork } from '../../models/export-models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from '@ethersproject/bignumber';
-import { PairDataWithRate, UniswapV2Fork } from '../../models/uni-v2-like';
+import { PairDataWithRate } from '../../models/uni-v2-like';
 import { calculatePairRateWith18Decimals } from '../../utils/pair-rate';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 
 export class UniV2LikeSDK {
+  static LIQUIDITY_TOKEN_DECIMALS = 18;
+
   private static getFactoryAddressAndInitCodeHash(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
@@ -104,6 +106,25 @@ export class UniV2LikeSDK {
     return Pair.getAddress(tokenA, tokenB, factoryAddress, initCodeHash);
   }
 
+  static getForkName(uniswapV2Fork: UniswapV2Fork) {
+    switch (uniswapV2Fork) {
+      case UniswapV2Fork.Uniswap:
+        return 'Uniswap V2';
+      case UniswapV2Fork.Sushiswap:
+        return 'Sushiswap V2';
+    }
+  }
+
+  static getPairName(
+    uniswapV2Fork: UniswapV2Fork,
+    erc20SymbolA: RecipeERC20Info,
+    erc20SymbolB: RecipeERC20Info,
+  ) {
+    return `${this.getForkName(
+      uniswapV2Fork,
+    )}: ${erc20SymbolA}-${erc20SymbolB}`;
+  }
+
   static async getPairRate(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
@@ -127,11 +148,11 @@ export class UniV2LikeSDK {
 
     const pairContract = new UniV2LikePairContract(pairAddress, provider);
 
-    const { tokenAmountA, tokenAmountB } = await pairContract.getReserves();
+    const { reserveA, reserveB } = await pairContract.getReserves();
     const rateWith18Decimals = calculatePairRateWith18Decimals(
-      tokenAmountA,
+      reserveA,
       erc20InfoA.decimals,
-      tokenAmountB,
+      reserveB,
       erc20InfoB.decimals,
     );
 
