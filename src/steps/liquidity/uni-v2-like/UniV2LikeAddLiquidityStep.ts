@@ -13,7 +13,7 @@ import { minBalanceAfterSlippage } from '../../../utils/number';
 import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like-router-contract';
 import { NETWORK_CONFIG } from '@railgun-community/shared-models';
 
-export abstract class UniV2LikeAddLiquidityStep extends Step {
+export class UniV2LikeAddLiquidityStep extends Step {
   readonly config = {
     name: '[Name] Add Liquidity Step',
     description: 'Adds liquidity to a Uniswap V2-like pair.',
@@ -43,10 +43,9 @@ export abstract class UniV2LikeAddLiquidityStep extends Step {
       routerContract,
       erc20AmountA,
       erc20AmountB,
-      pairAddress,
+      expectedLPAmount,
       slippagePercentage,
       deadlineTimestamp,
-      expectedLPBalance,
     } = this.addLiquidityData;
 
     const { erc20AmountsForStep, unusedERC20Amounts } =
@@ -109,15 +108,15 @@ export abstract class UniV2LikeAddLiquidityStep extends Step {
     };
 
     const minLPBalance = minBalanceAfterSlippage(
-      expectedLPBalance,
+      expectedLPAmount.amount,
       slippagePercentage,
     );
 
-    const outputBuyERC20Amount: StepOutputERC20Amount = {
-      tokenAddress: pairAddress,
-      decimals: UniV2LikeSDK.LIQUIDITY_TOKEN_DECIMALS,
+    const outputLPERC20Amount: StepOutputERC20Amount = {
+      tokenAddress: expectedLPAmount.tokenAddress,
+      decimals: expectedLPAmount.decimals,
       isBaseToken: false,
-      expectedBalance: expectedLPBalance,
+      expectedBalance: expectedLPAmount.amount,
       minBalance: minLPBalance,
       approvedSpender: undefined,
     };
@@ -128,7 +127,7 @@ export abstract class UniV2LikeAddLiquidityStep extends Step {
         spendERC20AmountRecipientA,
         spendERC20AmountRecipientB,
       ],
-      outputERC20Amounts: [outputBuyERC20Amount, ...unusedERC20Amounts],
+      outputERC20Amounts: [outputLPERC20Amount, ...unusedERC20Amounts],
       spentNFTs: [],
       outputNFTs: input.nfts,
       feeERC20AmountRecipients: [],

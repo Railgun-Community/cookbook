@@ -106,10 +106,18 @@ export type GetSwapQuote = (
 export type RecipeAddLiquidityData = {
   erc20AmountA: RecipeERC20Amount;
   erc20AmountB: RecipeERC20Amount;
-  expectedLPBalance: BigNumber;
+  expectedLPAmount: RecipeERC20Amount;
   slippagePercentage: number;
   routerContract: string;
-  pairAddress: string;
+  deadlineTimestamp: number;
+};
+
+export type RecipeRemoveLiquidityData = {
+  lpERC20Amount: RecipeERC20Amount;
+  expectedERC20AmountA: RecipeERC20Amount;
+  expectedERC20AmountB: RecipeERC20Amount;
+  slippagePercentage: number;
+  routerContract: string;
   deadlineTimestamp: number;
 };
 

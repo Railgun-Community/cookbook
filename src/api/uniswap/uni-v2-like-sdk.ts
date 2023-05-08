@@ -1,7 +1,13 @@
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { Pair } from 'custom-uniswap-v2-sdk';
 import { Token } from '@uniswap/sdk-core';
-import { RecipeERC20Info, UniswapV2Fork } from '../../models/export-models';
+import {
+  RecipeAddLiquidityData,
+  RecipeERC20Amount,
+  RecipeERC20Info,
+  RecipeRemoveLiquidityData,
+  UniswapV2Fork,
+} from '../../models/export-models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -61,12 +67,50 @@ export class UniV2LikeSDK {
     }
   }
 
+  private static getRouterContract(
+    uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
+  ): string {
+    switch (uniswapV2Fork) {
+      case UniswapV2Fork.Uniswap:
+        if (networkName === NetworkName.Ethereum) {
+          return '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45';
+        }
+        throw new Error('Uniswap V2 LP is not supported on this network');
+
+      case UniswapV2Fork.Sushiswap: {
+        // Look for "SushiSwapRouter" for each chain:
+        // https://dev.sushi.com/docs/Developers/Deployment%20Addresses
+        switch (networkName) {
+          case NetworkName.Ethereum:
+            return '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F';
+          case NetworkName.EthereumGoerli:
+            return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
+          case NetworkName.Polygon:
+            return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
+          case NetworkName.PolygonMumbai:
+            return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
+          case NetworkName.BNBChain:
+            return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
+          case NetworkName.Arbitrum:
+            return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
+          case NetworkName.ArbitrumGoerli:
+          case NetworkName.EthereumRopsten_DEPRECATED:
+          case NetworkName.Railgun:
+          case NetworkName.Hardhat:
+            throw new Error('Sushiswap V2 LP is not supported on this network');
+        }
+      }
+    }
+  }
+
   private static supportsNetwork(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
   ): boolean {
     try {
       this.getFactoryAddressAndInitCodeHash(uniswapV2Fork, networkName);
+      this.getRouterContract(uniswapV2Fork, networkName);
       return true;
     } catch {
       return false;
@@ -157,6 +201,136 @@ export class UniV2LikeSDK {
     );
 
     return rateWith18Decimals;
+  }
+
+  private static getDeadlineTimestamp() {
+    // 5 minutes from now
+    return Date.now() + 5 * 60 * 1000;
+  }
+
+  static async getAddLiquidityData(
+    uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
+    erc20AmountA: RecipeERC20Amount,
+    erc20AmountB: RecipeERC20Amount,
+    slippagePercentage: number,
+    provider: BaseProvider,
+  ): Promise<RecipeAddLiquidityData> {
+    const pairAddress = this.getPairLPAddress(
+      uniswapV2Fork,
+      networkName,
+      erc20AmountA,
+      erc20AmountB,
+    );
+    const routerContract = this.getRouterContract(uniswapV2Fork, networkName);
+    const expectedLPBalance = await this.getExpectedLPBalance(
+      erc20AmountA,
+      erc20AmountB,
+      pairAddress,
+      provider,
+    );
+    const expectedLPAmount: RecipeERC20Amount = {
+      tokenAddress: pairAddress,
+      decimals: this.LIQUIDITY_TOKEN_DECIMALS,
+      amount: expectedLPBalance,
+    };
+    const deadlineTimestamp = this.getDeadlineTimestamp();
+
+    return {
+      erc20AmountA,
+      erc20AmountB,
+      expectedLPAmount,
+      routerContract,
+      slippagePercentage,
+      deadlineTimestamp,
+    };
+  }
+
+  static async getRemoveLiquidityData(
+    uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
+    lpERC20Amount: RecipeERC20Amount,
+    erc20InfoA: RecipeERC20Info,
+    erc20InfoB: RecipeERC20Info,
+    slippagePercentage: number,
+    provider: BaseProvider,
+  ): Promise<RecipeRemoveLiquidityData> {
+    const pairAddress = this.getPairLPAddress(
+      uniswapV2Fork,
+      networkName,
+      erc20InfoA,
+      erc20InfoB,
+    );
+    if (pairAddress !== lpERC20Amount.tokenAddress) {
+      throw new Error(
+        'LP token address does not match pair address. Token A and B must be ordered by bytes.',
+      );
+    }
+
+    const routerContract = this.getRouterContract(uniswapV2Fork, networkName);
+    const { expectedAmountA, expectedAmountB } =
+      await this.getExpectedUnwoundABBalances(lpERC20Amount, provider);
+
+    const deadlineTimestamp = this.getDeadlineTimestamp();
+
+    const expectedERC20AmountA: RecipeERC20Amount = {
+      ...erc20InfoA,
+      amount: expectedAmountA,
+    };
+    const expectedERC20AmountB: RecipeERC20Amount = {
+      ...erc20InfoB,
+      amount: expectedAmountB,
+    };
+
+    return {
+      lpERC20Amount,
+      expectedERC20AmountA,
+      expectedERC20AmountB,
+      routerContract,
+      slippagePercentage,
+      deadlineTimestamp,
+    };
+  }
+
+  private static async getExpectedLPBalance(
+    erc20AmountA: RecipeERC20Amount,
+    erc20AmountB: RecipeERC20Amount,
+    pairAddress: string,
+    provider: BaseProvider,
+  ): Promise<BigNumber> {
+    const pairContract = new UniV2LikePairContract(pairAddress, provider);
+    const [{ reserveA, reserveB }, totalSupply] = await Promise.all([
+      pairContract.getReserves(),
+      pairContract.totalSupply(),
+    ]);
+
+    const mintedTokensA = erc20AmountA.amount.mul(totalSupply).div(reserveA);
+    const mintedTokensB = erc20AmountB.amount.mul(totalSupply).div(reserveB);
+
+    // Return minimum.
+    return mintedTokensA.lt(mintedTokensB) ? mintedTokensA : mintedTokensB;
+  }
+
+  private static async getExpectedUnwoundABBalances(
+    lpERC20Amount: RecipeERC20Amount,
+    provider: BaseProvider,
+  ): Promise<{
+    expectedAmountA: BigNumber;
+    expectedAmountB: BigNumber;
+  }> {
+    const pairContract = new UniV2LikePairContract(
+      lpERC20Amount.tokenAddress,
+      provider,
+    );
+    const [{ reserveA, reserveB }, totalSupply] = await Promise.all([
+      pairContract.getReserves(),
+      pairContract.totalSupply(),
+    ]);
+
+    const expectedAmountA = lpERC20Amount.amount.mul(reserveA).div(totalSupply);
+    const expectedAmountB = lpERC20Amount.amount.mul(reserveB).div(totalSupply);
+
+    return { expectedAmountA, expectedAmountB };
   }
 
   static getAllLPPairsForTokenAddresses(
