@@ -74,6 +74,6 @@ TODO
 
 ### Run all tests:
 
-1. Run anvil with 1000 ETH initial balance: `anvil --fork-url $ETHEREUM_RPC_URL --balance 1000000000000000000000`
+1. Run anvil fork and load test account with 1000 ETH: `anvil --fork-url $ETHEREUM_RPC_URL --balance 1000000000000000000000`
 
 2. Run tests (in another terminal): `yarn test-fork`.
