@@ -1,4 +1,4 @@
-import { Web3Provider } from '@ethersproject/providers';
+import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers';
 import {
   gasEstimateForUnprovenCrossContractCalls,
   generateCrossContractCallsProof,
@@ -12,32 +12,32 @@ import {
   serializeUnsignedTransaction,
 } from '@railgun-community/shared-models';
 import { Wallet } from 'ethers';
-import { ganacheConfig } from './ganache-config.test';
+import { testConfig } from './test-config.test';
 import { RecipeOutput } from '../models';
 import { AbstractWallet } from '@railgun-community/engine';
 
-export let ganacheEthersProvider: Optional<Web3Provider>;
+export let testRPCProvider: Optional<JsonRpcProvider>;
 export let testRailgunWallet: AbstractWallet;
 
-export const setSharedGanacheProvider = (provider: Web3Provider) => {
-  ganacheEthersProvider = provider;
+export const setSharedTestRPCProvider = (provider: JsonRpcProvider) => {
+  testRPCProvider = provider;
 };
 
 export const setSharedTestRailgunWallet = (wallet: AbstractWallet) => {
   testRailgunWallet = wallet;
 };
 
-export const getGanacheProvider = (): Web3Provider => {
-  const provider = ganacheEthersProvider;
+export const getGanacheProvider = (): JsonRpcProvider => {
+  const provider = testRPCProvider;
   if (!provider) {
-    throw new Error('No ganache ethers provider');
+    throw new Error('No test ethers provider');
   }
   return provider;
 };
 
 export const getTestEthersWallet = (): Wallet => {
   const provider = getGanacheProvider();
-  return Wallet.fromMnemonic(ganacheConfig.signerMnemonic).connect(provider);
+  return Wallet.fromMnemonic(testConfig.signerMnemonic).connect(provider);
 };
 
 export const getTestRailgunWallet = () => {
@@ -90,7 +90,7 @@ export const createQuickstartCrossContractCallsForTest = async (
     await gasEstimateForUnprovenCrossContractCalls(
       networkName,
       railgunWallet.id,
-      ganacheConfig.encryptionKey,
+      testConfig.encryptionKey,
       unshieldERC20Amounts,
       unshieldNFTs,
       shieldERC20Addresses,
@@ -110,7 +110,7 @@ export const createQuickstartCrossContractCallsForTest = async (
   const { error: generateProofError } = await generateCrossContractCallsProof(
     networkName,
     railgunWallet.id,
-    ganacheConfig.encryptionKey,
+    testConfig.encryptionKey,
     unshieldERC20Amounts,
     unshieldNFTs,
     shieldERC20Addresses,

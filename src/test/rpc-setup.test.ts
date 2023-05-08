@@ -1,56 +1,75 @@
 import ganache from 'ganache';
-import { ganacheConfig } from './ganache-config.test';
-import { Web3Provider } from '@ethersproject/providers';
+import { testConfig } from './test-config.test';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import debug from 'debug';
-import { getTestEthersWallet, setSharedGanacheProvider } from './shared.test';
+import { getTestEthersWallet, setSharedTestRPCProvider } from './shared.test';
 import { ethers } from 'ethers';
 
-const dbgGanacheEthereum = debug('ganache:ethereum');
+const dbg = debug('rpc:ethereum');
 
-export const setupGanacheEthereumRPCAndWallets = async (
+export enum ForkRPCType {
+  Ganache = 'ganache',
+  Anvil = 'anvil',
+}
+
+export const setupTestEthereumRPCAndWallets = async (
+  forkRPCType: ForkRPCType,
   tokenAddresses: string[],
 ) => {
-  dbgGanacheEthereum('Starting Ganache Ethereum RPC...');
+  dbg('Starting test Ethereum RPC...');
 
   // Get fork block (10000 blocks behind)
-  // const jsonRpcProvider = new JsonRpcProvider(ganacheConfig.ethereumForkRPC);
+  // const jsonRpcProvider = new JsonRpcProvider(testConfig.ethereumForkRPC);
   // const blockNumber = await jsonRpcProvider.getBlockNumber();
   // const ganacheForkBlock = blockNumber - 10000;
 
-  const ganacheServer = ganache.server({
-    server: {},
-    fork: {
-      url: ganacheConfig.ethereumForkRPC,
-      // requestsPerSecond: 100,
-      // blockNumber: ganacheForkBlock,
-    },
-    wallet: {
-      mnemonic: ganacheConfig.signerMnemonic,
-    },
-    chain: {
-      chainId: 1,
-    },
-    defaultTransactionGasLimit: 30_000_000,
-    logging: {
-      logger: {
-        log: msg => {
-          if (!ganacheConfig.showVerboseLogs) {
-            return;
-          }
-          dbgGanacheEthereum(msg);
+  const { localhostRPC, port } = testConfig;
+
+  if (forkRPCType === ForkRPCType.Ganache) {
+    const rpcServer = ganache.server({
+      server: {},
+      fork: {
+        url: testConfig.ethereumForkRPC,
+        // requestsPerSecond: 100,
+        // blockNumber: ganacheForkBlock,
+      },
+      wallet: {
+        mnemonic: testConfig.signerMnemonic,
+      },
+      chain: {
+        chainId: 1,
+      },
+      defaultTransactionGasLimit: 30_000_000,
+      logging: {
+        logger: {
+          log: (msg: string) => {
+            if (!testConfig.showVerboseLogs) {
+              return;
+            }
+            dbg(msg);
+          },
         },
       },
-    },
-  });
+    });
 
-  await ganacheServer.listen(ganacheConfig.ganachePort);
+    await rpcServer.listen(port);
 
-  const ganacheProvider = ganacheServer.provider;
+    dbg('Ganache RPC server created and listening...');
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const ganacheEthersProvider = new Web3Provider(ganacheProvider as any);
-  setSharedGanacheProvider(ganacheEthersProvider);
+  const testRPCProvider = new JsonRpcProvider(localhostRPC);
+  setSharedTestRPCProvider(testRPCProvider);
+
+  try {
+    await testRPCProvider.getBlockNumber();
+  } catch (err) {
+    throw new Error(
+      forkRPCType === ForkRPCType.Anvil
+        ? `Could not connect to test RPC server. Please start anvil fork RPC (see README).`
+        : `Could not connect to test Ganache RPC server.`,
+    );
+  }
 
   const wallet = getTestEthersWallet();
   const oneThousand18Decimals = '1000000000000000000000';
@@ -58,7 +77,8 @@ export const setupGanacheEthereumRPCAndWallets = async (
   await Promise.all(
     tokenAddresses.map(async tokenAddress => {
       await setTokenBalance(
-        ganacheEthersProvider,
+        forkRPCType,
+        testRPCProvider,
         wallet.address,
         tokenAddress,
         oneThousand18Decimals, // 1000 WETH
@@ -68,7 +88,8 @@ export const setupGanacheEthereumRPCAndWallets = async (
 };
 
 const setTokenBalance = async (
-  provider: Web3Provider,
+  forkRPCType: ForkRPCType,
+  provider: JsonRpcProvider,
   walletAddress: string,
   tokenAddress: string,
   balance: string,
@@ -82,7 +103,10 @@ const setTokenBalance = async (
   const erc20 = new ERC20Contract(tokenAddress, provider);
 
   // Get RPC command to set storage
-  let setRPCCommand = 'evm_setAccountStorageAt'; // Default
+  let setRPCCommand = forkRPCType
+    ? 'evm_setAccountStorageAt'
+    : 'anvil_setStorageAt';
+
   try {
     // Detect if hardhat
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -108,6 +132,7 @@ const setTokenBalance = async (
     const before: string = await provider.send('eth_getStorageAt', [
       tokenAddress,
       storageSlot,
+      null,
     ]);
 
     // Set storage

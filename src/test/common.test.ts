@@ -48,24 +48,21 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   );
 
   const recipeOutput = await recipe.getRecipeOutput(recipeInput);
-  // console.log(recipeOutput);
-  // console.log(JSON.stringify(recipeOutput.stepOutputs));
 
   const { gasEstimateString, transaction } =
     await createQuickstartCrossContractCallsForTest(networkName, recipeOutput);
-  // console.log(`Gas estimate: ${gasEstimateString}`);
 
   expect(
     BigNumber.from(gasEstimateString).gte(expectedGasWithin50K - 50_000),
   ).to.equal(
     true,
-    `${recipe.config.name}: Gas estimate lower than expected range: expected within 50k of ${expectedGasWithin50K}`,
+    `${recipe.config.name}: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimateString}`,
   );
   expect(
     BigNumber.from(gasEstimateString).lte(expectedGasWithin50K + 50_000),
   ).to.equal(
     true,
-    `${recipe.config.name}: Gas estimate higher than expected range: expected within 50k of ${expectedGasWithin50K}`,
+    `${recipe.config.name}: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimateString}`,
   );
 
   const wallet = getTestEthersWallet();

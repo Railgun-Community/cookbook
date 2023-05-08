@@ -23,12 +23,12 @@ import {
   deserializeTransaction,
   poll,
 } from '@railgun-community/shared-models';
-import { ganacheConfig } from './ganache-config.test';
+import { testConfig } from './test-config.test';
 import { BigNumber, Wallet } from 'ethers';
 import { debug } from 'debug';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import {
-  ganacheEthersProvider,
+  testRPCProvider,
   getGanacheProvider,
   getTestEthersWallet,
   getTestRailgunWallet,
@@ -40,7 +40,7 @@ import { groth16 } from 'snarkjs';
 const dbgRailgunSetup = debug('railgun:setup');
 
 const dbgRailgunQuickstart = debug('railgun:quickstart');
-dbgRailgunQuickstart.enabled = ganacheConfig.showVerboseLogs;
+dbgRailgunQuickstart.enabled = testConfig.showVerboseLogs;
 
 const ENGINE_TEST_DB = 'test.db';
 const db = new LevelDOWN(ENGINE_TEST_DB);
@@ -103,7 +103,7 @@ export const loadLocalhostFallbackProviderForTests = async () => {
     chainId,
     providers: [
       {
-        provider: ganacheConfig.ganacheLocalhostRPC,
+        provider: testConfig.localhostRPC,
         priority: 1,
         weight: 2,
       },
@@ -125,8 +125,8 @@ export const loadLocalhostFallbackProviderForTests = async () => {
 
 export const createRailgunWalletForTests = async () => {
   const { railgunWalletInfo } = await createRailgunWallet(
-    ganacheConfig.encryptionKey,
-    ganacheConfig.railgunMnemonic,
+    testConfig.encryptionKey,
+    testConfig.railgunMnemonic,
     {},
   );
   if (!railgunWalletInfo) {
@@ -139,9 +139,9 @@ export const createRailgunWalletForTests = async () => {
 };
 
 const approveShield = async (wallet: Wallet, tokenAddress: string) => {
-  const token = new ERC20Contract(tokenAddress, ganacheEthersProvider);
+  const token = new ERC20Contract(tokenAddress, testRPCProvider);
   const tx = await token.createSpenderApproval(
-    ganacheConfig.contractsEthereum.proxy,
+    testConfig.contractsEthereum.proxy,
     BigNumber.from(10).pow(18).mul(10000000), // 1 MM approved
   );
   return wallet.sendTransaction(tx);

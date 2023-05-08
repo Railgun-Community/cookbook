@@ -12,7 +12,7 @@ dist/
 # Test
 .nyc_output
 coverage/
-src/test/ganache-config-overrides.test.ts
+src/test/test-config-overrides.test.ts
 
 # Quickstart assets
 test.db

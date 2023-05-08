@@ -6,8 +6,8 @@ import {
   startRailgunForTests,
   waitForShieldedTokenBalances,
 } from './railgun-setup.test';
-import { setupGanacheEthereumRPCAndWallets } from './ganache-setup.test';
-import { ganacheConfig } from './ganache-config.test';
+import { ForkRPCType, setupTestEthereumRPCAndWallets } from './rpc-setup.test';
+import { testConfig } from './test-config.test';
 
 before(async function run() {
   if (process.env.RUN_GANACHE_TESTS) {
@@ -25,14 +25,18 @@ after(() => {
 
 export const setupGanacheQuickstartTests = async () => {
   const tokenAddresses: string[] = [
-    ganacheConfig.contractsEthereum.weth9,
-    ganacheConfig.contractsEthereum.rail,
-    ganacheConfig.contractsEthereum.crvCRVETH,
-    ganacheConfig.contractsEthereum.crvCRVETHVaultToken,
+    testConfig.contractsEthereum.weth9,
+    testConfig.contractsEthereum.rail,
+    testConfig.contractsEthereum.crvCRVETH,
+    testConfig.contractsEthereum.crvCRVETHVaultToken,
   ];
 
+  const forkRPCType = process.env.USE_GANACHE
+    ? ForkRPCType.Ganache
+    : ForkRPCType.Anvil;
+
   // Ganache forked Ethereum RPC setup
-  await setupGanacheEthereumRPCAndWallets(tokenAddresses);
+  await setupTestEthereumRPCAndWallets(forkRPCType, tokenAddresses);
 
   // Quickstart setup
   startRailgunForTests();

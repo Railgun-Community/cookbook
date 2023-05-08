@@ -58,19 +58,22 @@ TODO
 
 # Testing
 
-## Run unit tests
+## Unit tests
 
 `yarn test` to run tests without Ganache Fork.
 
-## Run integration tests (beta)
+## Integration tests (beta)
 
-`yarn test-fork` to run all tests, including Ganache Fork tests.
+### Setup:
 
-These tests are currently in beta - there are a number of minor issues with test setup scripts.
-Note that the Ganache fork and setup scripts take about 40 sec to complete.
+1. Set up anvil (install foundryup):
 
-If you see one of the following error messages during the setup scripts, please run the test suite again:
+`curl -L https://foundry.paradigm.xyz | bash`
 
-1. "socket hang up"
-2. "Error: cannot estimate gas; ..."
-3. "Error: RPC connection error."
+2. Add an Ethereum RPC for fork (Alchemy recommended for best stability): `export ETHEREUM_RPC_URL='your/rpc/url'`
+
+### Run all tests:
+
+1. Run anvil with 1000 ETH initial balance: `anvil --fork-url $ETHEREUM_RPC_URL --balance 1000000000000000000000`
+
+2. Run tests (in another terminal): `yarn test-fork`.

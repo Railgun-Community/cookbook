@@ -19,7 +19,7 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-      - run: yarn test-fork
+      - run: yarn test-fork-ganache
 
   fail-report:
     if: ${{ failure() }}

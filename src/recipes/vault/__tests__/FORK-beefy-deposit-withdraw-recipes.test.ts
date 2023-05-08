@@ -13,7 +13,7 @@ import {
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
-import { ganacheConfig } from '../../../test/ganache-config.test';
+import { testConfig } from '../../../test/test-config.test';
 import { BeefyAPI } from '../../../api/beefy/beefy-api';
 import { compareTokenAddress } from '../../../utils';
 import {
@@ -27,7 +27,7 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 const vaultID = 'convex-crveth';
 
-const tokenAddress = ganacheConfig.contractsEthereum.crvCRVETH;
+const tokenAddress = testConfig.contractsEthereum.crvCRVETH;
 const vaultTokenAddress = '0x245186caa063b13d0025891c0d513acf552fb38e';
 
 const oneWithDecimals = BigNumber.from(10).pow(18);

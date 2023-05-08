@@ -1,11 +1,12 @@
 const PORT = 8545;
 
-export const ganacheConfig = {
+export const testConfig = {
   // Set env ETHEREUM_RPC to change default fork RPC.
   ethereumForkRPC: process.env.ETHEREUM_RPC || 'https://cloudflare-eth.com',
 
-  ganachePort: PORT,
-  ganacheLocalhostRPC: `http://localhost:${PORT}`,
+  port: PORT,
+
+  localhostRPC: `http://localhost:${PORT}`,
 
   showVerboseLogs: false,
 
@@ -35,8 +36,8 @@ export const ganacheConfig = {
 
 try {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, global-require, @typescript-eslint/no-var-requires
-  const overrides = require('./ganache-config-overrides.test');
+  const overrides = require('./test-config-overrides.test');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  Object.assign(ganacheConfig, overrides ?? {});
+  Object.assign(testConfig, overrides ?? {});
   // eslint-disable-next-line no-empty
 } catch {}
