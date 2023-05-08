@@ -170,7 +170,7 @@ describe('approve-erc20-spender-step', () => {
     await expect(
       approveStep.getValidStepOutput(stepInputNoERC20s),
     ).to.be.rejectedWith(
-      'Approve ERC20 Spender step failed. No erc20 inputs match filter.',
+      'Approve ERC20 Spender step failed. No step inputs match filter.',
     );
 
     // Too low balance for erc20 input

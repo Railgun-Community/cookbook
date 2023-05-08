@@ -4,7 +4,7 @@ import {
   RecipeERC20Info,
   UniswapV2Fork,
 } from '../../../models/export-models';
-import { UniV2LikeRemoveLiquidityRecipe } from './UniV2LikeRemoveLiquidityRecipe';
+import { UniV2LikeRemoveLiquidityRecipe } from './uni-v2-like-remove-liquidity-recipe';
 
 export class SushiswapV2RemoveLiquidityRecipe extends UniV2LikeRemoveLiquidityRecipe {
   constructor(

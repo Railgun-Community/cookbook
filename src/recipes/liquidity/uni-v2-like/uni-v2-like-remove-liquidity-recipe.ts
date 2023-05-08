@@ -1,45 +1,53 @@
-import { StepInput, UniswapV2Fork } from '../../../models/export-models';
+import {
+  RecipeERC20Info,
+  StepInput,
+  UniswapV2Fork,
+} from '../../../models/export-models';
 import { UniV2LikeSDK } from '../../../api/uniswap/uni-v2-like-sdk';
 import { NetworkName } from '@railgun-community/shared-models';
 import { RecipeERC20Amount } from '../../../models';
 import { ApproveERC20SpenderStep } from '../../../steps/token/erc20/approve-erc20-spender-step';
-import { UniV2LikeAddLiquidityStep } from '../../../steps/liquidity/uni-v2-like/UniV2LikeAddLiquidityStep';
+import { UniV2LikeRemoveLiquidityStep } from '../../../steps/liquidity/uni-v2-like/uni-v2-like-remove-liquidity-step';
 import { BaseProvider } from '@ethersproject/providers';
 import { Step } from '../../../steps/step';
-import { AddLiquidityRecipe } from '../add-liquidity-recipe';
+import { RemoveLiquidityRecipe } from '../remove-liquidity-recipe';
 
-export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
+export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
   readonly config = {
-    name: '[Name] Add Liquidity Recipe',
-    description: 'Adds liquidity to a Uniswap V2-like pair.',
+    name: '[Name] Remove Liquidity',
+    description: 'Removes liquidity from a Uniswap V2-like pair.',
     hasNonDeterministicOutput: true,
   };
 
   private readonly uniswapV2Fork: UniswapV2Fork;
 
-  private readonly erc20AmountA: RecipeERC20Amount;
-  private readonly erc20AmountB: RecipeERC20Amount;
+  private readonly lpERC20Amount: RecipeERC20Amount;
+  private readonly erc20InfoA: RecipeERC20Info;
+  private readonly erc20InfoB: RecipeERC20Info;
 
   private readonly slippagePercentage: number;
   private readonly provider: BaseProvider;
 
   constructor(
     uniswapV2Fork: UniswapV2Fork,
-    erc20AmountA: RecipeERC20Amount,
-    erc20AmountB: RecipeERC20Amount,
+    lpERC20Amount: RecipeERC20Amount,
+    erc20InfoA: RecipeERC20Info,
+    erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
     provider: BaseProvider,
   ) {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
 
-    this.erc20AmountA = erc20AmountA;
-    this.erc20AmountB = erc20AmountB;
+    this.lpERC20Amount = lpERC20Amount;
+    this.erc20InfoA = erc20InfoA;
+    this.erc20InfoB = erc20InfoB;
+
     this.slippagePercentage = slippagePercentage;
     this.provider = provider;
 
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
-    this.config.name = `${forkName} Add Liquidity Recipe`;
+    this.config.name = `${forkName} Remove Liquidity`;
   }
 
   protected supportsNetwork(networkName: NetworkName): boolean {
@@ -51,25 +59,25 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   ): Promise<Step[]> {
     const { networkName } = firstInternalStepInput;
 
-    this.addLiquidityData = await UniV2LikeSDK.getAddLiquidityData(
+    this.removeLiquidityData = await UniV2LikeSDK.getRemoveLiquidityData(
       this.uniswapV2Fork,
       networkName,
-      this.erc20AmountA,
-      this.erc20AmountB,
+      this.lpERC20Amount,
+      this.erc20InfoA,
+      this.erc20InfoB,
       this.slippagePercentage,
       this.provider,
     );
 
     return [
       new ApproveERC20SpenderStep(
-        this.addLiquidityData.routerContract,
-        this.erc20AmountA,
+        this.removeLiquidityData.routerContract,
+        this.lpERC20Amount,
       ),
-      new ApproveERC20SpenderStep(
-        this.addLiquidityData.routerContract,
-        this.erc20AmountB,
+      new UniV2LikeRemoveLiquidityStep(
+        this.uniswapV2Fork,
+        this.removeLiquidityData,
       ),
-      new UniV2LikeAddLiquidityStep(this.uniswapV2Fork, this.addLiquidityData),
     ];
   }
 }

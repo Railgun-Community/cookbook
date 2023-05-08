@@ -3,7 +3,7 @@ import {
   RecipeERC20Amount,
   UniswapV2Fork,
 } from '../../../models/export-models';
-import { UniV2LikeAddLiquidityRecipe } from './UniV2LikeAddLiquidityRecipe';
+import { UniV2LikeAddLiquidityRecipe } from './uni-v2-like-add-liquidity-recipe';
 
 export class UniswapV2AddLiquidityRecipe extends UniV2LikeAddLiquidityRecipe {
   constructor(

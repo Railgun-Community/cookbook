@@ -236,7 +236,7 @@ describe('beefy-deposit-recipe', () => {
       unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'Approve ERC20 Spender step failed. No erc20 inputs match filter.',
+      'Approve ERC20 Spender step failed. No step inputs match filter.',
     );
   });
 });

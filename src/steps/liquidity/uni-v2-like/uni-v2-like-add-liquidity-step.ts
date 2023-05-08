@@ -15,7 +15,7 @@ import { NETWORK_CONFIG } from '@railgun-community/shared-models';
 
 export class UniV2LikeAddLiquidityStep extends Step {
   readonly config = {
-    name: '[Name] Add Liquidity Step',
+    name: '[Name] Add Liquidity',
     description: 'Adds liquidity to a Uniswap V2-like pair.',
     hasNonDeterministicOutput: true,
   };
@@ -32,7 +32,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
     this.uniswapV2Fork = uniswapV2Fork;
     this.addLiquidityData = addLiquidityData;
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
-    this.config.name = `${forkName} Add Liquidity Step`;
+    this.config.name = `${forkName} Add Liquidity`;
   }
 
   protected async getStepOutput(
@@ -88,12 +88,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
       deadlineTimestamp,
     );
 
-    const lpRecipient = UniV2LikeSDK.getPairName(
-      this.uniswapV2Fork,
-      erc20AmountA,
-      erc20AmountB,
-    );
-
+    const lpRecipient = UniV2LikeSDK.getForkName(this.uniswapV2Fork);
     const spendERC20AmountRecipientA: RecipeERC20AmountRecipient = {
       tokenAddress: validatedERC20AmountA.tokenAddress,
       decimals: validatedERC20AmountA.decimals,

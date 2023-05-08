@@ -51,7 +51,7 @@ export abstract class Step {
 
     const numFiltered = erc20AmountsForStep.length;
     if (numFiltered === 0) {
-      throw new Error(`No erc20 inputs match filter.`);
+      throw new Error(`No step inputs match filter.`);
     }
     if (numFiltered > 1) {
       throw new Error(
@@ -151,7 +151,7 @@ export abstract class Step {
     const numFiltered = erc20AmountsForStep.length;
     if (numFiltered !== filters.length) {
       throw new Error(
-        `Recipe does not include a balance for each filtered token.`,
+        `Step input does not include a balance for each filtered token.`,
       );
     }
 

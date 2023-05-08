@@ -110,7 +110,7 @@ describe('beefy-withdraw-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Beefy Vault Withdraw step failed. No erc20 inputs match filter.',
+      'Beefy Vault Withdraw step failed. No step inputs match filter.',
     );
   });
 });

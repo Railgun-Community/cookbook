@@ -17,3 +17,19 @@ export const calculatePairRateWith18Decimals = (
     .div(decimalsA);
   return rateWith18Decimals;
 };
+
+export const calculateAmountBFromPairRate = (
+  amountA: BigNumber,
+  decimalsA: number,
+  decimalsB: number,
+  rateWith18Decimals: BigNumber,
+) => {
+  const decimals18 = BigNumber.from(10).pow(18);
+
+  const amountB = amountA
+    .mul(decimals18)
+    .mul(decimalsB)
+    .div(rateWith18Decimals)
+    .div(decimalsA);
+  return amountB;
+};

@@ -12,7 +12,10 @@ import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from '@ethersproject/bignumber';
 import { PairDataWithRate } from '../../models/uni-v2-like';
-import { calculatePairRateWith18Decimals } from '../../utils/pair-rate';
+import {
+  calculateAmountBFromPairRate,
+  calculatePairRateWith18Decimals,
+} from '../../utils/pair-rate';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 
@@ -67,7 +70,7 @@ export class UniV2LikeSDK {
     }
   }
 
-  private static getRouterContract(
+  static getRouterContractAddress(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
   ): string {
@@ -110,7 +113,7 @@ export class UniV2LikeSDK {
   ): boolean {
     try {
       this.getFactoryAddressAndInitCodeHash(uniswapV2Fork, networkName);
-      this.getRouterContract(uniswapV2Fork, networkName);
+      this.getRouterContractAddress(uniswapV2Fork, networkName);
       return true;
     } catch {
       return false;
@@ -159,17 +162,7 @@ export class UniV2LikeSDK {
     }
   }
 
-  static getPairName(
-    uniswapV2Fork: UniswapV2Fork,
-    erc20SymbolA: RecipeERC20Info,
-    erc20SymbolB: RecipeERC20Info,
-  ) {
-    return `${this.getForkName(
-      uniswapV2Fork,
-    )}: ${erc20SymbolA}-${erc20SymbolB}`;
-  }
-
-  static async getPairRate(
+  static async getPairRateWith18Decimals(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
     provider: BaseProvider,
@@ -212,7 +205,7 @@ export class UniV2LikeSDK {
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
     erc20AmountA: RecipeERC20Amount,
-    erc20AmountB: RecipeERC20Amount,
+    erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
     provider: BaseProvider,
   ): Promise<RecipeAddLiquidityData> {
@@ -220,9 +213,31 @@ export class UniV2LikeSDK {
       uniswapV2Fork,
       networkName,
       erc20AmountA,
-      erc20AmountB,
+      erc20InfoB,
     );
-    const routerContract = this.getRouterContract(uniswapV2Fork, networkName);
+    const routerContract = this.getRouterContractAddress(
+      uniswapV2Fork,
+      networkName,
+    );
+    const rateWith18Decimals = await this.getPairRateWith18Decimals(
+      uniswapV2Fork,
+      networkName,
+      provider,
+      erc20AmountA,
+      erc20InfoB,
+    );
+
+    const amountB = calculateAmountBFromPairRate(
+      erc20AmountA.amount,
+      erc20AmountA.decimals,
+      erc20InfoB.decimals,
+      rateWith18Decimals,
+    );
+    const erc20AmountB: RecipeERC20Amount = {
+      ...erc20InfoB,
+      amount: amountB,
+    };
+
     const expectedLPBalance = await this.getExpectedLPBalance(
       erc20AmountA,
       erc20AmountB,
@@ -243,6 +258,7 @@ export class UniV2LikeSDK {
       routerContract,
       slippagePercentage,
       deadlineTimestamp,
+      rateWith18Decimals,
     };
   }
 
@@ -267,7 +283,10 @@ export class UniV2LikeSDK {
       );
     }
 
-    const routerContract = this.getRouterContract(uniswapV2Fork, networkName);
+    const routerContract = this.getRouterContractAddress(
+      uniswapV2Fork,
+      networkName,
+    );
     const { expectedAmountA, expectedAmountB } =
       await this.getExpectedUnwoundABBalances(lpERC20Amount, provider);
 

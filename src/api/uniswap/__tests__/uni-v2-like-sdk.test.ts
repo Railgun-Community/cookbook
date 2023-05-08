@@ -38,7 +38,7 @@ describe('uni-v2-like-sdk', () => {
   });
 
   it('Should get Uniswap LP rate for USDC-WETH pair', async () => {
-    const rate = await UniV2LikeSDK.getPairRate(
+    const rate = await UniV2LikeSDK.getPairRateWith18Decimals(
       UniswapV2Fork.Uniswap,
       networkName,
       provider,

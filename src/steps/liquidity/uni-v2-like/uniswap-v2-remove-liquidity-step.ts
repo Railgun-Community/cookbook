@@ -2,7 +2,7 @@ import {
   RecipeRemoveLiquidityData,
   UniswapV2Fork,
 } from '../../../models/export-models';
-import { UniV2LikeRemoveLiquidityStep } from './UniV2LikeRemoveLiquidityStep';
+import { UniV2LikeRemoveLiquidityStep } from './uni-v2-like-remove-liquidity-step';
 
 export class UniswapV2RemoveLiquidityStep extends UniV2LikeRemoveLiquidityStep {
   constructor(addLiquidityData: RecipeRemoveLiquidityData) {

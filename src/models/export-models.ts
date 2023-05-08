@@ -110,6 +110,7 @@ export type RecipeAddLiquidityData = {
   slippagePercentage: number;
   routerContract: string;
   deadlineTimestamp: number;
+  rateWith18Decimals: BigNumber;
 };
 
 export type RecipeRemoveLiquidityData = {
