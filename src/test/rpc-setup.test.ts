@@ -5,6 +5,7 @@ import { ERC20Contract } from '../contract/token/erc20-contract';
 import debug from 'debug';
 import { getTestEthersWallet, setSharedTestRPCProvider } from './shared.test';
 import { ethers } from 'ethers';
+import { parseEther } from '@ethersproject/units';
 
 const dbg = debug('rpc:ethereum');
 
@@ -19,11 +20,6 @@ export const setupTestEthereumRPCAndWallets = async (
 ) => {
   dbg('Starting test Ethereum RPC...');
 
-  // Get fork block (10000 blocks behind)
-  // const jsonRpcProvider = new JsonRpcProvider(testConfig.ethereumForkRPC);
-  // const blockNumber = await jsonRpcProvider.getBlockNumber();
-  // const ganacheForkBlock = blockNumber - 10000;
-
   const { localhostRPC, port } = testConfig;
 
   if (forkRPCType === ForkRPCType.Ganache) {
@@ -31,8 +27,6 @@ export const setupTestEthereumRPCAndWallets = async (
       server: {},
       fork: {
         url: testConfig.ethereumForkRPC,
-        // requestsPerSecond: 100,
-        // blockNumber: ganacheForkBlock,
       },
       wallet: {
         mnemonic: testConfig.signerMnemonic,
@@ -76,7 +70,7 @@ export const setupTestEthereumRPCAndWallets = async (
   }
 
   const wallet = getTestEthersWallet();
-  const oneThousand18Decimals = '1000000000000000000000';
+  const oneThousand18Decimals = parseEther('1000').toString();
 
   await Promise.all(
     tokenAddresses.map(async tokenAddress => {
