@@ -71,6 +71,10 @@ export const setupTestEthereumRPCAndWallets = async (
     );
   }
 
+  if (forkRPCType === ForkRPCType.Anvil) {
+    await testRPCProvider.send('anvil_reset', [{}]);
+  }
+
   const wallet = getTestEthersWallet();
   const oneThousand18Decimals = '1000000000000000000000';
 
