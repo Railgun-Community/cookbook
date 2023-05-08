@@ -81,7 +81,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
     await executeRecipeAndAssertUnshieldBalances(
       depositRecipe,
       depositRecipeInput,
-      2_950_000, // expectedGasWithin50K
+      2_880_000, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

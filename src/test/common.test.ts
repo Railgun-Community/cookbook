@@ -56,13 +56,21 @@ export const executeRecipeAndAssertUnshieldBalances = async (
     BigNumber.from(gasEstimateString).gte(expectedGasWithin50K - 50_000),
   ).to.equal(
     true,
-    `${recipe.config.name}: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimateString}`,
+    `${
+      recipe.config.name
+    }: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
+      gasEstimateString,
+    ).toString()}`,
   );
   expect(
     BigNumber.from(gasEstimateString).lte(expectedGasWithin50K + 50_000),
   ).to.equal(
     true,
-    `${recipe.config.name}: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimateString}`,
+    `${
+      recipe.config.name
+    }: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
+      gasEstimateString,
+    ).toString()}`,
   );
 
   const wallet = getTestEthersWallet();

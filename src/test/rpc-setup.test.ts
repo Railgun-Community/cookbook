@@ -103,25 +103,10 @@ const setTokenBalance = async (
   const erc20 = new ERC20Contract(tokenAddress, provider);
 
   // Get RPC command to set storage
-  let setRPCCommand = forkRPCType
-    ? 'evm_setAccountStorageAt'
-    : 'anvil_setStorageAt';
-
-  try {
-    // Detect if hardhat
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const response = await provider.send('hardhat_metadata', []);
-
-    // Throw if we're not hardhat
-    if (!response) throw new Error();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!response.clientVersion) throw new Error();
-
-    // Didn't throw, we're hardhat, override the RPC command to hardhat version
-    setRPCCommand = 'hardhat_setStorageAt';
-  } catch (err) {
-    // eslint-disable-next-line no-console
-  }
+  const setRPCCommand =
+    forkRPCType === ForkRPCType.Anvil
+      ? 'anvil_setStorageAt'
+      : 'evm_setAccountStorageAt';
 
   /**
    * Attempt to change ERC20 balance with storage slot
