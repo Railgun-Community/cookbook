@@ -22,7 +22,7 @@ export class RelayAdaptContract {
     this.contract = new Contract(
       network.relayAdaptContract,
       abi.adapt.relay,
-    ) as unknown as RelayAdapt;
+    ) as RelayAdapt;
   }
 
   private createERC20TokenData(tokenAddress: string): TokenDataStruct {

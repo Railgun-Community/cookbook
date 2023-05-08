@@ -33,6 +33,7 @@ describe('shield-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -57,6 +58,7 @@ describe('shield-step', () => {
         minBalance: BigNumber.from('11970'),
         approvedSpender: undefined,
         isBaseToken: false,
+        decimals: 18,
       },
     ]);
 
@@ -66,6 +68,7 @@ describe('shield-step', () => {
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
         tokenAddress,
+        decimals: 18,
         amount: BigNumber.from('30'),
         recipient: 'RAILGUN Shield Fee',
       },
@@ -83,6 +86,7 @@ describe('shield-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),

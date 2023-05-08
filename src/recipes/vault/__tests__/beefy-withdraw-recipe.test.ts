@@ -60,6 +60,7 @@ describe('beefy-withdraw-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
           amount: BigNumber.from('10000'),
         },
       ],
@@ -77,6 +78,7 @@ describe('beefy-withdraw-recipe', () => {
           amount: BigNumber.from('25'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -86,6 +88,7 @@ describe('beefy-withdraw-recipe', () => {
           minBalance: BigNumber.from('9975'),
           approvedSpender: undefined,
           isBaseToken: undefined,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -102,6 +105,7 @@ describe('beefy-withdraw-recipe', () => {
           tokenAddress,
           amount: BigNumber.from('1995'),
           recipient: 'Beefy Vault Withdraw Fee',
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -110,6 +114,7 @@ describe('beefy-withdraw-recipe', () => {
           expectedBalance: BigNumber.from('17955'),
           minBalance: BigNumber.from('17955'),
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -124,6 +129,7 @@ describe('beefy-withdraw-recipe', () => {
           amount: BigNumber.from('9975'),
           tokenAddress: vault.vaultTokenAddress,
           recipient: 'VAULT_NAME Vault',
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -137,6 +143,7 @@ describe('beefy-withdraw-recipe', () => {
           amount: BigNumber.from('44'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -146,6 +153,7 @@ describe('beefy-withdraw-recipe', () => {
           minBalance: BigNumber.from('17911'),
           tokenAddress,
           isBaseToken: undefined,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -196,6 +204,7 @@ describe('beefy-withdraw-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
+          decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],

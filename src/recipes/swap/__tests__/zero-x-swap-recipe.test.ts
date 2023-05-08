@@ -27,11 +27,13 @@ const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress,
+  decimals: 18,
   isBaseToken: false,
 };
 
 const buyToken: RecipeERC20Info = {
   tokenAddress: buyTokenAddress,
+  decimals: 18,
 };
 
 const slippagePercentage = 0.01;
@@ -46,6 +48,7 @@ const quote: SwapQuoteData = {
   },
   buyERC20Amount: {
     tokenAddress: buyTokenAddress,
+    decimals: 18,
     amount: BigNumber.from('500'),
   },
   minimumBuyAmount: BigNumber.from('495'),
@@ -85,6 +88,7 @@ describe('zero-x-swap-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },
@@ -110,6 +114,7 @@ describe('zero-x-swap-recipe', () => {
           amount: BigNumber.from('30'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: sellTokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -119,6 +124,7 @@ describe('zero-x-swap-recipe', () => {
           minBalance: BigNumber.from('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -138,6 +144,7 @@ describe('zero-x-swap-recipe', () => {
           minBalance: BigNumber.from('11970'),
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -162,6 +169,7 @@ describe('zero-x-swap-recipe', () => {
           minBalance: BigNumber.from('495'),
           tokenAddress: buyTokenAddress,
           isBaseToken: undefined,
+          decimals: 18,
         },
         {
           approvedSpender: spender,
@@ -169,6 +177,7 @@ describe('zero-x-swap-recipe', () => {
           minBalance: BigNumber.from('1970'),
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -185,6 +194,7 @@ describe('zero-x-swap-recipe', () => {
           isBaseToken: false,
           tokenAddress: sellTokenAddress,
           recipient: '0x Exchange',
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -198,11 +208,13 @@ describe('zero-x-swap-recipe', () => {
           amount: BigNumber.from('1'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: buyTokenAddress,
+          decimals: 18,
         },
         {
           amount: BigNumber.from('4'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: sellTokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -212,6 +224,7 @@ describe('zero-x-swap-recipe', () => {
           minBalance: BigNumber.from('494'),
           tokenAddress: buyTokenAddress,
           isBaseToken: undefined,
+          decimals: 18,
         },
         {
           approvedSpender: spender,
@@ -219,6 +232,7 @@ describe('zero-x-swap-recipe', () => {
           minBalance: BigNumber.from('1966'),
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -269,6 +283,7 @@ describe('zero-x-swap-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
+          decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
@@ -284,6 +299,7 @@ describe('zero-x-swap-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('2000'),
         },

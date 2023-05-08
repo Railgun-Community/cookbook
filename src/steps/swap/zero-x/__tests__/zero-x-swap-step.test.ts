@@ -21,6 +21,7 @@ const amount = BigNumber.from('10000');
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress,
+  decimals: 18,
   isBaseToken: true,
 };
 
@@ -34,6 +35,7 @@ const quote: SwapQuoteData = {
   },
   buyERC20Amount: {
     tokenAddress: buyTokenAddress,
+    decimals: 18,
     amount: BigNumber.from('500'),
   },
   minimumBuyAmount: BigNumber.from('495'),
@@ -61,6 +63,7 @@ describe('zero-x-swap-step', () => {
         {
           // Approved for swapping
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('10000'),
           minBalance: BigNumber.from('10000'),
@@ -69,6 +72,7 @@ describe('zero-x-swap-step', () => {
         {
           // Same token, unapproved
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),
@@ -91,6 +95,7 @@ describe('zero-x-swap-step', () => {
         isBaseToken: true,
         recipient: '0x Exchange',
         tokenAddress: sellTokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -102,6 +107,7 @@ describe('zero-x-swap-step', () => {
         expectedBalance: BigNumber.from('500'),
         minBalance: BigNumber.from('495'),
         tokenAddress: buyTokenAddress,
+        decimals: 18,
       },
       {
         approvedSpender: undefined,
@@ -109,6 +115,7 @@ describe('zero-x-swap-step', () => {
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
         tokenAddress: sellTokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -134,6 +141,7 @@ describe('zero-x-swap-step', () => {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -156,6 +164,7 @@ describe('zero-x-swap-step', () => {
         isBaseToken: true,
         recipient: '0x Exchange',
         tokenAddress: sellTokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -167,6 +176,7 @@ describe('zero-x-swap-step', () => {
         expectedBalance: BigNumber.from('500'),
         minBalance: BigNumber.from('495'),
         tokenAddress: buyTokenAddress,
+        decimals: 18,
       },
       {
         approvedSpender: undefined,
@@ -174,6 +184,7 @@ describe('zero-x-swap-step', () => {
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
         tokenAddress: sellTokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -201,6 +212,7 @@ describe('zero-x-swap-step', () => {
         {
           // Non-base token
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: spender,
@@ -217,6 +229,7 @@ describe('zero-x-swap-step', () => {
         {
           // No spender
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -237,6 +250,7 @@ describe('zero-x-swap-step', () => {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),

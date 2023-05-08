@@ -40,6 +40,7 @@ export class BeefyWithdrawStep extends Step {
 
     const withdrawERC20Info: RecipeERC20Info = {
       tokenAddress: vaultTokenAddress,
+      decimals: depositERC20Decimals,
     };
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
@@ -66,12 +67,14 @@ export class BeefyWithdrawStep extends Step {
     };
     const outputERC20Amount: StepOutputERC20Amount = {
       tokenAddress: depositERC20Address,
+      decimals: depositERC20Decimals,
       expectedBalance: withdrawAmountAfterFee,
       minBalance: withdrawAmountAfterFee,
       approvedSpender: undefined,
     };
     const feeERC20Amount: RecipeERC20AmountRecipient = {
       tokenAddress: depositERC20Address,
+      decimals: depositERC20Decimals,
       amount: withdrawFeeAmount,
       recipient: `Beefy Vault Withdraw Fee`,
     };

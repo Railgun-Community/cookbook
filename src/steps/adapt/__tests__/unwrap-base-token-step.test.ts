@@ -21,6 +21,7 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -43,6 +44,7 @@ describe('unwrap-base-token-step', () => {
         isBaseToken: false,
         recipient: 'Wrapped Token Contract',
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -54,6 +56,7 @@ describe('unwrap-base-token-step', () => {
         expectedBalance: amount,
         minBalance: amount,
         tokenAddress,
+        decimals: 18,
       },
       {
         // Change - WETH
@@ -62,6 +65,7 @@ describe('unwrap-base-token-step', () => {
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -89,6 +93,7 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -106,6 +111,7 @@ describe('unwrap-base-token-step', () => {
         isBaseToken: false,
         recipient: 'Wrapped Token Contract',
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -117,6 +123,7 @@ describe('unwrap-base-token-step', () => {
         isBaseToken: true,
         tokenAddress,
         approvedSpender: undefined,
+        decimals: 18,
       },
     ]);
 
@@ -142,6 +149,7 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -160,6 +168,7 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),

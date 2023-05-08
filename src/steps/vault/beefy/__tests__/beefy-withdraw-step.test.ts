@@ -36,6 +36,7 @@ describe('beefy-withdraw-step', () => {
       erc20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('10000'),
           minBalance: BigNumber.from('10000'),
           approvedSpender: undefined,
@@ -56,6 +57,7 @@ describe('beefy-withdraw-step', () => {
         amount: BigNumber.from('10000'),
         recipient: 'VAULT_NAME Vault',
         tokenAddress: vault.vaultTokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -66,6 +68,7 @@ describe('beefy-withdraw-step', () => {
         expectedBalance: BigNumber.from('18000'),
         minBalance: BigNumber.from('18000'),
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -74,6 +77,7 @@ describe('beefy-withdraw-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
+        decimals: 18,
         tokenAddress,
         amount: BigNumber.from('2000'),
         recipient: 'Beefy Vault Withdraw Fee',
@@ -97,6 +101,7 @@ describe('beefy-withdraw-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: vault.vaultContractAddress,

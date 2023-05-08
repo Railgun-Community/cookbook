@@ -55,6 +55,7 @@ export class ZeroXSwapStep extends Step {
     };
     const outputBuyERC20Amount: StepOutputERC20Amount = {
       tokenAddress: buyERC20Amount.tokenAddress,
+      decimals: buyERC20Amount.decimals,
       isBaseToken: buyERC20Amount.isBaseToken,
       expectedBalance: buyERC20Amount.amount,
       minBalance: minimumBuyAmount,

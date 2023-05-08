@@ -44,6 +44,7 @@ describe('FORK-empty-recipe', function run() {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },

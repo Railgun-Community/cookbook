@@ -14,10 +14,7 @@ export class ERC721Contract {
     if (!validateAddress(nftAddress)) {
       throw new Error('Invalid ERC20 address for contract');
     }
-    this.contract = new Contract(
-      nftAddress,
-      abi.token.erc721,
-    ) as unknown as ERC721;
+    this.contract = new Contract(nftAddress, abi.token.erc721) as ERC721;
   }
 
   createSpenderApproval(spender: string): Promise<PopulatedTransaction> {

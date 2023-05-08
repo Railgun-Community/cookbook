@@ -33,6 +33,7 @@ describe('empty-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },
@@ -51,6 +52,7 @@ describe('empty-recipe', () => {
           amount: BigNumber.from('30'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -60,6 +62,7 @@ describe('empty-recipe', () => {
           minBalance: BigNumber.from('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -80,6 +83,7 @@ describe('empty-recipe', () => {
           minBalance: BigNumber.from('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -101,6 +105,7 @@ describe('empty-recipe', () => {
           amount: BigNumber.from('29'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -110,6 +115,7 @@ describe('empty-recipe', () => {
           minBalance: BigNumber.from('11941'),
           tokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],

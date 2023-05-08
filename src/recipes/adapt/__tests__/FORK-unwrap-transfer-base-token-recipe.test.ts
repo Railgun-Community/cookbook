@@ -48,6 +48,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
@@ -89,6 +90,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],

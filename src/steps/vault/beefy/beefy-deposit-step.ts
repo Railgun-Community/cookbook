@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
@@ -29,7 +28,6 @@ export class BeefyDepositStep extends Step {
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
     const {
-      vaultID,
       vaultName,
       depositERC20Address,
       depositERC20Decimals,
@@ -42,6 +40,7 @@ export class BeefyDepositStep extends Step {
 
     const depositERC20Info: RecipeERC20Info = {
       tokenAddress: depositERC20Address,
+      decimals: depositERC20Decimals,
     };
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
@@ -73,6 +72,7 @@ export class BeefyDepositStep extends Step {
     };
     const outputERC20Amount: StepOutputERC20Amount = {
       tokenAddress: vaultTokenAddress,
+      decimals: depositERC20Decimals,
       expectedBalance: receivedVaultTokenAmount,
       minBalance: receivedVaultTokenAmount,
       approvedSpender: undefined,

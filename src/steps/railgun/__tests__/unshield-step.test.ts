@@ -33,6 +33,7 @@ describe('unshield-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -57,6 +58,7 @@ describe('unshield-step', () => {
         minBalance: BigNumber.from('11970'),
         approvedSpender: undefined,
         isBaseToken: false,
+        decimals: 18,
       },
     ]);
 
@@ -65,6 +67,7 @@ describe('unshield-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
+        decimals: 18,
         tokenAddress,
         amount: BigNumber.from('30'),
         recipient: 'RAILGUN Unshield Fee',
@@ -83,6 +86,7 @@ describe('unshield-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),

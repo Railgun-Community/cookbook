@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { TransferERC20Step } from '../transfer-erc20-step';
 import { BigNumber } from 'ethers';
-import { StepInput } from '../../../../models/export-models';
+import { RecipeERC20Info, StepInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 
 chai.use(chaiAsPromised);
@@ -10,18 +10,22 @@ const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
+const erc20Info: RecipeERC20Info = {
+  tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+  decimals: 18,
+};
 const amount = BigNumber.from('10000');
 
 describe('transfer-erc20-step', () => {
   it('Should create transfer-erc20 step with amount', async () => {
-    const step = new TransferERC20Step(toAddress, tokenAddress, amount);
+    const step = new TransferERC20Step(toAddress, erc20Info, amount);
 
     const stepInput: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: erc20Info.tokenAddress,
+          decimals: erc20Info.decimals,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -40,9 +44,9 @@ describe('transfer-erc20-step', () => {
     expect(output.spentERC20Amounts).to.deep.equal([
       {
         amount,
-        isBaseToken: false,
         recipient: toAddress,
-        tokenAddress,
+        tokenAddress: erc20Info.tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -52,7 +56,8 @@ describe('transfer-erc20-step', () => {
         approvedSpender: undefined,
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
-        tokenAddress,
+        tokenAddress: erc20Info.tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -67,17 +72,18 @@ describe('transfer-erc20-step', () => {
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
-    expect(output.populatedTransactions[0].to).to.equal(tokenAddress);
+    expect(output.populatedTransactions[0].to).to.equal(erc20Info.tokenAddress);
   });
 
   it('Should create transfer-erc20 step without amount', async () => {
-    const step = new TransferERC20Step(toAddress, tokenAddress);
+    const step = new TransferERC20Step(toAddress, erc20Info);
 
     const stepInput: StepInput = {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: erc20Info.tokenAddress,
+          decimals: erc20Info.decimals,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -91,9 +97,9 @@ describe('transfer-erc20-step', () => {
     expect(output.spentERC20Amounts).to.deep.equal([
       {
         amount: BigNumber.from('12000'),
-        isBaseToken: false,
         recipient: toAddress,
-        tokenAddress,
+        tokenAddress: erc20Info.tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -114,7 +120,7 @@ describe('transfer-erc20-step', () => {
   });
 
   it('Should test transfer-erc20 step error cases', async () => {
-    const step = new TransferERC20Step(toAddress, tokenAddress, amount);
+    const step = new TransferERC20Step(toAddress, erc20Info, amount);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
@@ -131,7 +137,8 @@ describe('transfer-erc20-step', () => {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress,
+          tokenAddress: erc20Info.tokenAddress,
+          decimals: erc20Info.decimals,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),
           approvedSpender: undefined,

@@ -58,6 +58,7 @@ export class ShieldStep extends Step {
 
       outputERC20Amounts.push({
         tokenAddress: erc20Amount.tokenAddress,
+        decimals: erc20Amount.decimals,
         isBaseToken: erc20Amount.isBaseToken,
         approvedSpender: erc20Amount.approvedSpender,
         expectedBalance: shieldedAmount,
@@ -66,6 +67,7 @@ export class ShieldStep extends Step {
 
       feeERC20AmountRecipients.push({
         tokenAddress: erc20Amount.tokenAddress,
+        decimals: erc20Amount.decimals,
         amount: shieldFeeAmount,
         recipient: 'RAILGUN Shield Fee',
       });

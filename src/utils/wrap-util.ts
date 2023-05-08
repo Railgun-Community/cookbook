@@ -1,26 +1,23 @@
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { RecipeERC20Info } from '../models/export-models';
 
-const getWrappedBaseTokenAddress = (networkName: NetworkName): string => {
+export const getWrappedBaseToken = (
+  networkName: NetworkName,
+): RecipeERC20Info => {
   const network = NETWORK_CONFIG[networkName];
   if (!network) {
     throw new Error(`Unknown network: ${networkName}`);
   }
-  return network.baseToken.wrappedAddress.toLowerCase();
-};
-
-export const getWrappedBaseToken = (
-  networkName: NetworkName,
-): RecipeERC20Info => {
   return {
-    tokenAddress: getWrappedBaseTokenAddress(networkName),
+    tokenAddress: network.baseToken.wrappedAddress.toLowerCase(),
+    decimals: network.baseToken.decimals,
     isBaseToken: false,
   };
 };
 
 export const getBaseToken = (networkName: NetworkName): RecipeERC20Info => {
   return {
-    tokenAddress: getWrappedBaseTokenAddress(networkName),
+    ...getWrappedBaseToken(networkName),
     isBaseToken: true,
   };
 };

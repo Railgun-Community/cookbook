@@ -22,7 +22,8 @@
     "compile-test": "npm run clean && npm run tsc-test",
     "test-coverage": "npm run compile-test && c8 mocha",
     "test": "npm run compile-test && NODE_ENV=test mocha",
-    "gen-typechain-beefy": "typechain --target ethers-v5 --out-dir ./src/abi-typechain/vault/beefy ./src/abi-typechain/vault/beefy/BeefyVault-MergedV6V7.json"
+    "gen-typechain-beefy": "typechain --target ethers-v5 --out-dir ./src/abi-typechain/vault/beefy ./src/abi-typechain/vault/beefy/BeefyVault-MergedV6V7.json",
+    "gen-typechain-uni": "typechain --target ethers-v5 --out-dir ./src/abi-typechain/liquidity ./src/abi-typechain/liquidity/UniV2LikePair.json"
   },
   "dependencies": {
     "@0x/contract-addresses": "^8.5.0",
@@ -31,6 +32,7 @@
     "@ethersproject/units": "^5.7.0",
     "@railgun-community/shared-models": "4.1.12",
     "axios": "^1.4.0",
+    "custom-uniswap-v2-sdk": "^3.2.0",
     "ethers": "^5.7.2"
   },
   "devDependencies": {

@@ -28,11 +28,13 @@ const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress, // WETH
+  decimals: 18,
   isBaseToken: false,
 };
 
 const buyToken: RecipeERC20Info = {
   tokenAddress: buyTokenAddress, // RAIL
+  decimals: 18,
 };
 
 const slippagePercentage = 0.01;
@@ -67,6 +69,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },

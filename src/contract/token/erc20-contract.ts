@@ -20,7 +20,7 @@ export class ERC20Contract {
       tokenAddress,
       abi.token.erc20,
       provider,
-    ) as unknown as ERC20;
+    ) as ERC20;
   }
 
   createSpenderApproval(

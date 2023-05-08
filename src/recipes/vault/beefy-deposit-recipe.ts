@@ -31,6 +31,7 @@ export class BeefyDepositRecipe extends Recipe {
     const spender = vault.vaultContractAddress;
     const depositERC20Info: RecipeERC20Info = {
       tokenAddress: vault.depositERC20Address,
+      decimals: vault.depositERC20Decimals,
     };
     return [
       new ApproveERC20SpenderStep(spender, depositERC20Info),

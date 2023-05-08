@@ -2,15 +2,16 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ApproveERC20SpenderStep } from '../approve-erc20-spender-step';
 import { BigNumber } from 'ethers';
-import { StepInput } from '../../../../models/export-models';
+import { RecipeERC20Info, StepInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const tokenInfo = {
+const tokenInfo: RecipeERC20Info = {
   tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+  decimals: 18,
 };
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
@@ -24,6 +25,7 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -44,12 +46,14 @@ describe('approve-erc20-spender-step', () => {
         approvedSpender: spender,
         expectedBalance: BigNumber.from('10000'),
         minBalance: BigNumber.from('10000'),
+        decimals: 18,
       },
       {
         tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: undefined,
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
+        decimals: 18,
       },
     ]);
 
@@ -75,6 +79,7 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -95,6 +100,7 @@ describe('approve-erc20-spender-step', () => {
         approvedSpender: spender,
         expectedBalance: BigNumber.from('12000'),
         minBalance: BigNumber.from('12000'),
+        decimals: 18,
       },
     ]);
 
@@ -119,6 +125,7 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: undefined,
@@ -139,6 +146,7 @@ describe('approve-erc20-spender-step', () => {
         expectedBalance: BigNumber.from('12000'),
         minBalance: BigNumber.from('12000'),
         approvedSpender: undefined,
+        decimals: 18,
       },
     ]);
 
@@ -171,6 +179,7 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),
           approvedSpender: undefined,

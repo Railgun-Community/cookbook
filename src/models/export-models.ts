@@ -14,6 +14,7 @@ export type CookbookDebugger = {
 
 export type RecipeERC20Info = {
   tokenAddress: string;
+  decimals: number;
   isBaseToken?: boolean;
 };
 

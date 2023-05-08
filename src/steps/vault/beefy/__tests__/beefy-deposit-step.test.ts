@@ -37,6 +37,7 @@ describe('beefy-deposit-step', () => {
         {
           // Approved for swapping
           tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('10000'),
           minBalance: BigNumber.from('10000'),
           approvedSpender: vault.vaultContractAddress,
@@ -44,6 +45,7 @@ describe('beefy-deposit-step', () => {
         {
           // Same token, unapproved
           tokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),
           approvedSpender: undefined,
@@ -64,6 +66,7 @@ describe('beefy-deposit-step', () => {
         amount: BigNumber.from('9000'),
         recipient: 'VAULT_NAME Vault',
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -74,12 +77,14 @@ describe('beefy-deposit-step', () => {
         expectedBalance: BigNumber.from('4500'),
         minBalance: BigNumber.from('4500'),
         tokenAddress: vault.vaultTokenAddress,
+        decimals: 18,
       },
       {
         approvedSpender: undefined,
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -88,6 +93,7 @@ describe('beefy-deposit-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
+        decimals: 18,
         tokenAddress,
         amount: BigNumber.from('1000'),
         recipient: 'VAULT_NAME Vault Deposit Fee',
@@ -111,6 +117,7 @@ describe('beefy-deposit-step', () => {
       erc20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
           approvedSpender: vault.vaultContractAddress,
@@ -127,6 +134,7 @@ describe('beefy-deposit-step', () => {
         {
           // No spender
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),

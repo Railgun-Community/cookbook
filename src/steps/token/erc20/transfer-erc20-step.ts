@@ -18,14 +18,18 @@ export class TransferERC20Step extends Step {
 
   private readonly toAddress: string;
 
-  private readonly tokenAddress: string;
+  private readonly erc20Info: RecipeERC20Info;
 
   private readonly amount: Optional<BigNumber>;
 
-  constructor(toAddress: string, tokenAddress: string, amount?: BigNumber) {
+  constructor(
+    toAddress: string,
+    erc20Info: RecipeERC20Info,
+    amount?: BigNumber,
+  ) {
     super();
     this.toAddress = toAddress;
-    this.tokenAddress = tokenAddress;
+    this.erc20Info = erc20Info;
     this.amount = amount;
   }
 
@@ -34,18 +38,14 @@ export class TransferERC20Step extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const { erc20Amounts } = input;
 
-    const erc20Info: RecipeERC20Info = {
-      tokenAddress: this.tokenAddress,
-      isBaseToken: false,
-    };
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
-        erc20Amount => compareERC20Info(erc20Amount, erc20Info),
+        erc20Amount => compareERC20Info(erc20Amount, this.erc20Info),
         this.amount,
       );
 
-    const contract = new ERC20Contract(this.tokenAddress);
+    const contract = new ERC20Contract(this.erc20Info.tokenAddress);
     const populatedTransactions: PopulatedTransaction[] = [
       await contract.createTransfer(
         this.toAddress,
@@ -54,7 +54,8 @@ export class TransferERC20Step extends Step {
     ];
 
     const transferredERC20: RecipeERC20AmountRecipient = {
-      ...erc20Info,
+      tokenAddress: this.erc20Info.tokenAddress,
+      decimals: this.erc20Info.decimals,
       amount: this.amount ?? erc20AmountForStep.expectedBalance,
       recipient: this.toAddress,
     };

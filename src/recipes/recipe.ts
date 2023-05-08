@@ -54,6 +54,7 @@ export abstract class Recipe {
       erc20Amounts: input.unshieldRecipeERC20Amounts.map(erc20Amount => {
         return {
           tokenAddress: erc20Amount.tokenAddress,
+          decimals: erc20Amount.decimals,
           isBaseToken: erc20Amount.isBaseToken,
           expectedBalance: erc20Amount.amount,
           minBalance: erc20Amount.amount,

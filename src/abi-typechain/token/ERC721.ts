@@ -23,6 +23,7 @@ import type {
   TypedEventFilter,
   TypedListener,
 } from '../common';
+import { BaseContract } from 'ethers';
 
 export interface ERC721Interface extends Interface {
   functions: {
@@ -200,7 +201,7 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface ERC721 {
+export interface ERC721 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

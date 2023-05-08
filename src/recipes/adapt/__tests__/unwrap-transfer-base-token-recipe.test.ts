@@ -35,6 +35,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },
@@ -53,6 +54,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           amount: BigNumber.from('30'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -62,6 +64,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           minBalance: BigNumber.from('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -82,6 +85,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           expectedBalance: amount, // 10000
           minBalance: amount, // 10000
           tokenAddress,
+          decimals: 18,
         },
         {
           // Change - WETH
@@ -90,6 +94,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           minBalance: BigNumber.from('1970'),
           tokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -105,6 +110,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           isBaseToken: false,
           recipient: 'Wrapped Token Contract',
           tokenAddress,
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -121,6 +127,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           minBalance: BigNumber.from('1970'),
           tokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -136,6 +143,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           isBaseToken: true,
           tokenAddress,
           recipient: toAddress,
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -149,6 +157,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           amount: BigNumber.from('4'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -158,6 +167,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           minBalance: BigNumber.from('1966'),
           tokenAddress,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -199,6 +209,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('12000'),
         },
@@ -215,6 +226,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           amount: BigNumber.from('30'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -224,6 +236,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           minBalance: BigNumber.from('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -244,6 +257,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           expectedBalance: BigNumber.from('11970'),
           minBalance: BigNumber.from('11970'),
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -259,6 +273,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           isBaseToken: false,
           recipient: 'Wrapped Token Contract',
           tokenAddress,
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -282,6 +297,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           isBaseToken: true,
           tokenAddress,
           recipient: toAddress,
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -327,6 +343,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
+          decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
@@ -342,6 +359,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           amount: BigNumber.from('2000'),
         },

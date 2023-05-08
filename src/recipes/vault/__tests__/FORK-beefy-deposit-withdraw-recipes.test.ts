@@ -65,6 +65,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           amount: oneWithDecimals,
         },
       ],
@@ -141,6 +142,7 @@ describe('FORK-beefy-deposit-withdraw-recipes', function run() {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
           amount: oneWithDecimals,
         },
       ],

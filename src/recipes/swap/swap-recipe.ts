@@ -39,6 +39,7 @@ export abstract class SwapRecipe extends Recipe {
     }
     return {
       tokenAddress: inputERC20Amount.tokenAddress,
+      decimals: inputERC20Amount.decimals,
       amount: inputERC20Amount.expectedBalance,
     };
   }

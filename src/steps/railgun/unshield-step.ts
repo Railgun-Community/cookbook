@@ -54,6 +54,7 @@ export class UnshieldStep extends Step {
 
       outputERC20Amounts.push({
         tokenAddress: erc20Amount.tokenAddress,
+        decimals: erc20Amount.decimals,
         isBaseToken: erc20Amount.isBaseToken,
         expectedBalance: unshieldedAmount,
         minBalance: unshieldedAmount,
@@ -62,6 +63,7 @@ export class UnshieldStep extends Step {
 
       feeERC20AmountRecipients.push({
         tokenAddress: erc20Amount.tokenAddress,
+        decimals: erc20Amount.decimals,
         amount: unshieldFeeAmount,
         recipient: 'RAILGUN Unshield Fee',
       });

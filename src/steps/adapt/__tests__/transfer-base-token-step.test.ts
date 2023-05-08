@@ -22,6 +22,7 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -44,6 +45,7 @@ describe('transfer-base-token-step', () => {
         isBaseToken: true,
         recipient: toAddress,
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -55,6 +57,7 @@ describe('transfer-base-token-step', () => {
         expectedBalance: BigNumber.from('2000'),
         minBalance: BigNumber.from('2000'),
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -82,6 +85,7 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -99,6 +103,7 @@ describe('transfer-base-token-step', () => {
         isBaseToken: true,
         recipient: toAddress,
         tokenAddress,
+        decimals: 18,
       },
     ]);
 
@@ -127,6 +132,7 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: false,
           expectedBalance: BigNumber.from('12000'),
           minBalance: BigNumber.from('12000'),
@@ -145,6 +151,7 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           isBaseToken: true,
           expectedBalance: BigNumber.from('2000'),
           minBalance: BigNumber.from('2000'),

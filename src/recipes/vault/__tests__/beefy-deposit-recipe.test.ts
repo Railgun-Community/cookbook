@@ -60,6 +60,7 @@ describe('beefy-deposit-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress,
+          decimals: 18,
           amount: BigNumber.from('10000'),
         },
       ],
@@ -77,6 +78,7 @@ describe('beefy-deposit-recipe', () => {
           amount: BigNumber.from('25'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -86,6 +88,7 @@ describe('beefy-deposit-recipe', () => {
           minBalance: BigNumber.from('9975'),
           approvedSpender: undefined,
           isBaseToken: undefined,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -105,6 +108,7 @@ describe('beefy-deposit-recipe', () => {
           minBalance: BigNumber.from('9975'),
           isBaseToken: undefined,
           tokenAddress,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -126,6 +130,7 @@ describe('beefy-deposit-recipe', () => {
           tokenAddress,
           amount: BigNumber.from('997'),
           recipient: 'VAULT_NAME Vault Deposit Fee',
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -134,6 +139,7 @@ describe('beefy-deposit-recipe', () => {
           expectedBalance: BigNumber.from('4489'),
           minBalance: BigNumber.from('4489'),
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -148,6 +154,7 @@ describe('beefy-deposit-recipe', () => {
           amount: BigNumber.from('8978'),
           tokenAddress,
           recipient: 'VAULT_NAME Vault',
+          decimals: 18,
         },
       ],
       spentNFTs: [],
@@ -161,6 +168,7 @@ describe('beefy-deposit-recipe', () => {
           amount: BigNumber.from('11'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
         },
       ],
       outputERC20Amounts: [
@@ -170,6 +178,7 @@ describe('beefy-deposit-recipe', () => {
           minBalance: BigNumber.from('4478'),
           tokenAddress: vault.vaultTokenAddress,
           isBaseToken: undefined,
+          decimals: 18,
         },
       ],
       outputNFTs: [],
@@ -220,6 +229,7 @@ describe('beefy-deposit-recipe', () => {
       unshieldRecipeERC20Amounts: [
         {
           tokenAddress: '0x1234',
+          decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
