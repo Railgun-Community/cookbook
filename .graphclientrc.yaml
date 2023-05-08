@@ -1,0 +1,24 @@
+sources:
+  - name: uniswap-v2-ethereum
+    handler:
+      graphql:
+        endpoint: https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2
+  - name: sushiswap-v2-ethereum
+    handler:
+      graphql:
+        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/exchange
+  - name: sushiswap-v2-polygon
+    handler:
+      graphql:
+        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
+  - name: sushiswap-v2-bsc
+    handler:
+      graphql:
+        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange
+  - name: sushiswap-v2-arbitrum
+    handler:
+      graphql:
+        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange
+
+documents:
+  - ./src/graph/graphql/uni-v2-like-query.graphql

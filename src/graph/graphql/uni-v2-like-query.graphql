@@ -1,0 +1,17 @@
+query Pairs($tokens: [String!]) {
+  pairs(where: { token0_in: $tokens, token1_in: $tokens }) {
+    id
+    reserve0
+    reserve1
+    token0 {
+      id
+      symbol
+      decimals
+    }
+    token1 {
+      id
+      symbol
+      decimals
+    }
+  }
+}

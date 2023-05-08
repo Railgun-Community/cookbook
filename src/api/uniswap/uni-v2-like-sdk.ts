@@ -5,16 +5,15 @@ import { RecipeERC20Info } from '../../models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from '@ethersproject/bignumber';
-
-export enum UniswapV2Fork {
-  Uniswap = 'Uniswap',
-  Sushiswap = 'Sushiswap',
-}
+import { PairDataWithRate, UniswapV2Fork } from '../../models/uni-v2-like';
+import { calculatePairRateWith18Decimals } from '../../utils/pair-rate';
+import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
+import { CookbookDebug } from '../../utils/cookbook-debug';
 
 export class UniV2LikeSDK {
   private static getFactoryAddressAndInitCodeHash(
-    networkName: NetworkName,
     uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
   ): { factoryAddress: string; initCodeHash: string } {
     switch (uniswapV2Fork) {
       case UniswapV2Fork.Uniswap:
@@ -60,6 +59,28 @@ export class UniV2LikeSDK {
     }
   }
 
+  private static supportsNetwork(
+    uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
+  ): boolean {
+    try {
+      this.getFactoryAddressAndInitCodeHash(uniswapV2Fork, networkName);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  static supportsForkAndNetwork(
+    uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
+  ): boolean {
+    return (
+      this.supportsNetwork(uniswapV2Fork, networkName) &&
+      UniV2LikeSubgraph.subgraphSupportsUniV2Fork(uniswapV2Fork, networkName)
+    );
+  }
+
   private static tokenForERC20Info(
     chainID: number,
     erc20Info: RecipeERC20Info,
@@ -74,7 +95,7 @@ export class UniV2LikeSDK {
     erc20InfoB: RecipeERC20Info,
   ): string {
     const { factoryAddress, initCodeHash } =
-      this.getFactoryAddressAndInitCodeHash(networkName, uniswapV2Fork);
+      this.getFactoryAddressAndInitCodeHash(uniswapV2Fork, networkName);
 
     const chainID = NETWORK_CONFIG[networkName].chain.id;
     const tokenA = this.tokenForERC20Info(chainID, erc20InfoA);
@@ -84,14 +105,14 @@ export class UniV2LikeSDK {
   }
 
   static async getPairRate(
-    provider: BaseProvider,
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
+    provider: BaseProvider,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
   ): Promise<BigNumber> {
     const { factoryAddress, initCodeHash } =
-      this.getFactoryAddressAndInitCodeHash(networkName, uniswapV2Fork);
+      this.getFactoryAddressAndInitCodeHash(uniswapV2Fork, networkName);
 
     const chainID = NETWORK_CONFIG[networkName].chain.id;
     const tokenA = this.tokenForERC20Info(chainID, erc20InfoA);
@@ -106,18 +127,34 @@ export class UniV2LikeSDK {
 
     const pairContract = new UniV2LikePairContract(pairAddress, provider);
 
-    const { amountTokenA, amountTokenB } = await pairContract.getReserves();
-
-    const decimals18 = BigNumber.from(10).pow(18);
-    const decimalsA = BigNumber.from(10).pow(erc20InfoA.decimals);
-    const decimalsB = BigNumber.from(10).pow(erc20InfoB.decimals);
-
-    const rateWith18Decimals = amountTokenA
-      .mul(decimals18)
-      .mul(decimalsB)
-      .div(amountTokenB)
-      .div(decimalsA);
+    const { tokenAmountA, tokenAmountB } = await pairContract.getReserves();
+    const rateWith18Decimals = calculatePairRateWith18Decimals(
+      tokenAmountA,
+      erc20InfoA.decimals,
+      tokenAmountB,
+      erc20InfoB.decimals,
+    );
 
     return rateWith18Decimals;
+  }
+
+  static getAllLPPairsForTokenAddresses(
+    uniswapV2Fork: UniswapV2Fork,
+    networkName: NetworkName,
+    tokenAddresses: string[],
+  ): Promise<PairDataWithRate[]> {
+    try {
+      return UniV2LikeSubgraph.getPairsForTokenAddresses(
+        uniswapV2Fork,
+        networkName,
+        tokenAddresses,
+      );
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      CookbookDebug.error(err);
+      throw new Error('Failed to get LP pairs');
+    }
   }
 }

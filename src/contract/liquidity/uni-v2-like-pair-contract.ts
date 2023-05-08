@@ -24,8 +24,8 @@ export class UniV2LikePairContract {
   async getReserves() {
     const { _reserve0, _reserve1 } = await this.contract.getReserves();
     return {
-      amountTokenA: _reserve0,
-      amountTokenB: _reserve1,
+      tokenAmountA: _reserve0,
+      tokenAmountB: _reserve1,
     };
   }
 }
