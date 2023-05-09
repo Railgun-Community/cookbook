@@ -124,17 +124,11 @@ export abstract class Step {
   protected getValidInputERC20Amounts(
     inputERC20Amounts: StepOutputERC20Amount[],
     filters: ERC20AmountFilter[],
-    amounts: Optional<BigNumber>[],
+    amountsPerAddress: Record<string, BigNumber>,
   ): {
     erc20AmountsForStep: StepOutputERC20Amount[];
     unusedERC20Amounts: StepOutputERC20Amount[];
   } {
-    if (amounts.length !== filters.length) {
-      throw new Error(
-        'getValidInputERC20Amounts requires one amount for each filter (can be array of undefineds).',
-      );
-    }
-
     const anyFilterPasses = (erc20Amount: StepOutputERC20Amount) => {
       return (
         filters.find(filter => {
@@ -156,8 +150,13 @@ export abstract class Step {
     }
 
     // Add change outputs.
-    erc20AmountsForStep.forEach((erc20AmountForStep, index) => {
-      const amount = amounts[index];
+    erc20AmountsForStep.forEach(erc20AmountForStep => {
+      const amount = amountsPerAddress[erc20AmountForStep.tokenAddress];
+      if (!amount) {
+        throw new Error(
+          `No amount specified for token ${erc20AmountForStep.tokenAddress}.`,
+        );
+      }
       const changeOutputs = this.getChangeOutputs(erc20AmountForStep, amount);
       if (changeOutputs) {
         unusedERC20Amounts.push(changeOutputs.changeOutput);

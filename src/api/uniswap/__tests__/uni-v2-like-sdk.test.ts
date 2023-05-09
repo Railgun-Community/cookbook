@@ -34,7 +34,7 @@ describe('uni-v2-like-sdk', () => {
       USDC_TOKEN,
       WETH_TOKEN,
     );
-    expect(lpAddress).to.equal('0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc');
+    expect(lpAddress).to.equal('0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc');
   });
 
   it('Should get Uniswap LP rate for USDC-WETH pair', async () => {

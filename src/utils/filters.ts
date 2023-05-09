@@ -29,7 +29,7 @@ export const findFirstInputERC20Amount = (
   );
   if (!inputERC20Amount) {
     throw new Error(
-      `AddLiquidityRecipe first input must contain ERC20 Amount: ${erc20Info.tokenAddress}`,
+      `First input for this recipe must contain ERC20 Amount: ${erc20Info.tokenAddress}`,
     );
   }
   return {

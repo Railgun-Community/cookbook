@@ -150,7 +150,12 @@ export class UniV2LikeSDK {
     const tokenA = this.tokenForERC20Info(chainID, erc20InfoA);
     const tokenB = this.tokenForERC20Info(chainID, erc20InfoB);
 
-    return Pair.getAddress(tokenA, tokenB, factoryAddress, initCodeHash);
+    return Pair.getAddress(
+      tokenA,
+      tokenB,
+      factoryAddress,
+      initCodeHash,
+    ).toLowerCase();
   }
 
   static getForkName(uniswapV2Fork: UniswapV2Fork) {
@@ -327,8 +332,20 @@ export class UniV2LikeSDK {
       pairContract.totalSupply(),
     ]);
 
-    const mintedTokensA = erc20AmountA.amount.mul(totalSupply).div(reserveA);
-    const mintedTokensB = erc20AmountB.amount.mul(totalSupply).div(reserveB);
+    const decimals18 = BigNumber.from(10).pow(18);
+    const decimalsA = BigNumber.from(10).pow(erc20AmountA.decimals);
+    const decimalsB = BigNumber.from(10).pow(erc20AmountB.decimals);
+
+    const mintedTokensA = erc20AmountA.amount
+      .mul(decimals18)
+      .mul(totalSupply)
+      .div(decimalsA)
+      .div(reserveA);
+    const mintedTokensB = erc20AmountB.amount
+      .mul(decimals18)
+      .mul(totalSupply)
+      .div(decimalsB)
+      .div(reserveB);
 
     // Return minimum.
     return mintedTokensA.lt(mintedTokensB) ? mintedTokensA : mintedTokensB;

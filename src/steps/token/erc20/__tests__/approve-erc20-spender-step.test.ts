@@ -46,6 +46,7 @@ describe('approve-erc20-spender-step', () => {
         approvedSpender: spender,
         expectedBalance: BigNumber.from('10000'),
         minBalance: BigNumber.from('10000'),
+        isBaseToken: undefined,
         decimals: 18,
       },
       {
@@ -100,6 +101,7 @@ describe('approve-erc20-spender-step', () => {
         approvedSpender: spender,
         expectedBalance: BigNumber.from('12000'),
         minBalance: BigNumber.from('12000'),
+        isBaseToken: undefined,
         decimals: 18,
       },
     ]);

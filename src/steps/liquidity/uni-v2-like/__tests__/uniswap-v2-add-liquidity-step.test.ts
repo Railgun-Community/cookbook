@@ -85,9 +85,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
     const output = await step.getValidStepOutput(stepInput);
 
     expect(output.name).to.equal('Uniswap V2 Add Liquidity');
-    expect(output.description).to.equal(
-      'Adds liquidity to a Uniswap V2-like pair.',
-    );
+    expect(output.description).to.equal('Adds liquidity to a Uniswap V2 Pool.');
 
     // Spent
     expect(output.spentERC20Amounts).to.deep.equal([
