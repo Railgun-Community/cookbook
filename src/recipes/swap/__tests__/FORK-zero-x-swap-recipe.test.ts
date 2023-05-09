@@ -43,7 +43,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }
@@ -58,7 +58,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
   });
 
   it('[FORK] Should run zero-x-swap-recipe', async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }

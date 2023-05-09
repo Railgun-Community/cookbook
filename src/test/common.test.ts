@@ -14,12 +14,13 @@ import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const SCAN_BALANCE_DELAY = 5000;
+const SCAN_BALANCE_DELAY = 3000;
 
 export const executeRecipeAndAssertUnshieldBalances = async (
   recipe: Recipe,
   recipeInput: RecipeInput,
   expectedGasWithin50K: number,
+  expectPossiblePrecisionLossOverflow?: boolean,
 ) => {
   const railgunWallet = getTestRailgunWallet();
 
@@ -106,10 +107,23 @@ export const executeRecipeAndAssertUnshieldBalances = async (
         .sub(unshieldAmount)
         .add(shieldTokenMap[tokenAddress] ?? 0);
 
-      expect(postBalance.toString()).to.equal(
-        expectedBalance.toString(),
-        `${recipe.config.name}: Did not get expected balance token ${tokenAddress}`,
-      );
+      if (expectPossiblePrecisionLossOverflow) {
+        // NOTE: Balance may be +1 wei because of precision loss.
+        expect(
+          postBalance.gte(expectedBalance) &&
+            postBalance.lte(expectedBalance.add(1)),
+        ).to.equal(
+          true,
+          `${
+            recipe.config.name
+          }: Did not get expected balance token ${tokenAddress}, expected ${expectedBalance.toString()} got ${postBalance.toString()}`,
+        );
+      } else {
+        expect(postBalance.toString()).to.equal(
+          expectedBalance.toString(),
+          `${recipe.config.name}: Did not get expected balance token ${tokenAddress}`,
+        );
+      }
     }),
   );
 };

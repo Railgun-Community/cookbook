@@ -17,7 +17,7 @@
     "eslint": "eslint src --ext .ts,.tsx --fix",
     "lint": "npm run check-circular-deps && npm run eslint && tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test-fork-ganache": "env USE_GANACHE=1 npm run test-fork",
-    "test-fork": "env DEBUG=railgun*,rpc*,cookbook* NODE_ENV=test RUN_GANACHE_TESTS=1 npm test",
+    "test-fork": "env DEBUG=railgun*,rpc*,cookbook* NODE_ENV=test RUN_FORK_TESTS=1 npm test",
     "tsc-test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
     "compile-test": "npm run clean && npm run tsc-test",
     "test-coverage": "npm run compile-test && c8 mocha",

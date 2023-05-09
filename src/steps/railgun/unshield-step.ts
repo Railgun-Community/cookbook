@@ -5,8 +5,8 @@ import {
   UnvalidatedStepOutput,
 } from '../../models/export-models';
 import { Step } from '../step';
-import { RailgunConfig } from '../../models/railgun-config';
 import { NetworkName } from '@railgun-community/shared-models';
+import { getUnshieldFee, getUnshieldedAmountAfterFee } from '../../utils/fee';
 
 export class UnshieldStep extends Step {
   readonly config = {
@@ -39,18 +39,18 @@ export class UnshieldStep extends Step {
     networkName: NetworkName,
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
-    const unshieldFeeBasisPoints =
-      RailgunConfig.getUnshieldFeeBasisPoints(networkName);
-
     const outputERC20Amounts: StepOutputERC20Amount[] = [];
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = [];
 
     inputERC20Amounts.forEach(erc20Amount => {
-      const unshieldFeeAmount = erc20Amount.expectedBalance
-        .mul(unshieldFeeBasisPoints)
-        .div(10000);
-      const unshieldedAmount =
-        erc20Amount.expectedBalance.sub(unshieldFeeAmount);
+      const unshieldFeeAmount = getUnshieldFee(
+        networkName,
+        erc20Amount.expectedBalance,
+      );
+      const unshieldedAmount = getUnshieldedAmountAfterFee(
+        networkName,
+        erc20Amount.expectedBalance,
+      );
 
       outputERC20Amounts.push({
         tokenAddress: erc20Amount.tokenAddress,

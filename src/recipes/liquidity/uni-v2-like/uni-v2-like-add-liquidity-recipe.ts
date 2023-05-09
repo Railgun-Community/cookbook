@@ -13,6 +13,10 @@ import { BaseProvider } from '@ethersproject/providers';
 import { Step } from '../../../steps/step';
 import { AddLiquidityRecipe } from '../add-liquidity-recipe';
 import { findFirstInputERC20Amount } from '../../../utils/filters';
+import {
+  getAmountToUnshieldForTarget,
+  getUnshieldedAmountAfterFee,
+} from '../../../utils/fee';
 
 export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   readonly config = {
@@ -53,7 +57,7 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
     return UniV2LikeSDK.supportsForkAndNetwork(this.uniswapV2Fork, networkName);
   }
 
-  protected async getAddLiquidityData(
+  private async getAddLiquidityData(
     networkName: NetworkName,
     erc20AmountA: RecipeERC20Amount,
   ): Promise<RecipeAddLiquidityData> {
@@ -66,6 +70,47 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
       this.provider,
     );
     return this.addLiquidityData;
+  }
+
+  /**
+   * This will return the amount of ERC20 B that is proportional to the amounts in the LP Pool,
+   * adjusting for unshield fees on either end.
+   */
+  async getAddLiquidityAmountBForUnshield(
+    networkName: NetworkName,
+    targetUnshieldERC20AmountA: RecipeERC20Amount,
+  ): Promise<{
+    erc20UnshieldAmountB: RecipeERC20Amount;
+    addLiquidityData: RecipeAddLiquidityData;
+  }> {
+    const unshieldedAmountA = getUnshieldedAmountAfterFee(
+      networkName,
+      targetUnshieldERC20AmountA.amount,
+    );
+    const unshieldedERC20AmountA: RecipeERC20Amount = {
+      ...targetUnshieldERC20AmountA,
+      amount: unshieldedAmountA,
+    };
+    this.addLiquidityData = await UniV2LikeSDK.getAddLiquidityData(
+      this.uniswapV2Fork,
+      networkName,
+      unshieldedERC20AmountA,
+      this.erc20InfoB,
+      this.slippagePercentage,
+      this.provider,
+    );
+    const preUnshieldAmountB = getAmountToUnshieldForTarget(
+      networkName,
+      this.addLiquidityData.erc20AmountB.amount,
+    );
+    const erc20UnshieldAmountB: RecipeERC20Amount = {
+      ...this.addLiquidityData.erc20AmountB,
+      amount: preUnshieldAmountB,
+    };
+    return {
+      erc20UnshieldAmountB,
+      addLiquidityData: this.addLiquidityData,
+    };
   }
 
   protected async getInternalSteps(

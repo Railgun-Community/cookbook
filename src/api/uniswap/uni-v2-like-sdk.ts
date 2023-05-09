@@ -12,10 +12,7 @@ import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from '@ethersproject/bignumber';
 import { PairDataWithRate } from '../../models/uni-v2-like';
-import {
-  calculateAmountBFromPairRate,
-  calculatePairRateWith18Decimals,
-} from '../../utils/pair-rate';
+import { calculatePairRateWith18Decimals } from '../../utils/pair-rate';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 
@@ -224,40 +221,32 @@ export class UniV2LikeSDK {
       erc20AmountA,
       erc20InfoB,
     );
-    const routerContract = this.getRouterContractAddress(
-      uniswapV2Fork,
-      networkName,
-    );
-    const rateWith18Decimals = await this.getPairRateWith18Decimals(
-      uniswapV2Fork,
-      networkName,
-      provider,
-      erc20AmountA,
-      erc20InfoB,
-    );
+    const pairContract = new UniV2LikePairContract(pairAddress, provider);
+    const [{ reserveA, reserveB }, totalSupply] = await Promise.all([
+      pairContract.getReserves(),
+      pairContract.totalSupply(),
+    ]);
 
-    const amountB = calculateAmountBFromPairRate(
-      erc20AmountA.amount,
-      erc20AmountA.decimals,
-      erc20InfoB.decimals,
-      rateWith18Decimals,
-    );
-    const erc20AmountB: RecipeERC20Amount = {
-      ...erc20InfoB,
-      amount: amountB,
-    };
-
-    const expectedLPBalance = await this.getExpectedLPBalance(
-      erc20AmountA,
-      erc20AmountB,
-      pairAddress,
-      provider,
-    );
+    const expectedLPBalance = erc20AmountA.amount
+      .mul(totalSupply)
+      .div(reserveA);
     const expectedLPAmount: RecipeERC20Amount = {
       tokenAddress: pairAddress,
       decimals: this.LIQUIDITY_TOKEN_DECIMALS,
       amount: expectedLPBalance,
     };
+
+    const amountB = expectedLPBalance.mul(reserveB).div(totalSupply);
+    const erc20AmountB: RecipeERC20Amount = {
+      ...erc20InfoB,
+      amount: amountB,
+    };
+
+    const routerContract = this.getRouterContractAddress(
+      uniswapV2Fork,
+      networkName,
+    );
+
     const deadlineTimestamp = this.getDeadlineTimestamp();
 
     return {
@@ -267,7 +256,6 @@ export class UniV2LikeSDK {
       routerContract,
       slippagePercentage,
       deadlineTimestamp,
-      rateWith18Decimals,
     };
   }
 
@@ -318,37 +306,6 @@ export class UniV2LikeSDK {
       slippagePercentage,
       deadlineTimestamp,
     };
-  }
-
-  private static async getExpectedLPBalance(
-    erc20AmountA: RecipeERC20Amount,
-    erc20AmountB: RecipeERC20Amount,
-    pairAddress: string,
-    provider: BaseProvider,
-  ): Promise<BigNumber> {
-    const pairContract = new UniV2LikePairContract(pairAddress, provider);
-    const [{ reserveA, reserveB }, totalSupply] = await Promise.all([
-      pairContract.getReserves(),
-      pairContract.totalSupply(),
-    ]);
-
-    const decimals18 = BigNumber.from(10).pow(18);
-    const decimalsA = BigNumber.from(10).pow(erc20AmountA.decimals);
-    const decimalsB = BigNumber.from(10).pow(erc20AmountB.decimals);
-
-    const mintedTokensA = erc20AmountA.amount
-      .mul(decimals18)
-      .mul(totalSupply)
-      .div(decimalsA)
-      .div(reserveA);
-    const mintedTokensB = erc20AmountB.amount
-      .mul(decimals18)
-      .mul(totalSupply)
-      .div(decimalsB)
-      .div(reserveB);
-
-    // Return minimum.
-    return mintedTokensA.lt(mintedTokensB) ? mintedTokensA : mintedTokensB;
   }
 
   private static async getExpectedUnwoundABBalances(

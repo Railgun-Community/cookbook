@@ -1,11 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { BigNumber } from 'ethers';
-import { NetworkName } from '@railgun-community/shared-models';
-import {
-  calculateAmountBFromPairRate,
-  calculatePairRateWith18Decimals,
-} from '../pair-rate';
+import { calculatePairRateWith18Decimals } from '../pair-rate';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -28,14 +24,5 @@ describe('pair-rate', () => {
       WETH_DECIMALS,
     );
     expect(pairRate.toString()).to.equal(oneInDecimals18.mul(2000).toString());
-
-    const amountA = oneInDecimals6.mul(10000);
-    const amountB = calculateAmountBFromPairRate(
-      amountA,
-      USDC_DECIMALS,
-      WETH_DECIMALS,
-      pairRate,
-    );
-    expect(amountB.toString()).to.equal(oneInDecimals18.mul(5).toString());
   });
 });

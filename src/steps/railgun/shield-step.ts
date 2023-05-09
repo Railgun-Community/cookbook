@@ -5,8 +5,8 @@ import {
   UnvalidatedStepOutput,
 } from '../../models/export-models';
 import { Step } from '../step';
-import { RailgunConfig } from '../../models/railgun-config';
 import { NetworkName } from '@railgun-community/shared-models';
+import { getShieldFee, getShieldedAmountAfterFee } from '../../utils/fee';
 
 export class ShieldStep extends Step {
   readonly config = {
@@ -37,23 +37,21 @@ export class ShieldStep extends Step {
     networkName: NetworkName,
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
-    const shieldFeeBasisPoints =
-      RailgunConfig.getShieldFeeBasisPoints(networkName);
-
     const outputERC20Amounts: StepOutputERC20Amount[] = [];
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = [];
 
     inputERC20Amounts.forEach(erc20Amount => {
-      const shieldFeeAmount = erc20Amount.expectedBalance
-        .mul(shieldFeeBasisPoints)
-        .div(10000);
-      const shieldedAmount = erc20Amount.expectedBalance.sub(shieldFeeAmount);
-
-      const shieldFeeAmountMinimum = erc20Amount.minBalance
-        .mul(shieldFeeBasisPoints)
-        .div(10000);
-      const shieldedAmountMinimum = erc20Amount.minBalance.sub(
-        shieldFeeAmountMinimum,
+      const shieldFeeAmount = getShieldFee(
+        networkName,
+        erc20Amount.expectedBalance,
+      );
+      const shieldedAmount = getShieldedAmountAfterFee(
+        networkName,
+        erc20Amount.expectedBalance,
+      );
+      const shieldedAmountMinimum = getShieldedAmountAfterFee(
+        networkName,
+        erc20Amount.minBalance,
       );
 
       outputERC20Amounts.push({

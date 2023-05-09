@@ -36,7 +36,7 @@ describe('FORK-beefy-vault-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }
@@ -49,7 +49,7 @@ describe('FORK-beefy-vault-recipes', function run() {
   });
 
   it('[FORK] Should run beefy-deposit-recipe', async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }
@@ -126,7 +126,7 @@ describe('FORK-beefy-vault-recipes', function run() {
   });
 
   it('[FORK] Should run beefy-withdraw-recipe', async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }

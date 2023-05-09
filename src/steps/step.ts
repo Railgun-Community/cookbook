@@ -153,9 +153,7 @@ export abstract class Step {
     erc20AmountsForStep.forEach(erc20AmountForStep => {
       const amount = amountsPerAddress[erc20AmountForStep.tokenAddress];
       if (!amount) {
-        throw new Error(
-          `No amount specified for token ${erc20AmountForStep.tokenAddress}.`,
-        );
+        return;
       }
       const changeOutputs = this.getChangeOutputs(erc20AmountForStep, amount);
       if (changeOutputs) {

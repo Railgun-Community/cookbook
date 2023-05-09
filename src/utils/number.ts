@@ -4,5 +4,6 @@ export const minBalanceAfterSlippage = (
   balance: BigNumber,
   slippagePercentage: number,
 ): BigNumber => {
-  return balance.mul(10000 - slippagePercentage * 10000).div(10000);
+  const slippageMax = balance.mul(slippagePercentage * 10000).div(10000);
+  return balance.sub(slippageMax);
 };

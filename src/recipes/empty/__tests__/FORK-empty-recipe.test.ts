@@ -20,7 +20,7 @@ describe('FORK-empty-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }
@@ -33,7 +33,7 @@ describe('FORK-empty-recipe', function run() {
   });
 
   it('[FORK] Should run empty-recipe', async function run() {
-    if (!process.env.RUN_GANACHE_TESTS) {
+    if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;
     }

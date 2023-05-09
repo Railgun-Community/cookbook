@@ -10,7 +10,7 @@ import { ForkRPCType, setupTestEthereumRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
 
 before(async function run() {
-  if (process.env.RUN_GANACHE_TESTS) {
+  if (process.env.RUN_FORK_TESTS) {
     this.timeout(2 * 60 * 1000); // 2 min timeout for setup.
     removeTestDB();
     await setupGanacheQuickstartTests();
@@ -18,7 +18,7 @@ before(async function run() {
 });
 
 after(() => {
-  if (process.env.RUN_GANACHE_TESTS) {
+  if (process.env.RUN_FORK_TESTS) {
     removeTestDB();
   }
 });
@@ -27,6 +27,7 @@ export const setupGanacheQuickstartTests = async () => {
   const tokenAddresses: string[] = [
     testConfig.contractsEthereum.weth9,
     testConfig.contractsEthereum.rail,
+    testConfig.contractsEthereum.usdc,
     testConfig.contractsEthereum.crvCRVETH,
     testConfig.contractsEthereum.crvCRVETHVaultToken,
   ];

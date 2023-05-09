@@ -45,7 +45,6 @@ const addLiquidityData: RecipeAddLiquidityData = {
     ...WETH_TOKEN,
     amount: oneInDecimals18.mul(1),
   },
-  rateWith18Decimals: oneInDecimals18.mul(2000),
   expectedLPAmount: {
     ...LP_TOKEN,
     amount: oneInDecimals18.mul(2),

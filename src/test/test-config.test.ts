@@ -25,8 +25,9 @@ export const testConfig = {
     relayAdapt: '0x0355B7B8cb128fA5692729Ab3AAa199C1753f726',
 
     // Tokens
-    dai: '0x6b175474e89094c44da98b954eedeac495271d0f',
     rail: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+    usdc: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+    // dai: '0x6b175474e89094c44da98b954eedeac495271d0f',
 
     // Vault tokens
     crvCRVETH: '0xEd4064f376cB8d68F770FB1Ff088a3d0F3FF5c4d',

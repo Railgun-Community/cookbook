@@ -10,12 +10,19 @@ import { BigNumber } from 'ethers';
 import { NetworkName } from '@railgun-community/shared-models';
 
 export abstract class AddLiquidityRecipe extends Recipe {
-  protected addLiquidityData: Optional<RecipeAddLiquidityData>;
+  addLiquidityData: Optional<RecipeAddLiquidityData>;
 
-  protected abstract getAddLiquidityData(
+  /**
+   * This will return the amount of ERC20 B that is proportional to the amounts in the LP Pool,
+   * adjusting for unshield fees on either end.
+   */
+  protected abstract getAddLiquidityAmountBForUnshield(
     networkName: NetworkName,
-    erc20AmountA: RecipeERC20Amount,
-  ): Promise<RecipeAddLiquidityData>;
+    targetUnshieldERC20AmountA: RecipeERC20Amount,
+  ): Promise<{
+    erc20UnshieldAmountB: RecipeERC20Amount;
+    addLiquidityData: RecipeAddLiquidityData;
+  }>;
 
   getExpectedLPAmountFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,
