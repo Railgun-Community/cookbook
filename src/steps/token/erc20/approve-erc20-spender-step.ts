@@ -57,7 +57,9 @@ export class ApproveERC20SpenderStep extends Step {
       await contract.createSpenderApproval(this.spender, approveAmount),
     ];
     const approvedERC20Amount: StepOutputERC20Amount = {
-      ...erc20AmountForStep,
+      tokenAddress: erc20AmountForStep.tokenAddress,
+      decimals: erc20AmountForStep.decimals,
+      isBaseToken: erc20AmountForStep.isBaseToken,
       expectedBalance: approveAmount,
       minBalance: approveAmount,
       approvedSpender: this.spender,

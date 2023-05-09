@@ -9,11 +9,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
-import {
-  RecipeERC20Amount,
-  RecipeERC20Info,
-  RecipeInput,
-} from '../../../../models/export-models';
+import { RecipeERC20Info, RecipeInput } from '../../../../models/export-models';
 import { UniswapV2AddLiquidityRecipe } from '../uniswap-v2-add-liquidity-recipe';
 import { BaseProvider } from '@ethersproject/providers';
 
@@ -36,20 +32,13 @@ const WETH_TOKEN: RecipeERC20Info = {
   decimals: 18,
 };
 
-const erc20AmountA: RecipeERC20Amount = {
-  ...USDC_TOKEN,
-  amount: oneInDecimals6.mul(2000),
-};
-const erc20InfoB: RecipeERC20Info = {
-  ...WETH_TOKEN,
-};
-
 // Assume 2:1 rate for LP:WETH.
 const LP_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
   decimals: 18,
 };
 
+// TODO: Date now stub
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
 
@@ -84,8 +73,8 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
   it('Should create uniswap-v2-add-liquidity-recipe', async () => {
     const recipe = new UniswapV2AddLiquidityRecipe(
-      erc20AmountA,
-      erc20InfoB,
+      USDC_TOKEN,
+      WETH_TOKEN,
       slippagePercentage,
       provider,
     );
@@ -118,13 +107,13 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           amount: oneInDecimals6.mul('2000').mul('25').div('10000'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: USDC_TOKEN.tokenAddress,
-          decimals: USDC_TOKEN.tokenAddress,
+          decimals: USDC_TOKEN.decimals,
         },
         {
           amount: oneInDecimals18.mul('1').mul('25').div('10000'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: WETH_TOKEN.tokenAddress,
-          decimals: WETH_TOKEN.tokenAddress,
+          decimals: WETH_TOKEN.decimals,
         },
       ],
       outputERC20Amounts: [
@@ -134,7 +123,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: USDC_TOKEN.tokenAddress,
-          decimals: USDC_TOKEN.tokenAddress,
+          decimals: USDC_TOKEN.decimals,
         },
         {
           expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
@@ -142,7 +131,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: WETH_TOKEN.tokenAddress,
-          decimals: WETH_TOKEN.tokenAddress,
+          decimals: WETH_TOKEN.decimals,
         },
       ],
       outputNFTs: [],
@@ -162,7 +151,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
           isBaseToken: undefined,
           tokenAddress: USDC_TOKEN.tokenAddress,
-          decimals: USDC_TOKEN.tokenAddress,
+          decimals: USDC_TOKEN.decimals,
         },
         {
           expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
@@ -170,7 +159,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: WETH_TOKEN.tokenAddress,
-          decimals: WETH_TOKEN.tokenAddress,
+          decimals: WETH_TOKEN.decimals,
         },
       ],
       outputNFTs: [],
@@ -195,7 +184,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
           isBaseToken: undefined,
           tokenAddress: USDC_TOKEN.tokenAddress,
-          decimals: USDC_TOKEN.tokenAddress,
+          decimals: USDC_TOKEN.decimals,
         },
         {
           expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
@@ -203,7 +192,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
           isBaseToken: undefined,
           tokenAddress: WETH_TOKEN.tokenAddress,
-          decimals: WETH_TOKEN.tokenAddress,
+          decimals: WETH_TOKEN.decimals,
         },
       ],
       outputNFTs: [],
@@ -233,7 +222,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: LP_TOKEN.tokenAddress,
-          decimals: LP_TOKEN.tokenAddress,
+          decimals: LP_TOKEN.decimals,
         },
       ],
       outputNFTs: [],
@@ -341,8 +330,8 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
   it('Should test uniswap-v2-add-liquidity-recipe error cases', async () => {
     const recipe = new UniswapV2AddLiquidityRecipe(
-      erc20AmountA,
-      erc20InfoB,
+      USDC_TOKEN,
+      WETH_TOKEN,
       slippagePercentage,
       provider,
     );
