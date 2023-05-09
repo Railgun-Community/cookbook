@@ -1,4 +1,5 @@
 import {
+  RecipeERC20Amount,
   RecipeOutput,
   RecipeRemoveLiquidityData,
 } from '../../models/export-models';
@@ -6,9 +7,15 @@ import { compareERC20Info } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { BigNumber } from 'ethers';
+import { NetworkName } from '@railgun-community/shared-models';
 
 export abstract class RemoveLiquidityRecipe extends Recipe {
   protected removeLiquidityData: Optional<RecipeRemoveLiquidityData>;
+
+  protected abstract getRemoveLiquidityData(
+    networkName: NetworkName,
+    lpERC20Amount: RecipeERC20Amount,
+  ): Promise<RecipeRemoveLiquidityData>;
 
   getExpectedABAmountsFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,

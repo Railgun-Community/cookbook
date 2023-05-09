@@ -96,7 +96,7 @@ describe('shield-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Shield step failed. Cannot shield base token.',
+      'Shield step is invalid. Cannot shield base token.',
     );
   });
 });

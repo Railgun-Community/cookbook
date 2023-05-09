@@ -159,7 +159,7 @@ describe('unwrap-base-token-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Unwrap Base Token step failed. No step inputs match filter.',
+      'Unwrap Base Token step is invalid. No step inputs match filter.',
     );
 
     // Too low balance for erc20 input
@@ -180,7 +180,7 @@ describe('unwrap-base-token-step', () => {
     await expect(
       step.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
-      'Unwrap Base Token step failed. Specified amount 10000 exceeds balance 2000.',
+      'Unwrap Base Token step is invalid. Specified amount 10000 exceeds balance 2000.',
     );
   });
 });

@@ -1,4 +1,5 @@
 import {
+  RecipeAddLiquidityData,
   RecipeERC20Info,
   StepInput,
   UniswapV2Fork,
@@ -11,17 +12,18 @@ import { UniV2LikeAddLiquidityStep } from '../../../steps/liquidity/uni-v2-like/
 import { BaseProvider } from '@ethersproject/providers';
 import { Step } from '../../../steps/step';
 import { AddLiquidityRecipe } from '../add-liquidity-recipe';
+import { findFirstInputERC20Amount } from '../../../utils/filters';
 
 export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   readonly config = {
     name: '[Name] Add Liquidity',
-    description: 'Adds liquidity to a Uniswap V2-like pair.',
+    description: 'Adds liquidity to a [Name] Pool.',
     hasNonDeterministicOutput: true,
   };
 
   private readonly uniswapV2Fork: UniswapV2Fork;
 
-  private readonly erc20AmountA: RecipeERC20Amount;
+  private readonly erc20InfoA: RecipeERC20Info;
   private readonly erc20InfoB: RecipeERC20Info;
 
   private readonly slippagePercentage: number;
@@ -29,7 +31,7 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
 
   constructor(
     uniswapV2Fork: UniswapV2Fork,
-    erc20AmountA: RecipeERC20Amount,
+    erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
     provider: BaseProvider,
@@ -37,37 +39,53 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
 
-    this.erc20AmountA = erc20AmountA;
+    this.erc20InfoA = erc20InfoA;
     this.erc20InfoB = erc20InfoB;
     this.slippagePercentage = slippagePercentage;
     this.provider = provider;
 
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Add Liquidity`;
+    this.config.description = `Adds liquidity to a ${forkName} Pool.`;
   }
 
   protected supportsNetwork(networkName: NetworkName): boolean {
     return UniV2LikeSDK.supportsForkAndNetwork(this.uniswapV2Fork, networkName);
   }
 
-  protected async getInternalSteps(
-    firstInternalStepInput: StepInput,
-  ): Promise<Step[]> {
-    const { networkName } = firstInternalStepInput;
-
+  protected async getAddLiquidityData(
+    networkName: NetworkName,
+    erc20AmountA: RecipeERC20Amount,
+  ): Promise<RecipeAddLiquidityData> {
     this.addLiquidityData = await UniV2LikeSDK.getAddLiquidityData(
       this.uniswapV2Fork,
       networkName,
-      this.erc20AmountA,
+      erc20AmountA,
       this.erc20InfoB,
       this.slippagePercentage,
       this.provider,
+    );
+    return this.addLiquidityData;
+  }
+
+  protected async getInternalSteps(
+    firstInternalStepInput: StepInput,
+  ): Promise<Step[]> {
+    const { networkName, erc20Amounts } = firstInternalStepInput;
+
+    const erc20AmountA = findFirstInputERC20Amount(
+      erc20Amounts,
+      this.erc20InfoA,
+    );
+    this.addLiquidityData = await this.getAddLiquidityData(
+      networkName,
+      erc20AmountA,
     );
 
     return [
       new ApproveERC20SpenderStep(
         this.addLiquidityData.routerContract,
-        this.erc20AmountA,
+        this.erc20InfoA,
       ),
       new ApproveERC20SpenderStep(
         this.addLiquidityData.routerContract,

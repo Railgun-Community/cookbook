@@ -3,7 +3,6 @@ import {
   RecipeERC20Amount,
   RecipeERC20Info,
   RecipeOutput,
-  StepOutputERC20Amount,
   SwapQuoteData,
 } from '../../models/export-models';
 import { compareERC20Info } from '../../utils';
@@ -25,24 +24,6 @@ export abstract class SwapRecipe extends Recipe {
     networkName: NetworkName,
     sellERC20Amount: RecipeERC20Amount,
   ): Promise<SwapQuoteData>;
-
-  protected findFirstInputSellERC20Amount(
-    inputERC20Amounts: StepOutputERC20Amount[],
-  ): RecipeERC20Amount {
-    const inputERC20Amount = inputERC20Amounts.find(erc20Amount =>
-      compareERC20Info(erc20Amount, this.sellERC20Info),
-    );
-    if (!inputERC20Amount) {
-      throw new Error(
-        `SwapRecipe first input must contain sell ERC20 Amount: ${this.sellERC20Info.tokenAddress}`,
-      );
-    }
-    return {
-      tokenAddress: inputERC20Amount.tokenAddress,
-      decimals: inputERC20Amount.decimals,
-      amount: inputERC20Amount.expectedBalance,
-    };
-  }
 
   getBuySellAmountsFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,

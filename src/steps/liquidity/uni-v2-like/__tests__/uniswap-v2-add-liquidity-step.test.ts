@@ -33,21 +33,22 @@ const LP_TOKEN: RecipeERC20Info = {
   decimals: 18,
 };
 
-const oneInDecimals = BigNumber.from(10).pow(18);
+const oneInDecimals6 = BigNumber.from(10).pow(6);
+const oneInDecimals18 = BigNumber.from(10).pow(18);
 
 const addLiquidityData: RecipeAddLiquidityData = {
   erc20AmountA: {
     ...USDC_TOKEN,
-    amount: oneInDecimals.mul(2000),
+    amount: oneInDecimals6.mul(2000),
   },
   erc20AmountB: {
     ...WETH_TOKEN,
-    amount: oneInDecimals.mul(1),
+    amount: oneInDecimals18.mul(1),
   },
-  rateWith18Decimals: oneInDecimals.mul(2000),
+  rateWith18Decimals: oneInDecimals18.mul(2000),
   expectedLPAmount: {
     ...LP_TOKEN,
-    amount: oneInDecimals.mul(2),
+    amount: oneInDecimals18.mul(2),
   },
   routerContract: UniV2LikeSDK.getRouterContractAddress(
     uniswapV2Fork,
@@ -67,15 +68,15 @@ describe('uniswap-v2-add-liquidity-step', () => {
         {
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
-          expectedBalance: oneInDecimals.mul(2000),
-          minBalance: oneInDecimals.mul(2000),
+          expectedBalance: oneInDecimals6.mul(2000),
+          minBalance: oneInDecimals6.mul(2000),
           approvedSpender: addLiquidityData.routerContract,
         },
         {
           tokenAddress: WETH_TOKEN.tokenAddress,
           decimals: WETH_TOKEN.decimals,
-          expectedBalance: oneInDecimals.mul(1),
-          minBalance: oneInDecimals.mul(1),
+          expectedBalance: oneInDecimals18.mul(1),
+          minBalance: oneInDecimals18.mul(1),
           approvedSpender: addLiquidityData.routerContract,
         },
       ],
@@ -91,14 +92,14 @@ describe('uniswap-v2-add-liquidity-step', () => {
     // Spent
     expect(output.spentERC20Amounts).to.deep.equal([
       {
-        amount: oneInDecimals.mul(2000),
-        recipient: 'Uniswap V2',
+        amount: oneInDecimals6.mul(2000),
+        recipient: 'Uniswap V2 Pool',
         tokenAddress: USDC_TOKEN.tokenAddress,
         decimals: USDC_TOKEN.decimals,
       },
       {
-        amount: oneInDecimals.mul(1),
-        recipient: 'Uniswap V2',
+        amount: oneInDecimals18.mul(1),
+        recipient: 'Uniswap V2 Pool',
         tokenAddress: WETH_TOKEN.tokenAddress,
         decimals: WETH_TOKEN.decimals,
       },
@@ -107,7 +108,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
     // Received
     expect(output.outputERC20Amounts).to.deep.equal([
       {
-        expectedBalance: oneInDecimals.mul(2),
+        expectedBalance: oneInDecimals18.mul(2),
         minBalance: BigNumber.from('1980000000000000000'),
         tokenAddress: LP_TOKEN.tokenAddress,
         decimals: 18,
@@ -123,7 +124,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xe8e33700000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000006c6b935b8bbd4000000000000000000000000000000000000000000000000000000de0b6b3a764000000000000000000000000000000000000000000000000006b56051582a97000000000000000000000000000000000000000000000000000000dbd2fc137a300000000000000000000000000004025ee6512dbbda97049bcf5aa5d38c54af6be8a00000000000000000000000000000000000000000000000000000000499602d2',
+        data: '0xe8e33700000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000773594000000000000000000000000000000000000000000000000000de0b6b3a764000000000000000000000000000000000000000000000000000000000000760467000000000000000000000000000000000000000000000000000dbd2fc137a300000000000000000000000000004025ee6512dbbda97049bcf5aa5d38c54af6be8a00000000000000000000000000000000000000000000000000000000499602d2',
         to: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
       },
     ]);
@@ -139,8 +140,8 @@ describe('uniswap-v2-add-liquidity-step', () => {
         {
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
-          expectedBalance: oneInDecimals.mul(2000),
-          minBalance: oneInDecimals.mul(2000),
+          expectedBalance: oneInDecimals6.mul(2000),
+          minBalance: oneInDecimals6.mul(2000),
           approvedSpender: addLiquidityData.routerContract,
         },
       ],
@@ -149,7 +150,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNotBothERC20s),
     ).to.be.rejectedWith(
-      'Uniswap V2 Add Liquidity step failed. Step input does not include a balance for each filtered token.',
+      'Uniswap V2 Add Liquidity step is invalid. Step input does not include a balance for each filtered token.',
     );
 
     const stepInputNoSpender: StepInput = {
@@ -159,8 +160,8 @@ describe('uniswap-v2-add-liquidity-step', () => {
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
           isBaseToken: true,
-          expectedBalance: oneInDecimals.mul(2000),
-          minBalance: oneInDecimals.mul(2000),
+          expectedBalance: oneInDecimals6.mul(2000),
+          minBalance: oneInDecimals6.mul(2000),
           approvedSpender: addLiquidityData.routerContract,
         },
         {
@@ -168,8 +169,8 @@ describe('uniswap-v2-add-liquidity-step', () => {
           tokenAddress: WETH_TOKEN.tokenAddress,
           decimals: WETH_TOKEN.decimals,
           isBaseToken: true,
-          expectedBalance: oneInDecimals.mul(1),
-          minBalance: oneInDecimals.mul(1),
+          expectedBalance: oneInDecimals18.mul(1),
+          minBalance: oneInDecimals18.mul(1),
           approvedSpender: undefined,
         },
       ],
@@ -178,7 +179,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNoSpender),
     ).to.be.rejectedWith(
-      'Uniswap V2 Add Liquidity step failed. Step input does not include a balance for each filtered token.',
+      'Uniswap V2 Add Liquidity step is invalid. Step input does not include a balance for each filtered token.',
     );
   });
 });

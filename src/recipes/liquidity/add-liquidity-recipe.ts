@@ -1,14 +1,21 @@
 import {
   RecipeAddLiquidityData,
+  RecipeERC20Amount,
   RecipeOutput,
 } from '../../models/export-models';
 import { compareERC20Info } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { BigNumber } from 'ethers';
+import { NetworkName } from '@railgun-community/shared-models';
 
 export abstract class AddLiquidityRecipe extends Recipe {
   protected addLiquidityData: Optional<RecipeAddLiquidityData>;
+
+  protected abstract getAddLiquidityData(
+    networkName: NetworkName,
+    erc20AmountA: RecipeERC20Amount,
+  ): Promise<RecipeAddLiquidityData>;
 
   getExpectedLPAmountFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,

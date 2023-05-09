@@ -79,7 +79,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
       deadlineTimestamp,
     );
 
-    const lpRecipient = UniV2LikeSDK.getForkName(this.uniswapV2Fork);
+    const lpRecipient = UniV2LikeSDK.getLPName(this.uniswapV2Fork);
     const spendERC20AmountRecipient: RecipeERC20AmountRecipient = {
       tokenAddress: erc20AmountForStep.tokenAddress,
       decimals: erc20AmountForStep.decimals,

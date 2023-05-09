@@ -1,4 +1,8 @@
-import { StepOutputERC20Amount } from '../models/export-models';
+import {
+  RecipeERC20Info,
+  StepOutputERC20Amount,
+} from '../models/export-models';
+import { compareERC20Info } from './token';
 
 export type ERC20AmountFilter = (erc20Amount: StepOutputERC20Amount) => boolean;
 
@@ -14,4 +18,23 @@ export const filterERC20AmountInputs = (
     erc20Amount => !filter(erc20Amount),
   );
   return { erc20AmountsForStep, unusedERC20Amounts };
+};
+
+export const findFirstInputERC20Amount = (
+  inputERC20Amounts: StepOutputERC20Amount[],
+  erc20Info: RecipeERC20Info,
+) => {
+  const inputERC20Amount = inputERC20Amounts.find(erc20Amount =>
+    compareERC20Info(erc20Amount, erc20Info),
+  );
+  if (!inputERC20Amount) {
+    throw new Error(
+      `AddLiquidityRecipe first input must contain ERC20 Amount: ${erc20Info.tokenAddress}`,
+    );
+  }
+  return {
+    tokenAddress: inputERC20Amount.tokenAddress,
+    decimals: inputERC20Amount.decimals,
+    amount: inputERC20Amount.expectedBalance,
+  };
 };

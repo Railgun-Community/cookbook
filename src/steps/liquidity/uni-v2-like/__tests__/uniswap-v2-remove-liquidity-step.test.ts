@@ -33,20 +33,21 @@ const LP_TOKEN: RecipeERC20Info = {
   decimals: 18,
 };
 
-const oneInDecimals = BigNumber.from(10).pow(18);
+const oneInDecimals6 = BigNumber.from(10).pow(6);
+const oneInDecimals18 = BigNumber.from(10).pow(18);
 
 const removeLiquidityData: RecipeRemoveLiquidityData = {
   lpERC20Amount: {
     ...LP_TOKEN,
-    amount: oneInDecimals.mul(2),
+    amount: oneInDecimals18.mul(2),
   },
   expectedERC20AmountA: {
     ...USDC_TOKEN,
-    amount: oneInDecimals.mul(2000),
+    amount: oneInDecimals6.mul(2000),
   },
   expectedERC20AmountB: {
     ...WETH_TOKEN,
-    amount: oneInDecimals.mul(1),
+    amount: oneInDecimals18.mul(1),
   },
   routerContract: UniV2LikeSDK.getRouterContractAddress(
     uniswapV2Fork,
@@ -66,8 +67,8 @@ describe('uniswap-v2-remove-liquidity-step', () => {
         {
           tokenAddress: LP_TOKEN.tokenAddress,
           decimals: LP_TOKEN.decimals,
-          expectedBalance: oneInDecimals.mul(2),
-          minBalance: oneInDecimals.mul(2),
+          expectedBalance: oneInDecimals18.mul(2),
+          minBalance: oneInDecimals18.mul(2),
           approvedSpender: removeLiquidityData.routerContract,
         },
       ],
@@ -83,8 +84,8 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     // Spent
     expect(output.spentERC20Amounts).to.deep.equal([
       {
-        amount: oneInDecimals.mul(2),
-        recipient: 'Uniswap V2',
+        amount: oneInDecimals18.mul(2),
+        recipient: 'Uniswap V2 Pool',
         tokenAddress: LP_TOKEN.tokenAddress,
         decimals: LP_TOKEN.decimals,
       },
@@ -93,15 +94,15 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     // Received
     expect(output.outputERC20Amounts).to.deep.equal([
       {
-        expectedBalance: oneInDecimals.mul(2000),
-        minBalance: BigNumber.from('1980000000000000000000'),
+        expectedBalance: oneInDecimals6.mul(2000),
+        minBalance: BigNumber.from('1980000000'),
         tokenAddress: USDC_TOKEN.tokenAddress,
         decimals: USDC_TOKEN.decimals,
         approvedSpender: undefined,
         isBaseToken: false,
       },
       {
-        expectedBalance: oneInDecimals.mul(1),
+        expectedBalance: oneInDecimals18.mul(1),
         minBalance: BigNumber.from('990000000000000000'),
         tokenAddress: WETH_TOKEN.tokenAddress,
         decimals: WETH_TOKEN.decimals,
@@ -117,7 +118,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0xbaa2abde000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000001bc16d674ec8000000000000000000000000000000000000000000000000006b56051582a97000000000000000000000000000000000000000000000000000000dbd2fc137a300000000000000000000000000004025ee6512dbbda97049bcf5aa5d38c54af6be8a00000000000000000000000000000000000000000000000000000000499602d2',
+        data: '0xbaa2abde000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000001bc16d674ec8000000000000000000000000000000000000000000000000000000000000760467000000000000000000000000000000000000000000000000000dbd2fc137a300000000000000000000000000004025ee6512dbbda97049bcf5aa5d38c54af6be8a00000000000000000000000000000000000000000000000000000000499602d2',
         to: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
       },
     ]);
@@ -133,8 +134,8 @@ describe('uniswap-v2-remove-liquidity-step', () => {
         {
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
-          expectedBalance: oneInDecimals.mul(2),
-          minBalance: oneInDecimals.mul(2),
+          expectedBalance: oneInDecimals6.mul(2),
+          minBalance: oneInDecimals6.mul(2),
           approvedSpender: removeLiquidityData.routerContract,
         },
       ],
@@ -143,7 +144,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNotBothERC20s),
     ).to.be.rejectedWith(
-      'Uniswap V2 Remove Liquidity step failed. No step inputs match filter.',
+      'Uniswap V2 Remove Liquidity step is invalid. No step inputs match filter.',
     );
 
     const stepInputNoSpender: StepInput = {
@@ -154,8 +155,8 @@ describe('uniswap-v2-remove-liquidity-step', () => {
           tokenAddress: LP_TOKEN.tokenAddress,
           decimals: LP_TOKEN.decimals,
           isBaseToken: true,
-          expectedBalance: oneInDecimals.mul(2),
-          minBalance: oneInDecimals.mul(2),
+          expectedBalance: oneInDecimals18.mul(2),
+          minBalance: oneInDecimals18.mul(2),
           approvedSpender: undefined,
         },
       ],
@@ -164,7 +165,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNoSpender),
     ).to.be.rejectedWith(
-      'Uniswap V2 Remove Liquidity step failed. No step inputs match filter.',
+      'Uniswap V2 Remove Liquidity step is invalid. No step inputs match filter.',
     );
   });
 });

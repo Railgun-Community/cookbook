@@ -350,7 +350,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'Unwrap Base Token step failed. No step inputs match filter.',
+      'Unwrap Base Token step is invalid. No step inputs match filter.',
     );
 
     // Too low balance for erc20 input
@@ -367,7 +367,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputTooLow)).to.be.rejectedWith(
-      'Unwrap Base Token step failed. Specified amount 10000 exceeds balance 1995.',
+      'Unwrap Base Token step is invalid. Specified amount 10000 exceeds balance 1995.',
     );
   });
 });

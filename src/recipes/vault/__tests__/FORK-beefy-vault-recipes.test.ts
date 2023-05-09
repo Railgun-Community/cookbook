@@ -32,7 +32,7 @@ const vaultTokenAddress = '0x245186caa063b13d0025891c0d513acf552fb38e';
 
 const oneWithDecimals = BigNumber.from(10).pow(18);
 
-describe('FORK-beefy-deposit-withdraw-recipes', function run() {
+describe('FORK-beefy-vault-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {

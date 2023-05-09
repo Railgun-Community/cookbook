@@ -162,6 +162,10 @@ export class UniV2LikeSDK {
     }
   }
 
+  static getLPName(uniswapV2Fork: UniswapV2Fork) {
+    return `${this.getForkName(uniswapV2Fork)} Pool`;
+  }
+
   static async getPairRateWith18Decimals(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,

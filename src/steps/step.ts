@@ -32,7 +32,7 @@ export abstract class Step {
       if (!(err instanceof Error)) {
         throw err;
       }
-      throw new Error(`${this.config.name} step failed. ${err.message}`);
+      throw new Error(`${this.config.name} step is invalid. ${err.message}`);
     }
   }
 

@@ -11,6 +11,7 @@ import {
 } from '../../models/export-models';
 import { SwapRecipe } from './swap-recipe';
 import { NetworkName } from '@railgun-community/shared-models';
+import { findFirstInputERC20Amount } from '../../utils';
 
 export class ZeroXSwapRecipe extends SwapRecipe {
   readonly config = {
@@ -56,8 +57,9 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     firstInternalStepInput: StepInput,
   ): Promise<Step[]> {
     const { networkName } = firstInternalStepInput;
-    const sellERC20Amount = this.findFirstInputSellERC20Amount(
+    const sellERC20Amount = findFirstInputERC20Amount(
       firstInternalStepInput.erc20Amounts,
+      this.sellERC20Info,
     );
     this.quote = await this.getSwapQuote(networkName, sellERC20Amount);
 
