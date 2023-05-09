@@ -290,7 +290,7 @@ describe('zero-x-swap-recipe', () => {
       unshieldRecipeNFTs: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'First input for this recipe must contain sell ERC20 Amount: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      'First input for this recipe must contain ERC20 Amount: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.',
     );
 
     // Too low balance for erc20 input

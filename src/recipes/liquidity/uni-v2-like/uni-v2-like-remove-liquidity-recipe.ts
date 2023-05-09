@@ -17,7 +17,7 @@ import { findFirstInputERC20Amount } from '../../../utils/filters';
 export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
   readonly config = {
     name: '[Name] Remove Liquidity',
-    description: 'Removes liquidity from a Uniswap V2-like pair.',
+    description: 'Removes liquidity from a [NAME] Pool.',
     hasNonDeterministicOutput: true,
   };
 
@@ -50,6 +50,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
 
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Remove Liquidity`;
+    this.config.description = `Removes liquidity from a ${forkName} Pool.`;
   }
 
   protected supportsNetwork(networkName: NetworkName): boolean {

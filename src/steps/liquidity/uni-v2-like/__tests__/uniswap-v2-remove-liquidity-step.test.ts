@@ -78,7 +78,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
 
     expect(output.name).to.equal('Uniswap V2 Remove Liquidity');
     expect(output.description).to.equal(
-      'Removes liquidity from a Uniswap V2-like pair.',
+      'Removes liquidity from a Uniswap V2 Pool.',
     );
 
     // Spent

@@ -1,14 +1,10 @@
 import { BaseProvider } from '@ethersproject/providers';
-import {
-  RecipeERC20Amount,
-  RecipeERC20Info,
-  UniswapV2Fork,
-} from '../../../models/export-models';
+import { RecipeERC20Info, UniswapV2Fork } from '../../../models/export-models';
 import { UniV2LikeRemoveLiquidityRecipe } from './uni-v2-like-remove-liquidity-recipe';
 
 export class UniswapV2RemoveLiquidityRecipe extends UniV2LikeRemoveLiquidityRecipe {
   constructor(
-    lpERC20Amount: RecipeERC20Amount,
+    lpERC20Info: RecipeERC20Info,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
@@ -16,7 +12,7 @@ export class UniswapV2RemoveLiquidityRecipe extends UniV2LikeRemoveLiquidityReci
   ) {
     super(
       UniswapV2Fork.Uniswap,
-      lpERC20Amount,
+      lpERC20Info,
       erc20InfoA,
       erc20InfoB,
       slippagePercentage,
