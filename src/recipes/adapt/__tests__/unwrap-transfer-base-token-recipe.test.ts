@@ -32,7 +32,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
@@ -40,7 +40,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -176,7 +176,9 @@ describe('unwrap-transfer-base-token-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([tokenAddress]);
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([tokenAddress]);
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -206,7 +208,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
@@ -214,7 +216,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -314,7 +316,9 @@ describe('unwrap-transfer-base-token-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([tokenAddress]);
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([tokenAddress]);
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -340,14 +344,14 @@ describe('unwrap-transfer-base-token-recipe', () => {
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: '0x1234',
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
       'Unwrap Base Token step is invalid. No step inputs match filter.',
@@ -356,7 +360,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     // Too low balance for erc20 input
     const recipeInputTooLow: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
@@ -364,7 +368,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           amount: BigNumber.from('2000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputTooLow)).to.be.rejectedWith(
       'Unwrap Base Token step is invalid. Specified amount 10000 exceeds balance 1995.',

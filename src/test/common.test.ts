@@ -4,8 +4,7 @@ import {
 } from '@railgun-community/quickstart';
 import { NETWORK_CONFIG, delay } from '@railgun-community/shared-models';
 import { BigNumber } from 'ethers';
-import { RecipeInput } from '../models/export-models';
-import { Recipe } from '../recipes';
+import { RecipeInput, RecipeOutput } from '../models/export-models';
 import {
   createQuickstartCrossContractCallsForTest,
   getTestEthersWallet,
@@ -19,9 +18,10 @@ const { expect } = chai;
 
 const SCAN_BALANCE_DELAY = 3000;
 
-export const executeRecipeAndAssertUnshieldBalances = async (
-  recipe: Recipe,
+export const executeRecipeStepsAndAssertUnshieldBalances = async (
+  name: string,
   recipeInput: RecipeInput,
+  recipeOutput: RecipeOutput,
   expectedGasWithin50K: number,
   expectPossiblePrecisionLossOverflow?: boolean,
 ) => {
@@ -35,35 +35,33 @@ export const executeRecipeAndAssertUnshieldBalances = async (
     { unshieldAmount: BigNumber; originalBalance: BigNumber }
   > = {};
   await Promise.all(
-    recipeInput.unshieldRecipeERC20Amounts.map(
-      async ({ tokenAddress, amount }) => {
-        const balance = await balanceForERC20Token(
-          railgunWallet,
-          networkName,
-          tokenAddress,
-        );
+    recipeInput.erc20Amounts.map(async ({ tokenAddress, amount }) => {
+      const balance = await balanceForERC20Token(
+        railgunWallet,
+        networkName,
+        tokenAddress,
+      );
 
-        preRecipeUnshieldMap[tokenAddress] = {
-          unshieldAmount: amount,
-          originalBalance: balance,
-        };
-      },
-    ),
+      preRecipeUnshieldMap[tokenAddress] = {
+        unshieldAmount: amount,
+        originalBalance: balance,
+      };
+    }),
   );
 
-  const recipeOutput = await recipe.getRecipeOutput(recipeInput);
-
   const { gasEstimateString, transaction } =
-    await createQuickstartCrossContractCallsForTest(networkName, recipeOutput);
+    await createQuickstartCrossContractCallsForTest(
+      networkName,
+      recipeInput,
+      recipeOutput,
+    );
 
   if (gasEstimateString) {
     expect(
       BigNumber.from(gasEstimateString).gte(expectedGasWithin50K - 50_000),
     ).to.equal(
       true,
-      `${
-        recipe.config.name
-      }: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
+      `${name}: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
         gasEstimateString,
       ).toString()}`,
     );
@@ -71,9 +69,7 @@ export const executeRecipeAndAssertUnshieldBalances = async (
       BigNumber.from(gasEstimateString).lte(expectedGasWithin50K + 50_000),
     ).to.equal(
       true,
-      `${
-        recipe.config.name
-      }: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
+      `${name}: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
         gasEstimateString,
       ).toString()}`,
     );
@@ -88,7 +84,7 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   );
   if (relayAdaptTransactionError) {
     throw new Error(
-      `${recipe.config.name} Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
+      `${name} Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
     );
   }
 
@@ -107,7 +103,7 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   });
 
   await Promise.all(
-    recipeInput.unshieldRecipeERC20Amounts.map(async ({ tokenAddress }) => {
+    recipeInput.erc20Amounts.map(async ({ tokenAddress }) => {
       const postBalance = await balanceForERC20Token(
         railgunWallet,
         networkName,
@@ -128,16 +124,14 @@ export const executeRecipeAndAssertUnshieldBalances = async (
             postBalance.lte(expectedBalance.add(1)),
         ).to.equal(
           true,
-          `${
-            recipe.config.name
-          }: Did not get expected private balance after unshield/reshield - token ${tokenAddress}: expected ${expectedBalance.toString()} or ${expectedBalance
+          `${name}: Did not get expected private balance after unshield/reshield - token ${tokenAddress}: expected ${expectedBalance.toString()} or ${expectedBalance
             .add(1)
             .toString()}, got ${postBalance.toString()}`,
         );
       } else {
         expect(postBalance.toString()).to.equal(
           expectedBalance.toString(),
-          `${recipe.config.name}:  Did not get expected private balance after unshield/reshield - token ${tokenAddress}`,
+          `${name}:  Did not get expected private balance after unshield/reshield - token ${tokenAddress}`,
         );
       }
     }),

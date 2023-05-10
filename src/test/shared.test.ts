@@ -7,6 +7,7 @@ import {
 import {
   EVMGasType,
   NetworkName,
+  RailgunERC20Amount,
   RailgunERC20AmountRecipient,
   TransactionGasDetailsSerialized,
   deserializeTransaction,
@@ -14,7 +15,7 @@ import {
 } from '@railgun-community/shared-models';
 import { Wallet } from 'ethers';
 import { testConfig } from './test-config.test';
-import { RecipeOutput } from '../models';
+import { RecipeInput, RecipeOutput } from '../models';
 import {
   AbstractWallet,
   MINIMUM_RELAY_ADAPT_CROSS_CONTRACT_CALLS_GAS_LIMIT,
@@ -80,6 +81,7 @@ const MOCK_RAILGUN_ADDRESS =
 
 export const createQuickstartCrossContractCallsForTest = async (
   networkName: NetworkName,
+  recipeInput: RecipeInput,
   recipeOutput: RecipeOutput,
 ): Promise<{
   gasEstimateString: Optional<string>;
@@ -88,13 +90,20 @@ export const createQuickstartCrossContractCallsForTest = async (
   const provider = getGanacheProvider();
   const railgunWallet = getTestRailgunWallet();
 
-  const {
-    populatedTransactions,
-    unshieldERC20Amounts,
-    unshieldNFTs,
-    shieldERC20Addresses,
-    shieldNFTs,
-  } = recipeOutput;
+  const { erc20Amounts, nfts: unshieldNFTs } = recipeInput;
+  const unshieldERC20Amounts: RailgunERC20Amount[] = erc20Amounts.map(
+    erc20Amount => ({
+      tokenAddress: erc20Amount.tokenAddress,
+      amountString: erc20Amount.amount.toHexString(),
+    }),
+  );
+
+  const { populatedTransactions, shieldERC20Amounts, shieldNFTs } =
+    recipeOutput;
+
+  const shieldERC20Addresses = shieldERC20Amounts.map(
+    shieldERC20Amount => shieldERC20Amount.tokenAddress,
+  );
 
   if (unshieldERC20Amounts.length < 1) {
     throw new Error(

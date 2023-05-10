@@ -10,7 +10,7 @@ import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
-import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
+import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -45,22 +45,24 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
     const recipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
 
     const provider = getGanacheProvider();
     const initialToAddressETHBalance = await provider.getBalance(toAddress);
 
-    await executeRecipeAndAssertUnshieldBalances(
-      recipe,
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
       recipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
     );
 
@@ -87,22 +89,24 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
     const recipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
 
     const provider = getGanacheProvider();
     const initialToAddressETHBalance = await provider.getBalance(toAddress);
 
-    await executeRecipeAndAssertUnshieldBalances(
-      recipe,
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
       recipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
     );
 

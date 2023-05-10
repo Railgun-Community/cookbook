@@ -57,14 +57,14 @@ describe('beefy-withdraw-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
           decimals: 18,
           amount: BigNumber.from('10000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -162,10 +162,9 @@ describe('beefy-withdraw-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([
-      vault.vaultTokenAddress,
-      tokenAddress,
-    ]);
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([vault.vaultTokenAddress, tokenAddress]);
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -201,14 +200,14 @@ describe('beefy-withdraw-recipe', () => {
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: '0x1234',
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
       'Beefy Vault Withdraw step is invalid. No step inputs match filter.',

@@ -16,7 +16,7 @@ import {
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import { ZeroXQuote } from '../../../api/zero-x';
-import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
+import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
@@ -66,7 +66,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
     const recipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
           decimals: 18,
@@ -74,7 +74,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
 
     const railgunWallet = getTestRailgunWallet();
@@ -84,9 +84,11 @@ describe('FORK-zero-x-swap-recipe', function run() {
       buyToken.tokenAddress,
     );
 
-    await executeRecipeAndAssertUnshieldBalances(
-      recipe,
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
       recipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
     );
 

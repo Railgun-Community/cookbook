@@ -9,7 +9,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { EmptyRecipe } from '../empty-recipe';
-import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
+import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
 
 chai.use(chaiAsPromised);
 
@@ -41,7 +41,7 @@ describe('FORK-empty-recipe', function run() {
     const recipe = new EmptyRecipe();
     const recipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
@@ -49,12 +49,14 @@ describe('FORK-empty-recipe', function run() {
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
 
-    await executeRecipeAndAssertUnshieldBalances(
-      recipe,
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
       recipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
     );
 

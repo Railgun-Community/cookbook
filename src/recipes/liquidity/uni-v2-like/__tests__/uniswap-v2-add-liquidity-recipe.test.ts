@@ -83,7 +83,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
@@ -95,7 +95,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           amount: oneInDecimals18.mul('1'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -295,7 +295,9 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([
       USDC_TOKEN.tokenAddress,
       WETH_TOKEN.tokenAddress,
       LP_TOKEN.tokenAddress,
@@ -354,14 +356,14 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: '0x1234',
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
       'First input for this recipe must contain ERC20 Amount: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.',

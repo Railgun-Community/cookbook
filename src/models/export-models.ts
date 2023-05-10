@@ -1,7 +1,5 @@
 import {
   NetworkName,
-  RailgunERC20Amount,
-  RailgunERC20AmountRecipient,
   RailgunNFTAmount,
 } from '@railgun-community/shared-models';
 import { PopulatedTransaction } from '@ethersproject/contracts';
@@ -28,8 +26,8 @@ export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
 
 export type RecipeInput = {
   networkName: NetworkName;
-  unshieldRecipeERC20Amounts: RecipeERC20Amount[];
-  unshieldRecipeNFTs: RailgunNFTAmount[];
+  erc20Amounts: RecipeERC20Amount[];
+  nfts: RailgunNFTAmount[];
 };
 
 export type StepInput = {
@@ -41,11 +39,9 @@ export type StepInput = {
 export type RecipeOutput = {
   stepOutputs: StepOutput[];
   populatedTransactions: PopulatedTransaction[];
-  unshieldERC20Amounts: RailgunERC20Amount[];
-  unshieldNFTs: RailgunNFTAmount[];
-  shieldERC20Addresses: string[];
+  shieldERC20Amounts: RecipeERC20Amount[];
   shieldNFTs: RailgunNFTAmount[];
-  feeERC20AmountRecipients: RailgunERC20AmountRecipient[];
+  feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
 };
 
 export type StepOutputERC20Amount = RecipeERC20Info & {
@@ -75,6 +71,11 @@ export type StepConfig = {
 };
 
 export type RecipeConfig = {
+  name: string;
+  description: string;
+};
+
+export type ComboMealConfig = {
   name: string;
   description: string;
 };

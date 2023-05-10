@@ -30,7 +30,7 @@ describe('empty-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
@@ -38,7 +38,7 @@ describe('empty-recipe', () => {
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -124,7 +124,9 @@ describe('empty-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([tokenAddress]);
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([tokenAddress]);
 
     expect(output.shieldNFTs).to.deep.equal([]);
 

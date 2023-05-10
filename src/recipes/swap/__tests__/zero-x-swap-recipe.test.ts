@@ -85,7 +85,7 @@ describe('zero-x-swap-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
           decimals: 18,
@@ -93,7 +93,7 @@ describe('zero-x-swap-recipe', () => {
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -241,10 +241,9 @@ describe('zero-x-swap-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([
-      sellTokenAddress,
-      buyTokenAddress,
-    ]);
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([sellTokenAddress, buyTokenAddress]);
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -280,14 +279,14 @@ describe('zero-x-swap-recipe', () => {
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: '0x1234',
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
       'First input for this recipe must contain ERC20 Amount: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.',
@@ -296,7 +295,7 @@ describe('zero-x-swap-recipe', () => {
     // Too low balance for erc20 input
     const recipeInputTooLow: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
           decimals: 18,
@@ -304,7 +303,7 @@ describe('zero-x-swap-recipe', () => {
           amount: BigNumber.from('2000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputTooLow)).to.be.rejectedWith(
       '0x Exchange Swap step is invalid. Specified amount 10000 exceeds balance 1995.',

@@ -57,14 +57,14 @@ describe('beefy-deposit-recipe', () => {
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
           amount: BigNumber.from('10000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
@@ -187,10 +187,9 @@ describe('beefy-deposit-recipe', () => {
       spentNFTs: [],
     });
 
-    expect(output.shieldERC20Addresses).to.deep.equal([
-      tokenAddress,
-      vault.vaultTokenAddress,
-    ]);
+    expect(
+      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal([tokenAddress, vault.vaultTokenAddress]);
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -226,14 +225,14 @@ describe('beefy-deposit-recipe', () => {
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
       networkName: networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: '0x1234',
           decimals: 18,
           amount: BigNumber.from('12000'),
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
       'Approve ERC20 Spender step is invalid. No step inputs match filter.',

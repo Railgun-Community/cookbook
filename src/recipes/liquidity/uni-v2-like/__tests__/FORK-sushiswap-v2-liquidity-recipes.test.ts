@@ -20,7 +20,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { executeRecipeAndAssertUnshieldBalances } from '../../../../test/common.test';
+import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
 import { getUnshieldedAmountAfterFee } from '../../../../utils/fee';
 
@@ -46,7 +46,7 @@ const LP_TOKEN: RecipeERC20Info = {
   decimals: 18,
 };
 
-describe.only('FORK-sushiswap-v2-liquidity-recipes', function run() {
+describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {
@@ -105,8 +105,8 @@ describe.only('FORK-sushiswap-v2-liquidity-recipes', function run() {
 
     const addLiquidityRecipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [usdcAmount, wethAmount],
-      unshieldRecipeNFTs: [],
+      erc20Amounts: [usdcAmount, wethAmount],
+      nfts: [],
     };
 
     const railgunWallet = getTestRailgunWallet();
@@ -116,9 +116,13 @@ describe.only('FORK-sushiswap-v2-liquidity-recipes', function run() {
       LP_TOKEN.tokenAddress,
     );
 
-    await executeRecipeAndAssertUnshieldBalances(
-      addLiquidityRecipe,
+    const recipeOutput = await addLiquidityRecipe.getRecipeOutput(
       addLiquidityRecipeInput,
+    );
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      addLiquidityRecipe.config.name,
+      addLiquidityRecipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
       true, // expectPossiblePrecisionLossOverflow - due to precision loss in the reserve ratios
     );
@@ -238,8 +242,8 @@ describe.only('FORK-sushiswap-v2-liquidity-recipes', function run() {
 
     const removeLiquidityRecipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [preUnshieldLPERC20Amount],
-      unshieldRecipeNFTs: [],
+      erc20Amounts: [preUnshieldLPERC20Amount],
+      nfts: [],
     };
 
     const railgunWallet = getTestRailgunWallet();
@@ -254,9 +258,13 @@ describe.only('FORK-sushiswap-v2-liquidity-recipes', function run() {
       WETH_TOKEN.tokenAddress,
     );
 
-    await executeRecipeAndAssertUnshieldBalances(
-      removeLiquidityRecipe,
+    const recipeOutput = await removeLiquidityRecipe.getRecipeOutput(
       removeLiquidityRecipeInput,
+    );
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      removeLiquidityRecipe.config.name,
+      removeLiquidityRecipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
     );
 

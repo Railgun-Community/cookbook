@@ -11,7 +11,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { executeRecipeAndAssertUnshieldBalances } from '../../../test/common.test';
+import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
 import { testConfig } from '../../../test/test-config.test';
 import { BeefyAPI } from '../../../api/beefy/beefy-api';
@@ -62,14 +62,14 @@ describe('FORK-beefy-vault-recipes', function run() {
     const depositRecipe = new BeefyDepositRecipe(vaultID);
     const depositRecipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress,
           decimals: 18,
           amount: oneWithDecimals,
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
 
     const railgunWallet = getTestRailgunWallet();
@@ -79,9 +79,13 @@ describe('FORK-beefy-vault-recipes', function run() {
       vaultTokenAddress,
     );
 
-    await executeRecipeAndAssertUnshieldBalances(
-      depositRecipe,
+    const recipeOutput = await depositRecipe.getRecipeOutput(
       depositRecipeInput,
+    );
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      depositRecipe.config.name,
+      depositRecipeInput,
+      recipeOutput,
       2_880_000, // expectedGasWithin50K
     );
 
@@ -139,14 +143,14 @@ describe('FORK-beefy-vault-recipes', function run() {
     const withdrawRecipe = new BeefyWithdrawRecipe(vaultID);
     const withdrawRecipeInput: RecipeInput = {
       networkName,
-      unshieldRecipeERC20Amounts: [
+      erc20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
           decimals: 18,
           amount: oneWithDecimals,
         },
       ],
-      unshieldRecipeNFTs: [],
+      nfts: [],
     };
 
     const railgunWallet = getTestRailgunWallet();
@@ -156,9 +160,13 @@ describe('FORK-beefy-vault-recipes', function run() {
       tokenAddress,
     );
 
-    await executeRecipeAndAssertUnshieldBalances(
-      withdrawRecipe,
+    const recipeOutput = await withdrawRecipe.getRecipeOutput(
       withdrawRecipeInput,
+    );
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      withdrawRecipe.config.name,
+      withdrawRecipeInput,
+      recipeOutput,
       2_800_000, // expectedGasWithin50K
     );
 
