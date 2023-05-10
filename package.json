@@ -40,7 +40,7 @@
     "@graphql-mesh/store": "^0.9.20",
     "@graphql-mesh/types": "^0.91.14",
     "@graphql-mesh/utils": "^0.43.22",
-    "@railgun-community/shared-models": "4.1.12",
+    "@railgun-community/shared-models": "4.2.2",
     "axios": "^1.4.0",
     "custom-uniswap-v2-sdk": "^3.2.0",
     "ethers": "^5.7.2",
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@graphprotocol/client-cli": "^2.2.22",
-    "@railgun-community/quickstart": "^4.3.24",
+    "@railgun-community/quickstart": "4.4.1",
     "@typechain/ethers-v5": "^10.2.0",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",

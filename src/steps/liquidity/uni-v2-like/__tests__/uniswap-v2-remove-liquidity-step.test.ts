@@ -49,7 +49,7 @@ const removeLiquidityData: RecipeRemoveLiquidityData = {
     ...WETH_TOKEN,
     amount: oneInDecimals18.mul(1),
   },
-  routerContract: UniV2LikeSDK.getRouterContractAddress(
+  routerContractAddress: UniV2LikeSDK.getRouterContractAddress(
     uniswapV2Fork,
     networkName,
   ),
@@ -69,7 +69,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
           decimals: LP_TOKEN.decimals,
           expectedBalance: oneInDecimals18.mul(2),
           minBalance: oneInDecimals18.mul(2),
-          approvedSpender: removeLiquidityData.routerContract,
+          approvedSpender: removeLiquidityData.routerContractAddress,
         },
       ],
       nfts: [],
@@ -136,7 +136,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
           decimals: USDC_TOKEN.decimals,
           expectedBalance: oneInDecimals6.mul(2),
           minBalance: oneInDecimals6.mul(2),
-          approvedSpender: removeLiquidityData.routerContract,
+          approvedSpender: removeLiquidityData.routerContractAddress,
         },
       ],
       nfts: [],

@@ -10,7 +10,7 @@ import { BigNumber } from 'ethers';
 import { NetworkName } from '@railgun-community/shared-models';
 
 export abstract class RemoveLiquidityRecipe extends Recipe {
-  protected removeLiquidityData: Optional<RecipeRemoveLiquidityData>;
+  removeLiquidityData: Optional<RecipeRemoveLiquidityData>;
 
   protected abstract getRemoveLiquidityData(
     networkName: NetworkName,

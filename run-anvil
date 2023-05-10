@@ -1,0 +1,3 @@
+#!/bin/bash
+
+anvil --fork-url $1 --balance '10000' --port 8600;

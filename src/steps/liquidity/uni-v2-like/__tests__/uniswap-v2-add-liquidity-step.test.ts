@@ -49,7 +49,7 @@ const addLiquidityData: RecipeAddLiquidityData = {
     ...LP_TOKEN,
     amount: oneInDecimals18.mul(2),
   },
-  routerContract: UniV2LikeSDK.getRouterContractAddress(
+  routerContractAddress: UniV2LikeSDK.getRouterContractAddress(
     uniswapV2Fork,
     networkName,
   ),
@@ -69,14 +69,14 @@ describe('uniswap-v2-add-liquidity-step', () => {
           decimals: USDC_TOKEN.decimals,
           expectedBalance: oneInDecimals6.mul(2000),
           minBalance: oneInDecimals6.mul(2000),
-          approvedSpender: addLiquidityData.routerContract,
+          approvedSpender: addLiquidityData.routerContractAddress,
         },
         {
           tokenAddress: WETH_TOKEN.tokenAddress,
           decimals: WETH_TOKEN.decimals,
           expectedBalance: oneInDecimals18.mul(1),
           minBalance: oneInDecimals18.mul(1),
-          approvedSpender: addLiquidityData.routerContract,
+          approvedSpender: addLiquidityData.routerContractAddress,
         },
       ],
       nfts: [],
@@ -139,7 +139,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
           decimals: USDC_TOKEN.decimals,
           expectedBalance: oneInDecimals6.mul(2000),
           minBalance: oneInDecimals6.mul(2000),
-          approvedSpender: addLiquidityData.routerContract,
+          approvedSpender: addLiquidityData.routerContractAddress,
         },
       ],
       nfts: [],
@@ -159,7 +159,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
           isBaseToken: true,
           expectedBalance: oneInDecimals6.mul(2000),
           minBalance: oneInDecimals6.mul(2000),
-          approvedSpender: addLiquidityData.routerContract,
+          approvedSpender: addLiquidityData.routerContractAddress,
         },
         {
           // No spender

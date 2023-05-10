@@ -41,7 +41,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const { erc20Amounts } = input;
     const {
-      routerContract,
+      routerContractAddress,
       lpERC20Amount,
       expectedERC20AmountA,
       expectedERC20AmountB,
@@ -54,7 +54,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
         erc20Amounts,
         erc20Amount =>
           compareERC20Info(erc20Amount, lpERC20Amount) &&
-          isApprovedForSpender(erc20Amount, routerContract),
+          isApprovedForSpender(erc20Amount, routerContractAddress),
         lpERC20Amount.amount,
       );
 
@@ -69,7 +69,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
       slippagePercentage,
     );
 
-    const contract = new UniV2LikeRouterContract(routerContract);
+    const contract = new UniV2LikeRouterContract(routerContractAddress);
     const populatedTransaction = await contract.createRemoveLiquidity(
       expectedERC20AmountA.tokenAddress,
       expectedERC20AmountB.tokenAddress,

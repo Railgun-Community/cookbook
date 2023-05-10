@@ -8,7 +8,7 @@ import { BigNumber } from 'ethers';
 export class UniV2LikePairContract {
   private readonly contract: UniV2LikePair;
 
-  constructor(pairAddress: string, provider?: BaseProvider) {
+  constructor(pairAddress: string, provider: BaseProvider) {
     if (!pairAddress) {
       throw new Error('Pair address is required for LP router');
     }
@@ -33,5 +33,9 @@ export class UniV2LikePairContract {
   async totalSupply(): Promise<BigNumber> {
     const totalSupply = await this.contract.totalSupply();
     return totalSupply;
+  }
+
+  async kLast(): Promise<BigNumber> {
+    return this.contract.kLast();
   }
 }

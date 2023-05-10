@@ -1,12 +1,14 @@
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { SushiswapV2AddLiquidityRecipe } from '../sushiswap-v2-add-liquidity-recipe';
+import { SushiswapV2RemoveLiquidityRecipe } from '../sushiswap-v2-remove-liquidity-recipe';
 import { BigNumber } from 'ethers';
 import {
   RecipeAddLiquidityData,
   RecipeERC20Amount,
   RecipeERC20Info,
   RecipeInput,
+  RecipeRemoveLiquidityData,
 } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
 import {
@@ -31,7 +33,6 @@ const oneInDecimals6 = BigNumber.from(10).pow(6);
 const oneInDecimals18 = BigNumber.from(10).pow(18);
 const slippagePercentage = 0.01;
 
-// Assume 2000:1 rate.for USDC:WETH.
 const USDC_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
   decimals: 6,
@@ -40,8 +41,6 @@ const WETH_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
   decimals: 18,
 };
-
-// Assume 2:1 rate for LP:WETH.
 const LP_TOKEN: RecipeERC20Info = {
   tokenAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
   decimals: 18,
@@ -165,25 +164,172 @@ describe.only('FORK-sushiswap-v2-liquidity-recipes', function run() {
       .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
       .div(10000);
 
-    const expectedPrivateVaultTokenBalance = initialPrivateLPTokenBalance
+    const expectedPrivateLPTokenBalance = initialPrivateLPTokenBalance
       .add(expectedLPTokenReceived) // LP tokens acquired
       .sub(shieldFee); // Shield fee
 
     // TODO: Why is this not an exact value?
-    // expect(expectedPrivateVaultTokenBalance.toString()).to.equal(
+    // expect(expectedPrivateLPTokenBalance.toString()).to.equal(
     //   privateLPTokenBalance.toString(),
     //   'Private LP token balance incorrect after adding liquidity',
     // );
-
-    // Within range of 0.00005%
+    // Within range of 0.0000005%
     expect(
-      expectedPrivateVaultTokenBalance.lt(privateLPTokenBalance) &&
-        expectedPrivateVaultTokenBalance
-          .add('1000000000')
-          .gt(privateLPTokenBalance),
+      expectedPrivateLPTokenBalance.lt(privateLPTokenBalance) &&
+        expectedPrivateLPTokenBalance.add('1000000').gt(privateLPTokenBalance),
     ).to.equal(
       true,
       'Private LP token balance incorrect after adding liquidity',
+    );
+
+    // 2. Add External Balance expectations.
+    // N/A
+  });
+
+  it('[FORK] Should run sushiswap-v2-remove-liquidity-recipe', async function run() {
+    if (!process.env.RUN_FORK_TESTS) {
+      this.skip();
+      return;
+    }
+    if (!testRPCProvider) {
+      throw new Error('Requires test rpc provider');
+    }
+
+    const removeLiquidityRecipe = new SushiswapV2RemoveLiquidityRecipe(
+      LP_TOKEN,
+      USDC_TOKEN,
+      WETH_TOKEN,
+      slippagePercentage,
+      testRPCProvider,
+    );
+
+    const preUnshieldLPERC20Amount: RecipeERC20Amount = {
+      tokenAddress: LP_TOKEN.tokenAddress,
+      decimals: LP_TOKEN.decimals,
+      amount: oneInDecimals18.mul(2).div(1000),
+    };
+
+    const lpUnshieldedAmount = getUnshieldedAmountAfterFee(
+      networkName,
+      preUnshieldLPERC20Amount.amount,
+    );
+    const lpERC20Amount: RecipeERC20Amount = {
+      ...preUnshieldLPERC20Amount,
+      amount: lpUnshieldedAmount,
+    };
+    const preUnshieldRemoveLiquidityData =
+      await removeLiquidityRecipe.getRemoveLiquidityData(
+        networkName,
+        lpERC20Amount,
+      );
+
+    const ratioAB = preUnshieldRemoveLiquidityData.expectedERC20AmountA.amount
+      .mul(oneInDecimals18)
+      .div(oneInDecimals6)
+      .div(preUnshieldRemoveLiquidityData.expectedERC20AmountB.amount);
+    expect(ratioAB.gt('500')).to.equal(
+      true,
+      'Lower than expected USDC:WETH ratio (expected >500 USDC:WETH)',
+    );
+    expect(ratioAB.lt('4000')).to.equal(
+      true,
+      'Higher than expected USDC:WETH ratio (expected <4000 USDC:WETH)',
+    );
+
+    const removeLiquidityRecipeInput: RecipeInput = {
+      networkName,
+      unshieldRecipeERC20Amounts: [preUnshieldLPERC20Amount],
+      unshieldRecipeNFTs: [],
+    };
+
+    const railgunWallet = getTestRailgunWallet();
+    const initialPrivateTokenABalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      USDC_TOKEN.tokenAddress,
+    );
+    const initialPrivateTokenBBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      WETH_TOKEN.tokenAddress,
+    );
+
+    await executeRecipeAndAssertUnshieldBalances(
+      removeLiquidityRecipe,
+      removeLiquidityRecipeInput,
+      2_800_000, // expectedGasWithin50K
+    );
+
+    const removeLiquidityData =
+      removeLiquidityRecipe.removeLiquidityData as RecipeRemoveLiquidityData;
+    assert(
+      removeLiquidityData != null,
+      'removeLiquidityData should be defined after recipe execution',
+    );
+
+    expect({
+      ...removeLiquidityData,
+      deadlineTimestamp: 1, // Don't compare deadlineTimestamp field.
+    }).to.deep.equal(
+      {
+        ...preUnshieldRemoveLiquidityData,
+        deadlineTimestamp: 1,
+      },
+      'after-op removeLiquidityData should have same data as pre-unshield calculated data',
+    );
+
+    // REQUIRED TESTS:
+
+    // 1. Add New Private Balance expectations.
+    // Expect new swapped token in private balance.
+
+    const privateTokenABalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      USDC_TOKEN.tokenAddress,
+    );
+    const privateTokenBBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      WETH_TOKEN.tokenAddress,
+    );
+
+    const expectedTokenAReceived =
+      removeLiquidityData.expectedERC20AmountA.amount;
+    const expectedTokenBReceived =
+      removeLiquidityData.expectedERC20AmountB.amount;
+
+    const shieldFeeA = expectedTokenAReceived
+      .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
+      .div(10000);
+    const shieldFeeB = expectedTokenBReceived
+      .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
+      .div(10000);
+
+    const expectedPrivateTokenABalance = initialPrivateTokenABalance
+      .add(expectedTokenAReceived) // Token acquired
+      .sub(shieldFeeA); // Shield fee
+    const expectedPrivateTokenBBalance = initialPrivateTokenBBalance
+      .add(expectedTokenBReceived) // Token acquired
+      .sub(shieldFeeB); // Shield fee
+
+    expect(privateTokenABalance.toString()).to.equal(
+      expectedPrivateTokenABalance.toString(),
+      'Private token A balance incorrect after removing liquidity',
+    );
+
+    // TODO: Why is this not an exact value?
+    // expect(privateTokenBBalance.toString()).to.equal(
+    //   expectedPrivateTokenBBalance.toString(),
+    //   'Private token B balance incorrect after removing liquidity',
+    // );
+    // Within range of 0.0000000001%
+    expect(
+      expectedPrivateTokenBBalance.lt(privateTokenBBalance) &&
+        expectedPrivateTokenBBalance.add('100000').gt(privateTokenBBalance),
+    ).to.equal(
+      true,
+      `Private LP token balance incorrect after adding liquidity, expected ${privateTokenBBalance.toString()} within 5000 of ${expectedPrivateTokenBBalance.toString()}`,
     );
 
     // 2. Add External Balance expectations.

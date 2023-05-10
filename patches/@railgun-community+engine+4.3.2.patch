@@ -1,5 +1,5 @@
 diff --git a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
-index c3fab66..6271988 100644
+index f4dc3a9..b1e1e5c 100644
 --- a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
 +++ b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
 @@ -183,6 +183,9 @@ class RailgunSmartWalletContract extends events_1.default {

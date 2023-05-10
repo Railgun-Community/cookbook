@@ -26,10 +26,11 @@ after(() => {
 export const setupGanacheQuickstartTests = async () => {
   const tokenAddresses: string[] = [
     testConfig.contractsEthereum.weth9,
-    testConfig.contractsEthereum.rail,
+    // testConfig.contractsEthereum.rail,
     testConfig.contractsEthereum.usdc,
-    testConfig.contractsEthereum.crvCRVETH,
-    testConfig.contractsEthereum.crvCRVETHVaultToken,
+    testConfig.contractsEthereum.usdcWethSushiswapV2LPToken,
+    // testConfig.contractsEthereum.crvCRVETH,
+    // testConfig.contractsEthereum.crvCRVETHVaultToken,
   ];
 
   const forkRPCType = process.env.USE_GANACHE

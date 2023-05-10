@@ -91,13 +91,9 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
       ...targetUnshieldERC20AmountA,
       amount: unshieldedAmountA,
     };
-    this.addLiquidityData = await UniV2LikeSDK.getAddLiquidityData(
-      this.uniswapV2Fork,
+    this.addLiquidityData = await this.getAddLiquidityData(
       networkName,
       unshieldedERC20AmountA,
-      this.erc20InfoB,
-      this.slippagePercentage,
-      this.provider,
     );
     const preUnshieldAmountB = getAmountToUnshieldForTarget(
       networkName,
@@ -129,11 +125,11 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
 
     return [
       new ApproveERC20SpenderStep(
-        this.addLiquidityData.routerContract,
+        this.addLiquidityData.routerContractAddress,
         this.erc20InfoA,
       ),
       new ApproveERC20SpenderStep(
-        this.addLiquidityData.routerContract,
+        this.addLiquidityData.routerContractAddress,
         this.erc20InfoB,
       ),
       new UniV2LikeAddLiquidityStep(this.uniswapV2Fork, this.addLiquidityData),

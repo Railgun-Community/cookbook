@@ -41,7 +41,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const { erc20Amounts } = input;
     const {
-      routerContract,
+      routerContractAddress,
       erc20AmountA,
       erc20AmountB,
       expectedLPAmount,
@@ -55,10 +55,10 @@ export class UniV2LikeAddLiquidityStep extends Step {
         [
           erc20Amount =>
             compareERC20Info(erc20Amount, erc20AmountA) &&
-            isApprovedForSpender(erc20Amount, routerContract),
+            isApprovedForSpender(erc20Amount, routerContractAddress),
           erc20Amount =>
             compareERC20Info(erc20Amount, erc20AmountB) &&
-            isApprovedForSpender(erc20Amount, routerContract),
+            isApprovedForSpender(erc20Amount, routerContractAddress),
         ],
         {
           [erc20AmountA.tokenAddress]: erc20AmountA.amount,
@@ -80,7 +80,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
 
     const { relayAdaptContract } = NETWORK_CONFIG[input.networkName];
 
-    const contract = new UniV2LikeRouterContract(routerContract);
+    const contract = new UniV2LikeRouterContract(routerContractAddress);
     const populatedTransaction = await contract.createAddLiquidity(
       validatedERC20AmountA.tokenAddress,
       validatedERC20AmountB.tokenAddress,

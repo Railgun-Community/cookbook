@@ -108,7 +108,7 @@ export type RecipeAddLiquidityData = {
   erc20AmountB: RecipeERC20Amount;
   expectedLPAmount: RecipeERC20Amount;
   slippagePercentage: number;
-  routerContract: string;
+  routerContractAddress: string;
   deadlineTimestamp: number;
 };
 
@@ -117,7 +117,7 @@ export type RecipeRemoveLiquidityData = {
   expectedERC20AmountA: RecipeERC20Amount;
   expectedERC20AmountB: RecipeERC20Amount;
   slippagePercentage: number;
-  routerContract: string;
+  routerContractAddress: string;
   deadlineTimestamp: number;
 };
 

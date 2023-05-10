@@ -57,7 +57,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
     return UniV2LikeSDK.supportsForkAndNetwork(this.uniswapV2Fork, networkName);
   }
 
-  protected async getRemoveLiquidityData(
+  async getRemoveLiquidityData(
     networkName: NetworkName,
     lpERC20Amount: RecipeERC20Amount,
   ): Promise<RecipeRemoveLiquidityData> {
@@ -82,20 +82,17 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
       erc20Amounts,
       this.lpERC20Info,
     );
-    this.removeLiquidityData = await this.getRemoveLiquidityData(
+    const removeLiquidityData = await this.getRemoveLiquidityData(
       networkName,
       lpERC20Amount,
     );
 
     return [
       new ApproveERC20SpenderStep(
-        this.removeLiquidityData.routerContract,
+        removeLiquidityData.routerContractAddress,
         this.lpERC20Info,
       ),
-      new UniV2LikeRemoveLiquidityStep(
-        this.uniswapV2Fork,
-        this.removeLiquidityData,
-      ),
+      new UniV2LikeRemoveLiquidityStep(this.uniswapV2Fork, removeLiquidityData),
     ];
   }
 }

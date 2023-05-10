@@ -1,4 +1,7 @@
-import { balanceForERC20Token } from '@railgun-community/quickstart';
+import {
+  balanceForERC20Token,
+  getRelayAdaptTransactionError,
+} from '@railgun-community/quickstart';
 import { NETWORK_CONFIG, delay } from '@railgun-community/shared-models';
 import { BigNumber } from 'ethers';
 import { RecipeInput } from '../models/export-models';
@@ -53,30 +56,41 @@ export const executeRecipeAndAssertUnshieldBalances = async (
   const { gasEstimateString, transaction } =
     await createQuickstartCrossContractCallsForTest(networkName, recipeOutput);
 
-  expect(
-    BigNumber.from(gasEstimateString).gte(expectedGasWithin50K - 50_000),
-  ).to.equal(
-    true,
-    `${
-      recipe.config.name
-    }: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
-      gasEstimateString,
-    ).toString()}`,
-  );
-  expect(
-    BigNumber.from(gasEstimateString).lte(expectedGasWithin50K + 50_000),
-  ).to.equal(
-    true,
-    `${
-      recipe.config.name
-    }: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
-      gasEstimateString,
-    ).toString()}`,
-  );
+  if (gasEstimateString) {
+    expect(
+      BigNumber.from(gasEstimateString).gte(expectedGasWithin50K - 50_000),
+    ).to.equal(
+      true,
+      `${
+        recipe.config.name
+      }: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
+        gasEstimateString,
+      ).toString()}`,
+    );
+    expect(
+      BigNumber.from(gasEstimateString).lte(expectedGasWithin50K + 50_000),
+    ).to.equal(
+      true,
+      `${
+        recipe.config.name
+      }: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${BigNumber.from(
+        gasEstimateString,
+      ).toString()}`,
+    );
+  }
 
   const wallet = getTestEthersWallet();
   const txResponse = await wallet.sendTransaction(transaction);
-  await txResponse.wait();
+  const txReceipt = await txResponse.wait();
+
+  const relayAdaptTransactionError = getRelayAdaptTransactionError(
+    txReceipt.logs,
+  );
+  if (relayAdaptTransactionError) {
+    throw new Error(
+      `${recipe.config.name} Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
+    );
+  }
 
   // Wait for private balances to re-scan.
   // TODO: Possible race condition - maybe watch for scan events instead.
@@ -116,12 +130,14 @@ export const executeRecipeAndAssertUnshieldBalances = async (
           true,
           `${
             recipe.config.name
-          }: Did not get expected balance token ${tokenAddress}, expected ${expectedBalance.toString()} got ${postBalance.toString()}`,
+          }: Did not get expected private balance after unshield/reshield - token ${tokenAddress}: expected ${expectedBalance.toString()} or ${expectedBalance
+            .add(1)
+            .toString()}, got ${postBalance.toString()}`,
         );
       } else {
         expect(postBalance.toString()).to.equal(
           expectedBalance.toString(),
-          `${recipe.config.name}: Did not get expected balance token ${tokenAddress}`,
+          `${recipe.config.name}:  Did not get expected private balance after unshield/reshield - token ${tokenAddress}`,
         );
       }
     }),

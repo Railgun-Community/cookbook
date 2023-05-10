@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers';
+import { JsonRpcProvider, TransactionRequest } from '@ethersproject/providers';
 import {
   gasEstimateForUnprovenCrossContractCalls,
   generateCrossContractCallsProof,
@@ -7,6 +7,7 @@ import {
 import {
   EVMGasType,
   NetworkName,
+  RailgunERC20AmountRecipient,
   TransactionGasDetailsSerialized,
   deserializeTransaction,
   serializeUnsignedTransaction,
@@ -14,7 +15,10 @@ import {
 import { Wallet } from 'ethers';
 import { testConfig } from './test-config.test';
 import { RecipeOutput } from '../models';
-import { AbstractWallet } from '@railgun-community/engine';
+import {
+  AbstractWallet,
+  MINIMUM_RELAY_ADAPT_CROSS_CONTRACT_CALLS_GAS_LIMIT,
+} from '@railgun-community/engine';
 
 export let testRPCProvider: Optional<JsonRpcProvider>;
 export let testRailgunWallet: AbstractWallet;
@@ -57,6 +61,12 @@ export const restoreGanacheSnapshot = async (snapshot: number) => {
   await getGanacheProvider().send('evm_revert', [snapshot]);
 };
 
+const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1: TransactionGasDetailsSerialized =
+  {
+    evmGasType: EVMGasType.Type1,
+    gasEstimateString: '0x00',
+    gasPriceString: '0x1234567890',
+  };
 const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2: TransactionGasDetailsSerialized =
   {
     evmGasType: EVMGasType.Type2,
@@ -65,10 +75,16 @@ const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2: TransactionGasDetailsSeria
     maxPriorityFeePerGasString: '0x123456',
   };
 
+const MOCK_RAILGUN_ADDRESS =
+  '0zk1q8hxknrs97q8pjxaagwthzc0df99rzmhl2xnlxmgv9akv32sua0kfrv7j6fe3z53llhxknrs97q8pjxaagwthzc0df99rzmhl2xnlxmgv9akv32sua0kg0zpzts';
+
 export const createQuickstartCrossContractCallsForTest = async (
   networkName: NetworkName,
   recipeOutput: RecipeOutput,
-) => {
+): Promise<{
+  gasEstimateString: Optional<string>;
+  transaction: TransactionRequest;
+}> => {
   const provider = getGanacheProvider();
   const railgunWallet = getTestRailgunWallet();
 
@@ -80,7 +96,19 @@ export const createQuickstartCrossContractCallsForTest = async (
     shieldNFTs,
   } = recipeOutput;
 
-  const sendWithPublicWallet = true;
+  if (unshieldERC20Amounts.length < 1) {
+    throw new Error(
+      'Test cross-contract call runner requires at least 1 unshield ERC20 amount.',
+    );
+  }
+
+  // Proof/transaction requires relayer fee in order to parse the relay adapt error for testing.
+  // Ie. RelayAdapt transaction must continue after revert, and emit event with error details.
+  const mockRelayerFeeRecipient: RailgunERC20AmountRecipient = {
+    tokenAddress: unshieldERC20Amounts[0].tokenAddress,
+    amountString: '0x00',
+    recipientAddress: MOCK_RAILGUN_ADDRESS,
+  };
 
   const crossContractCallsSerialized: string[] = populatedTransactions.map(
     serializeUnsignedTransaction,
@@ -98,13 +126,15 @@ export const createQuickstartCrossContractCallsForTest = async (
       crossContractCallsSerialized,
       MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
       undefined, // feeTokenDetails
-      sendWithPublicWallet,
+      true, // sendWithPublicWallet
     );
   if (gasEstimateError) {
-    throw new Error(`Error getting gas estimate: ${gasEstimateError}`);
-  }
-  if (!gasEstimateString) {
-    throw new Error(`No gas estimate created`);
+    // eslint-disable-next-line no-console
+    console.error(
+      'Received gas estimate error, which does not contain details of failure. Continuing transaction in order to parse RelayAdapt revert error.',
+    );
+    // eslint-disable-next-line no-console
+    console.log(gasEstimateError);
   }
 
   const { error: generateProofError } = await generateCrossContractCallsProof(
@@ -116,8 +146,8 @@ export const createQuickstartCrossContractCallsForTest = async (
     shieldERC20Addresses,
     shieldNFTs,
     crossContractCallsSerialized,
-    undefined, // relayerFeeERC20AmountRecipient
-    sendWithPublicWallet,
+    mockRelayerFeeRecipient,
+    false, // sendWithPublicWallet
     undefined, // overallBatchMinGasPrice
     () => {}, // progressCallback
   );
@@ -134,12 +164,14 @@ export const createQuickstartCrossContractCallsForTest = async (
       shieldERC20Addresses,
       shieldNFTs,
       crossContractCallsSerialized,
-      undefined, // relayerFeeERC20AmountRecipient
-      sendWithPublicWallet,
+      mockRelayerFeeRecipient,
+      false, // sendWithPublicWallet
       undefined, // overallBatchMinGasPrice
       {
-        ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
-        gasEstimateString,
+        ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1,
+        gasEstimateString:
+          gasEstimateString ??
+          MINIMUM_RELAY_ADAPT_CROSS_CONTRACT_CALLS_GAS_LIMIT.toHexString(),
       },
     );
   if (populateCallsError) {
