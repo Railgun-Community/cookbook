@@ -14,3 +14,11 @@ export const babylonianSqrt = (y: BigNumber): BigNumber => {
   }
   return z;
 };
+
+export const maxBigNumber = (b1: BigNumber, b2: BigNumber) => {
+  return b1.gt(b2) ? b1 : b2;
+};
+
+export const minBigNumber = (b1: BigNumber, b2: BigNumber) => {
+  return b1.lt(b2) ? b1 : b2;
+};

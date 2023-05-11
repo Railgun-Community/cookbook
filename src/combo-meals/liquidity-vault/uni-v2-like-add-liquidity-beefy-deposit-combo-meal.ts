@@ -18,7 +18,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
       'Adds liquidity to a [NAME] Pool and deposits the LP tokens into a Beefy Vault.',
   };
 
-  private readonly uniV2LikeRecipe: UniV2LikeAddLiquidityRecipe;
+  private readonly uniV2LikeAddLiquidityRecipe: UniV2LikeAddLiquidityRecipe;
 
   private readonly beefyDepositRecipe: BeefyDepositRecipe;
 
@@ -32,7 +32,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
   ) {
     super();
 
-    this.uniV2LikeRecipe = new UniV2LikeAddLiquidityRecipe(
+    this.uniV2LikeAddLiquidityRecipe = new UniV2LikeAddLiquidityRecipe(
       uniswapV2Fork,
       erc20InfoA,
       erc20InfoB,
@@ -50,13 +50,13 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
     networkName: NetworkName,
     targetUnshieldERC20AmountA: RecipeERC20Amount,
   ) {
-    return this.uniV2LikeRecipe.getAddLiquidityAmountBForUnshield(
+    return this.uniV2LikeAddLiquidityRecipe.getAddLiquidityAmountBForUnshield(
       networkName,
       targetUnshieldERC20AmountA,
     );
   }
 
   protected async getRecipes(): Promise<Recipe[]> {
-    return [this.uniV2LikeRecipe, this.beefyDepositRecipe];
+    return [this.uniV2LikeAddLiquidityRecipe, this.beefyDepositRecipe];
   }
 }

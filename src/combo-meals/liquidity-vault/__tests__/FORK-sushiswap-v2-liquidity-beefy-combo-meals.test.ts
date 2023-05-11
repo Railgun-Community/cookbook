@@ -40,12 +40,12 @@ const WETH_TOKEN: RecipeERC20Info = {
   decimals: 18,
 };
 const VAULT_TOKEN: RecipeERC20Info = {
-  tokenAddress: '0x61F96CA5c79c9753C93244c73f1d4b4a90c1aC8c',
+  tokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
   decimals: 18,
 };
 const vaultID = 'sushi-mainnet-usdc-weth';
 
-describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
+describe.only('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
   this.timeout(120000);
 
   before(async function run() {
@@ -61,7 +61,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     );
   });
 
-  it.only('[FORK] Should run uni-v2-like-add-liquidity-beefy-deposit-combo-meal', async function run() {
+  it('[FORK] Should run uni-v2-like-add-liquidity-beefy-deposit-combo-meal', async function run() {
     if (!process.env.RUN_FORK_TESTS) {
       this.skip();
       return;

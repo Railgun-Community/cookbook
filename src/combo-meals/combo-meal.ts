@@ -1,9 +1,11 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import {
   ComboMealConfig,
   RecipeInput,
   RecipeOutput,
 } from '../models/export-models';
 import { Recipe } from '../recipes';
+import { compareTokenAddress } from '../utils';
 
 export abstract class ComboMeal {
   abstract readonly config: ComboMealConfig;
@@ -16,7 +18,8 @@ export abstract class ComboMeal {
   ): RecipeInput {
     return {
       networkName: input.networkName,
-      erc20Amounts: output.erc20Amounts,
+      // TODO: Minimum balance is lost for combos. (amount is expectedBalance).
+      erc20Amounts: output.erc20Amounts.filter(({ amount }) => amount.gt(0)),
       nfts: output.nfts,
     };
   }
@@ -50,12 +53,51 @@ export abstract class ComboMeal {
       aggregatedRecipeOutput.populatedTransactions.push(
         ...recipeOutput.populatedTransactions,
       );
-      aggregatedRecipeOutput.erc20Amounts.push(...recipeOutput.erc20Amounts);
-      aggregatedRecipeOutput.nfts.push(...recipeOutput.nfts);
       aggregatedRecipeOutput.feeERC20AmountRecipients.push(
         ...recipeOutput.feeERC20AmountRecipients,
       );
+
+      // Add amounts to remove any duplicates.
+      recipeOutput.erc20Amounts.forEach(erc20Amount => {
+        const found = aggregatedRecipeOutput.erc20Amounts.find(
+          existingERC20Amount => {
+            return compareTokenAddress(
+              existingERC20Amount.tokenAddress,
+              erc20Amount.tokenAddress,
+            );
+          },
+        );
+        if (found) {
+          found.amount = found.amount.add(erc20Amount.amount);
+          return;
+        }
+        aggregatedRecipeOutput.erc20Amounts.push(erc20Amount);
+      });
+
+      // Add amounts to remove any duplicates.
+      recipeOutput.nfts.forEach(nft => {
+        const found = aggregatedRecipeOutput.nfts.find(existingERC20Amount => {
+          return (
+            compareTokenAddress(
+              existingERC20Amount.nftAddress,
+              nft.nftAddress,
+            ) &&
+            nft.tokenSubID === existingERC20Amount.tokenSubID &&
+            nft.nftTokenType === existingERC20Amount.nftTokenType
+          );
+        });
+        if (found) {
+          found.amountString = BigNumber.from(found.amountString)
+            .add(nft.amountString)
+            .toHexString();
+          return;
+        }
+        aggregatedRecipeOutput.nfts.push(nft);
+      });
+
+      aggregatedRecipeOutput.nfts.push(...recipeOutput.nfts);
     }
+
     return aggregatedRecipeOutput;
   }
 }

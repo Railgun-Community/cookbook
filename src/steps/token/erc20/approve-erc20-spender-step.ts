@@ -10,6 +10,7 @@ import { PopulatedTransaction } from '@ethersproject/contracts';
 import { ERC20Contract } from '../../../contract/token/erc20-contract';
 import { compareERC20Info } from '../../../utils/token';
 import { createNoActionStepOutput } from '../../../utils/no-action-output';
+import { minBigNumber } from '../../../utils/big-number';
 
 export class ApproveERC20SpenderStep extends Step {
   readonly config = {
@@ -61,7 +62,7 @@ export class ApproveERC20SpenderStep extends Step {
       decimals: erc20AmountForStep.decimals,
       isBaseToken: erc20AmountForStep.isBaseToken,
       expectedBalance: approveAmount,
-      minBalance: approveAmount,
+      minBalance: minBigNumber(approveAmount, erc20AmountForStep.minBalance),
       approvedSpender: this.spender,
     };
 

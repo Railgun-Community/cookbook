@@ -143,16 +143,23 @@ export class BeefyAPI {
         if (vaultAPIData.status !== 'active') {
           return undefined;
         }
+        if (
+          !vaultAPIData.tokenAddress ||
+          !vaultAPIData.earnedTokenAddress ||
+          !vaultAPIData.earnContractAddress
+        ) {
+          return undefined;
+        }
         return {
           vaultID: vaultAPIData.id,
           vaultName: vaultAPIData.name,
           apy,
           chain: vaultAPIData.chain,
           network: vaultAPIData.network,
-          depositERC20Address: vaultAPIData.tokenAddress,
+          depositERC20Address: vaultAPIData.tokenAddress.toLowerCase(),
           depositERC20Decimals: vaultAPIData.tokenDecimals,
-          vaultTokenAddress: vaultAPIData.earnedTokenAddress,
-          vaultContractAddress: vaultAPIData.earnContractAddress,
+          vaultTokenAddress: vaultAPIData.earnedTokenAddress.toLowerCase(),
+          vaultContractAddress: vaultAPIData.earnContractAddress.toLowerCase(),
           vaultRate: vaultAPIData.pricePerFullShare,
           depositFee: feesData?.deposit ?? 0,
           withdrawFee: feesData?.withdraw ?? 0,
@@ -206,7 +213,7 @@ export class BeefyAPI {
         throw err;
       }
       CookbookDebug.error(err);
-      throw new Error(err.message);
+      throw new Error(`Could not get active list of Vaults: ${err.message}`);
     }
   }
 

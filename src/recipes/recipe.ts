@@ -142,7 +142,7 @@ export abstract class Recipe {
         if (allStepOutputERC20Amounts[tokenAddress] && isFinalStep) {
           // Only set amount for final step outputs.
           allStepOutputERC20Amounts[tokenAddress].amount =
-            outputERC20Amount.expectedBalance;
+            outputERC20Amount.expectedBalance; // TODO: Minimum balance is lost for combos.
           return;
         }
         allStepOutputERC20Amounts[tokenAddress] = {
@@ -173,7 +173,7 @@ export abstract class Recipe {
     // TODO: After callbacks upgrade, no need to batch-re-shield all tokens.
     // We will only need to re-shield output tokens, or step outputs with slippage.
     // Until then, we need all tokens to re-shield in case of revert.
-    const shieldERC20Amounts: RecipeERC20Amount[] = Object.values(
+    const outputERC20Amounts: RecipeERC20Amount[] = Object.values(
       allStepOutputERC20Amounts,
     );
 
@@ -204,7 +204,7 @@ export abstract class Recipe {
         amountString: '0x00',
       };
     });
-    const shieldNFTs: RailgunNFTAmount[] = Object.values(
+    const outputNFTs: RailgunNFTAmount[] = Object.values(
       allStepOutputNFTAmounts,
     );
 
@@ -215,8 +215,8 @@ export abstract class Recipe {
     const recipeOutput: RecipeOutput = {
       stepOutputs,
       populatedTransactions,
-      erc20Amounts: shieldERC20Amounts,
-      nfts: shieldNFTs,
+      erc20Amounts: outputERC20Amounts,
+      nfts: outputNFTs,
       feeERC20AmountRecipients,
     };
     return recipeOutput;
