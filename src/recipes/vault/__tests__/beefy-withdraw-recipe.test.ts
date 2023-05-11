@@ -23,6 +23,7 @@ const tokenAddress = testConfig.contractsEthereum.rail.toLowerCase();
 const vault: BeefyVaultData = {
   vaultID: 'id',
   vaultName: 'VAULT_NAME',
+  apy: 5.0,
   chain: 'ethereum',
   network: 'ethereum',
   depositERC20Address: tokenAddress,

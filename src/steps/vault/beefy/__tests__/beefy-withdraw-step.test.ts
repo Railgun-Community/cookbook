@@ -16,6 +16,7 @@ const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 const vault: BeefyVaultData = {
   vaultID: 'id',
   vaultName: 'VAULT_NAME',
+  apy: 5.0,
   chain: 'ethereum',
   network: 'ethereum',
   depositERC20Address: tokenAddress,

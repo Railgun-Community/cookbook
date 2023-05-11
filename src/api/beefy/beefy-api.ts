@@ -58,9 +58,12 @@ type BeefyFeesAPIData = Record<
   }
 >;
 
+type BeefyAPYAPIData = Record<string, number>;
+
 export type BeefyVaultData = {
   vaultID: string;
   vaultName: string;
+  apy: number;
   chain: BeefyChain;
   network: BeefyNetwork;
   depositERC20Address: string;
@@ -128,11 +131,13 @@ export class BeefyAPI {
     const beefyFeesAPIData = await getBeefyAPIData<BeefyFeesAPIData>(
       BeefyApiEndpoint.GetFees,
     );
+    const beefyAPYAPIData = await this.getBeefyVaultAPYs();
 
     const vaultData: BeefyVaultData[] = removeUndefineds(
       beefyVaultAPIData.map(vaultAPIData => {
         const feesData = beefyFeesAPIData[vaultAPIData.id];
-        if (!feesData) {
+        const apy = beefyAPYAPIData[vaultAPIData.id];
+        if (feesData == null || apy == null) {
           return undefined;
         }
         if (vaultAPIData.status !== 'active') {
@@ -141,6 +146,7 @@ export class BeefyAPI {
         return {
           vaultID: vaultAPIData.id,
           vaultName: vaultAPIData.name,
+          apy,
           chain: vaultAPIData.chain,
           network: vaultAPIData.network,
           depositERC20Address: vaultAPIData.tokenAddress,
@@ -158,6 +164,13 @@ export class BeefyAPI {
     this.cacheTimestamp = Date.now();
 
     return vaultData;
+  }
+
+  private static async getBeefyVaultAPYs(): Promise<BeefyAPYAPIData> {
+    const beefyAPYAPIData = await getBeefyAPIData<BeefyAPYAPIData>(
+      BeefyApiEndpoint.GetAPYs,
+    );
+    return beefyAPYAPIData;
   }
 
   static async getFilteredBeefyVaults(
@@ -208,8 +221,11 @@ export class BeefyAPI {
 
     const beefyVault = beefyVaults.find(vault => vault.vaultID === vaultID);
     if (!beefyVault) {
-      throw new Error(`Beefy vault not found for ID: ${vaultID}.`);
+      throw new Error(
+        `Beefy vault with fees/apy data missing for ID: ${vaultID}.`,
+      );
     }
+
     return beefyVault;
   }
 }
