@@ -5,13 +5,17 @@
 
 Write a recipe in minutes to convert your dApp to a zkApp.
 
+## Full Documentation
+
+Coming soon
+
 ## Get the Recipe Builder
 
 `yarn add @railgun-community/cookbook`
 
-## Write your own dApp Integration
+## Write your own zkApp
 
-The RAILGUN Cookbook gives you the tools to write a "Recipe" to convert your dApp into a zkApp - private and fully anonymized. Your Recipe can interact with any smart contract using your private balance in RAILGUN. A Recipe contains a series of smart contact calls that are combined into a multicall.
+The RAILGUN Cookbook gives you the tools to write a "Recipe" to convert your dApp into a zkApp - [private and fully anonymous](https://docs.railgun.org/wiki/learn/privacy-system) for users. Your Recipe can interact with any smart contract using your private balance in [RAILGUN](https://docs.railgun.org/wiki/learn/overview). A Recipe contains a series of smart contact calls that are combined into a multicall.
 
 ### Cookbook "Steps"
 
@@ -27,7 +31,7 @@ Recipes combine Steps into functional, complex actions. Most integrations will r
 
 As an example, a simple 0x Exchange Swap call has a pre-requisite: the Sell Token must be approved for spending by the 0x contract. So, the 0x Swap Recipe (see "zero-x-swap-recipe.ts") has two Steps: (1) Approve sell token, (2) Swap sell token for buy token. The full Recipe uses a Step called ApproveERC20SpenderStep, which is a common Step in most integrations.
 
-Note that each Recipe must assume a clean slate – since it's executed in a public setting (the Relay Adapt Contract), developers should assume that the Relay Adapt contract does not have approval to spend tokens with any token contract. This is why the ApproveERC20SpenderStep is a basic requirement for nearly every Recipe.
+Note that each Recipe must assume a clean slate – since it's executed in a public setting (the RAILGUN Relay Adapt Contract), developers should assume that the Relay Adapt contract does not have approval to spend tokens with any token contract. This is why the ApproveERC20SpenderStep is a basic requirement for nearly every Recipe.
 
 ### Cookbook "Combo Meals"
 
@@ -37,11 +41,11 @@ For example, there is a Combo Meal that combines an "Add Liquidity" Recipe for U
 
 This all occurs in a single validated transaction call, saving network fees and making the user experience simple and delightful.
 
-## Cook up a Recipe and call it with RAILGUN Quickstart
+## Cook up a Recipe for the RAILGUN Quickstart SDK
 
-Given a full Recipe and its inputs, RAILGUN Quickstart will generate a zero-knowledge proof and a final serialized transaction for the Relay Adapt contract.
+Given a full Recipe and its inputs, [RAILGUN Quickstart](https://docs.railgun.org/developer-guide/quickstart/overview) will generate a [zero-knowledge proof](https://docs.railgun.org/wiki/learn/privacy-system/zero-knowledge-cryptography) and a final serialized transaction for the RAILGUN Relay Adapt contract.
 
-This final transaction can be submitted to the blockchain by any wallet, including a Relayer.
+This final transaction can be submitted to the blockchain by any wallet, including a [Relayer](https://docs.railgun.org/wiki/learn/privacy-system/community-relayers).
 
 ```
 const swap = new ZeroXSwapRecipe(sellERC20Info, buyERC20Info, slippagePercentage);
