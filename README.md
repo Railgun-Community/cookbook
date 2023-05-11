@@ -77,3 +77,13 @@ TODO
 1. Run anvil fork and load test account with 1000 ETH: `./run-anvil your/ethereum/rpc/url`
 
 2. Run tests (in another terminal): `yarn test-fork`.
+
+### Debugging:
+
+If you get a cross-contract call error (transaction failure), try running `debug_traceCall` against the Anvil RPC:
+
+```
+curl http://localhost:8600 -X POST \
+    -H "Content-Type: application/json" \
+  --data '{"method":"debug_traceCall","params":[{"from":null,"to":"ENTER_TO_0x","data":"ENTER_DATA_0x"}, "latest"],"id":1,"jsonrpc":"2.0"}'
+```

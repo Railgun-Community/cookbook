@@ -9,6 +9,7 @@ import {
   createQuickstartCrossContractCallsForTest,
   getTestEthersWallet,
   getTestRailgunWallet,
+  testRPCProvider,
 } from './shared.test';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -76,15 +77,46 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   }
 
   const wallet = getTestEthersWallet();
-  const txResponse = await wallet.sendTransaction(transaction);
-  const txReceipt = await txResponse.wait();
 
-  const relayAdaptTransactionError = getRelayAdaptTransactionError(
-    txReceipt.logs,
-  );
-  if (relayAdaptTransactionError) {
+  try {
+    const txResponse = await wallet.sendTransaction(transaction);
+    const txReceipt = await txResponse.wait();
+
+    const relayAdaptTransactionError = getRelayAdaptTransactionError(
+      txReceipt.logs,
+    );
+    if (relayAdaptTransactionError) {
+      throw new Error(
+        `${name} Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
+      );
+    }
+  } catch (err) {
+    const provider = testRPCProvider;
+    if (!provider) {
+      throw new Error('No test provider');
+    }
+
+    // Trace call and parse RelayAdapt log data to get error message.
+
+    const call = {
+      from: null,
+      to: transaction.to,
+      data: transaction.data,
+    };
+
+    // NOTE: This fails as output is too large for JS runtime.
+    // const trace = await provider.send('debug_traceCall', [call, 'latest']);
+
+    // eslint-disable-next-line no-console
+    console.log('Run this command to debug the transaction:\n');
+    // eslint-disable-next-line no-console
+    console.log(
+      `curl http://localhost:8600 -X POST     -H "Content-Type: application/json"   --data '{"method":"debug_traceCall","params":[{"from":null,"to":"${call.to}","data":"${call.data}"}, "latest"],"id":1,"jsonrpc":"2.0"}' | cut -c 1-1000
+      \n`,
+    );
+
     throw new Error(
-      `${name} Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
+      'Unable to call transaction. To debug: (1) See above for Anvil RPC debug_traceCall command. Run to capture returnValue. (2) Run `node debug_return_value <returnValue>` at project root to get RelayAdapt error message.',
     );
   }
 

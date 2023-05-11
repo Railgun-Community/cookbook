@@ -46,9 +46,9 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  BigDecimal: any;
-  BigInt: any;
-  Bytes: any;
+  BigDecimal: string; // MODIFIED
+  BigInt: string; // MODIFIED
+  Bytes: string; // MODIFIED
 };
 
 export type Query = {
@@ -4979,19 +4979,19 @@ const importFn: ImportFn = <T>(moduleId: string) => {
   switch(relativeModuleId) {
     case ".graphclient/sources/uniswap-v2-ethereum/introspectionSchema":
       return Promise.resolve(importedModule$0) as T;
-    
+
     case ".graphclient/sources/sushiswap-v2-arbitrum/introspectionSchema":
       return Promise.resolve(importedModule$1) as T;
-    
+
     case ".graphclient/sources/sushiswap-v2-polygon/introspectionSchema":
       return Promise.resolve(importedModule$2) as T;
-    
+
     case ".graphclient/sources/sushiswap-v2-ethereum/introspectionSchema":
       return Promise.resolve(importedModule$3) as T;
-    
+
     case ".graphclient/sources/sushiswap-v2-bsc/introspectionSchema":
       return Promise.resolve(importedModule$4) as T;
-    
+
     default:
       return Promise.reject(new Error(`Cannot find module '${relativeModuleId}'.`));
   }

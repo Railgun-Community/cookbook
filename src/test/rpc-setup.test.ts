@@ -67,6 +67,18 @@ export const setupTestEthereumRPCAndWallets = async (
 
   if (forkRPCType === ForkRPCType.Anvil) {
     await testRPCProvider.send('anvil_reset', [{}]);
+    // const something = await testRPCProvider.send('debug_traceTransaction', [
+    //   '0x4ca42b31216eeef6f962d7c414fab95eb75bb344162c5ccc4df99e33c89fb9d1',
+    //   {
+    //     tracer: 'callTracer',
+    //     disableStorage: false,
+    //     disableStack: false,
+    //     enableReturnData: true,
+    //     enableMemory: true,
+    //   },
+    // ]);
+    // console.log(something);
+    // throw new Error('TESTING');
   }
 
   const wallet = getTestEthersWallet();

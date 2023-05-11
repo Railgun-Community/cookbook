@@ -5,6 +5,7 @@ import { PairDataWithRate } from '../models/uni-v2-like';
 import { parseFixed } from '@ethersproject/bignumber';
 import { calculatePairRateWith18Decimals } from '../utils/pair-rate';
 import { UniswapV2Fork } from '../models/export-models';
+import { CookbookDebug } from '../utils/cookbook-debug';
 
 export class UniV2LikeSubgraph {
   private static meshes: Record<string, MeshInstance> = {};
@@ -26,38 +27,46 @@ export class UniV2LikeSubgraph {
     networkName: NetworkName,
     tokenAddresses: string[],
   ): Promise<PairDataWithRate[]> => {
-    const sdk = this.getBuiltGraphSDK(uniswapV2Fork, networkName);
-    const tokenAddressesLowercase = tokenAddresses.map(address =>
-      address.toLowerCase(),
-    );
-
-    const { pairs } = await sdk.Pairs({ tokens: tokenAddressesLowercase });
-
-    const pairData: PairDataWithRate[] = pairs.map(pair => {
-      const tokenDecimalsA = Number(pair.token0.decimals);
-      const reserveA = parseFixed(pair.reserve0, tokenDecimalsA);
-      const tokenDecimalsB = Number(pair.token1.decimals);
-      const reserveB = parseFixed(pair.reserve1, tokenDecimalsB);
-      const rateWith18Decimals = calculatePairRateWith18Decimals(
-        reserveA,
-        tokenDecimalsA,
-        reserveB,
-        tokenDecimalsB,
+    try {
+      const sdk = this.getBuiltGraphSDK(uniswapV2Fork, networkName);
+      const tokenAddressesLowercase = tokenAddresses.map(address =>
+        address.toLowerCase(),
       );
-      const pairDataWithRate: PairDataWithRate = {
-        pairAddress: pair.id,
-        tokenAddressA: pair.token0.id,
-        tokenDecimalsA,
-        tokenSymbolA: pair.token0.symbol,
-        tokenAddressB: pair.token1.id,
-        tokenDecimalsB,
-        tokenSymbolB: pair.token1.symbol,
-        rateWith18Decimals,
-      };
-      return pairDataWithRate;
-    });
 
-    return pairData;
+      const { pairs } = await sdk.Pairs({ tokens: tokenAddressesLowercase });
+
+      const pairData: PairDataWithRate[] = pairs.map(pair => {
+        const tokenDecimalsA = Number(pair.token0.decimals);
+        const reserveA = parseFixed(pair.reserve0, tokenDecimalsA);
+        const tokenDecimalsB = Number(pair.token1.decimals);
+        const reserveB = parseFixed(pair.reserve1, tokenDecimalsB);
+        const rateWith18Decimals = calculatePairRateWith18Decimals(
+          reserveA,
+          tokenDecimalsA,
+          reserveB,
+          tokenDecimalsB,
+        );
+        const pairDataWithRate: PairDataWithRate = {
+          pairAddress: pair.id,
+          tokenAddressA: pair.token0.id,
+          tokenDecimalsA,
+          tokenSymbolA: pair.token0.symbol,
+          tokenAddressB: pair.token1.id,
+          tokenDecimalsB,
+          tokenSymbolB: pair.token1.symbol,
+          rateWith18Decimals,
+        };
+        return pairDataWithRate;
+      });
+
+      return pairData;
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      CookbookDebug.error(err);
+      throw new Error('Could not get list of LP pairs: GraphQL request error.');
+    }
   };
 
   private static sourceNameForForkAndNetwork = (

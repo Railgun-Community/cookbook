@@ -96,7 +96,7 @@ describe('uni-v2-like-sdk', () => {
       tokenSymbolA: 'USDC',
       tokenSymbolB: 'WETH',
     });
-  }).timeout(15000);
+  }).timeout(30000);
 
   it('Should get Sushiswap LP pairs for USDC and WETH', async () => {
     const pairsOnlyUSDC = await UniV2LikeSDK.getAllLPPairsForTokenAddresses(
