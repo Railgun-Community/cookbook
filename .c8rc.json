@@ -6,7 +6,9 @@
     "dist/**",
     "node_modules/**",
     "**/*.d.ts",
-    "src/abi/**",
-    "src/models/**"
+    "src/abi-typechain/**",
+    "src/models/**",
+    "src/graph/graphql/**",
+    "src/test/**"
   ]
 }
