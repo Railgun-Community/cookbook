@@ -37,7 +37,7 @@ Note that each Recipe must assume a clean slate – since it's executed in a pu
 
 Combo Meals are the final frontier – every zkApp Chef's dream. They combine Recipes into very complex interactions, made 100% safe for execution against a private balance using the Cookbook.
 
-For example, there is a Combo Meal ([UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal](https://github.com/Railgun-Community/cookbook/blob/main/src/combo-meals/liquidity-vault/uni-v2-like-add-liquidity-beefy-deposit-combo-meal.ts)) that combines an "Add Liquidity" Recipe for Uniswap, with a "Deposit Vault" Recipe for Beefy. This gives a user the ability to add liquidity for a token pair on Uniswap, gain the LP token for that pair, and then deposit the LP token into a Beefy Vault to earn yield.
+For example, there is a [Combo Meal](https://github.com/Railgun-Community/cookbook/blob/main/src/combo-meals/liquidity-vault/uni-v2-like-add-liquidity-beefy-deposit-combo-meal.ts)) that combines an "Add Liquidity" Recipe for Uniswap, with a "Deposit Vault" Recipe for Beefy. This gives a user the ability to add liquidity for a token pair on Uniswap, gain the LP token for that pair, and then deposit the LP token into a Beefy Vault to earn yield.
 
 This all occurs in a single validated transaction call, saving network fees and making the user experience simple and delightful.
 
