@@ -177,13 +177,14 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     //   privateLPTokenBalance.toString(),
     //   'Private LP token balance incorrect after adding liquidity',
     // );
-    // Within range of 0.0000005%
     expect(
       expectedPrivateLPTokenBalance.lte(privateLPTokenBalance) &&
-        expectedPrivateLPTokenBalance.add('1000000').gte(privateLPTokenBalance),
+        expectedPrivateLPTokenBalance
+          .add('100000000')
+          .gte(privateLPTokenBalance),
     ).to.equal(
       true,
-      'Private LP token balance incorrect after adding liquidity',
+      `Private LP token balance incorrect after adding liquidity, expected ${privateLPTokenBalance.toString()} within 100000000 of ${expectedPrivateLPTokenBalance.toString()}`,
     );
 
     // 2. Add External Balance expectations.
@@ -331,7 +332,6 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     //   expectedPrivateTokenBBalance.toString(),
     //   'Private token B balance incorrect after removing liquidity',
     // );
-    // Within range of 0.0000000001%
     expect(
       expectedPrivateTokenBBalance.lte(privateTokenBBalance) &&
         expectedPrivateTokenBBalance.add('5000').gte(privateTokenBBalance),

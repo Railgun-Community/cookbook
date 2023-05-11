@@ -56,7 +56,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
     );
   }
 
-  protected async getInternalRecipes(): Promise<Recipe[]> {
+  protected async getRecipes(): Promise<Recipe[]> {
     return [this.uniV2LikeRecipe, this.beefyDepositRecipe];
   }
 }

@@ -150,7 +150,9 @@ export abstract class Recipe {
           decimals: outputERC20Amount.decimals,
           isBaseToken: outputERC20Amount.isBaseToken,
           // Expect 0 amount for middle step outputs.
-          amount: BigNumber.from(0),
+          amount: isFinalStep
+            ? outputERC20Amount.expectedBalance
+            : BigNumber.from(0),
         };
       });
     });
@@ -188,7 +190,7 @@ export abstract class Recipe {
         }
         allStepOutputNFTAmounts[nftID] = {
           ...outputNFT,
-          amountString: '0x00',
+          amountString: isFinalStep ? outputNFT.amountString : '0x00',
         };
       });
     });
@@ -213,8 +215,8 @@ export abstract class Recipe {
     const recipeOutput: RecipeOutput = {
       stepOutputs,
       populatedTransactions,
-      shieldERC20Amounts,
-      shieldNFTs,
+      erc20Amounts: shieldERC20Amounts,
+      nfts: shieldNFTs,
       feeERC20AmountRecipients,
     };
     return recipeOutput;

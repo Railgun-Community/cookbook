@@ -39,8 +39,8 @@ export type StepInput = {
 export type RecipeOutput = {
   stepOutputs: StepOutput[];
   populatedTransactions: PopulatedTransaction[];
-  shieldERC20Amounts: RecipeERC20Amount[];
-  shieldNFTs: RailgunNFTAmount[];
+  erc20Amounts: RecipeERC20Amount[];
+  nfts: RailgunNFTAmount[];
   feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
 };
 

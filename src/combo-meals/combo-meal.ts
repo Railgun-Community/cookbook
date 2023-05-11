@@ -8,7 +8,7 @@ import { Recipe } from '../recipes';
 export abstract class ComboMeal {
   abstract readonly config: ComboMealConfig;
 
-  protected abstract getInternalRecipes(): Promise<Recipe[]>;
+  protected abstract getRecipes(): Promise<Recipe[]>;
 
   private createNextRecipeInput(
     input: RecipeInput,
@@ -16,21 +16,21 @@ export abstract class ComboMeal {
   ): RecipeInput {
     return {
       networkName: input.networkName,
-      erc20Amounts: output.shieldERC20Amounts,
-      nfts: output.shieldNFTs,
+      erc20Amounts: output.erc20Amounts,
+      nfts: output.nfts,
     };
   }
 
   async getComboMealOutput(input: RecipeInput): Promise<RecipeOutput> {
-    const recipes = await this.getInternalRecipes();
+    const recipes = await this.getRecipes();
 
     let nextInput = input;
 
     const aggregatedRecipeOutput: RecipeOutput = {
       stepOutputs: [],
       populatedTransactions: [],
-      shieldERC20Amounts: [],
-      shieldNFTs: [],
+      erc20Amounts: [],
+      nfts: [],
       feeERC20AmountRecipients: [],
     };
 
@@ -50,10 +50,8 @@ export abstract class ComboMeal {
       aggregatedRecipeOutput.populatedTransactions.push(
         ...recipeOutput.populatedTransactions,
       );
-      aggregatedRecipeOutput.shieldERC20Amounts.push(
-        ...recipeOutput.shieldERC20Amounts,
-      );
-      aggregatedRecipeOutput.shieldNFTs.push(...recipeOutput.shieldNFTs);
+      aggregatedRecipeOutput.erc20Amounts.push(...recipeOutput.erc20Amounts);
+      aggregatedRecipeOutput.nfts.push(...recipeOutput.nfts);
       aggregatedRecipeOutput.feeERC20AmountRecipients.push(
         ...recipeOutput.feeERC20AmountRecipients,
       );

@@ -98,8 +98,11 @@ export const createQuickstartCrossContractCallsForTest = async (
     }),
   );
 
-  const { populatedTransactions, shieldERC20Amounts, shieldNFTs } =
-    recipeOutput;
+  const {
+    populatedTransactions,
+    erc20Amounts: shieldERC20Amounts,
+    nfts: shieldNFTs,
+  } = recipeOutput;
 
   const shieldERC20Addresses = shieldERC20Amounts.map(
     shieldERC20Amount => shieldERC20Amount.tokenAddress,
@@ -140,10 +143,8 @@ export const createQuickstartCrossContractCallsForTest = async (
   if (gasEstimateError) {
     // eslint-disable-next-line no-console
     console.error(
-      'Received gas estimate error, which does not contain details of failure. Continuing transaction in order to parse RelayAdapt revert error.',
+      'Received gas estimate error, which does not contain details of revert. Continuing transaction in order to parse RelayAdapt revert error.',
     );
-    // eslint-disable-next-line no-console
-    console.log(gasEstimateError);
   }
 
   const { error: generateProofError } = await generateCrossContractCallsProof(

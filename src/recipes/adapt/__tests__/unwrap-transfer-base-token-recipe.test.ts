@@ -177,12 +177,12 @@ describe('unwrap-transfer-base-token-recipe', () => {
     });
 
     expect(
-      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [tokenAddress].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
-    expect(output.shieldNFTs).to.deep.equal([]);
+    expect(output.nfts).to.deep.equal([]);
 
     const populatedTransactionsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.populatedTransactions,
@@ -321,12 +321,12 @@ describe('unwrap-transfer-base-token-recipe', () => {
     });
 
     expect(
-      output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [tokenAddress].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
-    expect(output.shieldNFTs).to.deep.equal([]);
+    expect(output.nfts).to.deep.equal([]);
 
     const populatedTransactionsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.populatedTransactions,

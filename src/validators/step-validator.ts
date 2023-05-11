@@ -15,7 +15,8 @@ export const validateStepOutput = (
 };
 
 const getTokenId = (tokenAddress: string, isBaseToken?: boolean) => {
-  return isBaseToken ? `${tokenAddress}-base` : tokenAddress;
+  const lcToken = tokenAddress.toLowerCase();
+  return isBaseToken ? `${lcToken}-base` : lcToken;
 };
 
 const validateStepOutputERC20Amounts = (
