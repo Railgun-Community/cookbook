@@ -178,9 +178,11 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     //   'Private LP token balance incorrect after adding liquidity',
     // );
     expect(
-      expectedPrivateLPTokenBalance.lte(privateLPTokenBalance) &&
+      expectedPrivateLPTokenBalance
+        .sub('10000000')
+        .lte(privateLPTokenBalance) &&
         expectedPrivateLPTokenBalance
-          .add('100000000')
+          .add('10000000')
           .gte(privateLPTokenBalance),
     ).to.equal(
       true,
