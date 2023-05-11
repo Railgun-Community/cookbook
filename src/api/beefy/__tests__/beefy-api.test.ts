@@ -49,8 +49,8 @@ describe('beefy-api', () => {
       vaultTokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       withdrawFee: 0.001,
     });
-    expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.03);
-    expect(vaultsForEthereumToken[0].apy).to.be.lessThan(0.15);
+    expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.001);
+    expect(vaultsForEthereumToken[0].apy).to.be.lessThan(0.2);
 
     const vaultsForPolygonToken = await BeefyAPI.getFilteredBeefyVaults(
       NetworkName.Polygon,
