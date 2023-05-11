@@ -11,7 +11,7 @@ Write a recipe in minutes to convert your dApp to a zkApp.
 
 ## Write your own dApp Integration
 
-The RAILGUN Cookbook gives you the tools to write a "Recipe" to convert your dApp into a zkApp that is private and anonymized. Your Recipe can interact with any smart contract using your private balance in RAILGUN. A Recipe contains a series of smart contact calls that are combined into a multicall. The Cookbook will automatically and executed in a Relay Adapt contract.
+The RAILGUN Cookbook gives you the tools to write a "Recipe" to convert your dApp into a zkApp - private and fully anonymized. Your Recipe can interact with any smart contract using your private balance in RAILGUN. A Recipe contains a series of smart contact calls that are combined into a multicall.
 
 ### Cookbook "Steps"
 
@@ -23,9 +23,9 @@ Step inputs and outputs are validated to ensure that each input has associated o
 
 ### Cookbook "Recipes"
 
-Recipes combine Steps into functional, complex actions. Most integrations will require 1-2 Recipes, and a number of Steps for each recipe. Steps are generic building blocks, making them multi-purpose and reusable for various Recipes.
+Recipes combine Steps into functional, complex actions. Most integrations will require 1-2 Recipes, and a number of Steps for each Recipe. Steps are generic building blocks, making them multi-purpose and reusable for various Recipes. Upon execution (`recipe.getRecipeOutput(recipeInput)`), the Cookbook automatically sandwiches the Recipe's transactions inside of Unshield/Shield calls, automatically calculating the associated fees with each Step, and providing the developer with a formatted list of Steps, their outputs, and the final array of populated transactions.
 
-As an example, a simple 0x Exchange Swap call has a pre-requisite: the Sell Token must be approved for spending by the 0x contract. So, the 0x Swap Recipe (see "zero-x-swap-recipe.ts") has two steps: (1) Approve sell token, (2) Swap sell token for buy token. The full recipe uses a step called ApproveERC20SpenderStep, which is a common step in most integrations.
+As an example, a simple 0x Exchange Swap call has a pre-requisite: the Sell Token must be approved for spending by the 0x contract. So, the 0x Swap Recipe (see "zero-x-swap-recipe.ts") has two Steps: (1) Approve sell token, (2) Swap sell token for buy token. The full Recipe uses a Step called ApproveERC20SpenderStep, which is a common Step in most integrations.
 
 Note that each Recipe must assume a clean slate – since it's executed in a public setting (the Relay Adapt Contract), developers should assume that the Relay Adapt contract does not have approval to spend tokens with any token contract. This is why the ApproveERC20SpenderStep is a basic requirement for nearly every Recipe.
 
@@ -33,66 +33,79 @@ Note that each Recipe must assume a clean slate – since it's executed in a pu
 
 Combo Meals are the final frontier – every zkApp Chef's dream. They combine Recipes into very complex interactions, made 100% safe for execution against a private balance using the Cookbook.
 
-For example, there is a Combo Meal that combines an "Add Liquidity" recipe for Uniswap, with a "Deposit Vault" recipe for Beefy. This gives a user the ability to add liquidity for a token pair on Uniswap, gain the LP token for that pair, and then deposit the LP token into a Beefy Vault to earn yield.
+For example, there is a Combo Meal that combines an "Add Liquidity" Recipe for Uniswap, with a "Deposit Vault" Recipe for Beefy. This gives a user the ability to add liquidity for a token pair on Uniswap, gain the LP token for that pair, and then deposit the LP token into a Beefy Vault to earn yield.
 
 This all occurs in a single validated transaction call, saving network fees and making the user experience simple and delightful.
 
 ## Cook up a Recipe and call it with RAILGUN Quickstart
 
+Given a full Recipe and its inputs, RAILGUN Quickstart will generate a zero-knowledge proof and a final serialized transaction for the Relay Adapt contract.
+
+This final transaction can be submitted to the blockchain by any wallet, including a Relayer.
+
 ```
-// Set up initial parameters.
-const sellToken = {tokenAddress: 'DAI'};
-const buyToken = {tokenAddress: 'WETH'};
-const slippagePercentage = 0.01;
+const swap = new ZeroXSwapRecipe(sellERC20Info, buyERC20Info, slippagePercentage);
 
-// Use RAILGUN Cookbook to generate auto-validated multi-call transactions from a recipe.
-const swap = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+// Inputs that will be unshielded from private balance.
+const unshieldERC20Amounts = [{ ...sellERC20Info, amount }];
 
-// Pass inputs that will be unshielded from private balance.
-const amount = BigNumber.from(10).pow(18).mul(3000); // 3000 DAI
-const unshieldERC20Amounts = [{ tokenAddress: 'DAI', amount }];
-const recipeInput = {networkName, unshieldERC20Amounts};
-const {populatedTransactions, shieldERC20Addresses} = await swap.getRecipeOutput(recipeInput);
+const recipeInput = { networkName, unshieldERC20Amounts };
+const { populatedTransactions, erc20Amounts } = await swap.getRecipeOutput(recipeInput);
 
-// Use RAILGUN Quickstart to generate a private [unshield -> call -> re-shield] enclosing the recipe.
+// Outputs to re-shield after the Recipe multicall.
+const shieldERC20Addresses = erc20Amounts.map(({tokenAddress}) => tokenAddress);
+
+// RAILGUN Quickstart will generate a [unshield -> call -> re-shield] transaction enclosing the Recipe multicall.
 const crossContractCallsSerialized = populatedTransactions.map(
     serializeUnsignedTransaction,
 )
+
 const {gasEstimateString} = await gasEstimateForUnprovenCrossContractCalls(
+    ...
+    unshieldERC20Amounts,
+    ...
+    shieldERC20Addresses,
     ...
     crossContractCallsSerialized,
     ...
 )
-const {error} = await generateCrossContractCallsProof(
+await generateCrossContractCallsProof(
+    ...
+    unshieldERC20Amounts,
+    ...
+    shieldERC20Addresses,
     ...
     crossContractCallsSerialized,
     ...
 )
 const {serializedTransaction} = await populateProvedCrossContractCalls(
     ...
+    unshieldERC20Amounts,
+    ...
+    shieldERC20Addresses,
+    ...
     crossContractCallsSerialized,
     ...
 );
 
 // Submit transaction to RPC.
-// Note: use @railgun-community/waku-relayer-client to submit through Relayer.
 const transaction = deserializeTransaction(serializedTransaction);
 await wallet.sendTransaction(transaction);
+
+// Note: use @railgun-community/waku-relayer-client to submit through a Relayer instead of signing with your own wallet.
 ```
 
 # Testing
 
 ## Unit tests
 
-`yarn test` to run tests without Ganache Fork.
+`yarn test` to run tests without RPC Fork.
 
-## Integration tests (beta)
+## Integration tests with RPC Fork
 
 ### Setup:
 
-1. Set up anvil (install foundryup):
-
-`curl -L https://foundry.paradigm.xyz | bash`
+1. Set up anvil (install foundryup): `curl -L https://foundry.paradigm.xyz | bash`
 
 2. Add an Ethereum RPC for fork (Alchemy recommended for best stability): `export ETHEREUM_RPC_URL='your/rpc/url'`
 
@@ -101,13 +114,3 @@ await wallet.sendTransaction(transaction);
 1. Run anvil fork and load test account with 1000 ETH: `./run-anvil your/ethereum/rpc/url`
 
 2. Run tests (in another terminal): `yarn test-fork`.
-
-### Debugging:
-
-If you get a cross-contract call error (transaction failure), try running `debug_traceCall` against the Anvil RPC:
-
-```
-curl http://localhost:8600 -X POST \
-    -H "Content-Type: application/json" \
-  --data '{"method":"debug_traceCall","params":[{"from":null,"to":"ENTER_TO_0x","data":"ENTER_DATA_0x"}, "latest"],"id":1,"jsonrpc":"2.0"}'
-```

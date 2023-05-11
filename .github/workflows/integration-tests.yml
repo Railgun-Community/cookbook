@@ -1,4 +1,4 @@
-name: Integration Tests (Ganache Fork)
+name: Integration Tests (RPC Fork)
 
 on:
   push:
