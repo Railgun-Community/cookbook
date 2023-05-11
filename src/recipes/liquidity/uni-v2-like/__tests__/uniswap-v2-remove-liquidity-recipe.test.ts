@@ -142,7 +142,7 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc450000000000000000000000000000000000000000000000001bafa9ee16e78000',
+          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc',
         },
       ],

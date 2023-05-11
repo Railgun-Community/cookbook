@@ -222,7 +222,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b3000000000000000000000000d9e1ce17f2641f24ae83637ab66a2cca9c378b9f0000000000000000000000000000000000000000000000000000000076e948c0',
+          data: '0x095ea7b3000000000000000000000000d9e1ce17f2641f24ae83637ab66a2cca9c378b9fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         },
       ],
@@ -267,7 +267,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b3000000000000000000000000d9e1ce17f2641f24ae83637ab66a2cca9c378b9f0000000000000000000000000000000000000000000000000dd7d4f70b73bfff',
+          data: '0x095ea7b3000000000000000000000000d9e1ce17f2641f24ae83637ab66a2cca9c378b9fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
       ],
@@ -330,7 +330,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b300000000000000000000000061f96ca5c79c9753c93244c73f1d4b4a90c1ac8c0000000000000000000000000000000000000000000000001bb3d96af7775df9',
+          data: '0x095ea7b300000000000000000000000061f96ca5c79c9753c93244c73f1d4b4a90c1ac8cffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0x397FF1542f962076d0BFE58eA045FfA2d347ACa0',
         },
       ],

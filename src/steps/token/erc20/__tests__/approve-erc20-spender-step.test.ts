@@ -113,7 +113,7 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.populatedTransactions).to.deep.equal([
       {
-        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002ee0',
+        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);

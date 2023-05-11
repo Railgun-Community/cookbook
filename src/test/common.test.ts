@@ -78,26 +78,20 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
 
   const wallet = getTestEthersWallet();
 
-  try {
-    const txResponse = await wallet.sendTransaction(transaction);
-    const txReceipt = await txResponse.wait();
+  let txResponse;
 
-    const relayAdaptTransactionError = getRelayAdaptTransactionError(
-      txReceipt.logs,
-    );
-    if (relayAdaptTransactionError) {
-      throw new Error(
-        `${name} Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
-      );
-    }
+  try {
+    txResponse = await wallet.sendTransaction(transaction);
   } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+
     const provider = testRPCProvider;
     if (!provider) {
       throw new Error('No test provider');
     }
 
     // Trace call and parse RelayAdapt log data to get error message.
-
     const call = {
       from: null,
       to: transaction.to,
@@ -108,7 +102,9 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
     // const trace = await provider.send('debug_traceCall', [call, 'latest']);
 
     // eslint-disable-next-line no-console
-    console.log('Run this command to debug the transaction:\n');
+    console.log(
+      'Run this command to debug the transaction, followed by `node debug_return_value <returnValue>`:\n',
+    );
     // eslint-disable-next-line no-console
     console.log(
       `curl http://localhost:8600 -X POST     -H "Content-Type: application/json"   --data '{"method":"debug_traceCall","params":[{"from":null,"to":"${call.to}","data":"${call.data}"}, "latest"],"id":1,"jsonrpc":"2.0"}' | cut -c 1-1000
@@ -117,6 +113,17 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
 
     throw new Error(
       'Unable to call transaction. To debug: (1) See above for Anvil RPC debug_traceCall command. Run to capture returnValue. (2) Run `node debug_return_value <returnValue>` at project root to get RelayAdapt error message.',
+    );
+  }
+
+  const txReceipt = await txResponse.wait();
+
+  const relayAdaptTransactionError = getRelayAdaptTransactionError(
+    txReceipt.logs,
+  );
+  if (relayAdaptTransactionError) {
+    throw new Error(
+      `${name}: Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
     );
   }
 

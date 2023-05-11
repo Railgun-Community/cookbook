@@ -151,7 +151,7 @@ describe('zero-x-swap-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002ec2',
+          data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
       ],

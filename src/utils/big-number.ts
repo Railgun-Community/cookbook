@@ -22,3 +22,8 @@ export const maxBigNumber = (b1: BigNumber, b2: BigNumber) => {
 export const minBigNumber = (b1: BigNumber, b2: BigNumber) => {
   return b1.lt(b2) ? b1 : b2;
 };
+
+export const maxBigNumberForTransaction = (): BigNumber => {
+  // = 2^256 - 1
+  return BigNumber.from(2).pow(BigNumber.from(256)).sub(BigNumber.from(1));
+};

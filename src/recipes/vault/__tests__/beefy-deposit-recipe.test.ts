@@ -116,7 +116,7 @@ describe('beefy-deposit-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b300000000000000000000000040324434a0b53dd1ed167ba30dcb6b4bd7a9536d00000000000000000000000000000000000000000000000000000000000026f7',
+          data: '0x095ea7b300000000000000000000000040324434a0b53dd1ed167ba30dcb6b4bd7a9536dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
         },
       ],

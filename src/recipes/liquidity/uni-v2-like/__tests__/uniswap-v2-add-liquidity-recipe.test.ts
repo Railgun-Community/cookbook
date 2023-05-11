@@ -168,7 +168,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc450000000000000000000000000000000000000000000000000000000076e948c0',
+          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         },
       ],
@@ -201,7 +201,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc450000000000000000000000000000000000000000000000000dd7d4f70b73c000',
+          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
       ],
