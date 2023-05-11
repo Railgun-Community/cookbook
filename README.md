@@ -31,7 +31,7 @@ Recipes combine Steps into functional, complex actions. Most integrations will r
 
 As an example, a simple 0x Exchange Swap call has a pre-requisite: the Sell Token must be approved for spending by the 0x contract. So, the [0x Swap Recipe](https://github.com/Railgun-Community/cookbook/blob/main/src/recipes/swap/zero-x-swap-recipe.ts) has two Steps: (1) Approve sell token, (2) Swap sell token for buy token. The full Recipe uses a Step called [ApproveERC20SpenderStep](https://github.com/Railgun-Community/cookbook/blob/main/src/steps/token/erc20/approve-erc20-spender-step.ts), which is a common Step among most integrations.
 
-Note that each Recipe must assume a clean slate – since it's executed in a public setting (the RAILGUN Relay Adapt Contract), developers should assume that the Relay Adapt contract does not have approval to spend tokens with any token contract. This is why the [ApproveERC20SpenderStep](https://github.com/Railgun-Community/cookbook/blob/main/src/steps/token/erc20/approve-erc20-spender-step.ts) is a basic requirement for nearly every Recipe.
+> Note that each Recipe must assume a clean slate – since it's executed in a public setting (the RAILGUN Relay Adapt Contract), developers should assume that the Relay Adapt contract does not have approval to spend tokens with any token contract. This is why the [ApproveERC20SpenderStep](https://github.com/Railgun-Community/cookbook/blob/main/src/steps/token/erc20/approve-erc20-spender-step.ts) is a basic requirement for nearly every Recipe.
 
 ### Cookbook "Combo Meals"
 
