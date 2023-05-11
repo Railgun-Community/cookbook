@@ -126,7 +126,9 @@ describe('empty-recipe', () => {
 
     expect(
       output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
-    ).to.deep.equal([tokenAddress]);
+    ).to.deep.equal(
+      [tokenAddress].map(tokenAddress => tokenAddress.toLowerCase()),
+    );
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -139,14 +141,16 @@ describe('empty-recipe', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amountString: '30',
-        recipientAddress: 'RAILGUN Unshield Fee',
+        amount: BigNumber.from('30'),
+        recipient: 'RAILGUN Unshield Fee',
         tokenAddress,
+        decimals: 18,
       },
       {
-        amountString: '29',
-        recipientAddress: 'RAILGUN Shield Fee',
+        amount: BigNumber.from('29'),
+        recipient: 'RAILGUN Shield Fee',
         tokenAddress,
+        decimals: 18,
       },
     ]);
   });

@@ -11,13 +11,14 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { BeefyAPI, BeefyVaultData } from '../../../api/beefy/beefy-api';
+import { testConfig } from '../../../test/test-config.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 
-const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
+const tokenAddress = testConfig.contractsEthereum.rail.toLowerCase();
 
 const vault: BeefyVaultData = {
   vaultID: 'id',
@@ -164,7 +165,11 @@ describe('beefy-withdraw-recipe', () => {
 
     expect(
       output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
-    ).to.deep.equal([vault.vaultTokenAddress, tokenAddress]);
+    ).to.deep.equal(
+      [vault.vaultTokenAddress, tokenAddress].map(tokenAddress =>
+        tokenAddress.toLowerCase(),
+      ),
+    );
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -177,19 +182,22 @@ describe('beefy-withdraw-recipe', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amountString: '25',
-        recipientAddress: 'RAILGUN Unshield Fee',
+        amount: BigNumber.from('25'),
+        recipient: 'RAILGUN Unshield Fee',
         tokenAddress: vault.vaultTokenAddress,
+        decimals: 18,
       },
       {
-        amountString: '1995',
-        recipientAddress: 'Beefy Vault Withdraw Fee',
-        tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
-      },
-      {
-        amountString: '44',
-        recipientAddress: 'RAILGUN Shield Fee',
+        amount: BigNumber.from('1995'),
+        recipient: 'Beefy Vault Withdraw Fee',
         tokenAddress,
+        decimals: 18,
+      },
+      {
+        amount: BigNumber.from('44'),
+        recipient: 'RAILGUN Shield Fee',
+        tokenAddress,
+        decimals: 18,
       },
     ]);
   });

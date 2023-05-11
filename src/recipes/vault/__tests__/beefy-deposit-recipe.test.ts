@@ -11,13 +11,14 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { BeefyAPI, BeefyVaultData } from '../../../api/beefy/beefy-api';
+import { testConfig } from '../../../test/test-config.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 
-const tokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
+const tokenAddress = testConfig.contractsEthereum.rail.toLowerCase();
 
 const vault: BeefyVaultData = {
   vaultID: 'id',
@@ -115,7 +116,7 @@ describe('beefy-deposit-recipe', () => {
       populatedTransactions: [
         {
           data: '0x095ea7b300000000000000000000000040324434a0b53dd1ed167ba30dcb6b4bd7a9536d00000000000000000000000000000000000000000000000000000000000026f7',
-          to: tokenAddress,
+          to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
         },
       ],
       spentERC20Amounts: [],
@@ -189,7 +190,11 @@ describe('beefy-deposit-recipe', () => {
 
     expect(
       output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
-    ).to.deep.equal([tokenAddress, vault.vaultTokenAddress]);
+    ).to.deep.equal(
+      [tokenAddress, vault.vaultTokenAddress].map(tokenAddress =>
+        tokenAddress.toLowerCase(),
+      ),
+    );
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -202,19 +207,22 @@ describe('beefy-deposit-recipe', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amountString: '25',
-        recipientAddress: 'RAILGUN Unshield Fee',
+        amount: BigNumber.from('25'),
+        recipient: 'RAILGUN Unshield Fee',
         tokenAddress,
+        decimals: 18,
       },
       {
-        amountString: '997',
-        recipientAddress: 'VAULT_NAME Vault Deposit Fee',
-        tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+        amount: BigNumber.from('997'),
+        recipient: 'VAULT_NAME Vault Deposit Fee',
+        tokenAddress,
+        decimals: 18,
       },
       {
-        amountString: '11',
-        recipientAddress: 'RAILGUN Shield Fee',
+        amount: BigNumber.from('11'),
+        recipient: 'RAILGUN Shield Fee',
         tokenAddress: vault.vaultTokenAddress,
+        decimals: 18,
       },
     ]);
   });

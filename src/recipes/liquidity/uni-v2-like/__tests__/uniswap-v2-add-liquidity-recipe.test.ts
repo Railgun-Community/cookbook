@@ -11,7 +11,7 @@ import {
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
 import { RecipeERC20Info, RecipeInput } from '../../../../models/export-models';
 import { UniswapV2AddLiquidityRecipe } from '../uniswap-v2-add-liquidity-recipe';
-import { BaseProvider } from '@ethersproject/providers';
+import { JsonRpcProvider } from '@ethersproject/providers';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -42,8 +42,9 @@ let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
 
-// Not actually used
-let provider: BaseProvider;
+const provider = new JsonRpcProvider(
+  'https://eth-mainnet.g.alchemy.com/v2/demo',
+);
 
 describe('uniswap-v2-add-liquidity-recipe', () => {
   before(() => {
@@ -297,11 +298,13 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
     expect(
       output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
-    ).to.deep.equal([
-      USDC_TOKEN.tokenAddress,
-      WETH_TOKEN.tokenAddress,
-      LP_TOKEN.tokenAddress,
-    ]);
+    ).to.deep.equal(
+      [
+        USDC_TOKEN.tokenAddress,
+        WETH_TOKEN.tokenAddress,
+        LP_TOKEN.tokenAddress,
+      ].map(tokenAddress => tokenAddress.toLowerCase()),
+    );
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -314,33 +317,27 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amountString: oneInDecimals6
-          .mul('2000')
-          .mul('25')
-          .div('10000')
-          .toString(),
-        recipientAddress: 'RAILGUN Unshield Fee',
+        amount: oneInDecimals6.mul('2000').mul('25').div('10000'),
+        recipient: 'RAILGUN Unshield Fee',
         tokenAddress: USDC_TOKEN.tokenAddress,
+        decimals: USDC_TOKEN.decimals,
       },
       {
-        amountString: oneInDecimals18
-          .mul('1')
-          .mul('25')
-          .div('10000')
-          .toString(),
-        recipientAddress: 'RAILGUN Unshield Fee',
+        amount: oneInDecimals18.mul('1').mul('25').div('10000'),
+        recipient: 'RAILGUN Unshield Fee',
         tokenAddress: WETH_TOKEN.tokenAddress,
+        decimals: WETH_TOKEN.decimals,
       },
       {
-        amountString: oneInDecimals18
+        amount: oneInDecimals18
           .mul('2')
           .mul('9975')
           .div('10000')
           .mul('25')
-          .div('10000')
-          .toString(),
+          .div('10000'),
+        recipient: 'RAILGUN Shield Fee',
         tokenAddress: LP_TOKEN.tokenAddress,
-        recipientAddress: 'RAILGUN Shield Fee',
+        decimals: LP_TOKEN.decimals,
       },
     ]);
   });

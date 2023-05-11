@@ -29,7 +29,6 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 
 const oneInDecimals6 = BigNumber.from(10).pow(6);
-const oneInDecimals18 = BigNumber.from(10).pow(18);
 const slippagePercentage = 0.01;
 
 const USDC_TOKEN: RecipeERC20Info = {
@@ -38,10 +37,6 @@ const USDC_TOKEN: RecipeERC20Info = {
 };
 const WETH_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  decimals: 18,
-};
-const LP_TOKEN: RecipeERC20Info = {
-  tokenAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
   decimals: 18,
 };
 const VAULT_TOKEN: RecipeERC20Info = {
@@ -155,10 +150,10 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     // );
     // Within range of 0.0000005%
     expect(
-      expectedPrivateVaultTokenBalance.lt(privateVaultTokenBalance) &&
+      expectedPrivateVaultTokenBalance.lte(privateVaultTokenBalance) &&
         expectedPrivateVaultTokenBalance
           .add('1000000')
-          .gt(privateVaultTokenBalance),
+          .gte(privateVaultTokenBalance),
     ).to.equal(
       true,
       'Private Vault token balance incorrect after adding liquidity and depositing to vault',

@@ -16,6 +16,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
+import { testConfig } from '../../../test/test-config.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -23,7 +24,7 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const sellTokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
-const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
+const buyTokenAddress = testConfig.contractsEthereum.rail.toLowerCase();
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress,
@@ -243,7 +244,11 @@ describe('zero-x-swap-recipe', () => {
 
     expect(
       output.shieldERC20Amounts.map(({ tokenAddress }) => tokenAddress),
-    ).to.deep.equal([sellTokenAddress, buyTokenAddress]);
+    ).to.deep.equal(
+      [sellTokenAddress, buyTokenAddress].map(tokenAddress =>
+        tokenAddress.toLowerCase(),
+      ),
+    );
 
     expect(output.shieldNFTs).to.deep.equal([]);
 
@@ -256,19 +261,22 @@ describe('zero-x-swap-recipe', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amountString: '30',
-        recipientAddress: 'RAILGUN Unshield Fee',
+        amount: BigNumber.from('30'),
+        recipient: 'RAILGUN Unshield Fee',
         tokenAddress: sellTokenAddress,
+        decimals: 18,
       },
       {
-        amountString: '1',
-        recipientAddress: 'RAILGUN Shield Fee',
+        amount: BigNumber.from('1'),
+        recipient: 'RAILGUN Shield Fee',
         tokenAddress: buyTokenAddress,
+        decimals: 18,
       },
       {
-        amountString: '4',
-        recipientAddress: 'RAILGUN Shield Fee',
+        amount: BigNumber.from('4'),
+        recipient: 'RAILGUN Shield Fee',
         tokenAddress: sellTokenAddress,
+        decimals: 18,
       },
     ]);
   });
