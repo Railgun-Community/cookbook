@@ -15,6 +15,7 @@ const tokenInfo: RecipeERC20Info = {
 };
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = BigNumber.from('10000');
+const USDT_ADDRESS = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 
 describe('approve-erc20-spender-step', () => {
   it('Should create approve-erc20-spender step with amount', async () => {
@@ -115,6 +116,62 @@ describe('approve-erc20-spender-step', () => {
       {
         data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+      },
+    ]);
+  });
+
+  it('Should create approve-erc20-spender step for USDT', async () => {
+    const usdtTokenInfo: RecipeERC20Info = {
+      tokenAddress: USDT_ADDRESS,
+      decimals: 6,
+    };
+
+    const approveStep = new ApproveERC20SpenderStep(spender, usdtTokenInfo);
+
+    const stepInput: StepInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: USDT_ADDRESS,
+          decimals: 6,
+          expectedBalance: BigNumber.from('12000'),
+          minBalance: BigNumber.from('12000'),
+          approvedSpender: undefined,
+        },
+      ],
+      nfts: [],
+    };
+    const output = await approveStep.getValidStepOutput(stepInput);
+
+    expect(output.name).to.equal('Approve ERC20 Spender');
+    expect(output.description).to.equal('Approves ERC20 for spender contract.');
+
+    expect(output.spentERC20Amounts).to.deep.equal([]);
+
+    expect(output.outputERC20Amounts).to.deep.equal([
+      {
+        tokenAddress: USDT_ADDRESS,
+        approvedSpender: spender,
+        expectedBalance: BigNumber.from('12000'),
+        minBalance: BigNumber.from('12000'),
+        isBaseToken: undefined,
+        decimals: 6,
+      },
+    ]);
+
+    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.outputNFTs).to.deep.equal([]);
+
+    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+
+    expect(output.populatedTransactions).to.deep.equal([
+      {
+        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
+        to: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      },
+      {
+        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        to: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       },
     ]);
   });

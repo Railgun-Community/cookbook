@@ -14,6 +14,7 @@ import {
   maxBigNumberForTransaction,
   minBigNumber,
 } from '../../../utils/big-number';
+import { NetworkName } from '@railgun-community/shared-models';
 
 export class ApproveERC20SpenderStep extends Step {
   readonly config = {
@@ -43,7 +44,7 @@ export class ApproveERC20SpenderStep extends Step {
       return createNoActionStepOutput(input);
     }
 
-    const { erc20Amounts } = input;
+    const { erc20Amounts, networkName } = input;
 
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
@@ -57,9 +58,22 @@ export class ApproveERC20SpenderStep extends Step {
     const contract = new ERC20Contract(erc20AmountForStep.tokenAddress);
     const approveAmount = this.amount ?? maxBigNumberForTransaction();
 
-    const populatedTransactions: PopulatedTransaction[] = [
+    const populatedTransactions: PopulatedTransaction[] = [];
+
+    if (
+      this.requiresClearApprovalTransaction(
+        networkName,
+        erc20AmountForStep.tokenAddress,
+      )
+    ) {
+      populatedTransactions.push(
+        await contract.createSpenderApproval(this.spender, BigNumber.from(0)),
+      );
+    }
+
+    populatedTransactions.push(
       await contract.createSpenderApproval(this.spender, approveAmount),
-    ];
+    );
     const approvedERC20Amount: StepOutputERC20Amount = {
       tokenAddress: erc20AmountForStep.tokenAddress,
       decimals: erc20AmountForStep.decimals,
@@ -80,5 +94,35 @@ export class ApproveERC20SpenderStep extends Step {
       outputNFTs: input.nfts,
       feeERC20AmountRecipients: [],
     };
+  }
+
+  /**
+   * Certain tokens require a clear approval transaction before approving a new spender.
+   */
+  private requiresClearApprovalTransaction(
+    networkName: NetworkName,
+    tokenAddress: string,
+  ): boolean {
+    switch (networkName) {
+      case NetworkName.Ethereum:
+        if (
+          [
+            '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+          ].includes(tokenAddress.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      case NetworkName.Railgun:
+      case NetworkName.BNBChain:
+      case NetworkName.Polygon:
+      case NetworkName.Arbitrum:
+      case NetworkName.EthereumRopsten_DEPRECATED:
+      case NetworkName.EthereumGoerli:
+      case NetworkName.PolygonMumbai:
+      case NetworkName.ArbitrumGoerli:
+      case NetworkName.Hardhat:
+        return false;
+    }
   }
 }
