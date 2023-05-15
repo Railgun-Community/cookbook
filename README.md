@@ -1,5 +1,6 @@
 [![Unit Tests Actions Status](https://github.com/Railgun-Community/cookbook/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/Railgun-Community/cookbook/actions)
-[![Integration Tests Actions Status](https://github.com/Railgun-Community/cookbook/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/Railgun-Community/cookbook/actions)
+
+<!-- [![Integration Tests Actions Status](https://github.com/Railgun-Community/cookbook/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/Railgun-Community/cookbook/actions) -->
 
 # RAILGUN Cookbook
 
