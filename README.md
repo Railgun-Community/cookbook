@@ -8,7 +8,7 @@ Write a recipe in minutes to convert your dApp to a zkApp.
 
 ## Docs and Integration Guide
 
-Coming soon
+See the full Integration Guide [here](https://docs.railgun.org/developer-guide/cookbook).
 
 ## Get the Recipe Builder
 
