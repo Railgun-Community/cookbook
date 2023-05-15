@@ -26,6 +26,7 @@ export class UniV2LikeSubgraph {
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
     tokenAddresses: string[],
+    retryCount = 0,
   ): Promise<PairDataWithRate[]> => {
     try {
       const sdk = this.getBuiltGraphSDK(uniswapV2Fork, networkName);
@@ -63,6 +64,14 @@ export class UniV2LikeSubgraph {
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
+      }
+      if (retryCount < 2) {
+        return this.getPairsForTokenAddresses(
+          uniswapV2Fork,
+          networkName,
+          tokenAddresses,
+          retryCount + 1,
+        );
       }
       CookbookDebug.error(err);
       throw new Error('Could not get list of LP pairs: GraphQL request error.');
