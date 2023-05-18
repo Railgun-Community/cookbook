@@ -18,7 +18,9 @@ See the full Integration Guide [here](https://docs.railgun.org/developer-guide/c
 
 The RAILGUN Cookbook gives you the tools to write a "Recipe" to convert your dApp into a zkApp - [private and fully anonymous](https://docs.railgun.org/wiki/learn/privacy-system) for users. Your Recipe can interact with any smart contract using your private balance in [RAILGUN](https://docs.railgun.org/wiki/learn/overview). A Recipe contains a series of smart contact calls that are combined into a multicall.
 
-### Cookbook "Steps"
+See the [full zkApp guide here](https://docs.railgun.org/developer-guide/cookbook/write).
+
+### Cookbook ["Steps"](https://docs.railgun.org/developer-guide/cookbook/write/step)
 
 Recipes are composed of "Steps," which are enclosed smart contract calls. Every Step has a set of inputs that correspond to a set of outputs: Spent tokens, Output tokens, and Fees. Spent tokens and Fees are eradicated during the Step, and Output tokens will be passed into the next Step as inputs.
 
@@ -26,7 +28,7 @@ For example, a simple [0x Exchange Swap Step](https://github.com/Railgun-Communi
 
 Step inputs and outputs are automatically validated to ensure that each input has associated outputs that represent the total value. There is an exception for tokens that are generated mid-Step - new token values become unvalidated Output tokens - they are simply passed to the next Step as inputs.
 
-### Cookbook "Recipes"
+### Cookbook ["Recipes"](https://docs.railgun.org/developer-guide/cookbook/write/recipe)
 
 Recipes combine Steps into functional, complex actions. Most integrations will require 1-2 Recipes, and a number of Steps for each Recipe. Steps are generic building blocks, making them multi-purpose and reusable for various Recipes. Upon execution (`recipe.getRecipeOutput(recipeInput)`), the Cookbook automatically sandwiches the Recipe's transactions inside of [Unshield](https://docs.railgun.org/wiki/learn/unshielding-tokens) and [Shield](https://docs.railgun.org/wiki/learn/shielding-tokens) calls, calculating the associated fees with each Step, and providing the developer with a formatted list of Steps, their outputs, and the final array of [populated transactions](https://docs.ethers.org/v5/api/utils/transactions/).
 
@@ -34,7 +36,7 @@ As an example, a simple 0x Exchange Swap call has a pre-requisite: the Sell Toke
 
 > Note that each Recipe must assume a clean slate – since it's executed in a public setting (the RAILGUN Relay Adapt Contract), developers should assume that the Relay Adapt contract does not have approval to spend tokens with any token contract. This is why the [ApproveERC20SpenderStep](https://github.com/Railgun-Community/cookbook/blob/main/src/steps/token/erc20/approve-erc20-spender-step.ts) is a basic requirement for nearly every Recipe.
 
-### Cookbook "Combo Meals"
+### Cookbook ["Combo Meals"](https://docs.railgun.org/developer-guide/cookbook/write/combo-meals)
 
 Combo Meals are the final frontier – every zkApp Chef's dream. They combine Recipes into very complex interactions, made 100% safe for execution against a private balance using the Cookbook.
 
