@@ -8,7 +8,7 @@ import {
 import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
 import { BeefyVaultData } from '../../../api/beefy';
-import { BeefyVaultContract } from '../../../contract/vault/beefy-vault-contract';
+import { BeefyVaultContract } from '../../../contract/vault/beefy/beefy-vault-contract';
 import { calculateOutputsForBeefyWithdraw } from './beefy-util';
 
 export class BeefyWithdrawStep extends Step {

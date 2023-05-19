@@ -1,8 +1,8 @@
 import { Contract, PopulatedTransaction } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
-import { validateAddress } from '../../utils/address';
+import { abi } from '../../../abi-typechain/abi';
+import { validateAddress } from '../../../utils/address';
 import { BaseProvider } from '@ethersproject/providers';
-import { BeefyVaultMergedV6V7 } from '../../abi-typechain/vault/beefy/BeefyVaultMergedV6V7';
+import { BeefyVaultMergedV6V7 } from '../../../abi-typechain/vault/beefy/BeefyVaultMergedV6V7';
 
 export class BeefyVaultContract {
   private readonly contract: BeefyVaultMergedV6V7;
