@@ -6,6 +6,8 @@ import ABI_UNI_V2_LIKE_ROUTER from './liquidity/UniV2LikeRouter.json';
 import ABI_UNI_V2_LIKE_PAIR from './liquidity/UniV2LikePair.json';
 import ABI_BEEFY_VAULT_MERGED_V6V7 from './vault/beefy/BeefyVault-MergedV6V7.json';
 import ABI_GMX_REWARD_TRACKER from './vault/gmx/RewardTracker.json';
+import ABI_GMX_REWARD_ROUTER from './vault/gmx/RewardRouter.json';
+import ABI_GMX_STAKED_GLP from './vault/gmx/StakedGlp.json';
 
 export const abi = {
   token: {
@@ -22,6 +24,10 @@ export const abi = {
   },
   vault: {
     beefy: ABI_BEEFY_VAULT_MERGED_V6V7,
-    gmx: ABI_GMX_REWARD_TRACKER,
+    gmx: {
+      rewardTracker: ABI_GMX_REWARD_TRACKER,
+      rewardRouter: ABI_GMX_REWARD_ROUTER,
+      stakedGlp: ABI_GMX_STAKED_GLP,
+    },
   },
 } as const;

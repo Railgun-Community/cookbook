@@ -7,15 +7,12 @@ import { BeefyVaultMergedV6V7 } from '../../../abi-typechain/vault/beefy/BeefyVa
 export class BeefyVaultContract {
   private readonly contract: BeefyVaultMergedV6V7;
 
-  constructor(vaultAddress: string, provider?: BaseProvider) {
-    if (!vaultAddress) {
-      throw new Error('Vault address is required for Beefy Vault Contract');
-    }
-    if (!validateAddress(vaultAddress)) {
+  constructor(address: string, provider?: BaseProvider) {
+    if (!validateAddress(address)) {
       throw new Error('Invalid Vault address for Beefy contract');
     }
     this.contract = new Contract(
-      vaultAddress,
+      address,
       abi.vault.beefy,
       provider,
     ) as BeefyVaultMergedV6V7;

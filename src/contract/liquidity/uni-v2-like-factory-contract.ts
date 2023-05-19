@@ -7,15 +7,12 @@ import { UniV2LikeFactory } from '../../abi-typechain/liquidity/UniV2LikeFactory
 export class UniV2LikeFactoryContract {
   private readonly contract: UniV2LikeFactory;
 
-  constructor(factoryAddress: string, provider: BaseProvider) {
-    if (!factoryAddress) {
-      throw new Error('Factory address is required for LP factory contract');
-    }
-    if (!validateAddress(factoryAddress)) {
+  constructor(address: string, provider: BaseProvider) {
+    if (!validateAddress(address)) {
       throw new Error('Invalid factory address for LP factory contract');
     }
     this.contract = new Contract(
-      factoryAddress,
+      address,
       abi.liquidity.uniV2LikeFactory,
       provider,
     ) as UniV2LikeFactory;

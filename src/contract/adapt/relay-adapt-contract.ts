@@ -7,6 +7,7 @@ import {
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ZERO_ADDRESS } from '../../models/constants';
+import { validateAddress } from '../../utils/address';
 
 export class RelayAdaptContract {
   private readonly contract: RelayAdapt;
@@ -16,8 +17,8 @@ export class RelayAdaptContract {
     if (!network) {
       throw new Error(`Network not found: ${networkName}`);
     }
-    if (!network.relayAdaptContract) {
-      throw new Error('Address is required for Relay Adapt contract.');
+    if (!validateAddress(network.relayAdaptContract)) {
+      throw new Error('Invalid address for Relay Adapt contract.');
     }
     this.contract = new Contract(
       network.relayAdaptContract,

@@ -8,16 +8,13 @@ import { BigNumber } from '@ethersproject/bignumber';
 export class GmxRewardTrackerContract {
   private readonly contract: RewardTracker;
 
-  constructor(vaultAddress: string, provider?: BaseProvider) {
-    if (!vaultAddress) {
-      throw new Error('Vault address is required for GMX Vault Contract');
-    }
-    if (!validateAddress(vaultAddress)) {
-      throw new Error('Invalid Vault address for GMX Vault contract');
+  constructor(address: string, provider: BaseProvider) {
+    if (!validateAddress(address)) {
+      throw new Error('Invalid address for GMX RewardTracker contract');
     }
     this.contract = new Contract(
-      vaultAddress,
-      abi.vault.gmx,
+      address,
+      abi.vault.gmx.rewardTracker,
       provider,
     ) as RewardTracker;
   }

@@ -8,15 +8,12 @@ import { validateAddress } from '../../utils/address';
 export class UniV2LikeRouterContract {
   private readonly contract: UniV2LikeRouter;
 
-  constructor(routerAddress: string) {
-    if (!routerAddress) {
-      throw new Error('Contract address is required for LP router');
-    }
-    if (!validateAddress(routerAddress)) {
+  constructor(address: string) {
+    if (!validateAddress(address)) {
       throw new Error('Invalid address for LP router contract');
     }
     this.contract = new Contract(
-      routerAddress,
+      address,
       abi.liquidity.uniV2LikeRouter,
     ) as UniV2LikeRouter;
   }

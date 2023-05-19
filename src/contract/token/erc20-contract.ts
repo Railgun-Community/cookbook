@@ -9,18 +9,11 @@ import { BaseProvider } from '@ethersproject/providers';
 export class ERC20Contract {
   private readonly contract: ERC20;
 
-  constructor(tokenAddress: string, provider?: BaseProvider) {
-    if (!tokenAddress) {
-      throw new Error('Token address is required for ERC20 Contract');
-    }
-    if (!validateAddress(tokenAddress)) {
+  constructor(address: string, provider?: BaseProvider) {
+    if (!validateAddress(address)) {
       throw new Error('Invalid ERC20 address for contract');
     }
-    this.contract = new Contract(
-      tokenAddress,
-      abi.token.erc20,
-      provider,
-    ) as ERC20;
+    this.contract = new Contract(address, abi.token.erc20, provider) as ERC20;
   }
 
   createSpenderApproval(

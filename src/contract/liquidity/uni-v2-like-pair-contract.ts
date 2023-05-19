@@ -8,15 +8,12 @@ import { BigNumber } from 'ethers';
 export class UniV2LikePairContract {
   private readonly contract: UniV2LikePair;
 
-  constructor(pairAddress: string, provider: BaseProvider) {
-    if (!pairAddress) {
-      throw new Error('Pair address is required for LP router');
-    }
-    if (!validateAddress(pairAddress)) {
+  constructor(address: string, provider: BaseProvider) {
+    if (!validateAddress(address)) {
       throw new Error('Invalid pair address for LP router contract');
     }
     this.contract = new Contract(
-      pairAddress,
+      address,
       abi.liquidity.uniV2LikePair,
       provider,
     ) as UniV2LikePair;
