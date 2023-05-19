@@ -18,7 +18,10 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
+import {
+  executeRecipeStepsAndAssertUnshieldBalances,
+  shouldSkipForkTest,
+} from '../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
 import { BeefyAPI } from '../../../api/beefy/beefy-api';
 import { calculateOutputsForBeefyDeposit } from '../../../steps/vault/beefy/beefy-util';
@@ -53,7 +56,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -66,7 +69,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
   });
 
   it('[FORK] Should run uni-v2-like-add-liquidity-beefy-deposit-combo-meal', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }

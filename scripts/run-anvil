@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+    echo "ERROR: Requires 2 parameters: run-anvil <chain-identifier> <fork-url>"
+    exit 1;
+fi
+
+case $1 in
+  Ethereum)
+    PORT=8600
+    CHAIN_ID=1
+    ;;
+  Arbitrum)
+    PORT=8601
+    CHAIN_ID=42161
+    ;;
+  *)
+    echo "ERROR: Unrecognized chain identifier $1" 1>&2
+    exit 1
+    ;;
+esac
+
+anvil \
+    --fork-url $2 \
+    --port $PORT \
+    --chain-id $CHAIN_ID \
+    --balance '10000' \
+    --gas-limit 30000000 \
+    --block-base-fee-per-gas 100 \
+    ;

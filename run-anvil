@@ -1,9 +1,0 @@
-#!/bin/bash
-
-anvil \
-    --fork-url $1 \
-    --balance '10000' \
-    --port 8600 \
-    --gas-limit 30000000 \
-    --block-base-fee-per-gas 100 \
-    ;

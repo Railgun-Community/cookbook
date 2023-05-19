@@ -16,6 +16,7 @@ import LevelDOWN from 'leveldown';
 import fs from 'fs';
 import {
   FallbackProviderJsonConfig,
+  NETWORK_CONFIG,
   NetworkName,
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
@@ -36,6 +37,7 @@ import {
 } from './shared.test';
 import { TransactionRequest } from '@ethersproject/providers';
 import { groth16 } from 'snarkjs';
+import { getLocalhostRPC, getRPCPort } from './common.test';
 
 const dbgRailgunSetup = debug('railgun:setup');
 
@@ -96,23 +98,23 @@ export const startRailgunForTests = () => {
   }
 };
 
-export const loadLocalhostFallbackProviderForTests = async () => {
-  const provider = getGanacheProvider();
-  const chainId = (await provider.getNetwork()).chainId;
+export const loadLocalhostFallbackProviderForTests = async (
+  networkName: NetworkName,
+) => {
+  const chainId = NETWORK_CONFIG[networkName].chain.id;
+  const port = getRPCPort(networkName);
   const localhostProviderConfig: FallbackProviderJsonConfig = {
     chainId,
     providers: [
       {
-        provider: testConfig.localhostRPC,
+        provider: getLocalhostRPC(port),
         priority: 1,
         weight: 2,
       },
     ],
   };
 
-  dbgRailgunSetup(
-    `Loading ganache provider for chain ${chainId} to RAILGUN Engine.`,
-  );
+  dbgRailgunSetup(`Loading provider for chain ${chainId} to RAILGUN Engine.`);
   const { error } = await loadProvider(
     localhostProviderConfig,
     NetworkName.Ethereum,
@@ -210,6 +212,7 @@ const trySendShieldTransaction = async (
 };
 
 export const waitForShieldedTokenBalances = async (
+  networkName: NetworkName,
   tokenAddresses: string[],
 ) => {
   const onBalancesUpdate = (balancesEvent: RailgunBalancesEvent) => {
@@ -226,11 +229,7 @@ export const waitForShieldedTokenBalances = async (
   ): (() => Promise<BigNumber>) => {
     dbgRailgunSetup(`Polling for updated token balance... ${tokenAddress}`);
     return () =>
-      balanceForERC20Token(
-        testRailgunWallet,
-        NetworkName.Ethereum,
-        tokenAddress,
-      );
+      balanceForERC20Token(testRailgunWallet, networkName, tokenAddress);
   };
 
   await Promise.all(

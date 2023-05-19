@@ -11,7 +11,10 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
+import {
+  executeRecipeStepsAndAssertUnshieldBalances,
+  shouldSkipForkTest,
+} from '../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
 import { testConfig } from '../../../test/test-config.test';
 import { BeefyAPI } from '../../../api/beefy/beefy-api';
@@ -36,7 +39,7 @@ describe('FORK-beefy-vault-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -49,7 +52,7 @@ describe('FORK-beefy-vault-recipes', function run() {
   });
 
   it('[FORK] Should run beefy-deposit-recipe', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -130,7 +133,7 @@ describe('FORK-beefy-vault-recipes', function run() {
   });
 
   it('[FORK] Should run beefy-withdraw-recipe', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }

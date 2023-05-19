@@ -6,21 +6,25 @@ import debug from 'debug';
 import { getTestEthersWallet, setSharedTestRPCProvider } from './shared.test';
 import { ethers } from 'ethers';
 import { parseEther } from '@ethersproject/units';
+import { getLocalhostRPC, getRPCPort } from './common.test';
+import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 
-const dbg = debug('rpc:ethereum');
+const dbg = debug('rpc:setup');
 
 export enum ForkRPCType {
   Ganache = 'ganache',
   Anvil = 'anvil',
 }
 
-export const setupTestEthereumRPCAndWallets = async (
+export const setupTestRPCAndWallets = async (
   forkRPCType: ForkRPCType,
+  networkName: NetworkName,
   tokenAddresses: string[],
 ) => {
-  dbg('Starting test Ethereum RPC...');
+  dbg(`Starting test RPC: ${networkName}...`);
 
-  const { localhostRPC, port } = testConfig;
+  const chainId = NETWORK_CONFIG[networkName].chain.id;
+  const port = getRPCPort(networkName);
 
   if (forkRPCType === ForkRPCType.Ganache) {
     const rpcServer = ganache.server({
@@ -32,7 +36,7 @@ export const setupTestEthereumRPCAndWallets = async (
         mnemonic: testConfig.signerMnemonic,
       },
       chain: {
-        chainId: 1,
+        chainId,
       },
       defaultTransactionGasLimit: 30_000_000,
       logging: {
@@ -48,11 +52,11 @@ export const setupTestEthereumRPCAndWallets = async (
     });
 
     await rpcServer.listen(port);
-
     dbg('Ganache RPC server created and listening...');
   }
 
-  const testRPCProvider = new JsonRpcProvider(localhostRPC);
+  const localhost = getLocalhostRPC(port);
+  const testRPCProvider = new JsonRpcProvider(localhost);
   setSharedTestRPCProvider(testRPCProvider);
 
   try {
@@ -60,25 +64,12 @@ export const setupTestEthereumRPCAndWallets = async (
   } catch (err) {
     throw new Error(
       forkRPCType === ForkRPCType.Anvil
-        ? `Could not connect to test RPC server. Please start anvil fork RPC (see README).`
+        ? `Could not connect to test RPC server. Please start anvil fork RPC for ${networkName} (see README).`
         : `Could not connect to test Ganache RPC server.`,
     );
   }
-
   if (forkRPCType === ForkRPCType.Anvil) {
     await testRPCProvider.send('anvil_reset', [{}]);
-    // const something = await testRPCProvider.send('debug_traceTransaction', [
-    //   '0x4ca42b31216eeef6f962d7c414fab95eb75bb344162c5ccc4df99e33c89fb9d1',
-    //   {
-    //     tracer: 'callTracer',
-    //     disableStorage: false,
-    //     disableStack: false,
-    //     enableReturnData: true,
-    //     enableMemory: true,
-    //   },
-    // ]);
-    // console.log(something);
-    // throw new Error('TESTING');
   }
 
   const wallet = getTestEthersWallet();

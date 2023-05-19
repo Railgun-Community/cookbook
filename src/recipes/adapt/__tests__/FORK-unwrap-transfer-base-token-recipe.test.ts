@@ -10,7 +10,10 @@ import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
-import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
+import {
+  executeRecipeStepsAndAssertUnshieldBalances,
+  shouldSkipForkTest,
+} from '../../../test/common.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -25,7 +28,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -37,7 +40,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
   });
 
   it('[FORK] Should run unwrap-transfer-base-token-recipe with amount', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -81,7 +84,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
   });
 
   it('[FORK] Should run unwrap-transfer-base-token-recipe without amount', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }

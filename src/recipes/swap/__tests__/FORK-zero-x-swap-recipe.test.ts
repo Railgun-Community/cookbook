@@ -16,7 +16,10 @@ import {
 } from '../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import { ZeroXQuote } from '../../../api/zero-x';
-import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
+import {
+  executeRecipeStepsAndAssertUnshieldBalances,
+  shouldSkipForkTest,
+} from '../../../test/common.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
@@ -43,7 +46,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -58,7 +61,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
   });
 
   it('[FORK] Should run zero-x-swap-recipe', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }

@@ -40,7 +40,7 @@ As an example, a simple 0x Exchange Swap call has a pre-requisite: the Sell Toke
 
 Combo Meals are the final frontier – every zkApp Chef's dream. They combine Recipes into very complex interactions, made 100% safe for execution against a private balance using the Cookbook.
 
-For example, there is a [Combo Meal](https://github.com/Railgun-Community/cookbook/blob/main/src/combo-meals/liquidity-vault/uni-v2-like-add-liquidity-beefy-deposit-combo-meal.ts)) that combines an "Add Liquidity" Recipe for Uniswap, with a "Deposit Vault" Recipe for Beefy. This gives a user the ability to add liquidity for a token pair on Uniswap, gain the LP token for that pair, and then deposit the LP token into a Beefy Vault to earn yield.
+For example, there is a [Combo Meal](https://github.com/Railgun-Community/cookbook/blob/main/src/combo-meals/liquidity-vault/uni-v2-like-add-liquidity-beefy-deposit-combo-meal.ts) that combines an "Add Liquidity" Recipe for Uniswap, with a "Deposit Vault" Recipe for Beefy. This gives a user the ability to add liquidity for a token pair on Uniswap, gain the LP token for that pair, and then deposit the LP token into a Beefy Vault to earn yield.
 
 This all occurs in a single validated transaction call, saving network fees and making the user experience simple and delightful.
 
@@ -112,12 +112,16 @@ await wallet.sendTransaction(transaction);
 
 ### Setup:
 
-1. Set up anvil (install foundryup): `curl -L https://foundry.paradigm.xyz | bash`
+1. Set up anvil (install [foundryup](https://book.getfoundry.sh/getting-started/installation)): `curl -L https://foundry.paradigm.xyz | bash`
 
-2. Add an Ethereum RPC for fork (Alchemy recommended for best stability): `export ETHEREUM_RPC_URL='your/rpc/url'`
+2. Add an Ethereum RPC for fork: `export ETHEREUM_RPC_URL='your/rpc/url'`
 
-### Run all tests:
+### Run fork tests:
 
-1. Run anvil fork and load test account with 1000 ETH: `./run-anvil your/ethereum/rpc/url`
+1. Fork tests currently support networks: Ethereum, Arbitrum
 
-2. Run tests (in another terminal): `yarn test-fork`.
+2. Run anvil fork with an RPC URL and load test account with 1000 ETH: `./scripts/run-anvil Ethereum https://your/ethereum/rpc/url`
+
+- See [Chainlist](https://chainlist.org/) or [Pokt](https://docs.pokt.network/use/public-rpc/) for public RPC endpoints (however paid RPCs are recommended for stability).
+
+3. Run tests (in another terminal): `env NETWORK_NAME=Ethereum yarn test-fork`.

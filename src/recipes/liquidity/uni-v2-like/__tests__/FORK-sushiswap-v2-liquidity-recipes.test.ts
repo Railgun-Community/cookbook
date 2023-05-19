@@ -20,7 +20,10 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
-import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../../test/common.test';
+import {
+  executeRecipeStepsAndAssertUnshieldBalances,
+  shouldSkipForkTest,
+} from '../../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
 import { getUnshieldedAmountAfterFee } from '../../../../utils/fee';
 
@@ -50,7 +53,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -63,7 +66,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
   });
 
   it('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -194,7 +197,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
   });
 
   it('[FORK] Should run sushiswap-v2-remove-liquidity-recipe', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }

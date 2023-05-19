@@ -2,7 +2,11 @@ import {
   balanceForERC20Token,
   getRelayAdaptTransactionError,
 } from '@railgun-community/quickstart';
-import { NETWORK_CONFIG, delay } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  delay,
+} from '@railgun-community/shared-models';
 import { BigNumber } from 'ethers';
 import { RecipeInput, RecipeOutput } from '../models/export-models';
 import {
@@ -18,6 +22,34 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const SCAN_BALANCE_DELAY = 3000;
+
+export const shouldSkipForkTest = (networkName: NetworkName) => {
+  return (
+    !process.env.RUN_FORK_TESTS || process.env.NETWORK_NAME !== networkName
+  );
+};
+
+export const getRPCPort = (networkName: NetworkName) => {
+  switch (networkName) {
+    case NetworkName.Ethereum:
+      return 8600;
+    case NetworkName.Arbitrum:
+      return 8601;
+    case NetworkName.BNBChain:
+    case NetworkName.Polygon:
+    case NetworkName.EthereumRopsten_DEPRECATED:
+    case NetworkName.EthereumGoerli:
+    case NetworkName.PolygonMumbai:
+    case NetworkName.ArbitrumGoerli:
+    case NetworkName.Hardhat:
+    case NetworkName.Railgun:
+      throw new Error('No RPC setup for network');
+  }
+};
+
+export const getLocalhostRPC = (port: number) => {
+  return `http://localhost:${port}`;
+};
 
 export const executeRecipeStepsAndAssertUnshieldBalances = async (
   name: string,

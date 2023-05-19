@@ -9,7 +9,10 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
 import { EmptyRecipe } from '../empty-recipe';
-import { executeRecipeStepsAndAssertUnshieldBalances } from '../../../test/common.test';
+import {
+  executeRecipeStepsAndAssertUnshieldBalances,
+  shouldSkipForkTest,
+} from '../../../test/common.test';
 
 chai.use(chaiAsPromised);
 
@@ -20,7 +23,7 @@ describe('FORK-empty-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
@@ -33,7 +36,7 @@ describe('FORK-empty-recipe', function run() {
   });
 
   it('[FORK] Should run empty-recipe', async function run() {
-    if (!process.env.RUN_FORK_TESTS) {
+    if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
     }
