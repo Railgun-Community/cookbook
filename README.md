@@ -120,7 +120,7 @@ await wallet.sendTransaction(transaction);
 
 1. Fork tests currently support networks: Ethereum, Arbitrum
 
-2. Run anvil fork with an RPC URL and load test account with 1000 ETH: `./scripts/run-anvil Ethereum https://your/ethereum/rpc/url`
+2. Run anvil fork with an RPC URL and load test account with 1000 ETH: `./run-anvil Ethereum https://your/ethereum/rpc/url`
 
 - See [Chainlist](https://chainlist.org/) or [Pokt](https://docs.pokt.network/use/public-rpc/) for public RPC endpoints (however paid RPCs are recommended for stability).
 
