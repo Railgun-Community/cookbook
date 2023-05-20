@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20AmountRecipient,
+  StepConfig,
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
@@ -12,7 +13,7 @@ import { getBaseToken } from '../../utils/wrap-util';
 import { compareERC20Info } from '../../utils/token';
 
 export class WrapBaseTokenStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Wrap Base Token',
     description: 'Wraps base token into wrapped token, ie ETH to WETH.',
   };
@@ -58,9 +59,7 @@ export class WrapBaseTokenStep extends Step {
       populatedTransactions,
       spentERC20Amounts: [spentBaseERC20Amount],
       outputERC20Amounts: [wrappedBaseERC20Amount, ...unusedERC20Amounts],
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [],
     };
   }
 }

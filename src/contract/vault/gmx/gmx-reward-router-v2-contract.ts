@@ -3,20 +3,20 @@ import { validateAddress } from '../../../utils/address';
 import { abi } from '../../../abi-typechain/abi';
 import { Contract, PopulatedTransaction } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
-import { RewardRouter } from '../../../abi-typechain/vault/gmx/RewardRouter';
+import { RewardRouterV2 } from '../../../abi-typechain/vault/gmx/RewardRouterV2';
 
-export class GmxRewardRouterContract {
-  private readonly contract: RewardRouter;
+export class GmxRewardRouterV2Contract {
+  private readonly contract: RewardRouterV2;
 
   constructor(address: string, provider?: BaseProvider) {
     if (!validateAddress(address)) {
-      throw new Error('Invalid address for GMX RewardRouter contract');
+      throw new Error('Invalid address for GMX RewardRouterV2 contract');
     }
     this.contract = new Contract(
       address,
-      abi.vault.gmx.rewardRouter,
+      abi.vault.gmx.rewardRouterV2,
       provider,
-    ) as RewardRouter;
+    ) as RewardRouterV2;
   }
 
   createMintAndStakeGlp(

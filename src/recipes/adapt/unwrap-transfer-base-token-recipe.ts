@@ -3,9 +3,10 @@ import { Recipe } from '../recipe';
 import { TransferBaseTokenStep } from '../../steps/adapt/transfer-base-token-step';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Step } from '../../steps';
+import { RecipeConfig } from '../../models/export-models';
 
 export class UnwrapTransferBaseTokenRecipe extends Recipe {
-  readonly config = {
+  readonly config: RecipeConfig = {
     name: 'Unwrap Base Token and Transfer',
     description:
       'Unwraps wrapped token into base token, and transfers base token to an external public address.',

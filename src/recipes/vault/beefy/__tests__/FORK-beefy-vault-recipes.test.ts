@@ -3,26 +3,26 @@ import chaiAsPromised from 'chai-as-promised';
 import { BeefyDepositRecipe } from '../beefy-deposit-recipe';
 import { BeefyWithdrawRecipe } from '../beefy-withdraw-recipe';
 import { BigNumber } from 'ethers';
-import { RecipeInput } from '../../../models/export-models';
-import { setRailgunFees } from '../../../init';
-import { getTestRailgunWallet } from '../../../test/shared.test';
+import { RecipeInput } from '../../../../models/export-models';
+import { setRailgunFees } from '../../../../init';
+import { getTestRailgunWallet } from '../../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
-} from '../../../test/mocks.test';
+} from '../../../../test/mocks.test';
 import { balanceForERC20Token } from '@railgun-community/quickstart';
 import {
   executeRecipeStepsAndAssertUnshieldBalances,
   shouldSkipForkTest,
-} from '../../../test/common.test';
+} from '../../../../test/common.test';
 import { NetworkName } from '@railgun-community/shared-models';
-import { testConfig } from '../../../test/test-config.test';
-import { BeefyAPI } from '../../../api/beefy/beefy-api';
-import { compareTokenAddress } from '../../../utils';
+import { testConfig } from '../../../../test/test-config.test';
+import { BeefyAPI } from '../../../../api/beefy/beefy-api';
+import { compareTokenAddress } from '../../../../utils';
 import {
   calculateOutputsForBeefyDeposit,
   calculateOutputsForBeefyWithdraw,
-} from '../../../steps/vault/beefy/beefy-util';
+} from '../../../../steps/vault/beefy/beefy-util';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

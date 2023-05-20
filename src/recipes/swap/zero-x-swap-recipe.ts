@@ -3,6 +3,7 @@ import { Step } from '../../steps/step';
 import { ZeroXQuote } from '../../api/zero-x/zero-x-quote';
 import { ZeroXSwapStep } from '../../steps/swap/zero-x/zero-x-swap-step';
 import {
+  RecipeConfig,
   RecipeERC20Amount,
   RecipeERC20Info,
   StepInput,
@@ -14,7 +15,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { findFirstInputERC20Amount } from '../../utils';
 
 export class ZeroXSwapRecipe extends SwapRecipe {
-  readonly config = {
+  readonly config: RecipeConfig = {
     name: '0x Exchange Swap',
     description: 'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.',
   };

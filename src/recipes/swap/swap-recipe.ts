@@ -39,7 +39,7 @@ export abstract class SwapRecipe extends Recipe {
       }
 
       const unshieldStepOutput = recipeOutput.stepOutputs[0];
-      const unshieldFee = unshieldStepOutput.feeERC20AmountRecipients.find(
+      const unshieldFee = unshieldStepOutput.feeERC20AmountRecipients?.find(
         fee => {
           return compareERC20Info(fee, this.sellERC20Info);
         },
@@ -50,7 +50,7 @@ export abstract class SwapRecipe extends Recipe {
 
       const shieldStepOutput =
         recipeOutput.stepOutputs[recipeOutput.stepOutputs.length - 1];
-      const shieldFee = shieldStepOutput.feeERC20AmountRecipients.find(fee => {
+      const shieldFee = shieldStepOutput.feeERC20AmountRecipients?.find(fee => {
         return compareERC20Info(fee, this.buyERC20Info);
       });
       if (!shieldFee) {

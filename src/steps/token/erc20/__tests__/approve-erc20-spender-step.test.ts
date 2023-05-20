@@ -39,7 +39,7 @@ describe('approve-erc20-spender-step', () => {
     expect(output.name).to.equal('Approve ERC20 Spender');
     expect(output.description).to.equal('Approves ERC20 for spender contract.');
 
-    expect(output.spentERC20Amounts).to.deep.equal([]);
+    expect(output.spentERC20Amounts).to.equal(undefined);
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
@@ -59,10 +59,10 @@ describe('approve-erc20-spender-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
-    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+    expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
     expect(output.populatedTransactions).to.deep.equal([
       {
@@ -94,7 +94,7 @@ describe('approve-erc20-spender-step', () => {
     expect(output.name).to.equal('Approve ERC20 Spender');
     expect(output.description).to.equal('Approves ERC20 for spender contract.');
 
-    expect(output.spentERC20Amounts).to.deep.equal([]);
+    expect(output.spentERC20Amounts).to.equal(undefined);
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
@@ -107,10 +107,10 @@ describe('approve-erc20-spender-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
-    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+    expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
     expect(output.populatedTransactions).to.deep.equal([
       {
@@ -146,7 +146,7 @@ describe('approve-erc20-spender-step', () => {
     expect(output.name).to.equal('Approve ERC20 Spender');
     expect(output.description).to.equal('Approves ERC20 for spender contract.');
 
-    expect(output.spentERC20Amounts).to.deep.equal([]);
+    expect(output.spentERC20Amounts).to.equal(undefined);
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
@@ -159,10 +159,10 @@ describe('approve-erc20-spender-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
-    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+    expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
     expect(output.populatedTransactions).to.deep.equal([
       {
@@ -197,7 +197,7 @@ describe('approve-erc20-spender-step', () => {
     expect(output.name).to.equal('Approve ERC20 Spender');
     expect(output.description).to.equal('Approves ERC20 for spender contract.');
 
-    expect(output.spentERC20Amounts).to.deep.equal([]);
+    expect(output.spentERC20Amounts).to.equal(undefined);
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
@@ -209,10 +209,10 @@ describe('approve-erc20-spender-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
-    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+    expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
     expect(output.populatedTransactions).to.deep.equal([]);
   });

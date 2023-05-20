@@ -139,14 +139,11 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
@@ -172,14 +169,11 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
@@ -205,14 +199,11 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
       name: 'Uniswap V2 Add Liquidity',
       description: 'Adds liquidity to a Uniswap V2 Pool.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: oneInDecimals18.mul('2').mul('9975').div('10000'),
@@ -249,7 +240,6 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           recipient: 'Uniswap V2 Pool',
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[4]).to.deep.equal({
@@ -292,8 +282,6 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(

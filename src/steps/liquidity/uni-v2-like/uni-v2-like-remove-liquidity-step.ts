@@ -5,6 +5,7 @@ import {
   StepOutputERC20Amount,
   UniswapV2Fork,
   UnvalidatedStepOutput,
+  StepConfig,
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils';
 import { Step } from '../../step';
@@ -14,7 +15,7 @@ import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like
 import { NETWORK_CONFIG } from '@railgun-community/shared-models';
 
 export class UniV2LikeRemoveLiquidityStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: '[Name] Remove Liquidity',
     description: 'Removes liquidity from a [NAME] Pool.',
     hasNonDeterministicOutput: true,
@@ -113,9 +114,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
         outputERC20AmountB,
         ...unusedERC20Amounts,
       ],
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [],
     };
   }
 }

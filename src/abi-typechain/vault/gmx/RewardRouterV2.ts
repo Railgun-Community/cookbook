@@ -28,7 +28,7 @@ import type {
   PromiseOrValue,
 } from '../../common';
 
-export interface RewardRouterInterface extends utils.Interface {
+export interface RewardRouterV2Interface extends utils.Interface {
   functions: {
     'acceptTransfer(address)': FunctionFragment;
     'batchCompoundForAccounts(address[])': FunctionFragment;
@@ -430,12 +430,12 @@ export type UnstakeGmxEvent = TypedEvent<
 
 export type UnstakeGmxEventFilter = TypedEventFilter<UnstakeGmxEvent>;
 
-export interface RewardRouter extends BaseContract {
+export interface RewardRouterV2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: RewardRouterInterface;
+  interface: RewardRouterV2Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

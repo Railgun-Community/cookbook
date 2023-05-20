@@ -1,5 +1,6 @@
 import {
   RecipeERC20AmountRecipient,
+  StepConfig,
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
@@ -9,7 +10,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { getUnshieldFee, getUnshieldedAmountAfterFee } from '../../utils/fee';
 
 export class UnshieldStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Unshield',
     description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
   };
@@ -27,9 +28,8 @@ export class UnshieldStep extends Step {
 
     return {
       populatedTransactions: [],
-      spentERC20Amounts: [],
+
       outputERC20Amounts,
-      spentNFTs: [],
       outputNFTs: input.nfts,
       feeERC20AmountRecipients,
     };

@@ -1,12 +1,16 @@
-import { Recipe } from '../recipe';
-import { ApproveERC20SpenderStep, Step } from '../../steps';
-import { BeefyAPI } from '../../api/beefy';
+import { Recipe } from '../../recipe';
+import { ApproveERC20SpenderStep, Step } from '../../../steps';
+import { BeefyAPI } from '../../../api/beefy';
 import { NetworkName } from '@railgun-community/shared-models';
-import { RecipeERC20Info, StepInput } from '../../models/export-models';
-import { BeefyDepositStep } from '../../steps/vault/beefy/beefy-deposit-step';
+import {
+  RecipeConfig,
+  RecipeERC20Info,
+  StepInput,
+} from '../../../models/export-models';
+import { BeefyDepositStep } from '../../../steps/vault/beefy/beefy-deposit-step';
 
 export class BeefyDepositRecipe extends Recipe {
-  readonly config = {
+  readonly config: RecipeConfig = {
     name: 'Beefy Vault Deposit',
     description:
       'Auto-approves and deposits tokens into a yield-bearing Beefy Vault.',

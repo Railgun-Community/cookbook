@@ -1,5 +1,6 @@
 import {
   RecipeERC20AmountRecipient,
+  StepConfig,
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
@@ -9,7 +10,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { getShieldFee, getShieldedAmountAfterFee } from '../../utils/fee';
 
 export class ShieldStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Shield',
     description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
   };
@@ -25,9 +26,8 @@ export class ShieldStep extends Step {
 
     return {
       populatedTransactions: [],
-      spentERC20Amounts: [],
+
       outputERC20Amounts,
-      spentNFTs: [],
       outputNFTs: input.nfts,
       feeERC20AmountRecipients,
     };

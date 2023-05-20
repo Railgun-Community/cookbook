@@ -67,15 +67,12 @@ describe('empty-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Empty Transfer Base Token',
       description:
         'Used for testing. Sends a 0-token transfer to a null address.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           tokenAddress,
@@ -93,8 +90,6 @@ describe('empty-recipe', () => {
           value: BigNumber.from(0),
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
@@ -120,8 +115,6 @@ describe('empty-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(

@@ -1,17 +1,17 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BeefyWithdrawRecipe } from '../beefy-withdraw-recipe';
+import { BeefyDepositRecipe } from '../beefy-deposit-recipe';
 import { BigNumber } from 'ethers';
-import { RecipeInput } from '../../../models/export-models';
+import { RecipeInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
-import { setRailgunFees } from '../../../init';
+import { setRailgunFees } from '../../../../init';
 import Sinon, { SinonStub } from 'sinon';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
-} from '../../../test/mocks.test';
-import { BeefyAPI, BeefyVaultData } from '../../../api/beefy/beefy-api';
-import { testConfig } from '../../../test/test-config.test';
+} from '../../../../test/mocks.test';
+import { BeefyAPI, BeefyVaultData } from '../../../../api/beefy/beefy-api';
+import { testConfig } from '../../../../test/test-config.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -31,13 +31,13 @@ const vault: BeefyVaultData = {
   vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultRate: '2000000000000000000', // 2x
-  depositFee: 0,
-  withdrawFee: 0.1,
+  depositFee: 0.1,
+  withdrawFee: 0,
 };
 
 let beefyVaultForIDStub: SinonStub;
 
-describe('beefy-withdraw-recipe', () => {
+describe('beefy-deposit-recipe', () => {
   before(() => {
     setRailgunFees(
       networkName,
@@ -54,14 +54,14 @@ describe('beefy-withdraw-recipe', () => {
     beefyVaultForIDStub.restore();
   });
 
-  it('Should create beefy-withdraw-recipe', async () => {
-    const recipe = new BeefyWithdrawRecipe(vault.vaultID);
+  it('Should create beefy-deposit-recipe', async () => {
+    const recipe = new BeefyDepositRecipe(vault.vaultID);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
       erc20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress,
           decimals: 18,
           amount: BigNumber.from('10000'),
         },
@@ -70,7 +70,7 @@ describe('beefy-withdraw-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs.length).to.equal(3);
+    expect(output.stepOutputs.length).to.equal(4);
 
     expect(output.stepOutputs[0]).to.deep.equal({
       name: 'Unshield',
@@ -79,13 +79,13 @@ describe('beefy-withdraw-recipe', () => {
         {
           amount: BigNumber.from('25'),
           recipient: 'RAILGUN Unshield Fee',
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress,
           decimals: 18,
         },
       ],
       outputERC20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress,
           expectedBalance: BigNumber.from('9975'),
           minBalance: BigNumber.from('9975'),
           approvedSpender: undefined,
@@ -95,26 +95,17 @@ describe('beefy-withdraw-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
-      name: 'Beefy Vault Withdraw',
-      description: 'Withdraws from a yield-bearing Beefy Vault.',
-      feeERC20AmountRecipients: [
-        {
-          tokenAddress,
-          amount: BigNumber.from('1995'),
-          recipient: 'Beefy Vault Withdraw Fee',
-          decimals: 18,
-        },
-      ],
+      name: 'Approve ERC20 Spender',
+      description: 'Approves ERC20 for spender contract.',
       outputERC20Amounts: [
         {
-          approvedSpender: undefined,
-          expectedBalance: BigNumber.from('17955'),
-          minBalance: BigNumber.from('17955'),
+          approvedSpender: vault.vaultContractAddress,
+          expectedBalance: BigNumber.from('9975'),
+          minBalance: BigNumber.from('9975'),
+          isBaseToken: undefined,
           tokenAddress,
           decimals: 18,
         },
@@ -122,52 +113,78 @@ describe('beefy-withdraw-recipe', () => {
       outputNFTs: [],
       populatedTransactions: [
         {
-          data: '0x853828b6',
-          to: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
+          data: '0x095ea7b300000000000000000000000040324434a0b53dd1ed167ba30dcb6b4bd7a9536dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
         },
       ],
-      spentERC20Amounts: [
-        {
-          amount: BigNumber.from('9975'),
-          tokenAddress: vault.vaultTokenAddress,
-          recipient: 'VAULT_NAME Vault',
-          decimals: 18,
-        },
-      ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
-      name: 'Shield',
-      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      name: 'Beefy Vault Deposit',
+      description: 'Deposits into a yield-bearing Beefy Vault.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('44'),
-          recipient: 'RAILGUN Shield Fee',
           tokenAddress,
+          amount: BigNumber.from('997'),
+          recipient: 'VAULT_NAME Vault Deposit Fee',
           decimals: 18,
         },
       ],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('17911'),
-          minBalance: BigNumber.from('17911'),
+          expectedBalance: BigNumber.from('4489'),
+          minBalance: BigNumber.from('4489'),
+          tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
+        },
+      ],
+      outputNFTs: [],
+      populatedTransactions: [
+        {
+          data: '0xde5f6268',
+          to: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: BigNumber.from('8978'),
           tokenAddress,
+          recipient: 'VAULT_NAME Vault',
+          decimals: 18,
+        },
+      ],
+    });
+
+    expect(output.stepOutputs[3]).to.deep.equal({
+      name: 'Shield',
+      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      feeERC20AmountRecipients: [
+        {
+          amount: BigNumber.from('11'),
+          recipient: 'RAILGUN Shield Fee',
+          tokenAddress: vault.vaultTokenAddress,
+          decimals: 18,
+        },
+      ],
+      outputERC20Amounts: [
+        {
+          approvedSpender: undefined,
+          expectedBalance: BigNumber.from('4478'),
+          minBalance: BigNumber.from('4478'),
+          tokenAddress: vault.vaultTokenAddress,
           isBaseToken: undefined,
           decimals: 18,
         },
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(
       output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
-      [vault.vaultTokenAddress, tokenAddress].map(tokenAddress =>
+      [tokenAddress, vault.vaultTokenAddress].map(tokenAddress =>
         tokenAddress.toLowerCase(),
       ),
     );
@@ -185,26 +202,26 @@ describe('beefy-withdraw-recipe', () => {
       {
         amount: BigNumber.from('25'),
         recipient: 'RAILGUN Unshield Fee',
-        tokenAddress: vault.vaultTokenAddress,
-        decimals: 18,
-      },
-      {
-        amount: BigNumber.from('1995'),
-        recipient: 'Beefy Vault Withdraw Fee',
         tokenAddress,
         decimals: 18,
       },
       {
-        amount: BigNumber.from('44'),
+        amount: BigNumber.from('997'),
+        recipient: 'VAULT_NAME Vault Deposit Fee',
+        tokenAddress,
+        decimals: 18,
+      },
+      {
+        amount: BigNumber.from('11'),
         recipient: 'RAILGUN Shield Fee',
-        tokenAddress,
+        tokenAddress: vault.vaultTokenAddress,
         decimals: 18,
       },
     ]);
   });
 
-  it('Should test beefy-withdraw-recipe error cases', async () => {
-    const recipe = new BeefyWithdrawRecipe(vault.vaultID);
+  it('Should test beefy-deposit-recipe error cases', async () => {
+    const recipe = new BeefyDepositRecipe(vault.vaultID);
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
@@ -219,7 +236,7 @@ describe('beefy-withdraw-recipe', () => {
       nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'Beefy Vault Withdraw step is invalid. No step inputs match filter.',
+      'Approve ERC20 Spender step is invalid. No step inputs match filter.',
     );
   });
 });

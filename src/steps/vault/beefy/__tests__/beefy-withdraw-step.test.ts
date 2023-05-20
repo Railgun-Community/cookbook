@@ -73,7 +73,7 @@ describe('beefy-withdraw-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([

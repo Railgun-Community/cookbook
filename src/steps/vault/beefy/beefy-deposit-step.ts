@@ -1,6 +1,7 @@
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
+  StepConfig,
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
@@ -12,7 +13,7 @@ import { BeefyVaultContract } from '../../../contract/vault/beefy/beefy-vault-co
 import { calculateOutputsForBeefyDeposit } from './beefy-util';
 
 export class BeefyDepositStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Beefy Vault Deposit',
     description: 'Deposits into a yield-bearing Beefy Vault.',
   };
@@ -77,7 +78,7 @@ export class BeefyDepositStep extends Step {
       minBalance: receivedVaultTokenAmount,
       approvedSpender: undefined,
     };
-    const feeERC20Amount: RecipeERC20AmountRecipient = {
+    const feeERC20AmountRecipient: RecipeERC20AmountRecipient = {
       ...depositERC20Info,
       amount: depositFeeAmount,
       recipient: `${vaultName} Vault Deposit Fee`,
@@ -87,9 +88,8 @@ export class BeefyDepositStep extends Step {
       populatedTransactions: [populatedTransaction],
       spentERC20Amounts: [spentERC20AmountRecipient],
       outputERC20Amounts: [outputERC20Amount, ...unusedERC20Amounts],
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [feeERC20Amount],
+      feeERC20AmountRecipients: [feeERC20AmountRecipient],
     };
   }
 }

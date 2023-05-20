@@ -1,4 +1,5 @@
 import {
+  RecipeConfig,
   RecipeERC20Info,
   RecipeRemoveLiquidityData,
   StepInput,
@@ -15,10 +16,9 @@ import { RemoveLiquidityRecipe } from '../remove-liquidity-recipe';
 import { findFirstInputERC20Amount } from '../../../utils/filters';
 
 export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
-  readonly config = {
+  readonly config: RecipeConfig = {
     name: '[Name] Remove Liquidity',
     description: 'Removes liquidity from a [NAME] Pool.',
-    hasNonDeterministicOutput: true,
   };
 
   private readonly uniswapV2Fork: UniswapV2Fork;

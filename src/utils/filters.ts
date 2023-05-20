@@ -1,10 +1,13 @@
 import {
   RecipeERC20Info,
+  RecipeNFTInfo,
   StepOutputERC20Amount,
 } from '../models/export-models';
 import { compareERC20Info } from './token';
 
 export type ERC20AmountFilter = (erc20Amount: StepOutputERC20Amount) => boolean;
+
+export type NFTAmountFilter = (nftAmount: RecipeNFTInfo) => boolean;
 
 export const filterERC20AmountInputs = (
   inputERC20Amounts: StepOutputERC20Amount[],
@@ -18,6 +21,20 @@ export const filterERC20AmountInputs = (
     erc20Amount => !filter(erc20Amount),
   );
   return { erc20AmountsForStep, unusedERC20Amounts };
+};
+
+export const filterNFTAmountInputs = (
+  inputNFTAmounts: RecipeNFTInfo[],
+  filter: NFTAmountFilter,
+): {
+  nftAmountsForStep: RecipeNFTInfo[];
+  unusedNFTAmounts: RecipeNFTInfo[];
+} => {
+  const nftAmountsForStep = inputNFTAmounts.filter(filter);
+  const unusedNFTAmounts = inputNFTAmounts.filter(
+    erc20Amount => !filter(erc20Amount),
+  );
+  return { nftAmountsForStep, unusedNFTAmounts };
 };
 
 export const findFirstInputERC20Amount = (

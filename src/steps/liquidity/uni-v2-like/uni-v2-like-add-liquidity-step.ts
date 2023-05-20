@@ -1,6 +1,7 @@
 import {
   RecipeAddLiquidityData,
   RecipeERC20AmountRecipient,
+  StepConfig,
   StepInput,
   StepOutputERC20Amount,
   UniswapV2Fork,
@@ -14,7 +15,7 @@ import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like
 import { NETWORK_CONFIG } from '@railgun-community/shared-models';
 
 export class UniV2LikeAddLiquidityStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: '[Name] Add Liquidity',
     description: 'Adds liquidity to a [NAME] Pool.',
     hasNonDeterministicOutput: true,
@@ -126,9 +127,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
         spendERC20AmountRecipientB,
       ],
       outputERC20Amounts: [outputLPERC20Amount, ...unusedERC20Amounts],
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [],
     };
   }
 }

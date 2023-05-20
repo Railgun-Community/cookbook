@@ -1,5 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { StepInput, UnvalidatedStepOutput } from '../models/export-models';
+import {
+  RecipeERC20AmountRecipient,
+  StepInput,
+  UnvalidatedStepOutput,
+} from '../models/export-models';
+import { RailgunNFTAmount } from '@railgun-community/shared-models';
 
 export const validateStepOutput = (
   input: StepInput,
@@ -46,13 +51,16 @@ const validateStepOutputERC20Amounts = (
       }
     },
   );
-  [...output.spentERC20Amounts, ...output.feeERC20AmountRecipients].forEach(
-    ({ tokenAddress, amount, isBaseToken }) => {
-      const id = getTokenId(tokenAddress, isBaseToken);
-      outputERC20AmountMap[id] ??= BigNumber.from(0);
-      outputERC20AmountMap[id] = outputERC20AmountMap[id].add(amount);
-    },
-  );
+
+  const eradicatedERC20Amounts: RecipeERC20AmountRecipient[] = [
+    ...(output.spentERC20Amounts ?? []),
+    ...(output.feeERC20AmountRecipients ?? []),
+  ];
+  eradicatedERC20Amounts.forEach(({ tokenAddress, amount, isBaseToken }) => {
+    const id = getTokenId(tokenAddress, isBaseToken);
+    outputERC20AmountMap[id] ??= BigNumber.from(0);
+    outputERC20AmountMap[id] = outputERC20AmountMap[id].add(amount);
+  });
 
   for (const id in inputERC20AmountMap) {
     if (!outputERC20AmountMap[id]) {
@@ -92,18 +100,20 @@ const validateStepOutputNFTs = (
   });
 
   // Add all NFT outputs.
-  [...output.outputNFTs, ...output.spentNFTs].forEach(
-    ({ nftAddress, tokenSubID, amountString }) => {
-      outputNFTMap[nftAddress] ??= {};
-      if (BigNumber.from(amountString).gt(1)) {
-        throw new Error('NFTs must have amount 1');
-      }
-      if (outputNFTMap[nftAddress][tokenSubID]) {
-        throw new Error(`Duplicate NFT input for ${nftAddress}: ${tokenSubID}`);
-      }
-      outputNFTMap[nftAddress][tokenSubID] = BigNumber.from(1);
-    },
-  );
+  const nftOutputs: RailgunNFTAmount[] = [
+    ...(output.spentNFTs ?? []),
+    ...(output.outputNFTs ?? []),
+  ];
+  nftOutputs.forEach(({ nftAddress, tokenSubID, amountString }) => {
+    outputNFTMap[nftAddress] ??= {};
+    if (BigNumber.from(amountString).gt(1)) {
+      throw new Error('NFTs must have amount 1');
+    }
+    if (outputNFTMap[nftAddress][tokenSubID]) {
+      throw new Error(`Duplicate NFT input for ${nftAddress}: ${tokenSubID}`);
+    }
+    outputNFTMap[nftAddress][tokenSubID] = BigNumber.from(1);
+  });
 
   for (const nftAddress in inputNFTMap) {
     for (const tokenSubID in inputNFTMap[nftAddress]) {

@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers';
 import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
 import {
   RecipeERC20AmountRecipient,
+  StepConfig,
   StepInput,
   UnvalidatedStepOutput,
 } from '../../models/export-models';
@@ -11,7 +12,7 @@ import { getBaseToken } from '../../utils/wrap-util';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 
 export class TransferBaseTokenStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Transfer Base Token',
     description: 'Transfers base token to an external public address.',
   };
@@ -53,9 +54,7 @@ export class TransferBaseTokenStep extends Step {
       populatedTransactions,
       spentERC20Amounts: [transferredBaseToken],
       outputERC20Amounts: unusedERC20Amounts,
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [],
     };
   }
 }

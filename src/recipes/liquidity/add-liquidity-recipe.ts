@@ -45,7 +45,7 @@ export abstract class AddLiquidityRecipe extends Recipe {
         this.addLiquidityData;
 
       const unshieldStepOutput = recipeOutput.stepOutputs[0];
-      const unshieldFeeA = unshieldStepOutput.feeERC20AmountRecipients.find(
+      const unshieldFeeA = unshieldStepOutput.feeERC20AmountRecipients?.find(
         fee => {
           return compareERC20Info(fee, erc20AmountA);
         },
@@ -53,7 +53,7 @@ export abstract class AddLiquidityRecipe extends Recipe {
       if (!unshieldFeeA) {
         throw new Error('Expected one unshield fee to match token A.');
       }
-      const unshieldFeeB = unshieldStepOutput.feeERC20AmountRecipients.find(
+      const unshieldFeeB = unshieldStepOutput.feeERC20AmountRecipients?.find(
         fee => {
           return compareERC20Info(fee, erc20AmountB);
         },
@@ -64,7 +64,7 @@ export abstract class AddLiquidityRecipe extends Recipe {
 
       const shieldStepOutput =
         recipeOutput.stepOutputs[recipeOutput.stepOutputs.length - 1];
-      const shieldFee = shieldStepOutput.feeERC20AmountRecipients.find(fee => {
+      const shieldFee = shieldStepOutput.feeERC20AmountRecipients?.find(fee => {
         return compareERC20Info(fee, expectedLPAmount);
       });
       if (!shieldFee) {

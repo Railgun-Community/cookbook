@@ -69,14 +69,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Unwrap Base Token',
       description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           // Wrapped - ETH
@@ -113,13 +110,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
           decimals: 18,
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: 'Transfer Base Token',
       description: 'Transfers base token to an external public address.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
@@ -146,7 +141,6 @@ describe('unwrap-transfer-base-token-recipe', () => {
           decimals: 18,
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
@@ -172,8 +166,6 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(
@@ -247,14 +239,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Unwrap Base Token',
       description: 'Unwraps wrapped token into base token, ie WETH to ETH.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           // Wrapped - ETH
@@ -282,13 +271,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
           decimals: 18,
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: 'Transfer Base Token',
       description: 'Transfers base token to an external public address.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [],
       outputNFTs: [],
       populatedTransactions: [
@@ -306,18 +293,15 @@ describe('unwrap-transfer-base-token-recipe', () => {
           decimals: 18,
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
       name: 'Shield',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [],
       outputNFTs: [],
+      feeERC20AmountRecipients: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(

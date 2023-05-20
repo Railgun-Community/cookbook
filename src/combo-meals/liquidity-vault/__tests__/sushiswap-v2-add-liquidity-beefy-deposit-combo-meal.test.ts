@@ -189,14 +189,11 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: getUnshieldedAmountAfterFee(
@@ -234,14 +231,11 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: getUnshieldedAmountAfterFee(
@@ -279,14 +273,11 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
       name: 'Sushiswap V2 Add Liquidity',
       description: 'Adds liquidity to a Sushiswap V2 Pool.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: BigNumber.from('0x1bafa9ee16e78000'),
@@ -318,13 +309,11 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           recipient: 'Sushiswap V2 Pool',
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[4]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           approvedSpender: vault.vaultContractAddress,
@@ -342,8 +331,6 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           to: '0x397FF1542f962076d0BFE58eA045FfA2d347ACa0',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[5]).to.deep.equal({
@@ -381,7 +368,6 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           decimals: 18,
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[6]).to.deep.equal({
@@ -407,8 +393,6 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(

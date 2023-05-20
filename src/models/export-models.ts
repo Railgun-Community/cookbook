@@ -24,23 +24,27 @@ export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
   recipient: string;
 };
 
+export type RecipeNFTInfo = RailgunNFTAmount & {
+  owns?: string;
+};
+
 export type RecipeInput = {
   networkName: NetworkName;
   erc20Amounts: RecipeERC20Amount[];
-  nfts: RailgunNFTAmount[];
+  nfts: RecipeNFTInfo[];
 };
 
 export type StepInput = {
   networkName: NetworkName;
   erc20Amounts: StepOutputERC20Amount[];
-  nfts: RailgunNFTAmount[];
+  nfts: RecipeNFTInfo[];
 };
 
 export type RecipeOutput = {
   stepOutputs: StepOutput[];
   populatedTransactions: PopulatedTransaction[];
   erc20Amounts: RecipeERC20Amount[];
-  nfts: RailgunNFTAmount[];
+  nfts: RecipeNFTInfo[];
   feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
 };
 
@@ -52,11 +56,11 @@ export type StepOutputERC20Amount = RecipeERC20Info & {
 
 export type UnvalidatedStepOutput = {
   populatedTransactions: PopulatedTransaction[];
-  spentERC20Amounts: RecipeERC20AmountRecipient[];
   outputERC20Amounts: StepOutputERC20Amount[];
-  spentNFTs: RailgunNFTAmount[];
-  outputNFTs: RailgunNFTAmount[];
-  feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
+  spentERC20Amounts?: RecipeERC20AmountRecipient[];
+  spentNFTs?: RecipeNFTInfo[];
+  outputNFTs: RecipeNFTInfo[];
+  feeERC20AmountRecipients?: RecipeERC20AmountRecipient[];
 };
 
 export type StepOutput = UnvalidatedStepOutput & {

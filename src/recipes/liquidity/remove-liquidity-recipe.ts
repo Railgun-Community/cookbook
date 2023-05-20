@@ -40,7 +40,7 @@ export abstract class RemoveLiquidityRecipe extends Recipe {
         this.removeLiquidityData;
 
       const unshieldStepOutput = recipeOutput.stepOutputs[0];
-      const unshieldFee = unshieldStepOutput.feeERC20AmountRecipients.find(
+      const unshieldFee = unshieldStepOutput.feeERC20AmountRecipients?.find(
         fee => {
           return compareERC20Info(fee, lpERC20Amount);
         },
@@ -51,15 +51,19 @@ export abstract class RemoveLiquidityRecipe extends Recipe {
 
       const shieldStepOutput =
         recipeOutput.stepOutputs[recipeOutput.stepOutputs.length - 1];
-      const shieldFeeA = shieldStepOutput.feeERC20AmountRecipients.find(fee => {
-        return compareERC20Info(fee, expectedERC20AmountA);
-      });
+      const shieldFeeA = shieldStepOutput.feeERC20AmountRecipients?.find(
+        fee => {
+          return compareERC20Info(fee, expectedERC20AmountA);
+        },
+      );
       if (!shieldFeeA) {
         throw new Error('Expected one shield fee to match token A.');
       }
-      const shieldFeeB = shieldStepOutput.feeERC20AmountRecipients.find(fee => {
-        return compareERC20Info(fee, expectedERC20AmountB);
-      });
+      const shieldFeeB = shieldStepOutput.feeERC20AmountRecipients?.find(
+        fee => {
+          return compareERC20Info(fee, expectedERC20AmountB);
+        },
+      );
       if (!shieldFeeB) {
         throw new Error('Expected one shield fee to match token B.');
       }

@@ -49,7 +49,7 @@ describe('shield-step', () => {
       'Shield ERC20s and NFTs into private RAILGUN balance.',
     );
 
-    expect(output.spentERC20Amounts).to.deep.equal([]);
+    expect(output.spentERC20Amounts).to.equal(undefined);
 
     expect(output.outputERC20Amounts).to.deep.equal([
       {
@@ -62,7 +62,7 @@ describe('shield-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([

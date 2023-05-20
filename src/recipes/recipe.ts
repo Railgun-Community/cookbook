@@ -209,7 +209,7 @@ export abstract class Recipe {
     );
 
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = stepOutputs
-      .map(output => output.feeERC20AmountRecipients)
+      .map(output => output.feeERC20AmountRecipients ?? [])
       .flat();
 
     const recipeOutput: RecipeOutput = {

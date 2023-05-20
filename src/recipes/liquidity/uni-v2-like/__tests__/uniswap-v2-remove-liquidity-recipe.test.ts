@@ -121,14 +121,11 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           expectedBalance: oneInDecimals18.mul('2').mul('9975').div('10000'),
@@ -146,14 +143,11 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
           to: '0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: 'Uniswap V2 Remove Liquidity',
       description: 'Removes liquidity from a Uniswap V2 Pool.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           tokenAddress: USDC_TOKEN.tokenAddress,
@@ -197,7 +191,6 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
           recipient: 'Uniswap V2 Pool',
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
@@ -271,8 +264,6 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(

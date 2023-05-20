@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20Info,
+  StepConfig,
   StepInput,
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
@@ -17,7 +18,7 @@ import {
 import { NetworkName } from '@railgun-community/shared-models';
 
 export class ApproveERC20SpenderStep extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Approve ERC20 Spender',
     description: 'Approves ERC20 for spender contract.',
   };
@@ -88,11 +89,8 @@ export class ApproveERC20SpenderStep extends Step {
 
     return {
       populatedTransactions,
-      spentERC20Amounts: [],
       outputERC20Amounts: [approvedERC20Amount, ...unusedERC20Amounts],
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [],
     };
   }
 

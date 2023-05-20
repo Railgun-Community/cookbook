@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers';
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
+  StepConfig,
   StepInput,
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
@@ -11,7 +12,7 @@ import { PopulatedTransaction } from '@ethersproject/contracts';
 import { ERC20Contract } from '../../../contract/token/erc20-contract';
 
 export class TransferERC20Step extends Step {
-  readonly config = {
+  readonly config: StepConfig = {
     name: 'Transfer ERC20',
     description: 'Transfers ERC20 token to an external public address.',
   };
@@ -64,9 +65,7 @@ export class TransferERC20Step extends Step {
       populatedTransactions,
       spentERC20Amounts: [transferredERC20],
       outputERC20Amounts: unusedERC20Amounts,
-      spentNFTs: [],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [],
     };
   }
 }

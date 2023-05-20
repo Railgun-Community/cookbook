@@ -2,18 +2,16 @@ import { Contract } from '@ethersproject/contracts';
 import { abi } from '../../abi-typechain/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { PopulatedTransaction } from '@ethersproject/contracts';
-import { BaseProvider } from '@ethersproject/providers';
-import { TestERC721 } from './TestERC721.test';
+import { AccessCardERC721 } from '../../abi-typechain/access-card/AccessCardERC721';
 
-export class TestERC721Contract {
-  private readonly contract: TestERC721;
+export class AccessCardERC721Contract {
+  private readonly contract: AccessCardERC721;
 
-  constructor(tokenAddress: string, provider?: BaseProvider) {
+  constructor(tokenAddress: string) {
     this.contract = new Contract(
       tokenAddress,
-      abi.token.erc20,
-      provider,
-    ) as TestERC721;
+      abi.token.accessCardERC721,
+    ) as AccessCardERC721;
   }
 
   mint(toAddress: string, tokenId: BigNumber): Promise<PopulatedTransaction> {

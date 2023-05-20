@@ -5,9 +5,16 @@ import {
   StepConfig,
   UnvalidatedStepOutput,
   StepOutputERC20Amount,
+  RecipeNFTInfo,
 } from '../models/export-models';
-import { ERC20AmountFilter, filterERC20AmountInputs } from '../utils/filters';
+import {
+  ERC20AmountFilter,
+  NFTAmountFilter,
+  filterERC20AmountInputs,
+  filterNFTAmountInputs,
+} from '../utils/filters';
 import { validateStepOutput } from '../validators/step-validator';
+import { RailgunNFTAmount } from '@railgun-community/shared-models';
 
 export abstract class Step {
   abstract readonly config: StepConfig;
@@ -98,6 +105,34 @@ export abstract class Step {
     }
 
     return { erc20AmountForStep, unusedERC20Amounts };
+  }
+
+  protected getValidInputNFTAmount(
+    inputNFTAmounts: RecipeNFTInfo[],
+    filter: NFTAmountFilter,
+  ): {
+    nftAmountForStep: RecipeNFTInfo;
+    unusedNFTAmounts: RecipeNFTInfo[];
+  } {
+    const { nftAmountsForStep, unusedNFTAmounts } = filterNFTAmountInputs(
+      inputNFTAmounts,
+      filter,
+    );
+
+    const numFiltered = nftAmountsForStep.length;
+    if (numFiltered === 0) {
+      throw new Error(`No step inputs match filter.`);
+    }
+    if (numFiltered > 1) {
+      throw new Error(
+        `Expected one NFT amount for step input - received ${numFiltered}.`,
+      );
+    }
+
+    // Copy values to new object.
+    const nftAmountForStep = { ...nftAmountsForStep[0] };
+
+    return { nftAmountForStep, unusedNFTAmounts };
   }
 
   private getChangeOutputs(

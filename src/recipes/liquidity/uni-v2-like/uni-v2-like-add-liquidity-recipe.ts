@@ -1,5 +1,6 @@
 import {
   RecipeAddLiquidityData,
+  RecipeConfig,
   RecipeERC20Info,
   StepInput,
   UniswapV2Fork,
@@ -19,10 +20,9 @@ import {
 } from '../../../utils/fee';
 
 export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
-  readonly config = {
+  readonly config: RecipeConfig = {
     name: '[Name] Add Liquidity',
     description: 'Adds liquidity to a [Name] Pool.',
-    hasNonDeterministicOutput: true,
   };
 
   private readonly uniswapV2Fork: UniswapV2Fork;

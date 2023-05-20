@@ -130,14 +130,11 @@ describe('zero-x-swap-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
       name: 'Approve ERC20 Spender',
       description: 'Approves ERC20 for spender contract.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           approvedSpender: spender,
@@ -155,14 +152,11 @@ describe('zero-x-swap-recipe', () => {
           to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
       ],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: '0x Exchange Swap',
       description: 'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.',
-      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
@@ -198,7 +192,6 @@ describe('zero-x-swap-recipe', () => {
           decimals: 18,
         },
       ],
-      spentNFTs: [],
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
@@ -238,8 +231,6 @@ describe('zero-x-swap-recipe', () => {
       ],
       outputNFTs: [],
       populatedTransactions: [],
-      spentERC20Amounts: [],
-      spentNFTs: [],
     });
 
     expect(

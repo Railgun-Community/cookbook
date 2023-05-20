@@ -61,10 +61,10 @@ describe('transfer-base-token-step', () => {
       },
     ]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
-    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+    expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
     expect(output.populatedTransactions).to.deep.equal([
       {
@@ -110,10 +110,10 @@ describe('transfer-base-token-step', () => {
     // Change
     expect(output.outputERC20Amounts).to.deep.equal([]);
 
-    expect(output.spentNFTs).to.deep.equal([]);
+    expect(output.spentNFTs).to.equal(undefined);
     expect(output.outputNFTs).to.deep.equal([]);
 
-    expect(output.feeERC20AmountRecipients).to.deep.equal([]);
+    expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
     expect(output.populatedTransactions).to.deep.equal([
       {
