@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   ComboMealConfig,
   RecipeInput,
@@ -19,7 +18,7 @@ export abstract class ComboMeal {
     return {
       networkName: input.networkName,
       // TODO: Minimum balance is lost for combos. (amount is expectedBalance).
-      erc20Amounts: output.erc20Amounts.filter(({ amount }) => amount.gt(0)),
+      erc20Amounts: output.erc20Amounts.filter(({ amount }) => amount > 0n),
       nfts: output.nfts,
     };
   }
@@ -31,7 +30,7 @@ export abstract class ComboMeal {
 
     const aggregatedRecipeOutput: RecipeOutput = {
       stepOutputs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
       erc20Amounts: [],
       nfts: [],
       feeERC20AmountRecipients: [],
@@ -50,8 +49,8 @@ export abstract class ComboMeal {
       nextInput = this.createNextRecipeInput(nextInput, recipeOutput);
 
       aggregatedRecipeOutput.stepOutputs.push(...recipeOutput.stepOutputs);
-      aggregatedRecipeOutput.populatedTransactions.push(
-        ...recipeOutput.populatedTransactions,
+      aggregatedRecipeOutput.crossContractCalls.push(
+        ...recipeOutput.crossContractCalls,
       );
       aggregatedRecipeOutput.feeERC20AmountRecipients.push(
         ...recipeOutput.feeERC20AmountRecipients,
@@ -68,7 +67,7 @@ export abstract class ComboMeal {
           },
         );
         if (found) {
-          found.amount = found.amount.add(erc20Amount.amount);
+          found.amount = found.amount + erc20Amount.amount;
           return;
         }
         aggregatedRecipeOutput.erc20Amounts.push(erc20Amount);
@@ -87,9 +86,7 @@ export abstract class ComboMeal {
           );
         });
         if (found) {
-          found.amountString = BigNumber.from(found.amountString)
-            .add(nft.amountString)
-            .toHexString();
+          found.amount = found.amount + nft.amount;
           return;
         }
         aggregatedRecipeOutput.nfts.push(nft);

@@ -6,7 +6,7 @@ import {
 import { compareERC20Info } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
-import { BigNumber } from 'ethers';
+
 import { NetworkName } from '@railgun-community/shared-models';
 
 export abstract class RemoveLiquidityRecipe extends Recipe {
@@ -20,13 +20,13 @@ export abstract class RemoveLiquidityRecipe extends Recipe {
   getExpectedABAmountsFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,
   ): Optional<{
-    lpUnshieldFee: BigNumber;
-    aAmount: BigNumber;
-    aMinimum: BigNumber;
-    bAmount: BigNumber;
-    bMinimum: BigNumber;
-    aShieldFee: BigNumber;
-    bShieldFee: BigNumber;
+    lpUnshieldFee: bigint;
+    aAmount: bigint;
+    aMinimum: bigint;
+    bAmount: bigint;
+    bMinimum: bigint;
+    aShieldFee: bigint;
+    bShieldFee: bigint;
   }> {
     try {
       if (!recipeOutput) {

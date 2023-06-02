@@ -4,7 +4,7 @@ export const createNoActionStepOutput = (
   input: StepInput,
 ): UnvalidatedStepOutput => {
   return {
-    populatedTransactions: [],
+    crossContractCalls: [],
 
     outputERC20Amounts: input.erc20Amounts,
 

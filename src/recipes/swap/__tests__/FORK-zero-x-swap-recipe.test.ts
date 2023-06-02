@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
-import { BigNumber } from 'ethers';
+
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -14,7 +14,7 @@ import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
-import { balanceForERC20Token } from '@railgun-community/quickstart';
+import { balanceForERC20Token } from '@railgun-community/wallet';
 import { ZeroXQuote } from '../../../api/zero-x';
 import {
   executeRecipeStepsAndAssertUnshieldBalances,
@@ -31,13 +31,13 @@ const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress, // WETH
-  decimals: 18,
+  decimals: 18n,
   isBaseToken: false,
 };
 
 const buyToken: RecipeERC20Info = {
   tokenAddress: buyTokenAddress, // RAIL
-  decimals: 18,
+  decimals: 18n,
 };
 
 const slippagePercentage = 0.01;
@@ -72,9 +72,9 @@ describe('FORK-zero-x-swap-recipe', function run() {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('12000'),
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -92,7 +92,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      2_800_000, // expectedGasWithin50K
+      2_800_000n, // expectedGasWithin50K
     );
 
     const quote = recipe.getLatestQuote() as SwapQuoteData;
@@ -116,13 +116,13 @@ describe('FORK-zero-x-swap-recipe', function run() {
     );
 
     const minimumBuyAmount = quote.minimumBuyAmount;
-    const minimumShieldFee = minimumBuyAmount
-      .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
-      .div(10000);
-    const expectedPrivateRAILBalance = initialPrivateRAILBalance
-      .add(minimumBuyAmount) // Minimum buy amount
-      .sub(minimumShieldFee); // Shield fee
-    expect(privateRAILBalance.gte(expectedPrivateRAILBalance)).to.equal(
+    const minimumShieldFee =
+      (minimumBuyAmount * MOCK_SHIELD_FEE_BASIS_POINTS) / 10000n;
+    const expectedPrivateRAILBalance =
+      initialPrivateRAILBalance +
+      minimumBuyAmount - // Minimum buy amount
+      minimumShieldFee; // Shield fee
+    expect(privateRAILBalance >= expectedPrivateRAILBalance).to.equal(
       true,
       'Private RAIL balance incorrect after swap',
     );

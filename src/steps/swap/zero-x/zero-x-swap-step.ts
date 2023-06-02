@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
@@ -33,13 +32,13 @@ export class ZeroXSwapStep extends Step {
     const {
       buyERC20Amount,
       minimumBuyAmount,
-      populatedTransaction,
+      crossContractCall,
       sellTokenValue,
       spender,
     } = this.quote;
     const { erc20Amounts } = input;
 
-    const sellERC20Amount = BigNumber.from(sellTokenValue);
+    const sellERC20Amount = BigInt(sellTokenValue);
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(
         erc20Amounts,
@@ -64,7 +63,7 @@ export class ZeroXSwapStep extends Step {
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       spentERC20Amounts: [sellERC20AmountRecipient],
       outputERC20Amounts: [outputBuyERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,

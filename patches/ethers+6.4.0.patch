@@ -1,0 +1,13 @@
+diff --git a/node_modules/ethers/lib.commonjs/providers/subscriber-polling.js b/node_modules/ethers/lib.commonjs/providers/subscriber-polling.js
+index dcba195..6cc4d6e 100644
+--- a/node_modules/ethers/lib.commonjs/providers/subscriber-polling.js
++++ b/node_modules/ethers/lib.commonjs/providers/subscriber-polling.js
+@@ -199,7 +199,7 @@ class PollingEventSubscriber {
+             return;
+         }
+         const filter = copy(this.#filter);
+-        filter.fromBlock = this.#blockNumber + 1;
++        filter.fromBlock = this.#blockNumber; // Updated to fix a bug in polling scans for the same filtered events across consecutive blocks (ie. during automated tests).
+         filter.toBlock = blockNumber;
+         const logs = await this.#provider.getLogs(filter);
+         // No logs could just mean the node has not indexed them yet,

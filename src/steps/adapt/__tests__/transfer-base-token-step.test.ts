@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { TransferBaseTokenStep } from '../transfer-base-token-step';
-import { BigNumber } from 'ethers';
+
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 
@@ -10,7 +10,7 @@ const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-const amount = BigNumber.from('10000');
+const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('transfer-base-token-step', () => {
@@ -22,10 +22,10 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -45,7 +45,7 @@ describe('transfer-base-token-step', () => {
         isBaseToken: true,
         recipient: toAddress,
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -54,10 +54,10 @@ describe('transfer-base-token-step', () => {
       {
         approvedSpender: undefined,
         isBaseToken: true,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
+        expectedBalance: 2000n,
+        minBalance: 2000n,
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -66,13 +66,13 @@ describe('transfer-base-token-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
         to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
       },
     ]);
-    expect(output.populatedTransactions[0].to).to.equal(
+    expect(output.crossContractCalls[0].to).to.equal(
       NETWORK_CONFIG[networkName].relayAdaptContract,
     );
   });
@@ -85,10 +85,10 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -99,11 +99,11 @@ describe('transfer-base-token-step', () => {
     // Transferred
     expect(output.spentERC20Amounts).to.deep.equal([
       {
-        amount: BigNumber.from('12000'),
+        amount: 12000n,
         isBaseToken: true,
         recipient: toAddress,
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -115,7 +115,7 @@ describe('transfer-base-token-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
         to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
@@ -132,10 +132,10 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -151,10 +151,10 @@ describe('transfer-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
+          expectedBalance: 2000n,
+          minBalance: 2000n,
           approvedSpender: undefined,
         },
       ],

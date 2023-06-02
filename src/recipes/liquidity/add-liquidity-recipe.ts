@@ -6,7 +6,7 @@ import {
 import { compareERC20Info } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
-import { BigNumber } from 'ethers';
+
 import { NetworkName } from '@railgun-community/shared-models';
 
 export abstract class AddLiquidityRecipe extends Recipe {
@@ -27,11 +27,11 @@ export abstract class AddLiquidityRecipe extends Recipe {
   getExpectedLPAmountFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,
   ): Optional<{
-    aUnshieldFee: BigNumber;
-    bUnshieldFee: BigNumber;
-    lpAmount: BigNumber;
-    lpMinimum: BigNumber;
-    lpShieldFee: BigNumber;
+    aUnshieldFee: bigint;
+    bUnshieldFee: bigint;
+    lpAmount: bigint;
+    lpMinimum: bigint;
+    lpShieldFee: bigint;
   }> {
     try {
       if (!recipeOutput) {

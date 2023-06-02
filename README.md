@@ -46,7 +46,7 @@ This all occurs in a single validated transaction call, saving network fees and 
 
 ## Cook up a Recipe for the RAILGUN Quickstart SDK
 
-Given a full Recipe and its inputs, [RAILGUN Quickstart](https://docs.railgun.org/developer-guide/quickstart/overview) will generate a [zero-knowledge proof](https://docs.railgun.org/wiki/learn/privacy-system/zero-knowledge-cryptography) and a final serialized transaction for the RAILGUN Relay Adapt contract.
+Given a full Recipe and its inputs, [RAILGUN Quickstart](https://docs.railgun.org/developer-guide/wallet/overview) will generate a [zero-knowledge proof](https://docs.railgun.org/wiki/learn/privacy-system/zero-knowledge-cryptography) and a final serialized transaction for the RAILGUN Relay Adapt contract.
 
 This final transaction can be submitted to the blockchain by any wallet, including a [Relayer](https://docs.railgun.org/wiki/learn/privacy-system/community-relayers).
 
@@ -57,23 +57,20 @@ const swap = new ZeroXSwapRecipe(sellERC20Info, buyERC20Info, slippagePercentage
 const unshieldERC20Amounts = [{ ...sellERC20Info, amount }];
 
 const recipeInput = { networkName, unshieldERC20Amounts };
-const { populatedTransactions, erc20Amounts } = await swap.getRecipeOutput(recipeInput);
+const { crossContractCalls, erc20Amounts } = await swap.getRecipeOutput(recipeInput);
 
 // Outputs to re-shield after the Recipe multicall.
 const shieldERC20Addresses = erc20Amounts.map(({tokenAddress}) => tokenAddress);
 
 // RAILGUN Quickstart will generate a [unshield -> call -> re-shield] transaction enclosing the Recipe multicall.
-const crossContractCallsSerialized = populatedTransactions.map(
-    serializeUnsignedTransaction,
-)
 
-const {gasEstimateString} = await gasEstimateForUnprovenCrossContractCalls(
+const {gasEstimate} = await gasEstimateForUnprovenCrossContractCalls(
     ...
     unshieldERC20Amounts,
     ...
     shieldERC20Addresses,
     ...
-    crossContractCallsSerialized,
+    crossContractCalls,
     ...
 )
 await generateCrossContractCallsProof(
@@ -82,21 +79,20 @@ await generateCrossContractCallsProof(
     ...
     shieldERC20Addresses,
     ...
-    crossContractCallsSerialized,
+    crossContractCalls,
     ...
 )
-const {serializedTransaction} = await populateProvedCrossContractCalls(
+const {transaction} = await populateProvedCrossContractCalls(
     ...
     unshieldERC20Amounts,
     ...
     shieldERC20Addresses,
     ...
-    crossContractCallsSerialized,
+    crossContractCalls,
     ...
 );
 
 // Submit transaction to RPC.
-const transaction = deserializeTransaction(serializedTransaction);
 await wallet.sendTransaction(transaction);
 
 // Note: use @railgun-community/waku-relayer-client to submit through a Relayer instead of signing with your own wallet.

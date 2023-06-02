@@ -1,7 +1,7 @@
 import { UnwrapBaseTokenStep } from '../../steps/adapt/unwrap-base-token-step';
 import { Recipe } from '../recipe';
 import { TransferBaseTokenStep } from '../../steps/adapt/transfer-base-token-step';
-import { BigNumber } from '@ethersproject/bignumber';
+
 import { Step } from '../../steps';
 import { RecipeConfig } from '../../models/export-models';
 
@@ -13,9 +13,9 @@ export class UnwrapTransferBaseTokenRecipe extends Recipe {
   };
 
   private readonly toAddress: string;
-  private readonly amount: Optional<BigNumber>;
+  private readonly amount: Optional<bigint>;
 
-  constructor(toAddress: string, amount?: BigNumber) {
+  constructor(toAddress: string, amount?: bigint) {
     super();
     this.toAddress = toAddress;
     this.amount = amount;

@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
 import {
   RecipeERC20AmountRecipient,
@@ -9,7 +8,7 @@ import {
 import { compareERC20Info } from '../../utils/token';
 import { Step } from '../step';
 import { getBaseToken } from '../../utils/wrap-util';
-import { PopulatedTransaction } from '@ethersproject/contracts';
+import { ContractTransaction } from 'ethers';
 
 export class TransferBaseTokenStep extends Step {
   readonly config: StepConfig = {
@@ -18,9 +17,9 @@ export class TransferBaseTokenStep extends Step {
   };
 
   private readonly toAddress: string;
-  private readonly amount: Optional<BigNumber>;
+  private readonly amount: Optional<bigint>;
 
-  constructor(toAddress: string, amount?: BigNumber) {
+  constructor(toAddress: string, amount?: bigint) {
     super();
     this.toAddress = toAddress;
     this.amount = amount;
@@ -40,7 +39,7 @@ export class TransferBaseTokenStep extends Step {
       );
 
     const contract = new RelayAdaptContract(input.networkName);
-    const populatedTransactions: PopulatedTransaction[] = [
+    const crossContractCalls: ContractTransaction[] = [
       await contract.createBaseTokenTransfer(this.toAddress, this.amount),
     ];
 
@@ -51,7 +50,7 @@ export class TransferBaseTokenStep extends Step {
     };
 
     return {
-      populatedTransactions,
+      crossContractCalls,
       spentERC20Amounts: [transferredBaseToken],
       outputERC20Amounts: unusedERC20Amounts,
       outputNFTs: input.nfts,

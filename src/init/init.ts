@@ -5,8 +5,8 @@ import { CookbookDebug } from '../utils/cookbook-debug';
 
 export const setRailgunFees = (
   networkName: NetworkName,
-  shieldFeeBasisPoints: string,
-  unshieldFeeBasisPoints: string,
+  shieldFeeBasisPoints: bigint,
+  unshieldFeeBasisPoints: bigint,
 ) => {
   RailgunConfig.SHIELD_FEE_BASIS_POINTS_FOR_NETWORK[networkName] =
     shieldFeeBasisPoints;

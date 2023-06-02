@@ -1,6 +1,5 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BigNumber } from 'ethers';
 import { NetworkName } from '@railgun-community/shared-models';
 import { StepInput } from '../../../../models/export-models';
 import { BeefyVaultData } from '../../../../api/beefy/beefy-api';
@@ -20,12 +19,12 @@ const vault: BeefyVaultData = {
   chain: 'ethereum',
   network: 'ethereum',
   depositERC20Address: tokenAddress,
-  depositERC20Decimals: 18,
+  depositERC20Decimals: 18n,
   vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
-  vaultRate: '2000000000000000000', // 2x
-  depositFee: 0.1,
-  withdrawFee: 0,
+  vaultRate: BigInt('2000000000000000000'), // 2x
+  depositFeeBasisPoints: 1000n,
+  withdrawFeeBasisPoints: 0n,
 };
 
 describe('beefy-deposit-step', () => {
@@ -38,17 +37,17 @@ describe('beefy-deposit-step', () => {
         {
           // Approved for swapping
           tokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('10000'),
-          minBalance: BigNumber.from('10000'),
+          decimals: 18n,
+          expectedBalance: 10000n,
+          minBalance: 10000n,
           approvedSpender: vault.vaultContractAddress,
         },
         {
           // Same token, unapproved
           tokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
+          decimals: 18n,
+          expectedBalance: 2000n,
+          minBalance: 2000n,
           approvedSpender: undefined,
         },
       ],
@@ -64,10 +63,10 @@ describe('beefy-deposit-step', () => {
     // Deposited
     expect(output.spentERC20Amounts).to.deep.equal([
       {
-        amount: BigNumber.from('9000'),
+        amount: BigInt('9000'),
         recipient: 'VAULT_NAME Vault',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -75,17 +74,17 @@ describe('beefy-deposit-step', () => {
     expect(output.outputERC20Amounts).to.deep.equal([
       {
         approvedSpender: undefined,
-        expectedBalance: BigNumber.from('4500'),
-        minBalance: BigNumber.from('4500'),
+        expectedBalance: BigInt('4500'),
+        minBalance: BigInt('4500'),
         tokenAddress: vault.vaultTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
         approvedSpender: undefined,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
+        expectedBalance: 2000n,
+        minBalance: 2000n,
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -94,14 +93,14 @@ describe('beefy-deposit-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        decimals: 18,
+        decimals: 18n,
         tokenAddress,
-        amount: BigNumber.from('1000'),
+        amount: 1000n,
         recipient: 'VAULT_NAME Vault Deposit Fee',
       },
     ]);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xde5f6268',
         to: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
@@ -118,9 +117,9 @@ describe('beefy-deposit-step', () => {
       erc20Amounts: [
         {
           tokenAddress: vault.vaultTokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          decimals: 18n,
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: vault.vaultContractAddress,
         },
       ],
@@ -135,10 +134,10 @@ describe('beefy-deposit-step', () => {
         {
           // No spender
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],

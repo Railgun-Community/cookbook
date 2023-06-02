@@ -1,36 +1,37 @@
-import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
-import { ERC20 } from '../../abi-typechain/token/ERC20';
-import { BigNumber } from '@ethersproject/bignumber';
-import { PopulatedTransaction } from '@ethersproject/contracts';
+import { Contract, ContractTransaction, Provider } from 'ethers';
+import { abi } from '../../abi/abi';
 import { validateAddress } from '../../utils/address';
-import { BaseProvider } from '@ethersproject/providers';
+import { Erc20 } from '../../typechain';
 
 export class ERC20Contract {
-  private readonly contract: ERC20;
+  private readonly contract: Erc20;
 
-  constructor(address: string, provider?: BaseProvider) {
+  constructor(address: string, provider?: Provider) {
     if (!validateAddress(address)) {
       throw new Error('Invalid ERC20 address for contract');
     }
-    this.contract = new Contract(address, abi.token.erc20, provider) as ERC20;
+    this.contract = new Contract(
+      address,
+      abi.token.erc20,
+      provider,
+    ) as unknown as Erc20;
   }
 
   createSpenderApproval(
     spender: string,
-    amount: BigNumber,
-  ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.approve(spender, amount);
+    amount: bigint,
+  ): Promise<ContractTransaction> {
+    return this.contract.approve.populateTransaction(spender, amount);
   }
 
   createTransfer(
     toAddress: string,
-    amount: BigNumber,
-  ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.transfer(toAddress, amount);
+    amount: bigint,
+  ): Promise<ContractTransaction> {
+    return this.contract.transfer.populateTransaction(toAddress, amount);
   }
 
-  balanceOf(account: string): Promise<BigNumber> {
+  balanceOf(account: string): Promise<bigint> {
     return this.contract.balanceOf(account);
   }
 }

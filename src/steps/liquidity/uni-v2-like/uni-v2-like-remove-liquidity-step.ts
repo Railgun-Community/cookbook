@@ -71,7 +71,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
     );
 
     const contract = new UniV2LikeRouterContract(routerContractAddress);
-    const populatedTransaction = await contract.createRemoveLiquidity(
+    const crossContractCall = await contract.createRemoveLiquidity(
       expectedERC20AmountA.tokenAddress,
       expectedERC20AmountB.tokenAddress,
       erc20AmountForStep.expectedBalance,
@@ -107,7 +107,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spendERC20AmountRecipient],
       outputERC20Amounts: [
         outputERC20AmountA,

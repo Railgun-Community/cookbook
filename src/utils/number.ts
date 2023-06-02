@@ -1,9 +1,7 @@
-import { BigNumber } from 'ethers';
-
 export const minBalanceAfterSlippage = (
-  balance: BigNumber,
+  balance: bigint,
   slippagePercentage: number,
-): BigNumber => {
-  const slippageMax = balance.mul(slippagePercentage * 10000).div(10000);
-  return balance.sub(slippageMax);
+): bigint => {
+  const slippageMax = (balance * BigInt(slippagePercentage * 10000)) / 10000n;
+  return balance - slippageMax;
 };

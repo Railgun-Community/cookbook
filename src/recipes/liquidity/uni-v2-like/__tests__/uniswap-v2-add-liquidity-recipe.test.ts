@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BigNumber } from 'ethers';
+
 import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../../init';
 import Sinon, { SinonStub } from 'sinon';
@@ -11,40 +11,38 @@ import {
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
 import { RecipeERC20Info, RecipeInput } from '../../../../models/export-models';
 import { UniswapV2AddLiquidityRecipe } from '../uniswap-v2-add-liquidity-recipe';
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { JsonRpcProvider } from 'ethers';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 
-const oneInDecimals6 = BigNumber.from(10).pow(6);
-const oneInDecimals18 = BigNumber.from(10).pow(18);
+const oneInDecimals6 = 10n ** 6n;
+const oneInDecimals18 = 10n ** 18n;
 const slippagePercentage = 0.01;
 
 // Assume 2000:1 rate.for USDC:WETH.
 const USDC_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-  decimals: 6,
+  decimals: 6n,
 };
 const WETH_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  decimals: 18,
+  decimals: 18n,
 };
 
 // Assume 2:1 rate for LP:WETH.
 const LP_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
-  decimals: 18,
+  decimals: 18n,
 };
 
 let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
 
-const provider = new JsonRpcProvider(
-  'https://eth-mainnet.g.alchemy.com/v2/demo',
-);
+const provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
 
 describe('uniswap-v2-add-liquidity-recipe', () => {
   before(() => {
@@ -59,13 +57,13 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       UniV2LikePairContract.prototype,
       'getReserves',
     ).resolves({
-      reserveA: oneInDecimals6.mul(2_000_000_000), // USDC
-      reserveB: oneInDecimals18.mul(1_000_000), // WETH
+      reserveA: oneInDecimals6 * 2_000_000_000n, // USDC
+      reserveB: oneInDecimals18 * 1_000_000n, // WETH
     });
     uniswapV2PairTotalSupply = Sinon.stub(
       UniV2LikePairContract.prototype,
       'totalSupply',
-    ).resolves(oneInDecimals18.mul(2_000_000));
+    ).resolves(oneInDecimals18 * 2_000_000n);
   });
 
   after(() => {
@@ -88,12 +86,12 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
         {
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
-          amount: oneInDecimals6.mul('2000'),
+          amount: oneInDecimals6 * 2000n,
         },
         {
           tokenAddress: WETH_TOKEN.tokenAddress,
           decimals: WETH_TOKEN.decimals,
-          amount: oneInDecimals18.mul('1'),
+          amount: oneInDecimals18 * 1n,
         },
       ],
       nfts: [],
@@ -107,13 +105,13 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: oneInDecimals6.mul('2000').mul('25').div('10000'),
+          amount: (oneInDecimals6 * 2000n * 25n) / 10000n,
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
         },
         {
-          amount: oneInDecimals18.mul('1').mul('25').div('10000'),
+          amount: (oneInDecimals18 * 1n * 25n) / 10000n,
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: WETH_TOKEN.tokenAddress,
           decimals: WETH_TOKEN.decimals,
@@ -121,16 +119,16 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       ],
       outputERC20Amounts: [
         {
-          expectedBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
-          minBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
+          expectedBalance: (oneInDecimals6 * 2000n * 9975n) / 10000n,
+          minBalance: (oneInDecimals6 * 2000n * 9975n) / 10000n,
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
         },
         {
-          expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
-          minBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
+          expectedBalance: (oneInDecimals18 * 1n * 9975n) / 10000n,
+          minBalance: (oneInDecimals18 * 1n * 9975n) / 10000n,
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: WETH_TOKEN.tokenAddress,
@@ -138,7 +136,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
@@ -146,16 +144,16 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       description: 'Approves ERC20 for spender contract.',
       outputERC20Amounts: [
         {
-          expectedBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
-          minBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
+          expectedBalance: (oneInDecimals6 * 2000n * 9975n) / 10000n,
+          minBalance: (oneInDecimals6 * 2000n * 9975n) / 10000n,
           approvedSpender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
           isBaseToken: undefined,
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
         },
         {
-          expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
-          minBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
+          expectedBalance: (oneInDecimals18 * 1n * 9975n) / 10000n,
+          minBalance: (oneInDecimals18 * 1n * 9975n) / 10000n,
           approvedSpender: undefined,
           isBaseToken: undefined,
           tokenAddress: WETH_TOKEN.tokenAddress,
@@ -163,10 +161,10 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         },
       ],
     });
@@ -176,16 +174,16 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       description: 'Approves ERC20 for spender contract.',
       outputERC20Amounts: [
         {
-          expectedBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
-          minBalance: oneInDecimals18.mul('1').mul('9975').div('10000'),
+          expectedBalance: (oneInDecimals18 * 1n * 9975n) / 10000n,
+          minBalance: (oneInDecimals18 * 1n * 9975n) / 10000n,
           approvedSpender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
           isBaseToken: undefined,
           tokenAddress: WETH_TOKEN.tokenAddress,
           decimals: WETH_TOKEN.decimals,
         },
         {
-          expectedBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
-          minBalance: oneInDecimals6.mul('2000').mul('9975').div('10000'),
+          expectedBalance: (oneInDecimals6 * 2000n * 9975n) / 10000n,
+          minBalance: (oneInDecimals6 * 2000n * 9975n) / 10000n,
           approvedSpender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
           isBaseToken: undefined,
           tokenAddress: USDC_TOKEN.tokenAddress,
@@ -193,10 +191,10 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-          to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },
       ],
     });
@@ -206,13 +204,8 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       description: 'Adds liquidity to a Uniswap V2 Pool.',
       outputERC20Amounts: [
         {
-          expectedBalance: oneInDecimals18.mul('2').mul('9975').div('10000'),
-          minBalance: oneInDecimals18
-            .mul('2')
-            .mul('9975')
-            .div('10000')
-            .mul('99')
-            .div('100'),
+          expectedBalance: (oneInDecimals18 * 2n * 9975n) / 10000n,
+          minBalance: (((oneInDecimals18 * 2n * 9975n) / 10000n) * 99n) / 100n,
           approvedSpender: undefined,
           isBaseToken: false,
           tokenAddress: LP_TOKEN.tokenAddress,
@@ -220,7 +213,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0xe8e33700000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000dd7d4f70b73c0000000000000000000000000000000000000000000000000000000000076e948c00000000000000000000000000000000000000000000000000db464c15fd150000000000000000000000000000000000000000000000000000000000075b8df100000000000000000000000004025ee6512dbbda97049bcf5aa5d38c54af6be8a0000000000000000000000000000000000000000000000000000000005fa74e0',
           to: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
@@ -228,13 +221,13 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: oneInDecimals18.mul('1').mul('9975').div('10000'),
+          amount: (oneInDecimals18 * 1n * 9975n) / 10000n,
           tokenAddress: WETH_TOKEN.tokenAddress,
           recipient: 'Uniswap V2 Pool',
-          decimals: 18,
+          decimals: 18n,
         },
         {
-          amount: oneInDecimals6.mul('2000').mul('9975').div('10000'),
+          amount: (oneInDecimals6 * 2000n * 9975n) / 10000n,
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
           recipient: 'Uniswap V2 Pool',
@@ -247,12 +240,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: oneInDecimals18
-            .mul('2')
-            .mul('9975')
-            .div('10000')
-            .mul('25')
-            .div('10000'),
+          amount: (((oneInDecimals18 * 2n * 9975n) / 10000n) * 25n) / 10000n,
           tokenAddress: LP_TOKEN.tokenAddress,
           decimals: LP_TOKEN.decimals,
           recipient: 'RAILGUN Shield Fee',
@@ -260,20 +248,12 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       ],
       outputERC20Amounts: [
         {
-          expectedBalance: oneInDecimals18
-            .mul('2')
-            .mul('9975')
-            .div('10000')
-            .mul('9975')
-            .div('10000'),
-          minBalance: oneInDecimals18
-            .mul('2')
-            .mul('9975')
-            .div('10000')
-            .mul('99')
-            .div('100')
-            .mul('9975')
-            .div('10000'),
+          expectedBalance:
+            (((oneInDecimals18 * 2n * 9975n) / 10000n) * 9975n) / 10000n,
+          minBalance:
+            (((((oneInDecimals18 * 2n * 9975n) / 10000n) * 99n) / 100n) *
+              9975n) /
+            10000n,
           tokenAddress: LP_TOKEN.tokenAddress,
           decimals: LP_TOKEN.decimals,
           isBaseToken: false,
@@ -281,7 +261,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(
@@ -296,33 +276,28 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
     expect(output.nfts).to.deep.equal([]);
 
-    const populatedTransactionsFlattened = output.stepOutputs.flatMap(
-      stepOutput => stepOutput.populatedTransactions,
+    const crossContractCallsFlattened = output.stepOutputs.flatMap(
+      stepOutput => stepOutput.crossContractCalls,
     );
-    expect(output.populatedTransactions).to.deep.equal(
-      populatedTransactionsFlattened,
+    expect(output.crossContractCalls).to.deep.equal(
+      crossContractCallsFlattened,
     );
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amount: oneInDecimals6.mul('2000').mul('25').div('10000'),
+        amount: (oneInDecimals6 * 2000n * 25n) / 10000n,
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress: USDC_TOKEN.tokenAddress,
         decimals: USDC_TOKEN.decimals,
       },
       {
-        amount: oneInDecimals18.mul('1').mul('25').div('10000'),
+        amount: (oneInDecimals18 * 1n * 25n) / 10000n,
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress: WETH_TOKEN.tokenAddress,
         decimals: WETH_TOKEN.decimals,
       },
       {
-        amount: oneInDecimals18
-          .mul('2')
-          .mul('9975')
-          .div('10000')
-          .mul('25')
-          .div('10000'),
+        amount: (((oneInDecimals18 * 2n * 9975n) / 10000n) * 25n) / 10000n,
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: LP_TOKEN.tokenAddress,
         decimals: LP_TOKEN.decimals,
@@ -344,8 +319,8 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress: '0x1234',
-          decimals: 18,
-          amount: BigNumber.from('12000'),
+          decimals: 18n,
+          amount: 12000n,
         },
       ],
       nfts: [],

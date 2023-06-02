@@ -15,9 +15,9 @@ import { Step } from '../../step';
 import { GmxRewardRouterV2Contract } from '../../../contract/vault/gmx/gmx-reward-router-v2-contract';
 import { GLP_DECIMALS, GMX } from '../../../api/gmx/gmx';
 import { minBalanceAfterSlippage } from '../../../utils/number';
-import { BigNumber } from 'ethers';
-import { BaseProvider } from '@ethersproject/providers';
+
 import { AccessCardOwnerAccountContract } from '../../../contract/access-card/access-card-owner-account-contract';
+import { Provider } from 'ethers';
 
 export class GMXMintStakeGLPStep extends Step {
   readonly config: StepConfig = {
@@ -32,13 +32,13 @@ export class GMXMintStakeGLPStep extends Step {
 
   private readonly nftOwnedAccountAddress: string;
 
-  private readonly provider: BaseProvider;
+  private readonly provider: Provider;
 
   constructor(
     stakeERC20Info: RecipeERC20Info,
     slippagePercentage: number,
     nftOwnedAccountAddress: string,
-    provider: BaseProvider,
+    provider: Provider,
   ) {
     super();
     this.stakeERC20Info = stakeERC20Info;
@@ -81,7 +81,7 @@ export class GMXMintStakeGLPStep extends Step {
       erc20AmountForStep.expectedBalance,
       this.provider,
     );
-    const minGlpAmount: BigNumber = minBalanceAfterSlippage(
+    const minGlpAmount: bigint = minBalanceAfterSlippage(
       expectedGlpAmount,
       this.slippagePercentage,
     );
@@ -92,7 +92,7 @@ export class GMXMintStakeGLPStep extends Step {
     const mintStakeTransaction = await gmxRewardRouter.createMintAndStakeGlp(
       erc20AmountForStep.tokenAddress,
       erc20AmountForStep.expectedBalance,
-      BigNumber.from(0), // TODO: Min USDG
+      0n, // TODO: Min USDG
       minGlpAmount,
     );
     if (
@@ -106,7 +106,7 @@ export class GMXMintStakeGLPStep extends Step {
     const nftOwnedAccount = new AccessCardOwnerAccountContract(
       this.nftOwnedAccountAddress,
     );
-    const populatedTransaction = await nftOwnedAccount.createCall(
+    const crossContractCall = await nftOwnedAccount.createCall(
       mintStakeTransaction.to,
       mintStakeTransaction.data,
       mintStakeTransaction.value,
@@ -127,12 +127,12 @@ export class GMXMintStakeGLPStep extends Step {
     const feeERC20AmountRecipient: RecipeERC20AmountRecipient = {
       tokenAddress: glpAddress,
       decimals: GLP_DECIMALS,
-      amount: BigNumber.from(0),
+      amount: 0n,
       recipient: 'GLP Staking Fee',
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spentERC20AmountRecipient],
       outputERC20Amounts: [outputERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,

@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
-import { BigNumber } from 'ethers';
+
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -28,13 +28,13 @@ const buyTokenAddress = testConfig.contractsEthereum.rail.toLowerCase();
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress,
-  decimals: 18,
+  decimals: 18n,
   isBaseToken: false,
 };
 
 const buyToken: RecipeERC20Info = {
   tokenAddress: buyTokenAddress,
-  decimals: 18,
+  decimals: 18n,
 };
 
 const slippagePercentage = 0.01;
@@ -42,24 +42,24 @@ const slippagePercentage = 0.01;
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',
   spender,
-  populatedTransaction: {
+  crossContractCall: {
     to: '0x1234',
-    value: BigNumber.from(0),
+    value: 0n,
     data: '0x5678',
   },
   buyERC20Amount: {
     tokenAddress: buyTokenAddress,
-    decimals: 18,
-    amount: BigNumber.from('500'),
+    decimals: 18n,
+    amount: BigInt('500'),
   },
-  minimumBuyAmount: BigNumber.from('495'),
+  minimumBuyAmount: BigInt('495'),
 
   // base token - 0x's filler address
   sellTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
 
   // Unused
-  price: BigNumber.from(0),
-  guaranteedPrice: BigNumber.from(0),
+  price: 0n,
+  guaranteedPrice: 0n,
   slippagePercentage,
 };
 
@@ -89,9 +89,9 @@ describe('zero-x-swap-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('12000'),
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -101,10 +101,10 @@ describe('zero-x-swap-recipe', () => {
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
-      sellFee: BigNumber.from('30'),
-      buyAmount: BigNumber.from('499'),
-      buyMinimum: BigNumber.from('494'),
-      buyFee: BigNumber.from('1'),
+      sellFee: 30n,
+      buyAmount: BigInt('499'),
+      buyMinimum: BigInt('494'),
+      buyFee: 1n,
     });
 
     expect(output.stepOutputs[0]).to.deep.equal({
@@ -112,24 +112,24 @@ describe('zero-x-swap-recipe', () => {
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('30'),
+          amount: 30n,
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          expectedBalance: BigNumber.from('11970'),
-          minBalance: BigNumber.from('11970'),
+          expectedBalance: BigInt('11970'),
+          minBalance: BigInt('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
@@ -138,18 +138,18 @@ describe('zero-x-swap-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: spender,
-          expectedBalance: BigNumber.from('11970'),
-          minBalance: BigNumber.from('11970'),
+          expectedBalance: BigInt('11970'),
+          minBalance: BigInt('11970'),
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-          to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },
       ],
     });
@@ -160,36 +160,36 @@ describe('zero-x-swap-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('500'),
-          minBalance: BigNumber.from('495'),
+          expectedBalance: BigInt('500'),
+          minBalance: BigInt('495'),
           tokenAddress: buyTokenAddress,
           isBaseToken: undefined,
-          decimals: 18,
+          decimals: 18n,
         },
         {
           approvedSpender: spender,
-          expectedBalance: BigNumber.from('1970'),
-          minBalance: BigNumber.from('1970'),
+          expectedBalance: 1970n,
+          minBalance: 1970n,
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0x5678',
           to: '0x1234',
-          value: BigNumber.from(0),
+          value: 0n,
         },
       ],
       spentERC20Amounts: [
         {
-          amount: BigNumber.from('10000'),
+          amount: 10000n,
           isBaseToken: false,
           tokenAddress: sellTokenAddress,
           recipient: '0x Exchange',
-          decimals: 18,
+          decimals: 18n,
         },
       ],
     });
@@ -199,38 +199,38 @@ describe('zero-x-swap-recipe', () => {
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('1'),
+          amount: 1n,
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: buyTokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
         {
-          amount: BigNumber.from('4'),
+          amount: 4n,
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('499'),
-          minBalance: BigNumber.from('494'),
+          expectedBalance: BigInt('499'),
+          minBalance: BigInt('494'),
           tokenAddress: buyTokenAddress,
           isBaseToken: undefined,
-          decimals: 18,
+          decimals: 18n,
         },
         {
           approvedSpender: spender,
-          expectedBalance: BigNumber.from('1966'),
-          minBalance: BigNumber.from('1966'),
+          expectedBalance: 1966n,
+          minBalance: 1966n,
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(
@@ -243,31 +243,31 @@ describe('zero-x-swap-recipe', () => {
 
     expect(output.nfts).to.deep.equal([]);
 
-    const populatedTransactionsFlattened = output.stepOutputs.flatMap(
-      stepOutput => stepOutput.populatedTransactions,
+    const crossContractCallsFlattened = output.stepOutputs.flatMap(
+      stepOutput => stepOutput.crossContractCalls,
     );
-    expect(output.populatedTransactions).to.deep.equal(
-      populatedTransactionsFlattened,
+    expect(output.crossContractCalls).to.deep.equal(
+      crossContractCallsFlattened,
     );
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amount: BigNumber.from('30'),
+        amount: 30n,
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress: sellTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
-        amount: BigNumber.from('1'),
+        amount: 1n,
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: buyTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
-        amount: BigNumber.from('4'),
+        amount: 4n,
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: sellTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
   });
@@ -281,8 +281,8 @@ describe('zero-x-swap-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress: '0x1234',
-          decimals: 18,
-          amount: BigNumber.from('12000'),
+          decimals: 18n,
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -297,9 +297,9 @@ describe('zero-x-swap-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('2000'),
+          amount: 2000n,
         },
       ],
       nfts: [],

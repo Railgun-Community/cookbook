@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal } from '../uni-v2-like-add-liquidity-beefy-deposit-combo-meal';
-import { BigNumber } from 'ethers';
 import {
   RecipeERC20Amount,
   RecipeERC20Info,
@@ -17,7 +16,7 @@ import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
-import { balanceForERC20Token } from '@railgun-community/quickstart';
+import { balanceForERC20Token } from '@railgun-community/wallet';
 import {
   executeRecipeStepsAndAssertUnshieldBalances,
   shouldSkipForkTest,
@@ -31,24 +30,24 @@ const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 
-const oneInDecimals6 = BigNumber.from(10).pow(6);
+const oneInDecimals6 = 10n ** 6n;
 const slippagePercentage = 0.01;
 
 const USDC_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-  decimals: 6,
+  decimals: 6n,
 };
 const WETH_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  decimals: 18,
+  decimals: 18n,
 };
 // const LP_TOKEN: RecipeERC20Info = {
 //   tokenAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
-//   decimals: 18,
+//   decimals: 18n,
 // };
 const VAULT_TOKEN: RecipeERC20Info = {
   tokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
-  decimals: 18,
+  decimals: 18n,
 };
 const vaultID = 'sushi-mainnet-usdc-weth';
 
@@ -91,7 +90,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     const usdcAmount: RecipeERC20Amount = {
       tokenAddress: USDC_TOKEN.tokenAddress,
       decimals: USDC_TOKEN.decimals,
-      amount: oneInDecimals6.mul(2000),
+      amount: oneInDecimals6 * 2000n,
     };
     const { erc20UnshieldAmountB: wethAmount, addLiquidityData } =
       await comboMeal.getAddLiquidityAmountBForUnshield(
@@ -118,7 +117,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       comboMeal.config.name,
       recipeInput,
       recipeOutput,
-      2_950_000, // expectedGasWithin50K
+      2_800_000n, // expectedGasWithin50K
       true, // expectPossiblePrecisionLossOverflow - due to precision loss in the reserve ratios
     );
 
@@ -137,32 +136,31 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
 
     const { receivedVaultTokenAmount } = calculateOutputsForBeefyDeposit(
       expectedLPTokenReceived,
-      vault.depositFee,
+      vault.depositFeeBasisPoints,
       vault.depositERC20Decimals,
       vault.vaultRate,
     );
 
-    const shieldFee = receivedVaultTokenAmount
-      .mul(MOCK_SHIELD_FEE_BASIS_POINTS)
-      .div(10000);
+    const shieldFee =
+      (receivedVaultTokenAmount * MOCK_SHIELD_FEE_BASIS_POINTS) / 10000n;
 
-    const expectedPrivateVaultTokenBalance = initialPrivateVaultTokenBalance
-      .add(receivedVaultTokenAmount) // Vault tokens acquired
-      .sub(shieldFee); // Shield fee
+    const expectedPrivateVaultTokenBalance =
+      initialPrivateVaultTokenBalance +
+      receivedVaultTokenAmount - // Vault tokens acquired
+      shieldFee; // Shield fee
 
     // TODO: Why is this not an exact value?
-    // expect(expectedPrivateVaultTokenBalance.toString()).to.equal(
-    //   privateVaultTokenBalance.toString(),
+    // expect(expectedPrivateVaultTokenBalance).to.equal(
+    //   privateVaultTokenBalance,
     //   'Private LP token balance incorrect after adding liquidity',
     // );
     expect(
-      expectedPrivateVaultTokenBalance.lte(privateVaultTokenBalance) &&
-        expectedPrivateVaultTokenBalance
-          .add('1000000000')
-          .gte(privateVaultTokenBalance),
+      expectedPrivateVaultTokenBalance <= privateVaultTokenBalance &&
+        expectedPrivateVaultTokenBalance + 1000000000n >=
+          privateVaultTokenBalance,
     ).to.equal(
       true,
-      `Private Vault token balance incorrect after adding liquidity and depositing to vault, expected ${privateVaultTokenBalance.toString()} within 1000000000 of ${expectedPrivateVaultTokenBalance.toString()}`,
+      `Private Vault token balance incorrect after adding liquidity and depositing to vault, expected ${privateVaultTokenBalance} within 1000000000 of ${expectedPrivateVaultTokenBalance}`,
     );
 
     // 2. Add External Balance expectations.

@@ -1,13 +1,12 @@
-import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
+import { Contract, Provider } from 'ethers';
+import { abi } from '../../abi/abi';
+import { UniV2LikeFactory } from '../../typechain';
 import { validateAddress } from '../../utils/address';
-import { BaseProvider } from '@ethersproject/providers';
-import { UniV2LikeFactory } from '../../abi-typechain/liquidity/UniV2LikeFactory';
 
 export class UniV2LikeFactoryContract {
   private readonly contract: UniV2LikeFactory;
 
-  constructor(address: string, provider: BaseProvider) {
+  constructor(address: string, provider: Provider) {
     if (!validateAddress(address)) {
       throw new Error('Invalid factory address for LP factory contract');
     }
@@ -15,7 +14,7 @@ export class UniV2LikeFactoryContract {
       address,
       abi.liquidity.uniV2LikeFactory,
       provider,
-    ) as UniV2LikeFactory;
+    ) as unknown as UniV2LikeFactory;
   }
 
   async feeTo(): Promise<string> {

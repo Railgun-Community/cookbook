@@ -13,7 +13,7 @@ const networkName = NetworkName.Ethereum;
 
 describe('custom-recipe', () => {
   before(() => {
-    setRailgunFees(networkName, '25', '25');
+    setRailgunFees(networkName, 25n, 25n);
   });
 
   it('Should add custom recipe steps', async () => {

@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeNFTInfo,
   StepConfig,
@@ -10,10 +9,11 @@ import {
   NFTTokenType,
   RailgunNFTAmount,
 } from '@railgun-community/shared-models';
-import { compareNFTs, nftAmountOne } from '../../utils/token';
+import { compareNFTs } from '../../utils/token';
 import { AccessCardNFT } from '../../api/access-card/access-card-nft';
-import { BaseProvider } from '@ethersproject/providers';
+
 import { AccessCardAccountCreatorContract } from '../../contract/access-card/access-card-account-creator-contract';
+import { Provider } from 'ethers';
 
 export class AccessCardCreateNFTOwnerStep extends Step {
   readonly config: StepConfig = {
@@ -24,17 +24,17 @@ export class AccessCardCreateNFTOwnerStep extends Step {
 
   private readonly accessCardNFTAddress: string;
 
-  private readonly nftTokenSubID: BigNumber;
+  private readonly nftTokenSubID: bigint;
 
   private readonly ownableContractAddress: string;
 
-  private readonly provider: BaseProvider;
+  private readonly provider: Provider;
 
   constructor(
     accessCardNFTAddress: string,
-    nftTokenSubID: BigNumber,
+    nftTokenSubID: bigint,
     ownableContractAddress: string,
-    provider: BaseProvider,
+    provider: Provider,
   ) {
     super();
     this.accessCardNFTAddress = accessCardNFTAddress;
@@ -51,8 +51,8 @@ export class AccessCardCreateNFTOwnerStep extends Step {
     const accessCardNFT: RailgunNFTAmount = {
       nftAddress: this.accessCardNFTAddress,
       nftTokenType: NFTTokenType.ERC721,
-      tokenSubID: this.nftTokenSubID.toHexString(),
-      amountString: nftAmountOne(),
+      tokenSubID: this.nftTokenSubID.toString(),
+      amount: 1n,
     };
 
     // Ensure that NFT exists.
@@ -69,7 +69,7 @@ export class AccessCardCreateNFTOwnerStep extends Step {
       accountCreator,
       this.provider,
     );
-    const populatedTransaction = await creator.createDeploy(
+    const crossContractCall = await creator.createDeploy(
       this.accessCardNFTAddress,
       this.nftTokenSubID,
     );
@@ -80,7 +80,7 @@ export class AccessCardCreateNFTOwnerStep extends Step {
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       outputERC20Amounts: input.erc20Amounts,
       outputNFTs: [ownerNFT, ...unusedNFTAmounts],
     };

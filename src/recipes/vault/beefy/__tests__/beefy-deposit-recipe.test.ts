@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { BeefyDepositRecipe } from '../beefy-deposit-recipe';
-import { BigNumber } from 'ethers';
 import { RecipeInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../../init';
@@ -27,12 +26,12 @@ const vault: BeefyVaultData = {
   chain: 'ethereum',
   network: 'ethereum',
   depositERC20Address: tokenAddress,
-  depositERC20Decimals: 18,
+  depositERC20Decimals: 18n,
   vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
-  vaultRate: '2000000000000000000', // 2x
-  depositFee: 0.1,
-  withdrawFee: 0,
+  vaultRate: BigInt('2000000000000000000'), // 2x
+  depositFeeBasisPoints: 1000n,
+  withdrawFeeBasisPoints: 0n,
 };
 
 let beefyVaultForIDStub: SinonStub;
@@ -62,8 +61,8 @@ describe('beefy-deposit-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
-          amount: BigNumber.from('10000'),
+          decimals: 18n,
+          amount: 10000n,
         },
       ],
       nfts: [],
@@ -77,24 +76,24 @@ describe('beefy-deposit-recipe', () => {
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('25'),
+          amount: BigInt('25'),
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigNumber.from('9975'),
-          minBalance: BigNumber.from('9975'),
+          expectedBalance: BigInt('9975'),
+          minBalance: BigInt('9975'),
           approvedSpender: undefined,
           isBaseToken: undefined,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
@@ -103,18 +102,18 @@ describe('beefy-deposit-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: vault.vaultContractAddress,
-          expectedBalance: BigNumber.from('9975'),
-          minBalance: BigNumber.from('9975'),
+          expectedBalance: BigInt('9975'),
+          minBalance: BigInt('9975'),
           isBaseToken: undefined,
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0x095ea7b300000000000000000000000040324434a0b53dd1ed167ba30dcb6b4bd7a9536dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-          to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
+          to: '0xe76c6c83af64e4c60245d8c7de953df673a7a33d',
         },
       ],
     });
@@ -125,22 +124,22 @@ describe('beefy-deposit-recipe', () => {
       feeERC20AmountRecipients: [
         {
           tokenAddress,
-          amount: BigNumber.from('997'),
+          amount: BigInt('997'),
           recipient: 'VAULT_NAME Vault Deposit Fee',
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('4489'),
-          minBalance: BigNumber.from('4489'),
+          expectedBalance: BigInt('4489'),
+          minBalance: BigInt('4489'),
           tokenAddress: vault.vaultTokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0xde5f6268',
           to: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
@@ -148,10 +147,10 @@ describe('beefy-deposit-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigNumber.from('8978'),
+          amount: BigInt('8978'),
           tokenAddress,
           recipient: 'VAULT_NAME Vault',
-          decimals: 18,
+          decimals: 18n,
         },
       ],
     });
@@ -161,24 +160,24 @@ describe('beefy-deposit-recipe', () => {
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('11'),
+          amount: BigInt('11'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: vault.vaultTokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('4478'),
-          minBalance: BigNumber.from('4478'),
+          expectedBalance: BigInt('4478'),
+          minBalance: BigInt('4478'),
           tokenAddress: vault.vaultTokenAddress,
           isBaseToken: undefined,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(
@@ -191,31 +190,31 @@ describe('beefy-deposit-recipe', () => {
 
     expect(output.nfts).to.deep.equal([]);
 
-    const populatedTransactionsFlattened = output.stepOutputs.flatMap(
-      stepOutput => stepOutput.populatedTransactions,
+    const crossContractCallsFlattened = output.stepOutputs.flatMap(
+      stepOutput => stepOutput.crossContractCalls,
     );
-    expect(output.populatedTransactions).to.deep.equal(
-      populatedTransactionsFlattened,
+    expect(output.crossContractCalls).to.deep.equal(
+      crossContractCallsFlattened,
     );
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amount: BigNumber.from('25'),
+        amount: BigInt('25'),
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
-        amount: BigNumber.from('997'),
+        amount: BigInt('997'),
         recipient: 'VAULT_NAME Vault Deposit Fee',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
-        amount: BigNumber.from('11'),
+        amount: BigInt('11'),
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: vault.vaultTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
   });
@@ -229,8 +228,8 @@ describe('beefy-deposit-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress: '0x1234',
-          decimals: 18,
-          amount: BigNumber.from('12000'),
+          decimals: 18n,
+          amount: 12000n,
         },
       ],
       nfts: [],

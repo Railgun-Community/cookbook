@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   StepInput,
   StepOutput,
@@ -14,7 +13,6 @@ import {
   filterNFTAmountInputs,
 } from '../utils/filters';
 import { validateStepOutput } from '../validators/step-validator';
-import { RailgunNFTAmount } from '@railgun-community/shared-models';
 
 export abstract class Step {
   abstract readonly config: StepConfig;
@@ -46,7 +44,7 @@ export abstract class Step {
   protected getValidInputERC20Amount(
     inputERC20Amounts: StepOutputERC20Amount[],
     filter: ERC20AmountFilter,
-    amount: Optional<BigNumber>,
+    amount: Optional<bigint>,
   ): {
     erc20AmountForStep: StepOutputERC20Amount;
     unusedERC20Amounts: StepOutputERC20Amount[];
@@ -69,9 +67,8 @@ export abstract class Step {
     // Copy values to new object.
     const erc20AmountForStep = { ...erc20AmountsForStep[0] };
 
-    const hasNonDeterministicInput = !erc20AmountForStep.expectedBalance.eq(
-      erc20AmountForStep.minBalance,
-    );
+    const hasNonDeterministicInput =
+      erc20AmountForStep.expectedBalance !== erc20AmountForStep.minBalance;
 
     // If this step has a non-deterministic output, we must provide deterministic inputs.
     // Otherwise, the expected balances become too complicated and variable.
@@ -89,9 +86,9 @@ export abstract class Step {
         );
       }
       // Note: minBalance === expectedBalance
-      if (amount.gt(erc20AmountForStep.expectedBalance)) {
+      if (amount > erc20AmountForStep.expectedBalance) {
         throw new Error(
-          `Specified amount ${amount.toString()} exceeds balance ${erc20AmountForStep.expectedBalance.toString()}.`,
+          `Specified amount ${amount} exceeds balance ${erc20AmountForStep.expectedBalance}.`,
         );
       }
     }
@@ -137,13 +134,13 @@ export abstract class Step {
 
   private getChangeOutputs(
     erc20AmountForStep: StepOutputERC20Amount,
-    amountUsed: Optional<BigNumber>,
+    amountUsed: Optional<bigint>,
   ) {
-    if (!amountUsed || amountUsed.gte(erc20AmountForStep.expectedBalance)) {
+    if (!amountUsed || amountUsed >= erc20AmountForStep.expectedBalance) {
       return undefined;
     }
 
-    const changeBalance = erc20AmountForStep.expectedBalance.sub(amountUsed);
+    const changeBalance = erc20AmountForStep.expectedBalance - amountUsed;
     const changeOutput: StepOutputERC20Amount = {
       ...erc20AmountForStep,
       expectedBalance: changeBalance,
@@ -159,7 +156,7 @@ export abstract class Step {
   protected getValidInputERC20Amounts(
     inputERC20Amounts: StepOutputERC20Amount[],
     filters: ERC20AmountFilter[],
-    amountsPerAddress: Record<string, BigNumber>,
+    amountsPerAddress: Record<string, bigint>,
   ): {
     erc20AmountsForStep: StepOutputERC20Amount[];
     unusedERC20Amounts: StepOutputERC20Amount[];

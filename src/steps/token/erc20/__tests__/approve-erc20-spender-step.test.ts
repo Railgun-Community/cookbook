@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ApproveERC20SpenderStep } from '../approve-erc20-spender-step';
-import { BigNumber } from 'ethers';
+
 import { RecipeERC20Info, StepInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 
@@ -11,10 +11,10 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 const tokenInfo: RecipeERC20Info = {
   tokenAddress: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
-  decimals: 18,
+  decimals: 18n,
 };
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-const amount = BigNumber.from('10000');
+const amount = 10000n;
 const USDT_ADDRESS = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 
 describe('approve-erc20-spender-step', () => {
@@ -26,9 +26,9 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          decimals: 18n,
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -45,17 +45,17 @@ describe('approve-erc20-spender-step', () => {
       {
         tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: spender,
-        expectedBalance: BigNumber.from('10000'),
-        minBalance: BigNumber.from('10000'),
+        expectedBalance: 10000n,
+        minBalance: 10000n,
         isBaseToken: undefined,
-        decimals: 18,
+        decimals: 18n,
       },
       {
         tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: undefined,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
-        decimals: 18,
+        expectedBalance: 2000n,
+        minBalance: 2000n,
+        decimals: 18n,
       },
     ]);
 
@@ -64,13 +64,13 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
-    expect(output.populatedTransactions[0].to).to.equal(tokenInfo.tokenAddress);
+    expect(output.crossContractCalls[0].to).to.equal(tokenInfo.tokenAddress);
   });
 
   it('Should create approve-erc20-spender step without amount', async () => {
@@ -81,9 +81,9 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          decimals: 18n,
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -100,10 +100,10 @@ describe('approve-erc20-spender-step', () => {
       {
         tokenAddress: tokenInfo.tokenAddress,
         approvedSpender: spender,
-        expectedBalance: BigNumber.from('12000'),
-        minBalance: BigNumber.from('12000'),
+        expectedBalance: 12000n,
+        minBalance: 12000n,
         isBaseToken: undefined,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -112,7 +112,7 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
@@ -123,7 +123,7 @@ describe('approve-erc20-spender-step', () => {
   it('Should create approve-erc20-spender step for USDT', async () => {
     const usdtTokenInfo: RecipeERC20Info = {
       tokenAddress: USDT_ADDRESS,
-      decimals: 6,
+      decimals: 6n,
     };
 
     const approveStep = new ApproveERC20SpenderStep(spender, usdtTokenInfo);
@@ -133,9 +133,9 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: USDT_ADDRESS,
-          decimals: 6,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          decimals: 6n,
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -152,10 +152,10 @@ describe('approve-erc20-spender-step', () => {
       {
         tokenAddress: USDT_ADDRESS,
         approvedSpender: spender,
-        expectedBalance: BigNumber.from('12000'),
-        minBalance: BigNumber.from('12000'),
+        expectedBalance: 12000n,
+        minBalance: 12000n,
         isBaseToken: undefined,
-        decimals: 6,
+        decimals: 6n,
       },
     ]);
 
@@ -164,14 +164,14 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-        to: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        to: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       },
       {
         data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-        to: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        to: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       },
     ]);
   });
@@ -184,9 +184,9 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          decimals: 18n,
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -202,10 +202,10 @@ describe('approve-erc20-spender-step', () => {
     expect(output.outputERC20Amounts).to.deep.equal([
       {
         tokenAddress: tokenInfo.tokenAddress,
-        expectedBalance: BigNumber.from('12000'),
-        minBalance: BigNumber.from('12000'),
+        expectedBalance: 12000n,
+        minBalance: 12000n,
         approvedSpender: undefined,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -214,7 +214,7 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([]);
+    expect(output.crossContractCalls).to.deep.equal([]);
   });
 
   it('Should test approve-erc20-spender step error cases', async () => {
@@ -238,9 +238,9 @@ describe('approve-erc20-spender-step', () => {
       erc20Amounts: [
         {
           tokenAddress: tokenInfo.tokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
+          decimals: 18n,
+          expectedBalance: 2000n,
+          minBalance: 2000n,
           approvedSpender: undefined,
         },
       ],

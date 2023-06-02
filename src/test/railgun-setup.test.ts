@@ -11,7 +11,7 @@ import {
   setOnBalanceUpdateCallback,
   startRailgunEngine,
   walletForID,
-} from '@railgun-community/quickstart';
+} from '@railgun-community/wallet';
 import LevelDOWN from 'leveldown';
 import fs from 'fs';
 import {
@@ -21,28 +21,25 @@ import {
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
   delay,
-  deserializeTransaction,
   poll,
 } from '@railgun-community/shared-models';
 import { testConfig } from './test-config.test';
-import { BigNumber, Wallet } from 'ethers';
+import { ContractTransaction, Wallet } from 'ethers';
 import { debug } from 'debug';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import {
   testRPCProvider,
-  getGanacheProvider,
   getTestEthersWallet,
   getTestRailgunWallet,
   setSharedTestRailgunWallet,
 } from './shared.test';
-import { TransactionRequest } from '@ethersproject/providers';
 import { groth16 } from 'snarkjs';
 import { getLocalhostRPC, getRPCPort } from './common.test';
 
 const dbgRailgunSetup = debug('railgun:setup');
 
-const dbgRailgunQuickstart = debug('railgun:quickstart');
-dbgRailgunQuickstart.enabled = testConfig.showVerboseLogs;
+const dbgRailgunWalletSDK = debug('railgun:wallet');
+dbgRailgunWalletSDK.enabled = testConfig.showVerboseLogs;
 
 const ENGINE_TEST_DB = 'test.db';
 const db = new LevelDOWN(ENGINE_TEST_DB);
@@ -77,7 +74,7 @@ export const startRailgunForTests = () => {
 
   dbgRailgunSetup('Starting RAILGUN Engine...');
 
-  const { error } = startRailgunEngine(
+  startRailgunEngine(
     testWalletSource,
     db,
     shouldDebug,
@@ -87,15 +84,11 @@ export const startRailgunForTests = () => {
   );
 
   setLoggers(
-    (msg: string) => dbgRailgunQuickstart(msg),
-    (error: string | Error) => dbgRailgunQuickstart(error),
+    (msg: string) => dbgRailgunWalletSDK(msg),
+    (error: string | Error) => dbgRailgunWalletSDK(error),
   );
 
   getProver().setSnarkJSGroth16(groth16 as Groth16);
-
-  if (error) {
-    throw new Error(error);
-  }
 };
 
 export const loadLocalhostFallbackProviderForTests = async (
@@ -115,18 +108,11 @@ export const loadLocalhostFallbackProviderForTests = async (
   };
 
   dbgRailgunSetup(`Loading provider for chain ${chainId} to RAILGUN Engine.`);
-  const { error } = await loadProvider(
-    localhostProviderConfig,
-    NetworkName.Ethereum,
-    true, // shouldDebug
-  );
-  if (error) {
-    throw new Error(error);
-  }
+  await loadProvider(localhostProviderConfig, networkName);
 };
 
 export const createRailgunWalletForTests = async () => {
-  const { railgunWalletInfo } = await createRailgunWallet(
+  const railgunWalletInfo = await createRailgunWallet(
     testConfig.encryptionKey,
     testConfig.railgunMnemonic,
     {},
@@ -144,12 +130,15 @@ const approveShield = async (wallet: Wallet, tokenAddress: string) => {
   const token = new ERC20Contract(tokenAddress, testRPCProvider);
   const tx = await token.createSpenderApproval(
     testConfig.contractsEthereum.proxy,
-    BigNumber.from(10).pow(18).mul(10000000), // 1 MM approved
+    10n ** 18n * 10000000n, // 1 MM approved
   );
-  return wallet.sendTransaction(tx);
+  return sendTransactionWithRetries(wallet, tx);
 };
 
-export const shieldAllTokensForTests = async (tokenAddresses: string[]) => {
+export const shieldAllTokensForTests = async (
+  networkName: NetworkName,
+  tokenAddresses: string[],
+) => {
   const wallet = getTestEthersWallet();
 
   dbgRailgunSetup('Approving all tokens for shielding...');
@@ -163,48 +152,39 @@ export const shieldAllTokensForTests = async (tokenAddresses: string[]) => {
   const testRailgunWallet = getTestRailgunWallet();
   const railgunAddress = testRailgunWallet.getAddress();
 
-  const oneThousand18Decimals = '1000000000000000000000';
+  const oneThousand18Decimals = 10n ** 18n * 1000n;
   const erc20AmountRecipients: RailgunERC20AmountRecipient[] =
     tokenAddresses.map(tokenAddress => ({
       tokenAddress,
-      amountString: BigNumber.from(oneThousand18Decimals).toHexString(), // 1000
+      amount: oneThousand18Decimals,
       recipientAddress: railgunAddress,
     }));
 
   const shieldPrivateKey = getRandomBytes(32);
-  const { serializedTransaction, error } = await populateShield(
-    NetworkName.Ethereum,
+  const { transaction } = await populateShield(
+    networkName,
     shieldPrivateKey,
     erc20AmountRecipients,
     [], // nftAmountRecipients
   );
-  if (error) {
-    throw new Error(`Error populating shield: ${error}`);
-  }
-  if (!serializedTransaction) {
-    throw new Error('No populated shield');
-  }
 
-  const provider = getGanacheProvider();
-  const chainId = (await provider.getNetwork()).chainId;
-  const tx = deserializeTransaction(serializedTransaction, undefined, chainId);
-
-  await trySendShieldTransaction(wallet, tx);
+  await sendTransactionWithRetries(wallet, transaction);
 
   dbgRailgunSetup('Shielded tokens.');
 };
 
-const trySendShieldTransaction = async (
+const sendTransactionWithRetries = async (
   wallet: Wallet,
-  transaction: TransactionRequest,
+  transaction: ContractTransaction,
   retryCount = 0,
 ): Promise<void> => {
   try {
+    transaction.nonce = await wallet.getNonce('latest');
     await wallet.sendTransaction(transaction);
   } catch (err) {
     if (retryCount < 3) {
-      await delay(500);
-      return trySendShieldTransaction(wallet, transaction, retryCount + 1);
+      await delay(300);
+      return sendTransactionWithRetries(wallet, transaction, retryCount + 1);
     }
     dbgRailgunSetup(err);
     throw new Error(`Could not send SHIELD transaction. See error output.`);
@@ -216,7 +196,7 @@ export const waitForShieldedTokenBalances = async (
   tokenAddresses: string[],
 ) => {
   const onBalancesUpdate = (balancesEvent: RailgunBalancesEvent) => {
-    dbgRailgunQuickstart('onBalancesUpdate', balancesEvent);
+    dbgRailgunWalletSDK('onBalancesUpdate', balancesEvent);
   };
   setOnBalanceUpdateCallback(onBalancesUpdate);
 
@@ -226,7 +206,7 @@ export const waitForShieldedTokenBalances = async (
 
   const tokenBalanceGetter = (
     tokenAddress: string,
-  ): (() => Promise<BigNumber>) => {
+  ): (() => Promise<bigint>) => {
     dbgRailgunSetup(`Polling for updated token balance... ${tokenAddress}`);
     return () =>
       balanceForERC20Token(testRailgunWallet, networkName, tokenAddress);
@@ -236,7 +216,7 @@ export const waitForShieldedTokenBalances = async (
     tokenAddresses.map(async tokenAddress => {
       const balance = await poll(
         tokenBalanceGetter(tokenAddress),
-        balance => balance.gte('997500000000000000000'),
+        balance => balance >= 997500000000000000000n,
         100, // Delay in MS
         300, // Iterations - 30sec total
       );

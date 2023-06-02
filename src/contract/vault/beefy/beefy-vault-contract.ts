@@ -1,13 +1,12 @@
-import { Contract, PopulatedTransaction } from '@ethersproject/contracts';
-import { abi } from '../../../abi-typechain/abi';
+import { Contract, ContractTransaction, Provider } from 'ethers';
+import { abi } from '../../../abi/abi';
+import { BeefyVaultMergedV6V7 } from '../../../typechain';
 import { validateAddress } from '../../../utils/address';
-import { BaseProvider } from '@ethersproject/providers';
-import { BeefyVaultMergedV6V7 } from '../../../abi-typechain/vault/beefy/BeefyVaultMergedV6V7';
 
 export class BeefyVaultContract {
   private readonly contract: BeefyVaultMergedV6V7;
 
-  constructor(address: string, provider?: BaseProvider) {
+  constructor(address: string, provider?: Provider) {
     if (!validateAddress(address)) {
       throw new Error('Invalid Vault address for Beefy contract');
     }
@@ -15,14 +14,14 @@ export class BeefyVaultContract {
       address,
       abi.vault.beefy,
       provider,
-    ) as BeefyVaultMergedV6V7;
+    ) as unknown as BeefyVaultMergedV6V7;
   }
 
-  createDepositAll(): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.depositAll();
+  createDepositAll(): Promise<ContractTransaction> {
+    return this.contract.depositAll.populateTransaction();
   }
 
-  createWithdrawAll(): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.withdrawAll();
+  createWithdrawAll(): Promise<ContractTransaction> {
+    return this.contract.withdrawAll.populateTransaction();
   }
 }

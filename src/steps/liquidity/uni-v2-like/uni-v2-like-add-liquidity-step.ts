@@ -82,7 +82,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
     const { relayAdaptContract } = NETWORK_CONFIG[input.networkName];
 
     const contract = new UniV2LikeRouterContract(routerContractAddress);
-    const populatedTransaction = await contract.createAddLiquidity(
+    const crossContractCall = await contract.createAddLiquidity(
       validatedERC20AmountA.tokenAddress,
       validatedERC20AmountB.tokenAddress,
       validatedERC20AmountA.expectedBalance,
@@ -121,7 +121,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       spentERC20Amounts: [
         spendERC20AmountRecipientA,
         spendERC20AmountRecipientB,

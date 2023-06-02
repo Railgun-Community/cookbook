@@ -14,10 +14,10 @@ import { GMX } from '../../../api/gmx/gmx';
 import { GMXMintStakeGLPStep } from '../../../steps/vault/gmx/gmx-stake-mint-glp-step';
 import { AccessCardNFTMintStep } from '../../../steps/access-card/access-card-nft-mint-step';
 import { AccessCardNFT } from '../../../api/access-card/access-card-nft';
-import { BaseProvider } from '@ethersproject/providers';
-import { BigNumber } from 'ethers';
+
 import { getRandomNFTID } from '../../../utils';
 import { AccessCardCreateNFTOwnerStep } from '../../../steps/access-card/access-card-create-nft-owner-step';
+import { Provider } from 'ethers';
 
 export class GMXMintStakeGLPRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -30,14 +30,14 @@ export class GMXMintStakeGLPRecipe extends Recipe {
 
   private readonly slippagePercentage: number;
 
-  private readonly provider: BaseProvider;
+  private readonly provider: Provider;
 
-  private readonly nftTokenSubID: BigNumber;
+  private readonly nftTokenSubID: bigint;
 
   constructor(
     stakeERC20Info: RecipeERC20Info,
     slippagePercentage: number,
-    provider: BaseProvider,
+    provider: Provider,
   ) {
     super();
     this.stakeERC20Info = stakeERC20Info;

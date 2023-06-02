@@ -10,7 +10,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { RecipeERC20Amount } from '../../../models';
 import { ApproveERC20SpenderStep } from '../../../steps/token/erc20/approve-erc20-spender-step';
 import { UniV2LikeAddLiquidityStep } from '../../../steps/liquidity/uni-v2-like/uni-v2-like-add-liquidity-step';
-import { BaseProvider } from '@ethersproject/providers';
+
 import { Step } from '../../../steps/step';
 import { AddLiquidityRecipe } from '../add-liquidity-recipe';
 import { findFirstInputERC20Amount } from '../../../utils/filters';
@@ -18,6 +18,7 @@ import {
   getAmountToUnshieldForTarget,
   getUnshieldedAmountAfterFee,
 } from '../../../utils/fee';
+import { Provider } from 'ethers';
 
 export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   readonly config: RecipeConfig = {
@@ -31,14 +32,14 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   private readonly erc20InfoB: RecipeERC20Info;
 
   private readonly slippagePercentage: number;
-  private readonly provider: BaseProvider;
+  private readonly provider: Provider;
 
   constructor(
     uniswapV2Fork: UniswapV2Fork,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
-    provider: BaseProvider,
+    provider: Provider,
   ) {
     super();
     this.uniswapV2Fork = uniswapV2Fork;

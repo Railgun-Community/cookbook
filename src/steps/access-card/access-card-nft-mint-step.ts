@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import {
   RecipeNFTInfo,
   StepConfig,
@@ -8,7 +7,6 @@ import {
 import { Step } from '../step';
 import { AccessCardERC721Contract } from '../../contract/access-card/access-card-erc721-contract';
 import { NETWORK_CONFIG, NFTTokenType } from '@railgun-community/shared-models';
-import { nftAmountOne } from '../../utils/token';
 
 export class AccessCardNFTMintStep extends Step {
   readonly config: StepConfig = {
@@ -19,9 +17,9 @@ export class AccessCardNFTMintStep extends Step {
 
   private readonly accessCardNFTAddress: string;
 
-  private readonly nftTokenSubID: BigNumber;
+  private readonly nftTokenSubID: bigint;
 
-  constructor(accessCardNFTAddress: string, nftTokenSubID: BigNumber) {
+  constructor(accessCardNFTAddress: string, nftTokenSubID: bigint) {
     super();
     this.accessCardNFTAddress = accessCardNFTAddress;
     this.nftTokenSubID = nftTokenSubID;
@@ -36,7 +34,7 @@ export class AccessCardNFTMintStep extends Step {
       NETWORK_CONFIG[networkName].relayAdaptContract;
 
     const contract = new AccessCardERC721Contract(this.accessCardNFTAddress);
-    const populatedTransaction = await contract.mint(
+    const crossContractCall = await contract.mint(
       relayAdaptContractAddress,
       this.nftTokenSubID,
     );
@@ -44,13 +42,13 @@ export class AccessCardNFTMintStep extends Step {
     const accessCardNFT: RecipeNFTInfo = {
       nftAddress: this.accessCardNFTAddress,
       nftTokenType: NFTTokenType.ERC721,
-      tokenSubID: this.nftTokenSubID.toHexString(),
-      amountString: nftAmountOne(),
+      tokenSubID: this.nftTokenSubID.toString(),
+      amount: 1n,
       owns: undefined,
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       outputERC20Amounts: input.erc20Amounts,
       outputNFTs: [accessCardNFT, ...input.nfts],
     };

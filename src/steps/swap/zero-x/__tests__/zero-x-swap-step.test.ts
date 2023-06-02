@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapStep } from '../zero-x-swap-step';
-import { BigNumber } from 'ethers';
+
 import {
   RecipeERC20Info,
   StepInput,
@@ -17,35 +17,35 @@ const networkName = NetworkName.Ethereum;
 const spender = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const sellTokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
-const amount = BigNumber.from('10000');
+const amount = 10000n;
 
 const sellToken: RecipeERC20Info = {
   tokenAddress: sellTokenAddress,
-  decimals: 18,
+  decimals: 18n,
   isBaseToken: true,
 };
 
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',
   spender,
-  populatedTransaction: {
+  crossContractCall: {
     to: '0x1234',
-    value: BigNumber.from(0),
+    value: 0n,
     data: '0x5678',
   },
   buyERC20Amount: {
     tokenAddress: buyTokenAddress,
-    decimals: 18,
-    amount: BigNumber.from('500'),
+    decimals: 18n,
+    amount: BigInt('500'),
   },
-  minimumBuyAmount: BigNumber.from('495'),
+  minimumBuyAmount: BigInt('495'),
 
   // base token - 0x's filler address
   sellTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
 
   // Unused
-  price: BigNumber.from(0),
-  guaranteedPrice: BigNumber.from(0),
+  price: 0n,
+  guaranteedPrice: 0n,
   slippagePercentage: 0.01,
 };
 
@@ -63,19 +63,19 @@ describe('zero-x-swap-step', () => {
         {
           // Approved for swapping
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('10000'),
-          minBalance: BigNumber.from('10000'),
+          expectedBalance: 10000n,
+          minBalance: 10000n,
           approvedSpender: spender,
         },
         {
           // Same token, unapproved
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
+          expectedBalance: 2000n,
+          minBalance: 2000n,
           approvedSpender: undefined,
         },
       ],
@@ -95,7 +95,7 @@ describe('zero-x-swap-step', () => {
         isBaseToken: true,
         recipient: '0x Exchange',
         tokenAddress: sellTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -104,18 +104,18 @@ describe('zero-x-swap-step', () => {
       {
         approvedSpender: undefined,
         isBaseToken: undefined,
-        expectedBalance: BigNumber.from('500'),
-        minBalance: BigNumber.from('495'),
+        expectedBalance: BigInt('500'),
+        minBalance: BigInt('495'),
         tokenAddress: buyTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
         approvedSpender: undefined,
         isBaseToken: true,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
+        expectedBalance: 2000n,
+        minBalance: 2000n,
         tokenAddress: sellTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -124,11 +124,11 @@ describe('zero-x-swap-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0x5678',
         to: '0x1234',
-        value: BigNumber.from(0),
+        value: 0n,
       },
     ]);
   });
@@ -141,10 +141,10 @@ describe('zero-x-swap-step', () => {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -164,7 +164,7 @@ describe('zero-x-swap-step', () => {
         isBaseToken: true,
         recipient: '0x Exchange',
         tokenAddress: sellTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -173,18 +173,18 @@ describe('zero-x-swap-step', () => {
       {
         approvedSpender: undefined,
         isBaseToken: undefined,
-        expectedBalance: BigNumber.from('500'),
-        minBalance: BigNumber.from('495'),
+        expectedBalance: BigInt('500'),
+        minBalance: BigInt('495'),
         tokenAddress: buyTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
         approvedSpender: undefined,
         isBaseToken: true,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
+        expectedBalance: 2000n,
+        minBalance: 2000n,
         tokenAddress: sellTokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -193,11 +193,11 @@ describe('zero-x-swap-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0x5678',
         to: '0x1234',
-        value: BigNumber.from(0),
+        value: 0n,
       },
     ]);
   });
@@ -212,9 +212,9 @@ describe('zero-x-swap-step', () => {
         {
           // Non-base token
           tokenAddress: sellTokenAddress,
-          decimals: 18,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          decimals: 18n,
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: spender,
         },
       ],
@@ -229,10 +229,10 @@ describe('zero-x-swap-step', () => {
         {
           // No spender
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -250,10 +250,10 @@ describe('zero-x-swap-step', () => {
       erc20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
+          expectedBalance: 2000n,
+          minBalance: 2000n,
           approvedSpender: spender,
         },
       ],

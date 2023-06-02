@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BigNumber } from 'ethers';
+
 import { NetworkName } from '@railgun-community/shared-models';
 import {
   getAmountToUnshieldForTarget,
@@ -27,18 +27,18 @@ describe('fee', () => {
   });
 
   it('Should get target unshield amount after reverse fee calc', async () => {
-    const postUnshieldAmount = BigNumber.from('19949999999999999');
+    const postUnshieldAmount = BigInt('19949999999999999');
 
     const targetUnshieldAmount = getAmountToUnshieldForTarget(
       networkName,
       postUnshieldAmount,
     );
-    expect(targetUnshieldAmount.toString()).to.equal('19999999999999998');
+    expect(targetUnshieldAmount).to.equal(19999999999999998n);
 
     const unshieldedAmount = getUnshieldedAmountAfterFee(
       NetworkName.Ethereum,
       targetUnshieldAmount,
     );
-    expect(unshieldedAmount.toString()).to.equal('19949999999999999');
+    expect(unshieldedAmount).to.equal(19949999999999999n);
   });
 });

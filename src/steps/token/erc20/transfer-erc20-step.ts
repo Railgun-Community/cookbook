@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
@@ -8,8 +7,8 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
-import { PopulatedTransaction } from '@ethersproject/contracts';
 import { ERC20Contract } from '../../../contract/token/erc20-contract';
+import { ContractTransaction } from 'ethers';
 
 export class TransferERC20Step extends Step {
   readonly config: StepConfig = {
@@ -21,13 +20,9 @@ export class TransferERC20Step extends Step {
 
   private readonly erc20Info: RecipeERC20Info;
 
-  private readonly amount: Optional<BigNumber>;
+  private readonly amount: Optional<bigint>;
 
-  constructor(
-    toAddress: string,
-    erc20Info: RecipeERC20Info,
-    amount?: BigNumber,
-  ) {
+  constructor(toAddress: string, erc20Info: RecipeERC20Info, amount?: bigint) {
     super();
     this.toAddress = toAddress;
     this.erc20Info = erc20Info;
@@ -47,7 +42,7 @@ export class TransferERC20Step extends Step {
       );
 
     const contract = new ERC20Contract(this.erc20Info.tokenAddress);
-    const populatedTransactions: PopulatedTransaction[] = [
+    const crossContractCalls: ContractTransaction[] = [
       await contract.createTransfer(
         this.toAddress,
         this.amount ?? erc20AmountForStep.expectedBalance,
@@ -62,7 +57,7 @@ export class TransferERC20Step extends Step {
     };
 
     return {
-      populatedTransactions,
+      crossContractCalls,
       spentERC20Amounts: [transferredERC20],
       outputERC20Amounts: unusedERC20Amounts,
       outputNFTs: input.nfts,

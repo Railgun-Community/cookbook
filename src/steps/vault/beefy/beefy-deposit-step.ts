@@ -35,7 +35,7 @@ export class BeefyDepositStep extends Step {
       vaultContractAddress,
       vaultTokenAddress,
       vaultRate,
-      depositFee,
+      depositFeeBasisPoints,
     } = this.vault;
     const { erc20Amounts } = input;
 
@@ -53,7 +53,7 @@ export class BeefyDepositStep extends Step {
       );
 
     const contract = new BeefyVaultContract(vaultContractAddress);
-    const populatedTransaction = await contract.createDepositAll();
+    const crossContractCall = await contract.createDepositAll();
 
     const {
       depositFeeAmount,
@@ -61,7 +61,7 @@ export class BeefyDepositStep extends Step {
       receivedVaultTokenAmount,
     } = calculateOutputsForBeefyDeposit(
       erc20AmountForStep.expectedBalance,
-      depositFee,
+      depositFeeBasisPoints,
       depositERC20Decimals,
       vaultRate,
     );
@@ -85,7 +85,7 @@ export class BeefyDepositStep extends Step {
     };
 
     return {
-      populatedTransactions: [populatedTransaction],
+      crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spentERC20AmountRecipient],
       outputERC20Amounts: [outputERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,

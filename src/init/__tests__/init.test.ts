@@ -9,12 +9,12 @@ const { expect } = chai;
 
 describe('init', () => {
   it('Should run init script', async () => {
-    setRailgunFees(NetworkName.Arbitrum, '35', '40');
+    setRailgunFees(NetworkName.Arbitrum, 35n, 40n);
     expect(
       RailgunConfig.SHIELD_FEE_BASIS_POINTS_FOR_NETWORK[NetworkName.Arbitrum],
-    ).to.equal('35');
+    ).to.equal(35n);
     expect(
       RailgunConfig.UNSHIELD_FEE_BASIS_POINTS_FOR_NETWORK[NetworkName.Arbitrum],
-    ).to.equal('40');
+    ).to.equal(40n);
   });
 });

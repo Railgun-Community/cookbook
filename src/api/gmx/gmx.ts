@@ -1,9 +1,8 @@
 import { NetworkName } from '@railgun-community/shared-models';
 import { RecipeERC20Info } from '../../models';
-import { BigNumber } from 'ethers';
 import { GmxGlpManagerContract } from '../../contract/vault/gmx/gmx-glp-manager-contract';
 import { GmxVaultContract } from '../../contract/vault/gmx/gmx-vault-contract';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from 'ethers';
 
 type GMXInfo = {
   glpAddress: string;
@@ -13,9 +12,9 @@ type GMXInfo = {
   stakeableERC20Addresses: string[];
 };
 
-export const GLP_DECIMALS = 18;
+export const GLP_DECIMALS = 18n;
 
-export const PRICE_PRECISION_DECIMALS = 30;
+export const PRICE_PRECISION_DECIMALS = 30n;
 
 export class GMX {
   static getGMXInfoForNetwork(networkName: NetworkName): GMXInfo {
@@ -56,9 +55,9 @@ export class GMX {
   static async getExpectedGLPMintAmountForToken(
     networkName: NetworkName,
     erc20Info: RecipeERC20Info,
-    amount: BigNumber,
-    provider: BaseProvider,
-  ): Promise<BigNumber> {
+    amount: bigint,
+    provider: Provider,
+  ): Promise<bigint> {
     const { glpManagerAddress, vaultAddress } =
       this.getGMXInfoForNetwork(networkName);
 
@@ -71,13 +70,13 @@ export class GMX {
       vault.getTokenPriceInUSD(erc20Info.tokenAddress, isMintingGLP),
     ]);
 
-    const glpDecimalMultiplier = BigNumber.from(10).pow(GLP_DECIMALS);
-    const tokenDecimalMultiplier = BigNumber.from(10).pow(erc20Info.decimals);
+    const glpDecimalMultiplier = 10n ** GLP_DECIMALS;
+    const tokenDecimalMultiplier = 10n ** erc20Info.decimals;
 
-    return amount
-      .mul(glpDecimalMultiplier)
-      .mul(glpPrice)
-      .div(tokenPrice)
-      .div(tokenDecimalMultiplier);
+    return (
+      (amount * glpDecimalMultiplier * glpPrice) /
+      tokenPrice /
+      tokenDecimalMultiplier
+    );
   }
 }

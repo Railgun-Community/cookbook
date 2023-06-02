@@ -1,20 +1,15 @@
-import { BigNumber } from '@ethersproject/bignumber';
-
-const DECIMALS_18 = BigNumber.from(10).pow(18);
+const DECIMALS_18 = 10n ** 18n;
 
 export const calculatePairRateWith18Decimals = (
-  reserveA: BigNumber,
-  tokenDecimalsA: number,
-  reserveB: BigNumber,
-  tokenDecimalsB: number,
+  reserveA: bigint,
+  tokenDecimalsA: bigint,
+  reserveB: bigint,
+  tokenDecimalsB: bigint,
 ) => {
-  const decimalsA = BigNumber.from(10).pow(tokenDecimalsA);
-  const decimalsB = BigNumber.from(10).pow(tokenDecimalsB);
+  const decimalsA = 10n ** tokenDecimalsA;
+  const decimalsB = 10n ** tokenDecimalsB;
 
-  const rateWith18Decimals = reserveA
-    .mul(DECIMALS_18)
-    .mul(decimalsB)
-    .div(reserveB)
-    .div(decimalsA);
+  const rateWith18Decimals =
+    (reserveA * DECIMALS_18 * decimalsB) / reserveB / decimalsA;
   return rateWith18Decimals;
 };

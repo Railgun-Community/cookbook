@@ -1,21 +1,16 @@
-import { BigNumber } from '@ethersproject/bignumber';
-
 export const calculateOutputsForBeefyDeposit = (
-  stepInitialBalance: BigNumber,
-  depositFee: number,
-  decimals: number,
-  vaultRate: string,
+  stepInitialBalance: bigint,
+  depositFeeBasisPoints: bigint,
+  decimals: bigint,
+  vaultRate: bigint,
 ) => {
-  const depositFeeBasisPoints = BigNumber.from(depositFee * 10000);
-  const depositFeeAmount = BigNumber.from(stepInitialBalance)
-    .mul(depositFeeBasisPoints)
-    .div(10000);
-  const depositAmountAfterFee = stepInitialBalance.sub(depositFeeAmount);
+  const depositFeeAmount =
+    (stepInitialBalance * depositFeeBasisPoints) / 10000n;
+  const depositAmountAfterFee = stepInitialBalance - depositFeeAmount;
 
-  const decimalsAdjustment = BigNumber.from(10).pow(decimals);
-  const receivedVaultTokenAmount = BigNumber.from(depositAmountAfterFee)
-    .mul(decimalsAdjustment)
-    .div(vaultRate);
+  const decimalsAdjustment = 10n ** BigInt(decimals);
+  const receivedVaultTokenAmount =
+    (depositAmountAfterFee * decimalsAdjustment) / vaultRate;
 
   return {
     depositFeeAmount,
@@ -25,21 +20,18 @@ export const calculateOutputsForBeefyDeposit = (
 };
 
 export const calculateOutputsForBeefyWithdraw = (
-  stepInitialBalance: BigNumber,
-  withdrawFee: number,
-  decimals: number,
-  vaultRate: string,
+  stepInitialBalance: bigint,
+  withdrawFeeBasisPoints: bigint,
+  decimals: bigint,
+  vaultRate: bigint,
 ) => {
-  const decimalsAdjustment = BigNumber.from(10).pow(decimals);
-  const receivedWithdrawAmount = BigNumber.from(stepInitialBalance)
-    .mul(vaultRate)
-    .div(decimalsAdjustment);
+  const decimalsAdjustment = 10n ** BigInt(decimals);
+  const receivedWithdrawAmount =
+    (stepInitialBalance * vaultRate) / decimalsAdjustment;
 
-  const withdrawFeeBasisPoints = BigNumber.from(withdrawFee * 10000);
-  const withdrawFeeAmount = BigNumber.from(receivedWithdrawAmount)
-    .mul(withdrawFeeBasisPoints)
-    .div(10000);
-  const withdrawAmountAfterFee = receivedWithdrawAmount.sub(withdrawFeeAmount);
+  const withdrawFeeAmount =
+    (receivedWithdrawAmount * withdrawFeeBasisPoints) / 10000n;
+  const withdrawAmountAfterFee = receivedWithdrawAmount - withdrawFeeAmount;
 
   return { receivedWithdrawAmount, withdrawFeeAmount, withdrawAmountAfterFee };
 };

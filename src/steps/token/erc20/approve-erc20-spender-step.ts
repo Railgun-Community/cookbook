@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20Info,
   StepConfig,
@@ -7,7 +6,6 @@ import {
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
 import { Step } from '../../step';
-import { PopulatedTransaction } from '@ethersproject/contracts';
 import { ERC20Contract } from '../../../contract/token/erc20-contract';
 import { compareERC20Info } from '../../../utils/token';
 import { createNoActionStepOutput } from '../../../utils/no-action-output';
@@ -16,6 +14,7 @@ import {
   minBigNumber,
 } from '../../../utils/big-number';
 import { NetworkName } from '@railgun-community/shared-models';
+import { ContractTransaction } from 'ethers';
 
 export class ApproveERC20SpenderStep extends Step {
   readonly config: StepConfig = {
@@ -25,12 +24,12 @@ export class ApproveERC20SpenderStep extends Step {
 
   private readonly spender: Optional<string>;
   private readonly tokenInfo: RecipeERC20Info;
-  private readonly amount: Optional<BigNumber>;
+  private readonly amount: Optional<bigint>;
 
   constructor(
     spender: Optional<string>,
     tokenInfo: RecipeERC20Info,
-    amount?: BigNumber,
+    amount?: bigint,
   ) {
     super();
     this.spender = spender;
@@ -59,7 +58,7 @@ export class ApproveERC20SpenderStep extends Step {
     const contract = new ERC20Contract(erc20AmountForStep.tokenAddress);
     const approveAmount = this.amount ?? maxBigNumberForTransaction();
 
-    const populatedTransactions: PopulatedTransaction[] = [];
+    const crossContractCalls: ContractTransaction[] = [];
 
     if (
       this.requiresClearApprovalTransaction(
@@ -67,12 +66,12 @@ export class ApproveERC20SpenderStep extends Step {
         erc20AmountForStep.tokenAddress,
       )
     ) {
-      populatedTransactions.push(
-        await contract.createSpenderApproval(this.spender, BigNumber.from(0)),
+      crossContractCalls.push(
+        await contract.createSpenderApproval(this.spender, 0n),
       );
     }
 
-    populatedTransactions.push(
+    crossContractCalls.push(
       await contract.createSpenderApproval(this.spender, approveAmount),
     );
     const approvedERC20Amount: StepOutputERC20Amount = {
@@ -88,7 +87,7 @@ export class ApproveERC20SpenderStep extends Step {
     };
 
     return {
-      populatedTransactions,
+      crossContractCalls,
       outputERC20Amounts: [approvedERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,
     };

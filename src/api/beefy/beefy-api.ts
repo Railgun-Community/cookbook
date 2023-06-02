@@ -2,7 +2,8 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { BeefyApiEndpoint, getBeefyAPIData } from './beefy-fetch';
 import { compareTokenAddress } from '../../utils';
 import { CookbookDebug } from '../../utils/cookbook-debug';
-import { removeUndefineds } from '@railgun-community/quickstart';
+import { removeUndefineds } from '@railgun-community/wallet';
+import { numToBasisPoints } from '../../utils/basis-points';
 
 export type BeefyNetwork =
   | 'ethereum'
@@ -67,12 +68,12 @@ export type BeefyVaultData = {
   chain: BeefyChain;
   network: BeefyNetwork;
   depositERC20Address: string;
-  depositERC20Decimals: number;
+  depositERC20Decimals: bigint;
   vaultTokenAddress: string;
   vaultContractAddress: string;
-  vaultRate: string;
-  depositFee: number;
-  withdrawFee: number;
+  vaultRate: bigint;
+  depositFeeBasisPoints: bigint;
+  withdrawFeeBasisPoints: bigint;
 };
 
 export class BeefyAPI {
@@ -150,20 +151,21 @@ export class BeefyAPI {
         ) {
           return undefined;
         }
-        return {
+        const vaultInfo: BeefyVaultData = {
           vaultID: vaultAPIData.id,
           vaultName: vaultAPIData.name,
           apy,
           chain: vaultAPIData.chain,
           network: vaultAPIData.network,
           depositERC20Address: vaultAPIData.tokenAddress.toLowerCase(),
-          depositERC20Decimals: vaultAPIData.tokenDecimals,
+          depositERC20Decimals: BigInt(vaultAPIData.tokenDecimals),
           vaultTokenAddress: vaultAPIData.earnedTokenAddress.toLowerCase(),
           vaultContractAddress: vaultAPIData.earnContractAddress.toLowerCase(),
-          vaultRate: vaultAPIData.pricePerFullShare,
-          depositFee: feesData?.deposit ?? 0,
-          withdrawFee: feesData?.withdraw ?? 0,
+          vaultRate: BigInt(vaultAPIData.pricePerFullShare),
+          depositFeeBasisPoints: numToBasisPoints(feesData?.deposit),
+          withdrawFeeBasisPoints: numToBasisPoints(feesData?.withdraw),
         };
+        return vaultInfo;
       }),
     );
 

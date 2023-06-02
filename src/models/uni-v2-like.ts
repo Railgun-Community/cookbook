@@ -1,12 +1,10 @@
-import { BigNumber } from '@ethersproject/bignumber';
-
 export type PairDataWithRate = {
   tokenAddressA: string;
   tokenSymbolA: string;
-  tokenDecimalsA: number;
+  tokenDecimalsA: bigint;
   tokenAddressB: string;
   tokenSymbolB: string;
-  tokenDecimalsB: number;
+  tokenDecimalsB: bigint;
   pairAddress: string;
-  rateWith18Decimals: BigNumber;
+  rateWith18Decimals: bigint;
 };

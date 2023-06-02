@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UnshieldStep } from '../unshield-step';
-import { BigNumber } from 'ethers';
+
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
@@ -33,10 +33,10 @@ describe('unshield-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -54,11 +54,11 @@ describe('unshield-step', () => {
     expect(output.outputERC20Amounts).to.deep.equal([
       {
         tokenAddress,
-        expectedBalance: BigNumber.from('11970'),
-        minBalance: BigNumber.from('11970'),
+        expectedBalance: BigInt('11970'),
+        minBalance: BigInt('11970'),
         approvedSpender: undefined,
         isBaseToken: false,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -67,14 +67,14 @@ describe('unshield-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        decimals: 18,
+        decimals: 18n,
         tokenAddress,
-        amount: BigNumber.from('30'),
+        amount: 30n,
         recipient: 'RAILGUN Unshield Fee',
       },
     ]);
 
-    expect(output.populatedTransactions).to.deep.equal([]);
+    expect(output.crossContractCalls).to.deep.equal([]);
   });
 
   it('Should test unshield step error cases', async () => {
@@ -86,10 +86,10 @@ describe('unshield-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],

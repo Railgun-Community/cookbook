@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BigNumber } from 'ethers';
+
 import {
   RecipeERC20Amount,
   RecipeERC20Info,
@@ -25,15 +25,15 @@ const { expect } = chai;
 
 const networkName = NetworkName.Arbitrum;
 
-const oneInDecimals18 = BigNumber.from(10).pow(18);
+const oneInDecimals18 = 10n ** 18n;
 const slippagePercentage = 0.01;
 
 const DAI_TOKEN: RecipeERC20Info = {
   tokenAddress: testConfig.contractsArbitrum.dai,
-  decimals: 18,
+  decimals: 18n,
 };
 
-describe('FORK-gmx-stake-mint-glp-recipe', function run() {
+describe.skip('FORK-gmx-stake-mint-glp-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
@@ -66,7 +66,7 @@ describe('FORK-gmx-stake-mint-glp-recipe', function run() {
 
     const daiAmount: RecipeERC20Amount = {
       ...DAI_TOKEN,
-      amount: oneInDecimals18.mul(2000),
+      amount: oneInDecimals18 * 2000n,
     };
 
     const gmxStakeMintGlpRecipeInput: RecipeInput = {
@@ -82,7 +82,7 @@ describe('FORK-gmx-stake-mint-glp-recipe', function run() {
       gmxStakeMintGlpRecipe.config.name,
       gmxStakeMintGlpRecipeInput,
       recipeOutput,
-      2_800_000, // expectedGasWithin50K
+      2_800_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

@@ -2,8 +2,7 @@ import {
   NetworkName,
   RailgunNFTAmount,
 } from '@railgun-community/shared-models';
-import { PopulatedTransaction } from '@ethersproject/contracts';
-import { BigNumber } from '@ethersproject/bignumber';
+import { ContractTransaction } from 'ethers';
 
 export type CookbookDebugger = {
   log: (msg: string) => void;
@@ -12,12 +11,12 @@ export type CookbookDebugger = {
 
 export type RecipeERC20Info = {
   tokenAddress: string;
-  decimals: number;
+  decimals: bigint;
   isBaseToken?: boolean;
 };
 
 export type RecipeERC20Amount = RecipeERC20Info & {
-  amount: BigNumber;
+  amount: bigint;
 };
 
 export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
@@ -42,20 +41,20 @@ export type StepInput = {
 
 export type RecipeOutput = {
   stepOutputs: StepOutput[];
-  populatedTransactions: PopulatedTransaction[];
+  crossContractCalls: ContractTransaction[];
   erc20Amounts: RecipeERC20Amount[];
   nfts: RecipeNFTInfo[];
   feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
 };
 
 export type StepOutputERC20Amount = RecipeERC20Info & {
-  expectedBalance: BigNumber;
-  minBalance: BigNumber;
+  expectedBalance: bigint;
+  minBalance: bigint;
   approvedSpender: Optional<string>;
 };
 
 export type UnvalidatedStepOutput = {
-  populatedTransactions: PopulatedTransaction[];
+  crossContractCalls: ContractTransaction[];
   outputERC20Amounts: StepOutputERC20Amount[];
   spentERC20Amounts?: RecipeERC20AmountRecipient[];
   spentNFTs?: RecipeNFTInfo[];
@@ -85,12 +84,12 @@ export type ComboMealConfig = {
 };
 
 export type SwapQuoteData = {
-  price: BigNumber;
-  guaranteedPrice: BigNumber;
+  price: bigint;
+  guaranteedPrice: bigint;
   buyERC20Amount: RecipeERC20Amount;
-  minimumBuyAmount: BigNumber;
+  minimumBuyAmount: bigint;
   spender: Optional<string>;
-  populatedTransaction: PopulatedTransaction;
+  crossContractCall: ContractTransaction;
   slippagePercentage: number;
   sellTokenAddress: string;
   sellTokenValue: string;

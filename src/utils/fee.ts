@@ -1,46 +1,45 @@
-import { BigNumber } from 'ethers';
 import { RailgunConfig } from '../models/railgun-config';
 import { NetworkName } from '@railgun-community/shared-models';
 
 export const getUnshieldFee = (
   networkName: NetworkName,
-  preUnshieldAmount: BigNumber,
-): BigNumber => {
+  preUnshieldAmount: bigint,
+): bigint => {
   const unshieldFeeBasisPoints =
     RailgunConfig.getUnshieldFeeBasisPoints(networkName);
-  return preUnshieldAmount.mul(unshieldFeeBasisPoints).div(10000);
+  return (preUnshieldAmount * unshieldFeeBasisPoints) / 10000n;
 };
 
 export const getUnshieldedAmountAfterFee = (
   networkName: NetworkName,
-  preUnshieldAmount: BigNumber,
-): BigNumber => {
+  preUnshieldAmount: bigint,
+): bigint => {
   const fee = getUnshieldFee(networkName, preUnshieldAmount);
-  return preUnshieldAmount.sub(fee);
+  return preUnshieldAmount - fee;
 };
 
 export const getAmountToUnshieldForTarget = (
   networkName: NetworkName,
-  postUnshieldAmount: BigNumber,
+  postUnshieldAmount: bigint,
 ) => {
   const unshieldFeeBasisPoints =
     RailgunConfig.getUnshieldFeeBasisPoints(networkName);
-  return postUnshieldAmount.mul(10000).div(10000 - unshieldFeeBasisPoints);
+  return (postUnshieldAmount * 10000n) / (10000n - unshieldFeeBasisPoints);
 };
 
 export const getShieldFee = (
   networkName: NetworkName,
-  preShieldAmount: BigNumber,
-): BigNumber => {
+  preShieldAmount: bigint,
+): bigint => {
   const shieldFeeBasisPoints =
     RailgunConfig.getShieldFeeBasisPoints(networkName);
-  return preShieldAmount.mul(shieldFeeBasisPoints).div(10000);
+  return (preShieldAmount * shieldFeeBasisPoints) / 10000n;
 };
 
 export const getShieldedAmountAfterFee = (
   networkName: NetworkName,
-  preShieldAmount: BigNumber,
-): BigNumber => {
+  preShieldAmount: bigint,
+): bigint => {
   const fee = getShieldFee(networkName, preShieldAmount);
-  return preShieldAmount.sub(fee);
+  return preShieldAmount - fee;
 };

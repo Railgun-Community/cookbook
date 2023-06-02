@@ -9,8 +9,7 @@ import {
   UniswapV2Fork,
 } from '../../models/export-models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
-import { BaseProvider } from '@ethersproject/providers';
-import { BigNumber } from '@ethersproject/bignumber';
+
 import { PairDataWithRate } from '../../models/uni-v2-like';
 import { calculatePairRateWith18Decimals } from '../../utils/pair-rate';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
@@ -18,9 +17,10 @@ import { CookbookDebug } from '../../utils/cookbook-debug';
 import { UniV2LikeFactoryContract } from '../../contract/liquidity/uni-v2-like-factory-contract';
 import { ZERO_ADDRESS } from '../../models/constants';
 import { babylonianSqrt } from '../../utils/big-number';
+import { Provider } from 'ethers';
 
 export class UniV2LikeSDK {
-  static LIQUIDITY_TOKEN_DECIMALS = 18;
+  static LIQUIDITY_TOKEN_DECIMALS = 18n;
 
   private static getFactoryAddressAndInitCodeHash(
     uniswapV2Fork: UniswapV2Fork,
@@ -134,7 +134,11 @@ export class UniV2LikeSDK {
     chainID: number,
     erc20Info: RecipeERC20Info,
   ) {
-    return new Token(chainID, erc20Info.tokenAddress, erc20Info.decimals);
+    return new Token(
+      chainID,
+      erc20Info.tokenAddress,
+      Number(erc20Info.decimals),
+    );
   }
 
   static getPairLPAddress(
@@ -174,10 +178,10 @@ export class UniV2LikeSDK {
   static async getPairRateWith18Decimals(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
-    provider: BaseProvider,
+    provider: Provider,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     const { factoryAddress, initCodeHash } =
       this.getFactoryAddressAndInitCodeHash(uniswapV2Fork, networkName);
 
@@ -213,12 +217,12 @@ export class UniV2LikeSDK {
   private static async getLPLiquidityDetailsAfterFee(
     factoryAddress: string,
     pairAddress: string,
-    provider: BaseProvider,
+    provider: Provider,
   ): Promise<{
-    reserveA: BigNumber;
-    reserveB: BigNumber;
-    totalSupply: BigNumber;
-    lpFeeAmount: BigNumber;
+    reserveA: bigint;
+    reserveB: bigint;
+    totalSupply: bigint;
+    lpFeeAmount: bigint;
   }> {
     const factoryContract = new UniV2LikeFactoryContract(
       factoryAddress,
@@ -251,7 +255,7 @@ export class UniV2LikeSDK {
     erc20AmountA: RecipeERC20Amount,
     erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
-    provider: BaseProvider,
+    provider: Provider,
   ): Promise<RecipeAddLiquidityData> {
     const { factoryAddress } = this.getFactoryAddressAndInitCodeHash(
       uniswapV2Fork,
@@ -270,18 +274,16 @@ export class UniV2LikeSDK {
         provider,
       );
 
-    const newTotalSupply = totalSupply.add(lpFeeAmount);
+    const newTotalSupply = totalSupply + lpFeeAmount;
 
-    const expectedLPBalance = erc20AmountA.amount
-      .mul(newTotalSupply)
-      .div(reserveA);
+    const expectedLPBalance = (erc20AmountA.amount * newTotalSupply) / reserveA;
     const expectedLPAmount: RecipeERC20Amount = {
       tokenAddress: pairAddress,
       decimals: this.LIQUIDITY_TOKEN_DECIMALS,
       amount: expectedLPBalance,
     };
 
-    const amountB = expectedLPBalance.mul(reserveB).div(newTotalSupply);
+    const amountB = (expectedLPBalance * reserveB) / newTotalSupply;
     const erc20AmountB: RecipeERC20Amount = {
       ...erc20InfoB,
       amount: amountB,
@@ -310,7 +312,7 @@ export class UniV2LikeSDK {
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
-    provider: BaseProvider,
+    provider: Provider,
   ): Promise<RecipeRemoveLiquidityData> {
     const { factoryAddress } = this.getFactoryAddressAndInitCodeHash(
       uniswapV2Fork,
@@ -334,9 +336,9 @@ export class UniV2LikeSDK {
         provider,
       );
 
-    const newLiquidity = lpERC20Amount.amount.sub(lpFeeAmount);
-    const expectedAmountA = newLiquidity.mul(reserveA).div(totalSupply);
-    const expectedAmountB = newLiquidity.mul(reserveB).div(totalSupply);
+    const newLiquidity = lpERC20Amount.amount - lpFeeAmount;
+    const expectedAmountA = (newLiquidity * reserveA) / totalSupply;
+    const expectedAmountB = (newLiquidity * reserveB) / totalSupply;
 
     const routerContractAddress = this.getRouterContractAddress(
       uniswapV2Fork,
@@ -365,29 +367,29 @@ export class UniV2LikeSDK {
   }
 
   private static getLPFeeAmount(
-    reserveA: BigNumber,
-    reserveB: BigNumber,
-    totalSupply: BigNumber,
-    kLast: BigNumber,
+    reserveA: bigint,
+    reserveB: bigint,
+    totalSupply: bigint,
+    kLast: bigint,
     feeTo: string,
-  ): BigNumber {
-    if (feeTo === ZERO_ADDRESS || kLast.isZero()) {
-      return BigNumber.from(0);
+  ): bigint {
+    if (feeTo === ZERO_ADDRESS || kLast === 0n) {
+      return 0n;
     }
-    const rootK = babylonianSqrt(reserveA.mul(reserveB));
+    const rootK = babylonianSqrt(reserveA * reserveB);
     const rootKLast = babylonianSqrt(kLast);
-    if (rootK.lte(rootKLast)) {
-      return BigNumber.from(0);
+    if (rootK <= rootKLast) {
+      return 0n;
     }
 
-    const numerator = totalSupply.mul(rootK.sub(rootKLast));
-    const denominator = rootK.mul(5).add(rootKLast.mul(4));
-    const liquidity = numerator.div(denominator);
-    if (liquidity.isZero()) {
-      return BigNumber.from(0);
+    const numerator = totalSupply * (rootK - rootKLast);
+    const denominator = rootK * 5n + rootKLast * 4n;
+    const liquidity = numerator / denominator;
+    if (liquidity === 0n) {
+      return 0n;
     }
 
-    const feeAmount = liquidity.mul(3).div(1000);
+    const feeAmount = (liquidity * 3n) / 1000n;
     return feeAmount;
   }
 

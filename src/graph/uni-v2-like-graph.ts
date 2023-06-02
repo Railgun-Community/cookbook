@@ -2,10 +2,10 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { getMeshOptions, getSdk } from './graphql/.graphclient';
 import { MeshInstance, getMesh } from '@graphql-mesh/runtime';
 import { PairDataWithRate } from '../models/uni-v2-like';
-import { parseFixed } from '@ethersproject/bignumber';
 import { calculatePairRateWith18Decimals } from '../utils/pair-rate';
 import { UniswapV2Fork } from '../models/export-models';
 import { CookbookDebug } from '../utils/cookbook-debug';
+import { parseUnits } from 'ethers';
 
 export class UniV2LikeSubgraph {
   private static meshes: Record<string, MeshInstance> = {};
@@ -37,10 +37,10 @@ export class UniV2LikeSubgraph {
       const { pairs } = await sdk.Pairs({ tokens: tokenAddressesLowercase });
 
       const pairData: PairDataWithRate[] = pairs.map(pair => {
-        const tokenDecimalsA = Number(pair.token0.decimals);
-        const reserveA = parseFixed(pair.reserve0, tokenDecimalsA);
-        const tokenDecimalsB = Number(pair.token1.decimals);
-        const reserveB = parseFixed(pair.reserve1, tokenDecimalsB);
+        const tokenDecimalsA = BigInt(pair.token0.decimals);
+        const reserveA = parseUnits(pair.reserve0, tokenDecimalsA);
+        const tokenDecimalsB = BigInt(pair.token1.decimals);
+        const reserveB = parseUnits(pair.reserve1, tokenDecimalsB);
         const rateWith18Decimals = calculatePairRateWith18Decimals(
           reserveA,
           tokenDecimalsA,

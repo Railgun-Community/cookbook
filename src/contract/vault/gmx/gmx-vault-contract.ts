@@ -1,14 +1,12 @@
-import { BaseProvider } from '@ethersproject/providers';
 import { validateAddress } from '../../../utils/address';
-import { abi } from '../../../abi-typechain/abi';
-import { Contract } from '@ethersproject/contracts';
-import { Vault } from '../../../abi-typechain/vault/gmx/Vault';
-import { BigNumber } from 'ethers';
+import { abi } from '../../../abi/abi';
+import { Contract, Provider } from 'ethers';
+import { Vault } from '../../../typechain';
 
 export class GmxVaultContract {
   private readonly contract: Vault;
 
-  constructor(address: string, provider: BaseProvider) {
+  constructor(address: string, provider: Provider) {
     if (!validateAddress(address)) {
       throw new Error('Invalid address for GMX Vault contract');
     }
@@ -16,13 +14,13 @@ export class GmxVaultContract {
       address,
       abi.vault.gmx.vault,
       provider,
-    ) as Vault;
+    ) as unknown as Vault;
   }
 
   getTokenPriceInUSD(
     tokenAddress: string,
     isMintingGLP: boolean,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     // Use max token price when token is minted (ie when GLP is burned)
     const maximize = !isMintingGLP;
     return maximize

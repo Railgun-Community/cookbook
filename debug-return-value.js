@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-const { parseRelayAdaptReturnValue } = require('@railgun-community/quickstart');
+const { parseRelayAdaptReturnValue } = require('@railgun-community/wallet');
 
 function main(args) {
   const returnValue = args.length ? args[0] : null;

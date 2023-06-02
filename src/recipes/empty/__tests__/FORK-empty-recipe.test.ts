@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BigNumber } from 'ethers';
+
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
@@ -47,9 +47,9 @@ describe('FORK-empty-recipe', function run() {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('12000'),
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -60,7 +60,7 @@ describe('FORK-empty-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      2_800_000, // expectedGasWithin50K
+      2_800_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

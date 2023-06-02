@@ -8,7 +8,6 @@ import {
 import { compareERC20Info } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
-import { BigNumber } from 'ethers';
 
 export abstract class SwapRecipe extends Recipe {
   protected quote: Optional<SwapQuoteData>;
@@ -28,10 +27,10 @@ export abstract class SwapRecipe extends Recipe {
   getBuySellAmountsFromRecipeOutput(
     recipeOutput: Optional<RecipeOutput>,
   ): Optional<{
-    sellFee: BigNumber;
-    buyAmount: BigNumber;
-    buyMinimum: BigNumber;
-    buyFee: BigNumber;
+    sellFee: bigint;
+    buyAmount: bigint;
+    buyMinimum: bigint;
+    buyFee: bigint;
   }> {
     try {
       if (!recipeOutput) {

@@ -1,8 +1,6 @@
-import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
-import { BigNumber } from '@ethersproject/bignumber';
-import { PopulatedTransaction } from '@ethersproject/contracts';
-import { AccessCardERC721 } from '../../abi-typechain/access-card/AccessCardERC721';
+import { Contract, ContractTransaction } from 'ethers';
+import { abi } from '../../abi/abi';
+import { AccessCardERC721 } from '../../typechain';
 
 export class AccessCardERC721Contract {
   private readonly contract: AccessCardERC721;
@@ -11,10 +9,10 @@ export class AccessCardERC721Contract {
     this.contract = new Contract(
       tokenAddress,
       abi.token.accessCardERC721,
-    ) as AccessCardERC721;
+    ) as unknown as AccessCardERC721;
   }
 
-  mint(toAddress: string, tokenId: BigNumber): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.mint(toAddress, tokenId);
+  mint(toAddress: string, tokenId: bigint): Promise<ContractTransaction> {
+    return this.contract.mint.populateTransaction(toAddress, tokenId);
   }
 }

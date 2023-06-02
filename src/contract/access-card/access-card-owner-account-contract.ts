@@ -1,9 +1,7 @@
-import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
-import { BigNumber } from '@ethersproject/bignumber';
-import { AccessCardOwnerAccount } from '../../abi-typechain/access-card/AccessCardOwnerAccount';
+import { abi } from '../../abi/abi';
 import { validateAddress } from '../../utils/address';
-import { PopulatedTransaction } from 'ethers';
+import { AccessCardOwnerAccount } from '../../typechain';
+import { Contract, ContractTransaction } from 'ethers';
 
 export class AccessCardOwnerAccountContract {
   private readonly contract: AccessCardOwnerAccount;
@@ -17,14 +15,14 @@ export class AccessCardOwnerAccountContract {
     this.contract = new Contract(
       address,
       abi.accessCard.ownerAccount,
-    ) as AccessCardOwnerAccount;
+    ) as unknown as AccessCardOwnerAccount;
   }
 
   createCall(
     to: string,
     data: string,
-    value: BigNumber,
-  ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.call(to, data, value);
+    value: bigint,
+  ): Promise<ContractTransaction> {
+    return this.contract.call.populateTransaction(to, data, value);
   }
 }

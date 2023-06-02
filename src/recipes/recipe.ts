@@ -14,7 +14,7 @@ import {
 import { ShieldStep } from '../steps/railgun/shield-step';
 import { UnshieldStep } from '../steps/railgun/unshield-step';
 import { Step } from '../steps/step';
-import { BigNumber } from 'ethers';
+import { ContractTransaction } from 'ethers';
 
 export abstract class Recipe {
   abstract readonly config: RecipeConfig;
@@ -129,8 +129,8 @@ export abstract class Recipe {
       throw new Error('No step outputs were generated.');
     }
 
-    const populatedTransactions = stepOutputs
-      .map(output => output.populatedTransactions)
+    const crossContractCalls: ContractTransaction[] = stepOutputs
+      .map(output => output.crossContractCalls)
       .flat();
 
     // We need to make sure to shield all step outputs, even those in the middle of recipes.
@@ -150,9 +150,7 @@ export abstract class Recipe {
           decimals: outputERC20Amount.decimals,
           isBaseToken: outputERC20Amount.isBaseToken,
           // Expect 0 amount for middle step outputs.
-          amount: isFinalStep
-            ? outputERC20Amount.expectedBalance
-            : BigNumber.from(0),
+          amount: isFinalStep ? outputERC20Amount.expectedBalance : 0n,
         };
       });
     });
@@ -166,7 +164,7 @@ export abstract class Recipe {
         decimals: erc20Amount.decimals,
         isBaseToken: erc20Amount.isBaseToken,
         // Expect 0 amount for unshield outputs.
-        amount: BigNumber.from(0),
+        amount: 0n,
       };
     });
 
@@ -185,12 +183,12 @@ export abstract class Recipe {
         const nftID = Recipe.getNFTID(outputNFT);
         if (allStepOutputNFTAmounts[nftID] && isFinalStep) {
           // Only set amount for final step outputs.
-          allStepOutputNFTAmounts[nftID].amountString = outputNFT.amountString;
+          allStepOutputNFTAmounts[nftID].amount = outputNFT.amount;
           return;
         }
         allStepOutputNFTAmounts[nftID] = {
           ...outputNFT,
-          amountString: isFinalStep ? outputNFT.amountString : '0x00',
+          amount: isFinalStep ? outputNFT.amount : 0n,
         };
       });
     });
@@ -201,7 +199,7 @@ export abstract class Recipe {
       }
       allStepOutputNFTAmounts[nftID] = {
         ...nft,
-        amountString: '0x00',
+        amount: 0n,
       };
     });
     const outputNFTs: RailgunNFTAmount[] = Object.values(
@@ -214,7 +212,7 @@ export abstract class Recipe {
 
     const recipeOutput: RecipeOutput = {
       stepOutputs,
-      populatedTransactions,
+      crossContractCalls,
       erc20Amounts: outputERC20Amounts,
       nfts: outputNFTs,
       feeERC20AmountRecipients,

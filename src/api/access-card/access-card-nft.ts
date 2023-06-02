@@ -1,7 +1,6 @@
 import { NetworkName } from '@railgun-community/shared-models';
 import { AccessCardAccountCreatorContract } from '../../contract/access-card/access-card-account-creator-contract';
-import { BaseProvider } from '@ethersproject/providers';
-import { BigNumber } from 'ethers';
+import { Provider } from 'ethers';
 
 type AccessCardAccounts = {
   erc721: string;
@@ -32,8 +31,8 @@ export class AccessCardNFT {
   static getOwnableContractAddress(
     networkName: NetworkName,
     nftAddress: string,
-    nftTokenSubID: BigNumber,
-    provider: BaseProvider,
+    nftTokenSubID: bigint,
+    provider: Provider,
   ): Promise<string> {
     const { accountCreator } = this.getAddressesForNetwork(networkName);
     const creator = new AccessCardAccountCreatorContract(

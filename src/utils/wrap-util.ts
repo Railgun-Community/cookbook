@@ -10,7 +10,7 @@ export const getWrappedBaseToken = (
   }
   return {
     tokenAddress: network.baseToken.wrappedAddress.toLowerCase(),
-    decimals: network.baseToken.decimals,
+    decimals: BigInt(network.baseToken.decimals),
     isBaseToken: false,
   };
 };

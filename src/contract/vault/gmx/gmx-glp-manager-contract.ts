@@ -1,13 +1,12 @@
-import { BaseProvider } from '@ethersproject/providers';
 import { validateAddress } from '../../../utils/address';
-import { abi } from '../../../abi-typechain/abi';
-import { Contract } from '@ethersproject/contracts';
-import { GlpManager } from '../../../abi-typechain/vault/gmx/GlpManager';
+import { abi } from '../../../abi/abi';
+import { Contract, Provider } from 'ethers';
+import { GlpManager } from '../../../typechain';
 
 export class GmxGlpManagerContract {
   private readonly contract: GlpManager;
 
-  constructor(address: string, provider: BaseProvider) {
+  constructor(address: string, provider: Provider) {
     if (!validateAddress(address)) {
       throw new Error('Invalid address for GMX GlpManager contract');
     }
@@ -15,7 +14,7 @@ export class GmxGlpManagerContract {
       address,
       abi.vault.gmx.glpManager,
       provider,
-    ) as GlpManager;
+    ) as unknown as GlpManager;
   }
 
   getGLPPriceInUSD(isMintingGLP: boolean) {

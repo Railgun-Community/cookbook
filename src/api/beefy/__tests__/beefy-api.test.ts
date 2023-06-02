@@ -38,23 +38,23 @@ describe('beefy-api', () => {
     expect({
       ...vaultsForEthereumToken[0],
       apy: 0,
-      vaultRate: '1',
+      vaultRate: 1n,
     }).to.deep.equal({
       // Set to exact values to skip comparison:
       apy: 0,
-      vaultRate: '1',
+      vaultRate: 1n,
 
       // Compare the rest of the values:
       chain: 'ethereum',
       depositERC20Address: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
-      depositERC20Decimals: 18,
-      depositFee: 0,
+      depositERC20Decimals: 18n,
+      depositFeeBasisPoints: 0n,
       network: 'ethereum',
       vaultContractAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       vaultID: 'sushi-mainnet-usdc-weth',
       vaultName: 'ETH-USDC LP',
       vaultTokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
-      withdrawFee: 0.001,
+      withdrawFeeBasisPoints: 10n,
     });
     expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.001);
     expect(vaultsForEthereumToken[0].apy).to.be.lessThan(0.2);

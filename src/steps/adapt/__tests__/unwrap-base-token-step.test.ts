@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UnwrapBaseTokenStep } from '../unwrap-base-token-step';
-import { BigNumber } from 'ethers';
+
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 
@@ -9,7 +9,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const amount = BigNumber.from('10000');
+const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('unwrap-base-token-step', () => {
@@ -21,10 +21,10 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -44,7 +44,7 @@ describe('unwrap-base-token-step', () => {
         isBaseToken: false,
         recipient: 'Wrapped Token Contract',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -56,16 +56,16 @@ describe('unwrap-base-token-step', () => {
         expectedBalance: amount,
         minBalance: amount,
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
         // Change - WETH
         approvedSpender: undefined,
         isBaseToken: false,
-        expectedBalance: BigNumber.from('2000'),
-        minBalance: BigNumber.from('2000'),
+        expectedBalance: 2000n,
+        minBalance: 2000n,
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -74,13 +74,13 @@ describe('unwrap-base-token-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xd5774a280000000000000000000000000000000000000000000000000000000000002710',
         to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
       },
     ]);
-    expect(output.populatedTransactions[0].to).to.equal(
+    expect(output.crossContractCalls[0].to).to.equal(
       NETWORK_CONFIG[networkName].relayAdaptContract,
     );
   });
@@ -93,10 +93,10 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -107,23 +107,23 @@ describe('unwrap-base-token-step', () => {
     // Transferred
     expect(output.spentERC20Amounts).to.deep.equal([
       {
-        amount: BigNumber.from('12000'),
+        amount: 12000n,
         isBaseToken: false,
         recipient: 'Wrapped Token Contract',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
     // Wrapped
     expect(output.outputERC20Amounts).to.deep.equal([
       {
-        expectedBalance: BigNumber.from('12000'),
-        minBalance: BigNumber.from('12000'),
+        expectedBalance: 12000n,
+        minBalance: 12000n,
         isBaseToken: true,
         tokenAddress,
         approvedSpender: undefined,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
 
@@ -132,7 +132,7 @@ describe('unwrap-base-token-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.equal(undefined);
 
-    expect(output.populatedTransactions).to.deep.equal([
+    expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xd5774a280000000000000000000000000000000000000000000000000000000000000000',
         to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
@@ -149,10 +149,10 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('12000'),
-          minBalance: BigNumber.from('12000'),
+          expectedBalance: 12000n,
+          minBalance: 12000n,
           approvedSpender: undefined,
         },
       ],
@@ -168,10 +168,10 @@ describe('unwrap-base-token-step', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          expectedBalance: BigNumber.from('2000'),
-          minBalance: BigNumber.from('2000'),
+          expectedBalance: 2000n,
+          minBalance: 2000n,
           approvedSpender: undefined,
         },
       ],

@@ -1,19 +1,13 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   RecipeERC20Info,
   StepOutputERC20Amount,
 } from '../models/export-models';
-import { getRandomBytes } from '@railgun-community/quickstart';
+import { getRandomBytes } from '@railgun-community/wallet';
 import { RailgunNFTAmount } from '@railgun-community/shared-models';
 
-export const nftAmountOne = () => {
-  return BigNumber.from(1).toHexString();
-};
-
-export const getRandomNFTID = (): BigNumber => {
+export const getRandomNFTID = (): bigint => {
   const randomHex = `0x${getRandomBytes(32)}`;
-  const randomID = BigNumber.from(randomHex);
-  return randomID;
+  return BigInt(randomHex);
 };
 
 export const compareNFTs = (
@@ -23,8 +17,8 @@ export const compareNFTs = (
   return (
     compareTokenAddress(a.nftAddress, b.nftAddress) &&
     a.nftTokenType === b.nftTokenType &&
-    BigNumber.from(a.tokenSubID).eq(b.tokenSubID) &&
-    BigNumber.from(a.amountString).eq(b.amountString)
+    BigInt(a.tokenSubID) === BigInt(b.tokenSubID) &&
+    a.amount === b.amount
   );
 };
 

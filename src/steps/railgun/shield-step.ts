@@ -25,7 +25,7 @@ export class ShieldStep extends Step {
     }
 
     return {
-      populatedTransactions: [],
+      crossContractCalls: [],
 
       outputERC20Amounts,
       outputNFTs: input.nfts,

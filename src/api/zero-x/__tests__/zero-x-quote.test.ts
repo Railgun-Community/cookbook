@@ -6,7 +6,7 @@ import {
   RecipeERC20Amount,
   RecipeERC20Info,
 } from '../../../models/export-models';
-import { BigNumber } from 'ethers';
+
 import { ZeroXConfig } from '../../../models/zero-x-config';
 
 chai.use(chaiAsPromised);
@@ -22,13 +22,13 @@ describe('zero-x-quote', () => {
   it('Should fetch quotes from ZeroX proxy', async () => {
     const sellERC20Amount: RecipeERC20Amount = {
       tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-      decimals: 18,
+      decimals: 18n,
       isBaseToken: false,
-      amount: BigNumber.from('0x1000000000000000000'),
+      amount: BigInt('0x1000000000000000000'),
     };
     const buyERC20Info: RecipeERC20Info = {
       tokenAddress: 'DAI',
-      decimals: 18,
+      decimals: 18n,
       isBaseToken: false,
     };
 

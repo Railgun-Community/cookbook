@@ -1,29 +1,26 @@
-import { BigNumber } from '@ethersproject/bignumber';
-
-export const babylonianSqrt = (y: BigNumber): BigNumber => {
-  let z = BigNumber.from(0);
-  if (y.gt(3)) {
+export const babylonianSqrt = (y: bigint): bigint => {
+  let z = 0n;
+  if (y > 3n) {
     z = y;
-    let x = y.div(2).add(1);
-    while (x.lt(z)) {
+    let x = y / 2n + 1n;
+    while (x < z) {
       z = x;
-      x = y.div(x).add(x).div(2);
+      x = (y / x + x) / 2n;
     }
-  } else if (y.gt(0)) {
-    z = BigNumber.from(1);
+  } else if (y > 0) {
+    z = 1n;
   }
   return z;
 };
 
-export const maxBigNumber = (b1: BigNumber, b2: BigNumber) => {
-  return b1.gt(b2) ? b1 : b2;
+export const maxBigNumber = (b1: bigint, b2: bigint) => {
+  return b1 > b2 ? b1 : b2;
 };
 
-export const minBigNumber = (b1: BigNumber, b2: BigNumber) => {
-  return b1.lt(b2) ? b1 : b2;
+export const minBigNumber = (b1: bigint, b2: bigint) => {
+  return b1 < b2 ? b1 : b2;
 };
 
-export const maxBigNumberForTransaction = (): BigNumber => {
-  // = 2^256 - 1
-  return BigNumber.from(2).pow(BigNumber.from(256)).sub(BigNumber.from(1));
+export const maxBigNumberForTransaction = (): bigint => {
+  return 2n ** 256n - 1n;
 };

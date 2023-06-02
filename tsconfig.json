@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2020",
     "module": "commonjs",
+    "moduleResolution": "node",
     "sourceMap": true,
     "inlineSources": true,
     "declaration": true,
@@ -22,7 +23,6 @@
     "removeComments": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
     "isolatedModules": true,
     "noImplicitReturns": true,
     "useUnknownInCatchVariables": false,

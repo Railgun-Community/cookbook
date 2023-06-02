@@ -1,11 +1,9 @@
 import ganache from 'ganache';
 import { testConfig } from './test-config.test';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import debug from 'debug';
 import { getTestEthersWallet, setSharedTestRPCProvider } from './shared.test';
-import { ethers } from 'ethers';
-import { parseEther } from '@ethersproject/units';
+import { JsonRpcProvider, solidityPackedKeccak256 } from 'ethers';
 import { getLocalhostRPC, getRPCPort } from './common.test';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 
@@ -14,6 +12,7 @@ const dbg = debug('rpc:setup');
 export enum ForkRPCType {
   Ganache = 'ganache',
   Anvil = 'anvil',
+  Hardhat = 'hardhat',
 }
 
 export const setupTestRPCAndWallets = async (
@@ -56,7 +55,9 @@ export const setupTestRPCAndWallets = async (
   }
 
   const localhost = getLocalhostRPC(port);
-  const testRPCProvider = new JsonRpcProvider(localhost);
+  const testRPCProvider = new JsonRpcProvider(localhost, undefined, {
+    polling: true,
+  });
   setSharedTestRPCProvider(testRPCProvider);
 
   try {
@@ -65,15 +66,19 @@ export const setupTestRPCAndWallets = async (
     throw new Error(
       forkRPCType === ForkRPCType.Anvil
         ? `Could not connect to test RPC server. Please start anvil fork RPC for ${networkName} (see README).`
+        : forkRPCType === ForkRPCType.Hardhat
+        ? `Could not connect to test Hardhat RPC server.`
         : `Could not connect to test Ganache RPC server.`,
     );
   }
   if (forkRPCType === ForkRPCType.Anvil) {
     await testRPCProvider.send('anvil_reset', [{}]);
+  } else if (forkRPCType === ForkRPCType.Hardhat) {
+    await testRPCProvider.send('hardhat_reset', []);
   }
 
   const wallet = getTestEthersWallet();
-  const oneThousand18Decimals = parseEther('1000').toString();
+  const oneThousand18Decimals = 10n ** 18n * 1000n;
 
   await Promise.all(
     tokenAddresses.map(async tokenAddress => {
@@ -93,7 +98,7 @@ const setTokenBalance = async (
   provider: JsonRpcProvider,
   walletAddress: string,
   tokenAddress: string,
-  balance: string,
+  balance: bigint,
 ) => {
   // Format balance
   const balanceFormatted = `0x${BigInt(balance)
@@ -104,10 +109,11 @@ const setTokenBalance = async (
   const erc20 = new ERC20Contract(tokenAddress, provider);
 
   // Get RPC command to set storage
-  const setRPCCommand =
-    forkRPCType === ForkRPCType.Anvil
-      ? 'anvil_setStorageAt'
-      : 'evm_setAccountStorageAt';
+  const setRPCCommand = [ForkRPCType.Anvil, ForkRPCType.Hardhat].includes(
+    forkRPCType,
+  )
+    ? 'hardhat_setStorageAt'
+    : 'evm_setAccountStorageAt';
 
   /**
    * Attempt to change ERC20 balance with storage slot
@@ -129,8 +135,7 @@ const setTokenBalance = async (
     ]);
 
     // Check if token balance changed
-    if ((await erc20.balanceOf(walletAddress)).toBigInt() === BigInt(balance))
-      return true;
+    if ((await erc20.balanceOf(walletAddress)) === balance) return true;
 
     // Restore storage before going to next slot
     await provider.send(setRPCCommand, [tokenAddress, storageSlot, before]);
@@ -146,10 +151,7 @@ const setTokenBalance = async (
     // Try to change for solidity storage layout
     if (
       await attemptERC20BalanceChange(
-        ethers.utils.solidityKeccak256(
-          ['uint256', 'uint256'],
-          [walletAddress, i],
-        ),
+        solidityPackedKeccak256(['uint256', 'uint256'], [walletAddress, i]),
       )
     ) {
       success = true;
@@ -159,10 +161,7 @@ const setTokenBalance = async (
     // Try to change for vyper storage layout
     if (
       await attemptERC20BalanceChange(
-        ethers.utils.solidityKeccak256(
-          ['uint256', 'uint256'],
-          [i, walletAddress],
-        ),
+        solidityPackedKeccak256(['uint256', 'uint256'], [i, walletAddress]),
       )
     ) {
       success = true;

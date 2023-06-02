@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UnwrapTransferBaseTokenRecipe } from '../unwrap-transfer-base-token-recipe';
-import { BigNumber } from 'ethers';
+
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
@@ -15,7 +15,7 @@ const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-const amount = BigNumber.from('10000');
+const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('unwrap-transfer-base-token-recipe', () => {
@@ -35,9 +35,9 @@ describe('unwrap-transfer-base-token-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('12000'),
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -51,24 +51,24 @@ describe('unwrap-transfer-base-token-recipe', () => {
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('30'),
+          amount: 30n,
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigNumber.from('11970'),
-          minBalance: BigNumber.from('11970'),
+          expectedBalance: BigInt('11970'),
+          minBalance: BigInt('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
@@ -82,20 +82,20 @@ describe('unwrap-transfer-base-token-recipe', () => {
           expectedBalance: amount, // 10000
           minBalance: amount, // 10000
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
         {
           // Change - WETH
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('1970'),
-          minBalance: BigNumber.from('1970'),
+          expectedBalance: 1970n,
+          minBalance: 1970n,
           tokenAddress,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0xd5774a280000000000000000000000000000000000000000000000000000000000002710',
           to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
@@ -103,11 +103,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigNumber.from('10000'),
+          amount: 10000n,
           isBaseToken: false,
           recipient: 'Wrapped Token Contract',
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
     });
@@ -118,15 +118,15 @@ describe('unwrap-transfer-base-token-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('1970'),
-          minBalance: BigNumber.from('1970'),
+          expectedBalance: 1970n,
+          minBalance: 1970n,
           tokenAddress,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
           to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
@@ -134,11 +134,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigNumber.from('10000'),
+          amount: 10000n,
           isBaseToken: true,
           tokenAddress,
           recipient: toAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
     });
@@ -148,24 +148,24 @@ describe('unwrap-transfer-base-token-recipe', () => {
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('4'),
+          amount: 4n,
           recipient: 'RAILGUN Shield Fee',
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigNumber.from('1966'),
-          minBalance: BigNumber.from('1966'),
+          expectedBalance: 1966n,
+          minBalance: 1966n,
           tokenAddress,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(
@@ -176,25 +176,25 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     expect(output.nfts).to.deep.equal([]);
 
-    const populatedTransactionsFlattened = output.stepOutputs.flatMap(
-      stepOutput => stepOutput.populatedTransactions,
+    const crossContractCallsFlattened = output.stepOutputs.flatMap(
+      stepOutput => stepOutput.crossContractCalls,
     );
-    expect(output.populatedTransactions).to.deep.equal(
-      populatedTransactionsFlattened,
+    expect(output.crossContractCalls).to.deep.equal(
+      crossContractCallsFlattened,
     );
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amount: BigNumber.from('30'),
+        amount: 30n,
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
       {
-        amount: BigNumber.from('4'),
+        amount: 4n,
         recipient: 'RAILGUN Shield Fee',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
   });
@@ -207,9 +207,9 @@ describe('unwrap-transfer-base-token-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('12000'),
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -221,24 +221,24 @@ describe('unwrap-transfer-base-token-recipe', () => {
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigNumber.from('30'),
+          amount: 30n,
           recipient: 'RAILGUN Unshield Fee',
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigNumber.from('11970'),
-          minBalance: BigNumber.from('11970'),
+          expectedBalance: BigInt('11970'),
+          minBalance: BigInt('11970'),
           approvedSpender: undefined,
           isBaseToken: false,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(output.stepOutputs[1]).to.deep.equal({
@@ -249,14 +249,14 @@ describe('unwrap-transfer-base-token-recipe', () => {
           // Wrapped - ETH
           approvedSpender: undefined,
           isBaseToken: true,
-          expectedBalance: BigNumber.from('11970'),
-          minBalance: BigNumber.from('11970'),
+          expectedBalance: BigInt('11970'),
+          minBalance: BigInt('11970'),
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0xd5774a280000000000000000000000000000000000000000000000000000000000000000',
           to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
@@ -264,11 +264,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigNumber.from('11970'),
+          amount: BigInt('11970'),
           isBaseToken: false,
           recipient: 'Wrapped Token Contract',
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
     });
@@ -278,7 +278,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       description: 'Transfers base token to an external public address.',
       outputERC20Amounts: [],
       outputNFTs: [],
-      populatedTransactions: [
+      crossContractCalls: [
         {
           data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
           to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
@@ -286,11 +286,11 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigNumber.from('11970'),
+          amount: BigInt('11970'),
           isBaseToken: true,
           tokenAddress,
           recipient: toAddress,
-          decimals: 18,
+          decimals: 18n,
         },
       ],
     });
@@ -301,7 +301,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       outputERC20Amounts: [],
       outputNFTs: [],
       feeERC20AmountRecipients: [],
-      populatedTransactions: [],
+      crossContractCalls: [],
     });
 
     expect(
@@ -312,19 +312,19 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     expect(output.nfts).to.deep.equal([]);
 
-    const populatedTransactionsFlattened = output.stepOutputs.flatMap(
-      stepOutput => stepOutput.populatedTransactions,
+    const crossContractCallsFlattened = output.stepOutputs.flatMap(
+      stepOutput => stepOutput.crossContractCalls,
     );
-    expect(output.populatedTransactions).to.deep.equal(
-      populatedTransactionsFlattened,
+    expect(output.crossContractCalls).to.deep.equal(
+      crossContractCallsFlattened,
     );
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        amount: BigNumber.from('30'),
+        amount: 30n,
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress,
-        decimals: 18,
+        decimals: 18n,
       },
     ]);
   });
@@ -338,8 +338,8 @@ describe('unwrap-transfer-base-token-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress: '0x1234',
-          decimals: 18,
-          amount: BigNumber.from('12000'),
+          decimals: 18n,
+          amount: 12000n,
         },
       ],
       nfts: [],
@@ -354,9 +354,9 @@ describe('unwrap-transfer-base-token-recipe', () => {
       erc20Amounts: [
         {
           tokenAddress,
-          decimals: 18,
+          decimals: 18n,
           isBaseToken: false,
-          amount: BigNumber.from('2000'),
+          amount: 2000n,
         },
       ],
       nfts: [],

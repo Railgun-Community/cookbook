@@ -55,6 +55,12 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
 
 export const setupForkTests = async () => {
   const networkName = process.env.NETWORK_NAME as NetworkName;
+  if (!networkName) {
+    throw new Error(
+      `Run fork tests with NETWORK_NAME env variable. See README.`,
+    );
+  }
+
   if (!Object.keys(NetworkName).includes(networkName)) {
     throw new Error(
       `Unrecognized network name, expected one of list: ${getSupportedNetworkNamesForTest().join(
@@ -67,6 +73,8 @@ export const setupForkTests = async () => {
 
   const forkRPCType = process.env.USE_GANACHE
     ? ForkRPCType.Ganache
+    : process.env.USE_HARDHAT
+    ? ForkRPCType.Hardhat
     : ForkRPCType.Anvil;
 
   // Ganache forked Ethereum RPC setup
@@ -78,7 +86,7 @@ export const setupForkTests = async () => {
 
   // Wallet setup and initial shield
   await createRailgunWalletForTests();
-  await shieldAllTokensForTests(tokenAddresses);
+  await shieldAllTokensForTests(networkName, tokenAddresses);
 
   // Make sure shielded balances are updated
   await waitForShieldedTokenBalances(networkName, tokenAddresses);

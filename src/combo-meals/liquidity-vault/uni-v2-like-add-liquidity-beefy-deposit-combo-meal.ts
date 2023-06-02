@@ -1,4 +1,3 @@
-import { BaseProvider } from '@ethersproject/providers';
 import {
   ComboMealConfig,
   RecipeERC20Amount,
@@ -11,6 +10,7 @@ import { BeefyDepositRecipe } from '../../recipes/vault/beefy/beefy-deposit-reci
 import { ComboMeal } from '../combo-meal';
 import { UniV2LikeSDK } from '../../api/uniswap/uni-v2-like-sdk';
 import { NetworkName } from '@railgun-community/shared-models';
+import { Provider } from 'ethers';
 
 export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
@@ -29,7 +29,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
     erc20InfoB: RecipeERC20Info,
     slippagePercentage: number,
     vaultID: string,
-    provider: BaseProvider,
+    provider: Provider,
   ) {
     super();
 

@@ -1,20 +1,22 @@
-import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
-import { ERC721 } from '../../abi-typechain/token/ERC721';
-import { PopulatedTransaction } from '@ethersproject/contracts';
+import { Contract, ContractTransaction } from 'ethers';
+import { abi } from '../../abi/abi';
+import { Erc721 } from '../../typechain';
 import { validateAddress } from '../../utils/address';
 
 export class ERC721Contract {
-  private readonly contract: ERC721;
+  private readonly contract: Erc721;
 
   constructor(address: string) {
     if (!validateAddress(address)) {
       throw new Error('Invalid ERC20 address for contract');
     }
-    this.contract = new Contract(address, abi.token.erc721) as ERC721;
+    this.contract = new Contract(
+      address,
+      abi.token.erc721,
+    ) as unknown as Erc721;
   }
 
-  createSpenderApproval(spender: string): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.setApprovalForAll(spender, true);
+  createSpenderApproval(spender: string): Promise<ContractTransaction> {
+    return this.contract.setApprovalForAll.populateTransaction(spender, true);
   }
 }

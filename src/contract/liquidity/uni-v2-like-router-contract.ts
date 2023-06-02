@@ -1,8 +1,6 @@
-import { Contract } from '@ethersproject/contracts';
-import { abi } from '../../abi-typechain/abi';
-import { UniV2LikeRouter } from '../../abi-typechain/liquidity/UniV2LikeRouter';
-import { BigNumber } from '@ethersproject/bignumber';
-import { PopulatedTransaction } from '@ethersproject/contracts';
+import { Contract, ContractTransaction } from 'ethers';
+import { abi } from '../../abi/abi';
+import { UniV2LikeRouter } from '../../typechain';
 import { validateAddress } from '../../utils/address';
 
 export class UniV2LikeRouterContract {
@@ -15,20 +13,20 @@ export class UniV2LikeRouterContract {
     this.contract = new Contract(
       address,
       abi.liquidity.uniV2LikeRouter,
-    ) as UniV2LikeRouter;
+    ) as unknown as UniV2LikeRouter;
   }
 
   createAddLiquidity(
     tokenA: string,
     tokenB: string,
-    amountADesired: BigNumber,
-    amountBDesired: BigNumber,
-    amountAMin: BigNumber,
-    amountBMin: BigNumber,
+    amountADesired: bigint,
+    amountBDesired: bigint,
+    amountAMin: bigint,
+    amountBMin: bigint,
     to: string,
     deadline: number,
-  ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.addLiquidity(
+  ): Promise<ContractTransaction> {
+    return this.contract.addLiquidity.populateTransaction(
       tokenA,
       tokenB,
       amountADesired,
@@ -43,13 +41,13 @@ export class UniV2LikeRouterContract {
   createRemoveLiquidity(
     tokenA: string,
     tokenB: string,
-    liquidity: BigNumber,
-    amountAMin: BigNumber,
-    amountBMin: BigNumber,
+    liquidity: bigint,
+    amountAMin: bigint,
+    amountBMin: bigint,
     to: string,
     deadline: number,
-  ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.removeLiquidity(
+  ): Promise<ContractTransaction> {
+    return this.contract.removeLiquidity.populateTransaction(
       tokenA,
       tokenB,
       liquidity,

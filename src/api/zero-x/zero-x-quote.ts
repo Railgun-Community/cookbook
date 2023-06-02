@@ -1,8 +1,6 @@
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { AxiosError } from 'axios';
 import { getContractAddressesForChainOrThrow } from '@0x/contract-addresses';
-import { BigNumber } from '@ethersproject/bignumber';
-import { parseUnits } from '@ethersproject/units';
 import {
   getZeroXData,
   ZeroXApiEndpoint,
@@ -14,8 +12,8 @@ import {
   SwapQuoteData,
   SwapQuoteParams,
 } from '../../models/export-models';
-import { PopulatedTransaction } from '@ethersproject/contracts';
 import { minBalanceAfterSlippage } from '../../utils/number';
+import { ContractTransaction, parseUnits } from 'ethers';
 
 export const ZERO_X_PRICE_DECIMALS = 18;
 
@@ -101,8 +99,7 @@ export class ZeroXQuote {
     slippagePercentage,
     isRailgun,
   }: SwapQuoteParams): Promise<SwapQuoteData> => {
-    const sellAmount = sellERC20Amount.amount.toString();
-    if (sellAmount === '0') {
+    if (sellERC20Amount.amount === 0n) {
       throw new Error('Swap sell amount is 0.');
     }
     const sellTokenAddress = this.getZeroXTokenAddress(sellERC20Amount);
@@ -113,7 +110,7 @@ export class ZeroXQuote {
     const params: ZeroXAPIQuoteParams = {
       sellToken: sellTokenAddress,
       buyToken: buyTokenAddress,
-      sellAmount,
+      sellAmount: sellERC20Amount.amount.toString(),
       slippagePercentage: String(slippagePercentage),
     };
 
@@ -146,13 +143,13 @@ export class ZeroXQuote {
       }
 
       const minimumBuyAmount = minBalanceAfterSlippage(
-        BigNumber.from(buyAmount),
+        BigInt(buyAmount),
         slippagePercentage,
       );
-      const populatedTransaction: PopulatedTransaction = {
+      const crossContractCall: ContractTransaction = {
         to: to,
         data: data,
-        value: BigNumber.from(value),
+        value: BigInt(value),
       };
       const spender: Optional<string> =
         allowanceTarget === NULL_SPENDER_ADDRESS ? undefined : allowanceTarget;
@@ -162,11 +159,11 @@ export class ZeroXQuote {
         guaranteedPrice: parseUnits(guaranteedPrice, ZERO_X_PRICE_DECIMALS),
         buyERC20Amount: {
           ...buyERC20Info,
-          amount: BigNumber.from(buyAmount),
+          amount: BigInt(buyAmount),
         },
         minimumBuyAmount,
         spender,
-        populatedTransaction,
+        crossContractCall,
         slippagePercentage,
         sellTokenAddress: sellTokenAddressResponse,
         sellTokenValue: sellTokenValueResponse,
