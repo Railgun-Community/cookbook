@@ -1,13 +1,13 @@
+import { randomBytes } from 'ethers';
 import {
   RecipeERC20Info,
   StepOutputERC20Amount,
 } from '../models/export-models';
-import { getRandomBytes } from '@railgun-community/wallet';
 import { RailgunNFTAmount } from '@railgun-community/shared-models';
 
 export const getRandomNFTID = (): bigint => {
-  const randomHex = `0x${getRandomBytes(32)}`;
-  return BigInt(randomHex);
+  const randomHex = Buffer.from(randomBytes(32)).toString('hex');
+  return BigInt(`0x${randomHex}`);
 };
 
 export const compareNFTs = (

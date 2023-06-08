@@ -2248,15 +2248,15 @@
     levelup "^5.1.1"
     msgpack-lite "^0.1.26"
 
-"@railgun-community/shared-models@5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-5.1.3.tgz#a7c31c89404fe0679fe4f60c60e1874e72079d25"
-  integrity sha512-rXg6BijIo/AEUBVDrTxxkauzS3SNlY5x9Gs2rW3/hNQc5t2vQBmNumVft4KQXv2xVQedqNh+NTiIZY/8asfWRg==
+"@railgun-community/shared-models@5.1.8":
+  version "5.1.8"
+  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-5.1.8.tgz#005f6984f422f63c62750070748e05083b41a443"
+  integrity sha512-m4P9jGJS0XefMlO1xUgxk4hGpN0FbSxjZZsc48pCbx6nlFrck2TXxr+VNMAsDKV6ohVxQbuxT/AAbpNs8BxvQA==
 
-"@railgun-community/wallet@5.1.2":
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-5.1.2.tgz#1d7982e9c4de2e2833e599a5a91de2caa3436cbb"
-  integrity sha512-44nOWkJeP9JOFnJD2M44IzVk9d06IuFJA8jbLPmzmN2vdPpuyO4wrz9aHb4529AJwGTFMP/gvkKIt4azMC35fg==
+"@railgun-community/wallet@5.1.3":
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-5.1.3.tgz#e37fa2d93e1a1962672f4e6a227460ab59866f39"
+  integrity sha512-dvZduX4nhpH8A/K1w9YTgfOs2YevYXBiyGfoemZ/BaIWfJ+oMGlgWZuCtNMZlWQRa2L+TM2FCxiq3p942BdERA==
   dependencies:
     "@graphql-mesh/cache-localforage" "^0.7.20"
     "@graphql-mesh/cross-helpers" "^0.3.4"
@@ -2269,7 +2269,7 @@
     "@graphql-mesh/utils" "^0.43.22"
     "@noble/ed25519" "^1.7.1"
     "@railgun-community/engine" "5.0.3"
-    "@railgun-community/shared-models" "5.1.3"
+    "@railgun-community/shared-models" "5.1.8"
     "@whatwg-node/fetch" "^0.8.4"
     axios "0.27.2"
     brotli "^1.3.3"

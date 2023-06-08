@@ -1,8 +1,10 @@
-import { NetworkName } from '@railgun-community/shared-models';
+import {
+  NetworkName,
+  removeUndefineds,
+} from '@railgun-community/shared-models';
 import { BeefyApiEndpoint, getBeefyAPIData } from './beefy-fetch';
 import { compareTokenAddress } from '../../utils';
 import { CookbookDebug } from '../../utils/cookbook-debug';
-import { removeUndefineds } from '@railgun-community/wallet';
 import { numToBasisPoints } from '../../utils/basis-points';
 
 export type BeefyNetwork =

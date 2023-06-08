@@ -2,7 +2,6 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { BeefyDepositRecipe } from '../beefy-deposit-recipe';
 import { BeefyWithdrawRecipe } from '../beefy-withdraw-recipe';
-
 import { RecipeInput } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
 import { getTestRailgunWallet } from '../../../../test/shared.test';
