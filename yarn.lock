@@ -7,6 +7,11 @@
   resolved "https://registry.yarnpkg.com/@0x/contract-addresses/-/contract-addresses-8.5.0.tgz#80d3e7afb93ed429128088edf88fc405cedbb821"
   integrity sha512-Jfk3fIk/Ay1INGiwJOJyr4LF5mdOKdtukKvw700lrbrNDYz2Azq4sEOxDCevzonffGnMUlrZHfz0lWtw1cygRA==
 
+"@adraffy/ens-normalize@1.9.2":
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.9.2.tgz#60111a5d9db45b2e5cbb6231b0bb8d97e8659316"
+  integrity sha512-0h+FrQDqe2Wn+IIGFkTCd4aAwTJ+7834Ek1COohCyV26AXhwQ7WQaz+4F/nLOeVl/3BtWHOHLPsq46V8YB46Eg==
+
 "@adraffy/ens-normalize@https://github.com/ricmoo/ens-normalize.js":
   version "1.9.0"
   resolved "https://github.com/ricmoo/ens-normalize.js#2d040533e57e4f25f9a7cc4715e219658ad454b5"
@@ -2228,10 +2233,10 @@
   resolved "https://registry.yarnpkg.com/@railgun-community/curve25519-scalarmult-wasm/-/curve25519-scalarmult-wasm-0.1.4.tgz#72f84f7d4d15a0deedb679860f07f59953dc21eb"
   integrity sha512-8F5S6nGAZ/xO3mgFegLtwB9dcEs1Hynn+h775or4dFhWNP+Eh6c8N2vrdlkIfLZ+lFIP798lELBrQC0mplXE7A==
 
-"@railgun-community/engine@5.0.3":
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/@railgun-community/engine/-/engine-5.0.3.tgz#9fbe24a08b1f2435b43ff86e129776346b837f66"
-  integrity sha512-ltRFVkmcQZxjIDPNF2teZE4JNKO98YX8O39MwFnZjlULD0zgdQN0auPcwHUibHlk6DOKV+kXH98ncDaf6L9rDg==
+"@railgun-community/engine@5.0.8":
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/@railgun-community/engine/-/engine-5.0.8.tgz#d8bbff8af358c51cf3713dc156af1dd02916736d"
+  integrity sha512-XtsX0JpLp8wgxs2PC5opTW6tYBsnaEQfOSKQwDvASj4UNe3hUrC0mHfKVkS+7NZD/uOZic/UZRXW0dJVMHEsXQ==
   dependencies:
     "@noble/ed25519" "^1.7.1"
     "@noble/hashes" "^1.3.0"
@@ -2244,19 +2249,19 @@
     circomlibjs hsg88/circomlibjs#ffjavascrip.0.1.0
     encoding-down "^7.1.0"
     ethereum-cryptography "^2.0.0"
-    ethers "^6.4.0"
+    ethers "^6.6.0"
     levelup "^5.1.1"
     msgpack-lite "^0.1.26"
 
-"@railgun-community/shared-models@5.1.8":
-  version "5.1.8"
-  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-5.1.8.tgz#005f6984f422f63c62750070748e05083b41a443"
-  integrity sha512-m4P9jGJS0XefMlO1xUgxk4hGpN0FbSxjZZsc48pCbx6nlFrck2TXxr+VNMAsDKV6ohVxQbuxT/AAbpNs8BxvQA==
+"@railgun-community/shared-models@5.1.15":
+  version "5.1.15"
+  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-5.1.15.tgz#4cd4a7c68d24eff68db3738e1771bf0dc586dcf0"
+  integrity sha512-9XUnxcequMhwehKUoYMz4v0VRSXWkTcH9YiA5X5N4NRvRauxuTrOGrRzLPehnSovBmMgJKIkQ/3utoTmcRrpDQ==
 
-"@railgun-community/wallet@5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-5.1.3.tgz#e37fa2d93e1a1962672f4e6a227460ab59866f39"
-  integrity sha512-dvZduX4nhpH8A/K1w9YTgfOs2YevYXBiyGfoemZ/BaIWfJ+oMGlgWZuCtNMZlWQRa2L+TM2FCxiq3p942BdERA==
+"@railgun-community/wallet@5.1.5":
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-5.1.5.tgz#6421d8ad693616f18af21df18c2a5f83b802a4be"
+  integrity sha512-yedUQ4mWslpx6CHOgsgWUpSLbrHtVq5iqXvWCWfvsKphDgOwSZFjb2DRfmb8QhF2jpVEyDYMt0G7L4P3FqUu7w==
   dependencies:
     "@graphql-mesh/cache-localforage" "^0.7.20"
     "@graphql-mesh/cross-helpers" "^0.3.4"
@@ -2268,8 +2273,8 @@
     "@graphql-mesh/types" "^0.91.14"
     "@graphql-mesh/utils" "^0.43.22"
     "@noble/ed25519" "^1.7.1"
-    "@railgun-community/engine" "5.0.3"
-    "@railgun-community/shared-models" "5.1.8"
+    "@railgun-community/engine" "5.0.8"
+    "@railgun-community/shared-models" "5.1.15"
     "@whatwg-node/fetch" "^0.8.4"
     axios "0.27.2"
     brotli "^1.3.3"
@@ -4991,6 +4996,19 @@ ethers@^6.4.0:
   integrity sha512-nksaMCwX+BOdV2NQ1/57OehSD2JtujbhrdC2+Fb9VpvBO0WO6h+WWwu3oMMw7aUiTa5lvQcWX1vl4aOy7Q3CTg==
   dependencies:
     "@adraffy/ens-normalize" "https://github.com/ricmoo/ens-normalize.js"
+    "@noble/hashes" "1.1.2"
+    "@noble/secp256k1" "1.7.1"
+    "@types/node" "18.15.13"
+    aes-js "4.0.0-beta.5"
+    tslib "2.4.0"
+    ws "8.5.0"
+
+ethers@^6.6.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-6.6.0.tgz#596e512cd91ef86b04f95f2e6be58a22ec4f2ce6"
+  integrity sha512-7D2U+n8eZYmh592VZqap9vBu50jN7YUDHqAmwBYTMntmUKC9RVgcqcFbd+3DTCOQ1jMyK6QHv1usbcfgiGaHOA==
+  dependencies:
+    "@adraffy/ens-normalize" "1.9.2"
     "@noble/hashes" "1.1.2"
     "@noble/secp256k1" "1.7.1"
     "@types/node" "18.15.13"
