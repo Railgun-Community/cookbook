@@ -1,8 +1,8 @@
 diff --git a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
-index b942514..db2df20 100644
+index 3da7693..ea8f2b7 100644
 --- a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
 +++ b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
-@@ -241,6 +241,10 @@ class RailgunSmartWalletContract extends events_1.default {
+@@ -250,6 +250,10 @@ class RailgunSmartWalletContract extends events_1.default {
       * @param latestBlock - block to scan to
       */
      async getHistoricalEvents(chain, initialStartBlock, latestBlock, getNextStartBlockFromValidMerkletree, eventsListener, eventsNullifierListener, eventsUnshieldListener, setLastSyncedBlock) {

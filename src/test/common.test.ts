@@ -1,6 +1,4 @@
 import {
-  awaitMultipleWalletScans,
-  awaitWalletScan,
   balanceForERC20Token,
   getRelayAdaptTransactionError,
 } from '@railgun-community/wallet';
@@ -8,7 +6,6 @@ import {
   NETWORK_CONFIG,
   NetworkName,
   delay,
-  promiseTimeout,
 } from '@railgun-community/shared-models';
 import { RecipeInput, RecipeOutput } from '../models/export-models';
 import {
@@ -24,7 +21,7 @@ import { ERC20Contract } from '../contract';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const SCAN_BALANCE_WAIT = 3000;
+const SCAN_BALANCE_WAIT = 11000;
 
 export const shouldSkipForkTest = (networkName: NetworkName) => {
   return (

@@ -12,7 +12,7 @@ import { testConfig } from './test-config.test';
 
 before(async function run() {
   if (process.env.RUN_FORK_TESTS) {
-    this.timeout(2 * 60 * 1000); // 2 min timeout for setup.
+    this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
     removeTestDB();
     await setupForkTests();
   }
