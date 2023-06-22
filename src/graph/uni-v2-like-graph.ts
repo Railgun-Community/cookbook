@@ -1,4 +1,4 @@
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { getMeshOptions, getSdk } from './graphql/.graphclient';
 import { MeshInstance, getMesh } from '@graphql-mesh/runtime';
 import { PairDataWithRate } from '../models/uni-v2-like';
@@ -119,7 +119,7 @@ export class UniV2LikeSubgraph {
     networkName: NetworkName,
   ): Promise<MeshInstance> => {
     const meshID = `${uniswapV2Fork}-${networkName}`;
-    if (this.meshes[meshID]) {
+    if (isDefined(this.meshes[meshID])) {
       return this.meshes[meshID];
     }
     const sourceName = this.sourceNameForForkAndNetwork(

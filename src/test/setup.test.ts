@@ -1,4 +1,4 @@
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import {
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
@@ -11,7 +11,7 @@ import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
 
 before(async function run() {
-  if (process.env.RUN_FORK_TESTS) {
+  if (isDefined(process.env.RUN_FORK_TESTS)) {
     this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
     removeTestDB();
     await setupForkTests();
@@ -19,7 +19,7 @@ before(async function run() {
 });
 
 after(() => {
-  if (process.env.RUN_FORK_TESTS) {
+  if (isDefined(process.env.RUN_FORK_TESTS)) {
     removeTestDB();
   }
 });
@@ -55,7 +55,7 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
 
 export const setupForkTests = async () => {
   const networkName = process.env.NETWORK_NAME as NetworkName;
-  if (!networkName) {
+  if (!isDefined(networkName)) {
     throw new Error(
       `Run fork tests with NETWORK_NAME env variable. See README.`,
     );
@@ -71,9 +71,9 @@ export const setupForkTests = async () => {
 
   const tokenAddresses: string[] = getTestERC20Addresses(networkName);
 
-  const forkRPCType = process.env.USE_GANACHE
+  const forkRPCType = isDefined(process.env.USE_GANACHE)
     ? ForkRPCType.Ganache
-    : process.env.USE_HARDHAT
+    : isDefined(process.env.USE_HARDHAT)
     ? ForkRPCType.Hardhat
     : ForkRPCType.Anvil;
 

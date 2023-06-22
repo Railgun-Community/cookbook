@@ -10,6 +10,7 @@ import {
   RailgunERC20Amount,
   RailgunERC20AmountRecipient,
   TransactionGasDetails,
+  isDefined,
 } from '@railgun-community/shared-models';
 import { ContractTransaction, JsonRpcProvider, Wallet } from 'ethers';
 import { testConfig } from './test-config.test';
@@ -46,7 +47,7 @@ export const getTestEthersWallet = (): Wallet => {
 
 export const getTestRailgunWallet = () => {
   const wallet = testRailgunWallet;
-  if (!wallet) {
+  if (!isDefined(wallet)) {
     throw new Error('No test railgun wallet created');
   }
   return wallet;

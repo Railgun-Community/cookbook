@@ -43,7 +43,7 @@ const ZERO_X_PROXY_BASE_TOKEN_ADDRESS =
 
 export class ZeroXQuote {
   private static getZeroXTokenAddress = (erc20: RecipeERC20Info) => {
-    if (erc20.isBaseToken) {
+    if (erc20.isBaseToken ?? false) {
       return ZERO_X_PROXY_BASE_TOKEN_ADDRESS;
     }
     return erc20.tokenAddress;

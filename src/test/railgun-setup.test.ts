@@ -21,6 +21,7 @@ import {
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
   delay,
+  isDefined,
   poll,
 } from '@railgun-community/shared-models';
 import { testConfig } from './test-config.test';
@@ -117,7 +118,7 @@ export const createRailgunWalletForTests = async () => {
     testConfig.railgunMnemonic,
     {},
   );
-  if (!railgunWalletInfo) {
+  if (!isDefined(railgunWalletInfo)) {
     throw new Error('Error creating Railgun wallet.');
   }
 
@@ -220,7 +221,7 @@ export const waitForShieldedTokenBalances = async (
         100, // Delay in MS
         300, // Iterations - 30sec total
       );
-      if (!balance) {
+      if (!isDefined(balance)) {
         throw new Error(`Could not find shielded balance for ${tokenAddress}`);
       }
     }),

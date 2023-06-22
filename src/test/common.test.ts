@@ -6,6 +6,7 @@ import {
   NETWORK_CONFIG,
   NetworkName,
   delay,
+  isDefined,
 } from '@railgun-community/shared-models';
 import { RecipeInput, RecipeOutput } from '../models/export-models';
 import {
@@ -25,7 +26,8 @@ const SCAN_BALANCE_WAIT = 11000;
 
 export const shouldSkipForkTest = (networkName: NetworkName) => {
   return (
-    !process.env.RUN_FORK_TESTS || process.env.NETWORK_NAME !== networkName
+    !isDefined(process.env.RUN_FORK_TESTS) ||
+    process.env.NETWORK_NAME !== networkName
   );
 };
 
@@ -89,7 +91,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
       recipeOutput,
     );
 
-  if (gasEstimate) {
+  if (isDefined(gasEstimate)) {
     expect(gasEstimate >= expectedGasWithin50K - 50_000n).to.equal(
       true,
       `${name}: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimate}`,
@@ -158,7 +160,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   const relayAdaptTransactionError = getRelayAdaptTransactionError(
     txReceipt.logs,
   );
-  if (relayAdaptTransactionError) {
+  if (isDefined(relayAdaptTransactionError)) {
     throw new Error(
       `${name}: Relay Adapt subcall revert: ${relayAdaptTransactionError}`,
     );
@@ -202,7 +204,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
       const shieldedAmount = shieldTokenMap[tokenAddress] ?? 0n;
       const expectedBalance = originalBalance - unshieldAmount + shieldedAmount;
 
-      if (expectPossiblePrecisionLossOverflow) {
+      if (expectPossiblePrecisionLossOverflow ?? false) {
         // NOTE: Balance may be +1 wei because of precision loss.
         expect(
           postBalance >= expectedBalance && postBalance <= expectedBalance + 1n,

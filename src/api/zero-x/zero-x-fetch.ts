@@ -1,4 +1,4 @@
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import axios from 'axios';
 import { ZeroXConfig } from '../../models/zero-x-config';
 
@@ -50,7 +50,7 @@ export const createZeroXUrl = (
   params?: APIParams,
 ) => {
   const proxyDomain = ZeroXConfig.PROXY_API_DOMAIN;
-  if (proxyDomain) {
+  if (isDefined(proxyDomain)) {
     return createZeroXProxyAPIUrl(
       proxyDomain,
       endpoint,

@@ -13,7 +13,7 @@ import {
   maxBigNumberForTransaction,
   minBigNumber,
 } from '../../../utils/big-number';
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { ContractTransaction } from 'ethers';
 
 export class ApproveERC20SpenderStep extends Step {
@@ -40,7 +40,7 @@ export class ApproveERC20SpenderStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
-    if (!this.spender || this.tokenInfo.isBaseToken) {
+    if (!isDefined(this.spender) || (this.tokenInfo.isBaseToken ?? false)) {
       return createNoActionStepOutput(input);
     }
 

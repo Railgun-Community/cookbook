@@ -1,5 +1,9 @@
 import { abi } from '../../abi/abi';
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  isDefined,
+} from '@railgun-community/shared-models';
 
 import { ZERO_ADDRESS } from '../../models/constants';
 import { validateAddress } from '../../utils/address';
@@ -12,7 +16,7 @@ export class RelayAdaptContract {
 
   constructor(networkName: NetworkName) {
     const network = NETWORK_CONFIG[networkName];
-    if (!network) {
+    if (!isDefined(network)) {
       throw new Error(`Network not found: ${networkName}`);
     }
     if (!validateAddress(network.relayAdaptContract)) {

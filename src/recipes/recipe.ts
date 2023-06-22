@@ -1,6 +1,7 @@
 import {
   NetworkName,
   RailgunNFTAmount,
+  isDefined,
 } from '@railgun-community/shared-models';
 import {
   RecipeConfig,
@@ -139,7 +140,7 @@ export abstract class Recipe {
       const isFinalStep = index === stepOutputs.length - 1;
       stepOutput.outputERC20Amounts.forEach(outputERC20Amount => {
         const tokenAddress = outputERC20Amount.tokenAddress.toLowerCase();
-        if (allStepOutputERC20Amounts[tokenAddress] && isFinalStep) {
+        if (isDefined(allStepOutputERC20Amounts[tokenAddress]) && isFinalStep) {
           // Only set amount for final step outputs.
           allStepOutputERC20Amounts[tokenAddress].amount =
             outputERC20Amount.expectedBalance; // TODO: Minimum balance is lost for combos.
@@ -156,7 +157,7 @@ export abstract class Recipe {
     });
     input.erc20Amounts.forEach(erc20Amount => {
       const tokenAddress = erc20Amount.tokenAddress.toLowerCase();
-      if (allStepOutputERC20Amounts[tokenAddress]) {
+      if (isDefined(allStepOutputERC20Amounts[tokenAddress])) {
         return;
       }
       allStepOutputERC20Amounts[tokenAddress] = {
@@ -181,7 +182,7 @@ export abstract class Recipe {
       const isFinalStep = index === stepOutputs.length - 1;
       stepOutput.outputNFTs.forEach(outputNFT => {
         const nftID = Recipe.getNFTID(outputNFT);
-        if (allStepOutputNFTAmounts[nftID] && isFinalStep) {
+        if (isDefined(allStepOutputNFTAmounts[nftID]) && isFinalStep) {
           // Only set amount for final step outputs.
           allStepOutputNFTAmounts[nftID].amount = outputNFT.amount;
           return;
@@ -194,7 +195,7 @@ export abstract class Recipe {
     });
     input.nfts.forEach(nft => {
       const nftID = Recipe.getNFTID(nft);
-      if (allStepOutputNFTAmounts[nftID]) {
+      if (isDefined(allStepOutputNFTAmounts[nftID])) {
         return;
       }
       allStepOutputNFTAmounts[nftID] = {
