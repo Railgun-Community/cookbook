@@ -3,7 +3,7 @@ import {
   StepInput,
   UnvalidatedStepOutput,
 } from '../models/export-models';
-import { RailgunNFTAmount } from '@railgun-community/shared-models';
+import { RailgunNFTAmount, isDefined } from '@railgun-community/shared-models';
 
 export const validateStepOutput = (
   input: StepInput,
@@ -20,7 +20,7 @@ export const validateStepOutput = (
 
 const getTokenId = (tokenAddress: string, isBaseToken?: boolean) => {
   const lcToken = tokenAddress.toLowerCase();
-  return isBaseToken ? `${lcToken}-base` : lcToken;
+  return isDefined(isBaseToken) && isBaseToken ? `${lcToken}-base` : lcToken;
 };
 
 const validateStepOutputERC20Amounts = (

@@ -1,5 +1,6 @@
 import {
   NetworkName,
+  isDefined,
   removeUndefineds,
 } from '@railgun-community/shared-models';
 import { BeefyApiEndpoint, getBeefyAPIData } from './beefy-fetch';
@@ -117,7 +118,8 @@ export class BeefyAPI {
   private static cacheExpired(): boolean {
     // 3 min cache
     return (
-      !this.cacheTimestamp || this.cacheTimestamp < Date.now() - 3 * 60 * 1000
+      !isDefined(this.cacheTimestamp) ||
+      this.cacheTimestamp < Date.now() - 3 * 60 * 1000
     );
   }
 
@@ -200,12 +202,12 @@ export class BeefyAPI {
           vault.network === beefyChainInfo.network,
       );
 
-      if (depositERC20Address) {
+      if (isDefined(depositERC20Address)) {
         filtered = filtered.filter(vault =>
           compareTokenAddress(vault.depositERC20Address, depositERC20Address),
         );
       }
-      if (vaultTokenAddress) {
+      if (isDefined(vaultTokenAddress)) {
         filtered = filtered.filter(vault =>
           compareTokenAddress(vault.vaultTokenAddress, vaultTokenAddress),
         );

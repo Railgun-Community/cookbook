@@ -1,11 +1,15 @@
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  isDefined,
+} from '@railgun-community/shared-models';
 import { RecipeERC20Info } from '../models/export-models';
 
 export const getWrappedBaseToken = (
   networkName: NetworkName,
 ): RecipeERC20Info => {
   const network = NETWORK_CONFIG[networkName];
-  if (!network) {
+  if (!isDefined(network)) {
     throw new Error(`Unknown network: ${networkName}`);
   }
   return {

@@ -20,7 +20,11 @@ export class ShieldStep extends Step {
   async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
     const { outputERC20Amounts, feeERC20AmountRecipients } =
       this.getOutputERC20AmountsAndFees(input.networkName, input.erc20Amounts);
-    if (!outputERC20Amounts.every(erc20Amount => !erc20Amount.isBaseToken)) {
+    if (
+      !outputERC20Amounts.every(
+        erc20Amount => !(erc20Amount.isBaseToken ?? false),
+      )
+    ) {
       throw new Error('Cannot shield base token.');
     }
 

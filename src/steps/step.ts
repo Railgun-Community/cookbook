@@ -1,3 +1,4 @@
+import { isDefined } from '@railgun-community/shared-models';
 import {
   StepInput,
   StepOutput,
@@ -72,13 +73,16 @@ export abstract class Step {
 
     // If this step has a non-deterministic output, we must provide deterministic inputs.
     // Otherwise, the expected balances become too complicated and variable.
-    if (this.config.hasNonDeterministicOutput && hasNonDeterministicInput) {
+    if (
+      (this.config.hasNonDeterministicOutput ?? false) &&
+      hasNonDeterministicInput
+    ) {
       throw new Error(
         `Non-deterministic step must have deterministic inputs - you may not stack non-deterministic steps in a single recipe.`,
       );
     }
 
-    if (amount) {
+    if (isDefined(amount)) {
       // If we have a specified amount, we must have a deterministic input in order to generate the change outputs.
       if (hasNonDeterministicInput) {
         throw new Error(
@@ -136,7 +140,10 @@ export abstract class Step {
     erc20AmountForStep: StepOutputERC20Amount,
     amountUsed: Optional<bigint>,
   ) {
-    if (!amountUsed || amountUsed >= erc20AmountForStep.expectedBalance) {
+    if (
+      !isDefined(amountUsed) ||
+      amountUsed >= erc20AmountForStep.expectedBalance
+    ) {
       return undefined;
     }
 

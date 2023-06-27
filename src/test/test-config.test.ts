@@ -1,6 +1,6 @@
 export const testConfig = {
   // Set env ETHEREUM_RPC to change default fork RPC.
-  ethereumForkRPC: process.env.ETHEREUM_RPC || 'https://cloudflare-eth.com',
+  ethereumForkRPC: process.env.ETHEREUM_RPC ?? 'https://cloudflare-eth.com',
 
   showVerboseLogs: false,
 
