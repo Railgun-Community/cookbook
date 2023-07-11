@@ -78,7 +78,9 @@ export class UniV2LikeSubgraph {
         );
       }
       CookbookDebug.error(err);
-      throw new Error('Could not get list of LP pairs: GraphQL request error.');
+      throw new Error(
+        `Could not get list of LP pairs. GraphQL request error: ${err.message}.`,
+      );
     }
   };
 
