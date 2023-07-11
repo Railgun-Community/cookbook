@@ -19,7 +19,8 @@ describe('zero-x-quote', () => {
     ZeroXConfig.PROXY_API_DOMAIN = undefined;
   });
 
-  it('Should fetch quotes from ZeroX proxy', async () => {
+  // TODO: Skipping test because Proxy API domain needs to be configured.
+  it.skip('Should fetch quotes from ZeroX proxy', async () => {
     const sellERC20Amount: RecipeERC20Amount = {
       tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       decimals: 18n,
