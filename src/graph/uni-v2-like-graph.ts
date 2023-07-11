@@ -28,6 +28,10 @@ export class UniV2LikeSubgraph {
     tokenAddresses: string[],
     retryCount = 0,
   ): Promise<PairDataWithRate[]> => {
+    if (tokenAddresses.length < 2) {
+      return [];
+    }
+
     try {
       const sdk = this.getBuiltGraphSDK(uniswapV2Fork, networkName);
       const tokenAddressesLowercase = tokenAddresses.map(address =>
