@@ -104,7 +104,7 @@ describe('beefy-withdraw-recipe', () => {
         {
           tokenAddress,
           amount: BigInt('1995'),
-          recipient: 'Beefy Vault Withdraw Fee',
+          recipient: 'VAULT_NAME Vault Withdraw Fee',
           decimals: 18n,
         },
       ],
@@ -185,7 +185,7 @@ describe('beefy-withdraw-recipe', () => {
       },
       {
         amount: BigInt('1995'),
-        recipient: 'Beefy Vault Withdraw Fee',
+        recipient: 'VAULT_NAME Vault Withdraw Fee',
         tokenAddress,
         decimals: 18n,
       },

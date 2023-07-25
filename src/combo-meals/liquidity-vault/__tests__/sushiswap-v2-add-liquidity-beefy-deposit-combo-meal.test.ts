@@ -333,14 +333,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
     expect(output.stepOutputs[5]).to.deep.equal({
       name: 'Beefy Vault Deposit',
       description: 'Deposits into a yield-bearing Beefy Vault.',
-      feeERC20AmountRecipients: [
-        {
-          tokenAddress: LP_TOKEN.tokenAddress,
-          amount: BigInt('0x00'),
-          recipient: 'ETH-USDC LP Vault Deposit Fee',
-          decimals: 18n,
-        },
-      ],
+      feeERC20AmountRecipients: [],
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
@@ -424,12 +417,6 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
         recipient: 'RAILGUN Unshield Fee',
         tokenAddress: WETH_TOKEN.tokenAddress,
         decimals: WETH_TOKEN.decimals,
-      },
-      {
-        amount: BigInt('0x00'),
-        recipient: 'ETH-USDC LP Vault Deposit Fee',
-        tokenAddress: LP_TOKEN.tokenAddress,
-        decimals: LP_TOKEN.decimals,
       },
       {
         amount: BigInt('0x1187230ce4005c'),

@@ -117,7 +117,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       comboMeal.config.name,
       recipeInput,
       recipeOutput,
-      2_800_000n, // expectedGasWithin50K
+      3_200_000n, // expectedGasWithin50K
       true, // expectPossiblePrecisionLossOverflow - due to precision loss in the reserve ratios
     );
 

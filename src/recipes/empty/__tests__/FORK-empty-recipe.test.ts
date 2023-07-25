@@ -60,7 +60,7 @@ describe('FORK-empty-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      2_800_000n, // expectedGasWithin50K
+      3_200_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

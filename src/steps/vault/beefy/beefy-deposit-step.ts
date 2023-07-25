@@ -78,18 +78,24 @@ export class BeefyDepositStep extends Step {
       minBalance: receivedVaultTokenAmount,
       approvedSpender: undefined,
     };
-    const feeERC20AmountRecipient: RecipeERC20AmountRecipient = {
-      ...depositERC20Info,
-      amount: depositFeeAmount,
-      recipient: `${vaultName} Vault Deposit Fee`,
-    };
+    const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] =
+      depositFeeAmount > 0n
+        ? [
+            {
+              tokenAddress: depositERC20Address,
+              decimals: depositERC20Decimals,
+              amount: depositFeeAmount,
+              recipient: `${vaultName} Vault Deposit Fee`,
+            },
+          ]
+        : [];
 
     return {
       crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spentERC20AmountRecipient],
       outputERC20Amounts: [outputERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [feeERC20AmountRecipient],
+      feeERC20AmountRecipients,
     };
   }
 }

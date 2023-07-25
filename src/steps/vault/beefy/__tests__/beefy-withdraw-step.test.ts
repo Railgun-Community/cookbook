@@ -80,7 +80,7 @@ describe('beefy-withdraw-step', () => {
         decimals: 18n,
         tokenAddress,
         amount: 2000n,
-        recipient: 'Beefy Vault Withdraw Fee',
+        recipient: 'VAULT_NAME Vault Withdraw Fee',
       },
     ]);
 

@@ -73,19 +73,24 @@ export class BeefyWithdrawStep extends Step {
       minBalance: withdrawAmountAfterFee,
       approvedSpender: undefined,
     };
-    const feeERC20AmountRecipient: RecipeERC20AmountRecipient = {
-      tokenAddress: depositERC20Address,
-      decimals: depositERC20Decimals,
-      amount: withdrawFeeAmount,
-      recipient: `Beefy Vault Withdraw Fee`,
-    };
+    const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] =
+      withdrawFeeAmount > 0n
+        ? [
+            {
+              tokenAddress: depositERC20Address,
+              decimals: depositERC20Decimals,
+              amount: withdrawFeeAmount,
+              recipient: `${vaultName} Vault Withdraw Fee`,
+            },
+          ]
+        : [];
 
     return {
       crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spentERC20AmountRecipient],
       outputERC20Amounts: [outputERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,
-      feeERC20AmountRecipients: [feeERC20AmountRecipient],
+      feeERC20AmountRecipients,
     };
   }
 }

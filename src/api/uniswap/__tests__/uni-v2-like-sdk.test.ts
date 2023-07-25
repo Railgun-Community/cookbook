@@ -57,8 +57,7 @@ describe('uni-v2-like-sdk', () => {
     );
   }).timeout(5000);
 
-  // TODO: Fix test when subgraph is repaired.
-  // See indexing_error: https://thegraph.com/hosted-service/subgraph/uniswap/uniswap-v2
+  // TODO: Fix this test.
   it.skip('Should get Uniswap LP pairs for USDC and WETH', async () => {
     const pairsOnlyUSDC = await UniV2LikeSDK.getAllLPPairsForTokenAddresses(
       UniswapV2Fork.Uniswap,

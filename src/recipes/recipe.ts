@@ -134,7 +134,8 @@ export abstract class Recipe {
       .map(output => output.crossContractCalls)
       .flat();
 
-    // We need to make sure to shield all step outputs, even those in the middle of recipes.
+    // TODO: Pre callbacks, we need to make sure to shield all step outputs,
+    // even those in the middle of recipes and those with 0n expected amounts.
     const allStepOutputERC20Amounts: Record<string, RecipeERC20Amount> = {};
     stepOutputs.forEach((stepOutput, index) => {
       const isFinalStep = index === stepOutputs.length - 1;
@@ -175,6 +176,8 @@ export abstract class Recipe {
     const outputERC20Amounts: RecipeERC20Amount[] = Object.values(
       allStepOutputERC20Amounts,
     );
+    // TODO: Remove 0n amounts after callbacks.
+    // .filter(({ amount }) => amount > 0n);
 
     // TODO: After callbacks upgrade, remove unshield NFTs to auto re-shield.
     const allStepOutputNFTAmounts: Record<string, RailgunNFTAmount> = {};
@@ -206,9 +209,17 @@ export abstract class Recipe {
     const outputNFTs: RailgunNFTAmount[] = Object.values(
       allStepOutputNFTAmounts,
     );
+    // TODO: Remove 0n amounts after callbacks.
+    // .filter(({ amount }) => amount > 0n);
 
     const feeERC20AmountRecipients: RecipeERC20AmountRecipient[] = stepOutputs
-      .map(output => output.feeERC20AmountRecipients ?? [])
+      .map(
+        output =>
+          output.feeERC20AmountRecipients?.filter(feeERC20AmountRecipient => {
+            // Only return fees with non-zero amounts.
+            return feeERC20AmountRecipient.amount > 0n;
+          }) ?? [],
+      )
       .flat();
 
     const recipeOutput: RecipeOutput = {

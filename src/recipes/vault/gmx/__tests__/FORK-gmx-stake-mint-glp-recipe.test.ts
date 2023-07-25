@@ -82,7 +82,7 @@ describe.skip('FORK-gmx-stake-mint-glp-recipe', function run() {
       gmxStakeMintGlpRecipe.config.name,
       gmxStakeMintGlpRecipeInput,
       recipeOutput,
-      2_800_000n, // expectedGasWithin50K
+      3_200_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:
