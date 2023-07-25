@@ -27,6 +27,7 @@ const vault: BeefyVaultData = {
   network: 'ethereum',
   depositERC20Address: tokenAddress,
   depositERC20Decimals: 18n,
+  vaultTokenSymbol: 'mooHermesMETIS-m.USDC',
   vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultRate: BigInt('2000000000000000000'), // 2x

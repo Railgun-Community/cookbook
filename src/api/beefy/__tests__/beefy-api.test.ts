@@ -53,6 +53,7 @@ describe('beefy-api', () => {
       vaultContractAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       vaultID: 'sushi-mainnet-usdc-weth',
       vaultName: 'ETH-USDC LP',
+      vaultTokenSymbol: 'mooSushiETH-USDC',
       vaultTokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       withdrawFeeBasisPoints: 10n,
     });

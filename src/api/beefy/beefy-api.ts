@@ -72,6 +72,7 @@ export type BeefyVaultData = {
   network: BeefyNetwork;
   depositERC20Address: string;
   depositERC20Decimals: bigint;
+  vaultTokenSymbol: string;
   vaultTokenAddress: string;
   vaultContractAddress: string;
   vaultRate: bigint;
@@ -163,6 +164,7 @@ export class BeefyAPI {
           network: vaultAPIData.network,
           depositERC20Address: vaultAPIData.tokenAddress.toLowerCase(),
           depositERC20Decimals: BigInt(vaultAPIData.tokenDecimals),
+          vaultTokenSymbol: vaultAPIData.earnedToken,
           vaultTokenAddress: vaultAPIData.earnedTokenAddress.toLowerCase(),
           vaultContractAddress: vaultAPIData.earnContractAddress.toLowerCase(),
           vaultRate: BigInt(vaultAPIData.pricePerFullShare),
