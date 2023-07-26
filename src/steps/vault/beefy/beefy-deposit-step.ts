@@ -33,7 +33,7 @@ export class BeefyDepositStep extends Step {
       depositERC20Address,
       depositERC20Decimals,
       vaultContractAddress,
-      vaultTokenAddress,
+      vaultERC20Address,
       vaultRate,
       depositFeeBasisPoints,
     } = this.vault;
@@ -72,7 +72,7 @@ export class BeefyDepositStep extends Step {
       recipient: `${vaultName} Vault`,
     };
     const outputERC20Amount: StepOutputERC20Amount = {
-      tokenAddress: vaultTokenAddress,
+      tokenAddress: vaultERC20Address,
       decimals: depositERC20Decimals,
       expectedBalance: receivedVaultTokenAmount,
       minBalance: receivedVaultTokenAmount,

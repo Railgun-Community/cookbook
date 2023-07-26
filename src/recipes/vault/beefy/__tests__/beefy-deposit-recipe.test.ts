@@ -25,10 +25,11 @@ const vault: BeefyVaultData = {
   apy: 5.0,
   chain: 'ethereum',
   network: 'ethereum',
+  depositERC20Symbol: 'RAIL',
   depositERC20Address: tokenAddress,
   depositERC20Decimals: 18n,
-  vaultTokenSymbol: 'mooHermesMETIS-m.USDC',
-  vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
+  vaultERC20Symbol: 'mooHermesMETIS-m.USDC',
+  vaultERC20Address: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultRate: BigInt('2000000000000000000'), // 2x
   depositFeeBasisPoints: 1000n,
@@ -135,7 +136,7 @@ describe('beefy-deposit-recipe', () => {
           approvedSpender: undefined,
           expectedBalance: BigInt('4489'),
           minBalance: BigInt('4489'),
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
         },
       ],
@@ -163,7 +164,7 @@ describe('beefy-deposit-recipe', () => {
         {
           amount: BigInt('11'),
           recipient: 'RAILGUN Shield Fee',
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
         },
       ],
@@ -172,7 +173,7 @@ describe('beefy-deposit-recipe', () => {
           approvedSpender: undefined,
           expectedBalance: BigInt('4478'),
           minBalance: BigInt('4478'),
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
         },
@@ -184,7 +185,7 @@ describe('beefy-deposit-recipe', () => {
     expect(
       output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
-      [tokenAddress, vault.vaultTokenAddress].map(tokenAddress =>
+      [tokenAddress, vault.vaultERC20Address].map(tokenAddress =>
         tokenAddress.toLowerCase(),
       ),
     );
@@ -214,7 +215,7 @@ describe('beefy-deposit-recipe', () => {
       {
         amount: BigInt('11'),
         recipient: 'RAILGUN Shield Fee',
-        tokenAddress: vault.vaultTokenAddress,
+        tokenAddress: vault.vaultERC20Address,
         decimals: 18n,
       },
     ]);

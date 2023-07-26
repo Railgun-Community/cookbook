@@ -46,6 +46,7 @@ describe('beefy-api', () => {
 
       // Compare the rest of the values:
       chain: 'ethereum',
+      depositERC20Symbol: 'ETH-USDC LP',
       depositERC20Address: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
       depositERC20Decimals: 18n,
       depositFeeBasisPoints: 0n,
@@ -53,8 +54,8 @@ describe('beefy-api', () => {
       vaultContractAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       vaultID: 'sushi-mainnet-usdc-weth',
       vaultName: 'ETH-USDC LP',
-      vaultTokenSymbol: 'mooSushiETH-USDC',
-      vaultTokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
+      vaultERC20Symbol: 'mooSushiETH-USDC',
+      vaultERC20Address: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       withdrawFeeBasisPoints: 10n,
     });
     expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.001);

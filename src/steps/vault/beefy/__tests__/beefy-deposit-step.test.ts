@@ -18,10 +18,11 @@ const vault: BeefyVaultData = {
   apy: 5.0,
   chain: 'ethereum',
   network: 'ethereum',
+  depositERC20Symbol: 'RAIL',
   depositERC20Address: tokenAddress,
   depositERC20Decimals: 18n,
-  vaultTokenSymbol: 'mooHermesMETIS-m.USDC',
-  vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
+  vaultERC20Symbol: 'mooHermesMETIS-m.USDC',
+  vaultERC20Address: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultRate: BigInt('2000000000000000000'), // 2x
   depositFeeBasisPoints: 1000n,
@@ -77,7 +78,7 @@ describe('beefy-deposit-step', () => {
         approvedSpender: undefined,
         expectedBalance: BigInt('4500'),
         minBalance: BigInt('4500'),
-        tokenAddress: vault.vaultTokenAddress,
+        tokenAddress: vault.vaultERC20Address,
         decimals: 18n,
       },
       {
@@ -117,7 +118,7 @@ describe('beefy-deposit-step', () => {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
           expectedBalance: 12000n,
           minBalance: 12000n,

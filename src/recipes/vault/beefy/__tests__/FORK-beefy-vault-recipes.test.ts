@@ -30,7 +30,7 @@ const networkName = NetworkName.Ethereum;
 const vaultID = 'convex-crveth';
 
 const tokenAddress = testConfig.contractsEthereum.crvCRVETH;
-const vaultTokenAddress = '0x245186caa063b13d0025891c0d513acf552fb38e';
+const vaultERC20Address = '0x245186caa063b13d0025891c0d513acf552fb38e';
 
 const oneWithDecimals = 10n ** 18n;
 
@@ -58,7 +58,7 @@ describe('FORK-beefy-vault-recipes', function run() {
 
     const vault = await BeefyAPI.getBeefyVaultForID(vaultID, networkName);
     expect(
-      compareTokenAddress(vault.vaultTokenAddress, vaultTokenAddress),
+      compareTokenAddress(vault.vaultERC20Address, vaultERC20Address),
     ).to.equal(true);
 
     const depositRecipe = new BeefyDepositRecipe(vaultID);
@@ -78,7 +78,7 @@ describe('FORK-beefy-vault-recipes', function run() {
     const initialPrivateVaultTokenBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
-      vaultTokenAddress,
+      vaultERC20Address,
     );
 
     const recipeOutput = await depositRecipe.getRecipeOutput(
@@ -99,7 +99,7 @@ describe('FORK-beefy-vault-recipes', function run() {
     const privateVaultTokenBalance = await balanceForERC20Token(
       railgunWallet,
       networkName,
-      vaultTokenAddress,
+      vaultERC20Address,
     );
 
     const unshieldFee =
@@ -138,7 +138,7 @@ describe('FORK-beefy-vault-recipes', function run() {
 
     const vault = await BeefyAPI.getBeefyVaultForID(vaultID, networkName);
     expect(
-      compareTokenAddress(vault.vaultTokenAddress, vaultTokenAddress),
+      compareTokenAddress(vault.vaultERC20Address, vaultERC20Address),
     ).to.equal(true);
 
     const withdrawRecipe = new BeefyWithdrawRecipe(vaultID);
@@ -146,7 +146,7 @@ describe('FORK-beefy-vault-recipes', function run() {
       networkName,
       erc20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
           amount: oneWithDecimals,
         },

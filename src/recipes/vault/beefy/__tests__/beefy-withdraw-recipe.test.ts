@@ -26,10 +26,11 @@ const vault: BeefyVaultData = {
   apy: 5.0,
   chain: 'ethereum',
   network: 'ethereum',
+  depositERC20Symbol: 'RAIL',
   depositERC20Address: tokenAddress,
   depositERC20Decimals: 18n,
-  vaultTokenSymbol: 'mooHermesMETIS-m.USDC',
-  vaultTokenAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
+  vaultERC20Symbol: 'mooHermesMETIS-m.USDC',
+  vaultERC20Address: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultContractAddress: '0x40324434a0b53dd1ED167Ba30dcB6B4bd7a9536d',
   vaultRate: BigInt('2000000000000000000'), // 2x
   depositFeeBasisPoints: 0n,
@@ -62,7 +63,7 @@ describe('beefy-withdraw-recipe', () => {
       networkName: networkName,
       erc20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
           amount: 10000n,
         },
@@ -80,13 +81,13 @@ describe('beefy-withdraw-recipe', () => {
         {
           amount: BigInt('25'),
           recipient: 'RAILGUN Unshield Fee',
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
         },
       ],
       outputERC20Amounts: [
         {
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           expectedBalance: BigInt('9975'),
           minBalance: BigInt('9975'),
           approvedSpender: undefined,
@@ -128,7 +129,7 @@ describe('beefy-withdraw-recipe', () => {
       spentERC20Amounts: [
         {
           amount: BigInt('9975'),
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           recipient: 'VAULT_NAME Vault',
           decimals: 18n,
         },
@@ -163,7 +164,7 @@ describe('beefy-withdraw-recipe', () => {
     expect(
       output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
-      [vault.vaultTokenAddress, tokenAddress].map(tokenAddress =>
+      [vault.vaultERC20Address, tokenAddress].map(tokenAddress =>
         tokenAddress.toLowerCase(),
       ),
     );
@@ -181,7 +182,7 @@ describe('beefy-withdraw-recipe', () => {
       {
         amount: BigInt('25'),
         recipient: 'RAILGUN Unshield Fee',
-        tokenAddress: vault.vaultTokenAddress,
+        tokenAddress: vault.vaultERC20Address,
         decimals: 18n,
       },
       {

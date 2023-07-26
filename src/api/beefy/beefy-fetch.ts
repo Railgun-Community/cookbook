@@ -4,6 +4,7 @@ export enum BeefyApiEndpoint {
   GetVaults = 'vaults',
   GetFees = 'fees',
   GetAPYs = 'apy',
+  GetTVLs = 'tvl',
 }
 
 const BEEFY_API_URL = 'https://api.beefy.finance';

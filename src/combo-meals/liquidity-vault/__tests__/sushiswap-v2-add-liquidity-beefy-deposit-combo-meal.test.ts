@@ -53,10 +53,11 @@ const vault: BeefyVaultData = {
   apy: 0.07759618455427408,
   chain: 'ethereum',
   network: 'ethereum',
+  depositERC20Symbol: 'RAIL',
   depositERC20Address: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
   depositERC20Decimals: 18n,
-  vaultTokenSymbol: 'mooSushiETH-USDC',
-  vaultTokenAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
+  vaultERC20Symbol: 'mooSushiETH-USDC',
+  vaultERC20Address: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
   vaultContractAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
   vaultRate: 1010912951971336619n,
   depositFeeBasisPoints: 0n,
@@ -340,7 +341,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           approvedSpender: undefined,
           expectedBalance: BigInt('0x1b6326c42440912b'),
           minBalance: BigInt('0x1b6326c42440912b'),
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
         },
       ],
@@ -368,7 +369,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
         {
           amount: BigInt('0x1187230ce4005c'),
           recipient: 'RAILGUN Shield Fee',
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           decimals: 18n,
         },
       ],
@@ -377,7 +378,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           approvedSpender: undefined,
           expectedBalance: BigInt('0x1b519fa1175c90cf'),
           minBalance: BigInt('0x1b519fa1175c90cf'),
-          tokenAddress: vault.vaultTokenAddress,
+          tokenAddress: vault.vaultERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
         },
@@ -393,7 +394,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
         USDC_TOKEN.tokenAddress,
         WETH_TOKEN.tokenAddress,
         LP_TOKEN.tokenAddress,
-        vault.vaultTokenAddress,
+        vault.vaultERC20Address,
       ].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
@@ -422,7 +423,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       {
         amount: BigInt('0x1187230ce4005c'),
         recipient: 'RAILGUN Shield Fee',
-        tokenAddress: vault.vaultTokenAddress,
+        tokenAddress: vault.vaultERC20Address,
         decimals: vault.depositERC20Decimals,
       },
     ]);
