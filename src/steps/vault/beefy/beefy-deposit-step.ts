@@ -8,7 +8,7 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
 import { Step } from '../../step';
-import { BeefyVaultData } from '../../../api/beefy';
+import { BEEFY_VAULT_ERC20_DECIMALS, BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy/beefy-vault-contract';
 import { calculateOutputsForBeefyDeposit } from './beefy-util';
 
@@ -73,7 +73,7 @@ export class BeefyDepositStep extends Step {
     };
     const outputERC20Amount: StepOutputERC20Amount = {
       tokenAddress: vaultERC20Address,
-      decimals: depositERC20Decimals,
+      decimals: BEEFY_VAULT_ERC20_DECIMALS,
       expectedBalance: receivedVaultTokenAmount,
       minBalance: receivedVaultTokenAmount,
       approvedSpender: undefined,

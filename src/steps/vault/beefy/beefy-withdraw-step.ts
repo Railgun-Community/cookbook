@@ -8,7 +8,7 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
-import { BeefyVaultData } from '../../../api/beefy';
+import { BEEFY_VAULT_ERC20_DECIMALS, BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy/beefy-vault-contract';
 import { calculateOutputsForBeefyWithdraw } from './beefy-util';
 
@@ -41,7 +41,7 @@ export class BeefyWithdrawStep extends Step {
 
     const withdrawERC20Info: RecipeERC20Info = {
       tokenAddress: vaultERC20Address,
-      decimals: depositERC20Decimals,
+      decimals: BEEFY_VAULT_ERC20_DECIMALS,
     };
     const { erc20AmountForStep, unusedERC20Amounts } =
       this.getValidInputERC20Amount(

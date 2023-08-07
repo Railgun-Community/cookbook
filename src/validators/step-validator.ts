@@ -62,8 +62,11 @@ const validateStepOutputERC20Amounts = (
   });
 
   for (const id in inputERC20AmountMap) {
-    if (!outputERC20AmountMap[id]) {
+    if (!isDefined(outputERC20AmountMap[id])) {
       throw new Error(`Missing output for ${id}.`);
+    }
+    if (outputERC20AmountMap[id] === 0n) {
+      throw new Error(`Missing output value for ${id}.`);
     }
     if (inputERC20AmountMap[id] !== outputERC20AmountMap[id]) {
       throw new Error(

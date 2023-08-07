@@ -66,6 +66,8 @@ type BeefyAPYAPIData = Record<string, number>;
 
 type BeefyTVLAPIData = Record<string, Record<string, number>>;
 
+export const BEEFY_VAULT_ERC20_DECIMALS = 18n;
+
 export type BeefyVaultData = {
   vaultID: string;
   vaultName: string;
