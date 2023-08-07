@@ -148,7 +148,7 @@ export const shieldAllTokensForTests = async (
     await approveShield(wallet, tokenAddresses[i]);
   }
 
-  dbgRailgunSetup('Shielding tokens... This may take 10-15 seconds.');
+  dbgRailgunSetup('Shielding tokens... This may take 5-10 seconds.');
 
   const testRailgunWallet = getTestRailgunWallet();
   const railgunAddress = testRailgunWallet.getAddress();

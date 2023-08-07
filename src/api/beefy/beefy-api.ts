@@ -7,7 +7,6 @@ import { BeefyApiEndpoint, getBeefyAPIData } from './beefy-fetch';
 import { compareTokenAddress } from '../../utils';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { numToBasisPoints } from '../../utils/basis-points';
-import { numToPlainString } from '../../utils/number';
 
 export type BeefyNetwork =
   | 'ethereum'
@@ -215,17 +214,19 @@ export class BeefyAPI {
       if (!(err instanceof Error)) {
         throw err;
       }
-      CookbookDebug.error(
-        new Error(
-          `Could not parse Beefy Vault data for ${vaultAPIData.id}: ${err.message}`,
-        ),
-      );
+      // CookbookDebug.error(
+      //   new Error(
+      //     `Could not parse Beefy Vault data for ${vaultAPIData.id}: ${err.message}`,
+      //   ),
+      // );
       return undefined;
     }
   }
 
   private static parseVaultRate(pricePerFullShare: string): bigint {
-    return BigInt(numToPlainString(pricePerFullShare));
+    // NOTE: Some inactive vaults currently have pricePerFullShare in scientific notation.
+    // This will crash, which returns undefined in the above try/catch.
+    return BigInt(pricePerFullShare);
   }
 
   private static async getBeefyVaultAPYs(): Promise<BeefyAPYAPIData> {

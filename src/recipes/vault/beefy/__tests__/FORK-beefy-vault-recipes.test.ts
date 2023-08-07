@@ -27,10 +27,10 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const vaultID = 'convex-frxeth';
+const vaultID = 'convex-steth';
 
-const tokenAddress = testConfig.contractsEthereum.frxETHCRV;
-const vaultERC20Address = testConfig.contractsEthereum.frxETHCRVVaultToken;
+const tokenAddress = testConfig.contractsEthereum.steCRV;
+const vaultERC20Address = testConfig.contractsEthereum.mooConvexStETH;
 
 const oneWithDecimals = 10n ** 18n;
 
@@ -130,6 +130,8 @@ describe('FORK-beefy-vault-recipes', function run() {
     // N/A
   });
 
+  // NOTE: There's a chance that the deposit conflicts with this withdraw function.
+  // We may have to run withdraw on a different vault.
   it('[FORK] Should run beefy-withdraw-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
