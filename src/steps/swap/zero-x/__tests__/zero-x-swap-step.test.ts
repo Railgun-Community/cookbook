@@ -9,6 +9,7 @@ import {
 } from '../../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { ZeroXConfig } from '../../../../models/zero-x-config';
+import { testConfig } from '../../../../test/test-config.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -51,7 +52,7 @@ const quote: SwapQuoteData = {
 
 describe('zero-x-swap-step', () => {
   before(() => {
-    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+    ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
   });
 
   it('Should create zero-x-swap step with spender', async () => {

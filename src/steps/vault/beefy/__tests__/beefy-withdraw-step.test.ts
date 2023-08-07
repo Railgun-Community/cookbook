@@ -27,6 +27,7 @@ const vault: BeefyVaultData = {
   vaultRate: BigInt('2000000000000000000'), // 2x
   depositFeeBasisPoints: 0n,
   withdrawFeeBasisPoints: 1000n,
+  isActive: true,
 };
 
 describe('beefy-withdraw-step', () => {

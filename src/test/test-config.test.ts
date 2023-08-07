@@ -1,4 +1,4 @@
-export const testConfig = {
+export let testConfig = {
   // Set env ETHEREUM_RPC to change default fork RPC.
   ethereumForkRPC: process.env.ETHEREUM_RPC ?? 'https://cloudflare-eth.com',
 
@@ -25,8 +25,8 @@ export const testConfig = {
     // LP tokens
     usdcWethSushiswapV2LPToken: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
     // Vault tokens
-    crvCRVETH: '0xEd4064f376cB8d68F770FB1Ff088a3d0F3FF5c4d',
-    crvCRVETHVaultToken: '0x245186CaA063b13d0025891c0d513aCf552fB38E',
+    frxETHCRV: '0xf43211935C781D5ca1a41d2041F397B8A7366C7A',
+    frxETHCRVVaultToken: '0x4a37227BFE2aD5c5126E176e16363d5c79BC1EF5',
   },
 
   contractsArbitrum: {
@@ -38,12 +38,22 @@ export const testConfig = {
     // Standard tokens
     dai: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
   },
+
+  // OVERRIDES - override using test-config-overrides.ts
+
+  // API Domain for a proxy server equipped with 0x nginx config that includes private API key.
+  zeroXProxyApiDomain: process.env.ZERO_X_PROXY_API_DOMAIN ?? '',
+  // API Key for 0x API.
+  zeroXApiKey: process.env.ZERO_X_API_KEY ?? '',
 };
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, global-require, @typescript-eslint/no-var-requires
-  const overrides = require('./test-config-overrides.test');
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, global-require, @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-member-access
+  const overrides = require('./test-config-overrides.test').default;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  Object.assign(testConfig, overrides ?? {});
+  testConfig = { ...testConfig, ...overrides };
   // eslint-disable-next-line no-empty
-} catch {}
+} catch {
+  // eslint-disable-next-line no-console
+  console.error('Could not load test-config-overrides.');
+}

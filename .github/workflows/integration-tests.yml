@@ -19,7 +19,7 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-      - run: env NETWORK_NAME=Ethereum yarn test-fork
+      - run: env ZERO_X_PROXY_API_DOMAIN=${{ secrets.ZERO_X_PROXY_API_DOMAIN }} env ZERO_X_API_KEY=${{ secrets.ZERO_X_API_KEY }} env NETWORK_NAME=Ethereum yarn test-fork
 
   fail-report:
     if: ${{ failure() }}

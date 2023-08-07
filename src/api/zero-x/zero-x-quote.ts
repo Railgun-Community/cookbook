@@ -184,6 +184,9 @@ export class ZeroXQuote {
       // err.response.data.validationErrors[].reason
 
       const { response } = err as AxiosError<any>;
+      if (!response) {
+        return `0x API request failed: ${err.message}.`;
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data = response?.data;

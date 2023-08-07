@@ -21,6 +21,7 @@ import {
   shouldSkipForkTest,
 } from '../../../test/common.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
+import { testConfig } from '../../../test/test-config.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -57,7 +58,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
       MOCK_UNSHIELD_FEE_BASIS_POINTS,
     );
 
-    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+    ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
   });
 
   it('[FORK] Should run zero-x-swap-recipe', async function run() {

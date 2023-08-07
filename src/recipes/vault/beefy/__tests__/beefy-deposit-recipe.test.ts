@@ -32,6 +32,7 @@ const ethVault: BeefyVaultData = {
   vaultRate: BigInt('2000000000000000000'), // 2x
   depositFeeBasisPoints: 1000n,
   withdrawFeeBasisPoints: 0n,
+  isActive: true,
 };
 
 const polygonVault: BeefyVaultData = {
@@ -50,6 +51,7 @@ const polygonVault: BeefyVaultData = {
   vaultRate: BigInt('2000000000000000000'), // 2x
   depositFeeBasisPoints: 1000n,
   withdrawFeeBasisPoints: 0n,
+  isActive: true,
 };
 
 let beefyVaultForIDStub: SinonStub;

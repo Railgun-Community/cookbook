@@ -62,6 +62,7 @@ const vault: BeefyVaultData = {
   vaultRate: 1010912951971336619n,
   depositFeeBasisPoints: 0n,
   withdrawFeeBasisPoints: 10n,
+  isActive: true,
 };
 
 let dateStub: SinonStub;

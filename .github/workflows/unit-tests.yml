@@ -19,7 +19,7 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-      - run: yarn test
+      - run: env ZERO_X_PROXY_API_DOMAIN=${{ secrets.ZERO_X_PROXY_API_DOMAIN }} env ZERO_X_API_KEY=${{ secrets.ZERO_X_API_KEY }} yarn test
 
   fail-report:
     if: ${{ failure() }}

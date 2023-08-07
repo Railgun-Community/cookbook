@@ -24,6 +24,7 @@ describe('beefy-api', () => {
         const chainVaults = await BeefyAPI.getFilteredBeefyVaults(
           networkName,
           false, // skipCache
+          false, // includeInactiveVaults
         );
         expect(chainVaults.length).to.be.greaterThan(10);
       }),
@@ -32,6 +33,7 @@ describe('beefy-api', () => {
     const vaultsForEthereumToken = await BeefyAPI.getFilteredBeefyVaults(
       NetworkName.Ethereum,
       false, // skipCache
+      false, // includeInactiveVaults
       testConfig.contractsEthereum.usdcWethSushiswapV2LPToken.toUpperCase(),
     );
     expect(vaultsForEthereumToken.length).to.equal(1);
@@ -64,8 +66,25 @@ describe('beefy-api', () => {
     const vaultsForPolygonToken = await BeefyAPI.getFilteredBeefyVaults(
       NetworkName.Polygon,
       false, // skipCache
+      false, // includeInactiveVaults
       '0xEcd5e75AFb02eFa118AF914515D6521aaBd189F1'.toUpperCase(),
     );
     expect(vaultsForPolygonToken.length).to.equal(0);
+  }).timeout(20000);
+
+  it('Should get specific Beefy vault data', async () => {
+    const vaultID = 'sushi-mainnet-usdc-weth';
+    const vault = await BeefyAPI.getBeefyVaultForID(
+      vaultID,
+      NetworkName.Ethereum,
+    );
+    expect(vault.vaultID).to.equal(vaultID);
+  }).timeout(20000);
+
+  it('Should error for inactive Beefy Vault', async () => {
+    const vaultID = 'convex-crveth';
+    await expect(
+      BeefyAPI.getBeefyVaultForID(vaultID, NetworkName.Ethereum),
+    ).to.be.rejectedWith(`Beefy vault is not active for ID: ${vaultID}.`);
   }).timeout(20000);
 });
