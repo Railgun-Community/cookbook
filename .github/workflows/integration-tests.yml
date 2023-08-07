@@ -19,7 +19,7 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-      - run: yarn test-fork
+      - run: env NETWORK_NAME=Ethereum yarn test-fork
 
   fail-report:
     if: ${{ failure() }}
