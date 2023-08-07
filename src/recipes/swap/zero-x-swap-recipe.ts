@@ -13,11 +13,13 @@ import {
 import { SwapRecipe } from './swap-recipe';
 import { NetworkName } from '@railgun-community/shared-models';
 import { findFirstInputERC20Amount } from '../../utils';
+import { MIN_GAS_LIMIT_0X_SWAP } from '../../models/min-gas-limits';
 
 export class ZeroXSwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
     name: '0x Exchange Swap',
     description: 'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.',
+    minGasLimit: MIN_GAS_LIMIT_0X_SWAP,
   };
 
   protected readonly sellERC20Info: RecipeERC20Info;

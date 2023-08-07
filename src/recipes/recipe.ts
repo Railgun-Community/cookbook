@@ -223,11 +223,13 @@ export abstract class Recipe {
       .flat();
 
     const recipeOutput: RecipeOutput = {
+      name: this.config.name,
       stepOutputs,
       crossContractCalls,
       erc20Amounts: outputERC20Amounts,
       nfts: outputNFTs,
       feeERC20AmountRecipients,
+      minGasLimit: this.config.minGasLimit,
     };
     return recipeOutput;
   }

@@ -11,12 +11,14 @@ import { ComboMeal } from '../combo-meal';
 import { UniV2LikeSDK } from '../../api/uniswap/uni-v2-like-sdk';
 import { NetworkName } from '@railgun-community/shared-models';
 import { Provider } from 'ethers';
+import { MIN_GAS_LIMIT_COMBO_MEAL } from '../../models/min-gas-limits';
 
 export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
     name: '[NAME] Add Liquidity + Beefy Vault Deposit Combo Meal',
     description:
       'Adds liquidity to a [NAME] Pool and deposits the LP tokens into a Beefy Vault.',
+    minGasLimit: MIN_GAS_LIMIT_COMBO_MEAL,
   };
 
   private readonly uniV2LikeAddLiquidityRecipe: UniV2LikeAddLiquidityRecipe;

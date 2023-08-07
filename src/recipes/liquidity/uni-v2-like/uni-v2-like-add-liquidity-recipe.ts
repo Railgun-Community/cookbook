@@ -19,11 +19,13 @@ import {
   getUnshieldedAmountAfterFee,
 } from '../../../utils/fee';
 import { Provider } from 'ethers';
+import { MIN_GAS_LIMIT_LP_V2_ADD_LIQUIDITY } from '../../../models/min-gas-limits';
 
 export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   readonly config: RecipeConfig = {
     name: '[Name] Add Liquidity',
     description: 'Adds liquidity to a [Name] Pool.',
+    minGasLimit: MIN_GAS_LIMIT_LP_V2_ADD_LIQUIDITY,
   };
 
   private readonly uniswapV2Fork: UniswapV2Fork;

@@ -5,6 +5,7 @@ import { UnwrapBaseTokenStep } from '../../steps/adapt/unwrap-base-token-step';
 import { StepInput } from '../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../init';
+import { MIN_GAS_LIMIT_ANY_RECIPE } from '../../models/min-gas-limits';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -23,6 +24,7 @@ describe('custom-recipe', () => {
       {
         name: 'custom',
         description: 'this is a custom recipe',
+        minGasLimit: MIN_GAS_LIMIT_ANY_RECIPE,
       },
       supportedNetworks,
     );

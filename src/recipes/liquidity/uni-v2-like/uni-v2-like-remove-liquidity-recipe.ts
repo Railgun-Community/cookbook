@@ -15,11 +15,13 @@ import { Step } from '../../../steps/step';
 import { RemoveLiquidityRecipe } from '../remove-liquidity-recipe';
 import { findFirstInputERC20Amount } from '../../../utils/filters';
 import { Provider } from 'ethers';
+import { MIN_GAS_LIMIT_LP_V2_REMOVE_LIQUIDITY } from '../../../models/min-gas-limits';
 
 export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
   readonly config: RecipeConfig = {
     name: '[Name] Remove Liquidity',
     description: 'Removes liquidity from a [NAME] Pool.',
+    minGasLimit: MIN_GAS_LIMIT_LP_V2_REMOVE_LIQUIDITY,
   };
 
   private readonly uniswapV2Fork: UniswapV2Fork;

@@ -8,12 +8,14 @@ import {
   StepInput,
 } from '../../../models/export-models';
 import { BeefyDepositStep } from '../../../steps/vault/beefy/beefy-deposit-step';
+import { MIN_GAS_LIMIT_BEEFY_VAULT_DEPOSIT } from '../../../models/min-gas-limits';
 
 export class BeefyDepositRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'Beefy Vault Deposit',
     description:
       'Auto-approves and deposits tokens into a yield-bearing Beefy Vault.',
+    minGasLimit: MIN_GAS_LIMIT_BEEFY_VAULT_DEPOSIT,
   };
 
   protected readonly vaultID: string;

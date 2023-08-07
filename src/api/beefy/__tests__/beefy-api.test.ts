@@ -59,6 +59,7 @@ describe('beefy-api', () => {
       vaultERC20Symbol: 'mooSushiETH-USDC',
       vaultERC20Address: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
       withdrawFeeBasisPoints: 10n,
+      isActive: true,
     });
     expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.001);
     expect(vaultsForEthereumToken[0].apy).to.be.lessThan(0.2);

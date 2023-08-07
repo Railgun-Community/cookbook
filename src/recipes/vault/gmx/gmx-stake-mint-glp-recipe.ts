@@ -18,12 +18,14 @@ import { AccessCardNFT } from '../../../api/access-card/access-card-nft';
 import { getRandomNFTID } from '../../../utils';
 import { AccessCardCreateNFTOwnerStep } from '../../../steps/access-card/access-card-create-nft-owner-step';
 import { Provider } from 'ethers';
+import { MIN_GAS_LIMIT_ANY_RECIPE } from '../../../models/min-gas-limits';
 
 export class GMXMintStakeGLPRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'GMX Mint and Stake GLP Recipe',
     description:
       'Stakes into GMX and mints GLP token into an account owned by an Access Card NFT.',
+    minGasLimit: MIN_GAS_LIMIT_ANY_RECIPE, // TODO: UPDATE GAS LIMIT
   };
 
   protected readonly stakeERC20Info: RecipeERC20Info;

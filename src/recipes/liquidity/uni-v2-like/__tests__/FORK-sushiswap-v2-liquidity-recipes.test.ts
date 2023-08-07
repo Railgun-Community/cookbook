@@ -126,7 +126,6 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
       addLiquidityRecipe.config.name,
       addLiquidityRecipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
       true, // expectPossiblePrecisionLossOverflow - due to precision loss in the reserve ratios
     );
 
@@ -268,7 +267,6 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
       removeLiquidityRecipe.config.name,
       removeLiquidityRecipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     const removeLiquidityData =

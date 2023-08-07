@@ -29,11 +29,13 @@ export abstract class ComboMeal {
     let nextInput = input;
 
     const aggregatedRecipeOutput: RecipeOutput = {
+      name: this.config.name,
       stepOutputs: [],
       crossContractCalls: [],
       erc20Amounts: [],
       nfts: [],
       feeERC20AmountRecipients: [],
+      minGasLimit: this.config.minGasLimit,
     };
 
     for (let i = 0; i < recipes.length; i++) {

@@ -5,11 +5,13 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { StepInput } from '../../../models/export-models';
 import { BeefyWithdrawStep } from '../../../steps/vault/beefy/beefy-withdraw-step';
 import { RecipeConfig } from '../../../models/export-models';
+import { MIN_GAS_LIMIT_BEEFY_VAULT_WITHDRAW } from '../../../models/min-gas-limits';
 
 export class BeefyWithdrawRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'Beefy Vault Withdraw',
     description: 'Withdraws ERC20 tokens from yield-bearing Beefy Vault.',
+    minGasLimit: MIN_GAS_LIMIT_BEEFY_VAULT_WITHDRAW,
   };
 
   protected readonly vaultID: string;

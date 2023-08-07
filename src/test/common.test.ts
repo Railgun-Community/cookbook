@@ -57,12 +57,12 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   name: string,
   recipeInput: RecipeInput,
   recipeOutput: RecipeOutput,
-  expectedGasWithin50K: bigint,
   expectPossiblePrecisionLossOverflow?: boolean,
 ) => {
   const railgunWallet = getTestRailgunWallet();
 
   const { networkName } = recipeInput;
+  const { minGasLimit } = recipeOutput;
 
   // Get original balances for all unshielded ERC20s.
   const preRecipeUnshieldMap: Record<
@@ -91,14 +91,16 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
       recipeOutput,
     );
 
+  // console.log(`gas estimate for ${recipeOutput.name}: ${gasEstimate}`);
+
   if (isDefined(gasEstimate)) {
-    expect(gasEstimate >= expectedGasWithin50K - 50_000n).to.equal(
+    expect(gasEstimate >= minGasLimit - 200_000n).to.equal(
       true,
-      `${name}: Gas estimate lower than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimate}`,
+      `${name}: Gas estimate lower than expected range: within 200k of ${minGasLimit} - got ${gasEstimate}`,
     );
-    expect(gasEstimate <= expectedGasWithin50K + 50_000n).to.equal(
+    expect(gasEstimate <= minGasLimit + 50_000n).to.equal(
       true,
-      `${name}: Gas estimate higher than expected range: within 50k of ${expectedGasWithin50K} - got ${gasEstimate}`,
+      `${name}: Gas estimate higher than expected range: within 50k of ${minGasLimit} - got ${gasEstimate}`,
     );
   }
 

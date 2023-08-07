@@ -20,7 +20,7 @@ const networkName = NetworkName.Ethereum;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('FORK-empty-recipe', function run() {
-  this.timeout(120000);
+  this.timeout(45000);
 
   before(async function run() {
     if (shouldSkipForkTest(networkName)) {
@@ -60,7 +60,6 @@ describe('FORK-empty-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

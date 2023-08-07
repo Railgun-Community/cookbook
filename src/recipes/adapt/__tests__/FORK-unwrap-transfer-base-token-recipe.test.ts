@@ -70,7 +70,6 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     const expectedRailgunPostBalance = railgunPreBalance - 12000n + 1966n;
@@ -117,7 +116,6 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

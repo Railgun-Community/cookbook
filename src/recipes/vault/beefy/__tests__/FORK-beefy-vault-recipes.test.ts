@@ -88,7 +88,6 @@ describe('FORK-beefy-vault-recipes', function run() {
       depositRecipe.config.name,
       depositRecipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:
@@ -170,7 +169,6 @@ describe('FORK-beefy-vault-recipes', function run() {
       withdrawRecipe.config.name,
       withdrawRecipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     // REQUIRED TESTS:

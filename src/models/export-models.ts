@@ -40,11 +40,13 @@ export type StepInput = {
 };
 
 export type RecipeOutput = {
+  name: string;
   stepOutputs: StepOutput[];
   crossContractCalls: ContractTransaction[];
   erc20Amounts: RecipeERC20Amount[];
   nfts: RecipeNFTInfo[];
   feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
+  minGasLimit: bigint;
 };
 
 export type StepOutputERC20Amount = RecipeERC20Info & {
@@ -76,11 +78,13 @@ export type StepConfig = {
 export type RecipeConfig = {
   name: string;
   description: string;
+  minGasLimit: bigint;
 };
 
 export type ComboMealConfig = {
   name: string;
   description: string;
+  minGasLimit: bigint;
 };
 
 export type SwapQuoteData = {

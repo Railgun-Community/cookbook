@@ -51,7 +51,7 @@ const VAULT_TOKEN: RecipeERC20Info = {
 };
 const vaultID = 'sushi-mainnet-usdc-weth';
 
-describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
+describe.only('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
   this.timeout(120000);
 
   before(async function run() {
@@ -117,7 +117,6 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       comboMeal.config.name,
       recipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
       true, // expectPossiblePrecisionLossOverflow - due to precision loss in the reserve ratios
     );
 

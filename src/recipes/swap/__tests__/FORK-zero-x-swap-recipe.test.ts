@@ -93,7 +93,6 @@ describe('FORK-zero-x-swap-recipe', function run() {
       recipe.config.name,
       recipeInput,
       recipeOutput,
-      3_200_000n, // expectedGasWithin50K
     );
 
     const quote = recipe.getLatestQuote() as SwapQuoteData;

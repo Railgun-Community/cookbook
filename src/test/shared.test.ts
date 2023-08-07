@@ -15,10 +15,7 @@ import {
 import { ContractTransaction, JsonRpcProvider, Wallet } from 'ethers';
 import { testConfig } from './test-config.test';
 import { RecipeInput, RecipeOutput } from '../models';
-import {
-  AbstractWallet,
-  MINIMUM_RELAY_ADAPT_CROSS_CONTRACT_CALLS_GAS_LIMIT,
-} from '@railgun-community/engine';
+import { AbstractWallet } from '@railgun-community/engine';
 
 export let testRPCProvider: Optional<JsonRpcProvider>;
 export let testRailgunWallet: AbstractWallet;
@@ -88,6 +85,7 @@ export const createQuickstartCrossContractCallsForTest = async (
   const railgunWallet = getTestRailgunWallet();
 
   const { erc20Amounts, nfts: unshieldNFTs } = recipeInput;
+  const { minGasLimit } = recipeOutput;
   const unshieldERC20Amounts: RailgunERC20Amount[] = erc20Amounts;
 
   const {
@@ -129,6 +127,7 @@ export const createQuickstartCrossContractCallsForTest = async (
         MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
         undefined, // feeTokenDetails
         true, // sendWithPublicWallet
+        minGasLimit,
       );
     gasEstimate = resolvedGasEstimate;
   } catch (err) {
@@ -152,9 +151,14 @@ export const createQuickstartCrossContractCallsForTest = async (
     mockRelayerFeeRecipient,
     false, // sendWithPublicWallet
     undefined, // overallBatchMinGasPrice
+    minGasLimit,
     () => {}, // progressCallback
   );
 
+  const transactionGasDetails: TransactionGasDetails = {
+    ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1,
+    gasEstimate: gasEstimate ?? minGasLimit,
+  };
   const { transaction } = await populateProvedCrossContractCalls(
     networkName,
     railgunWallet.id,
@@ -166,11 +170,7 @@ export const createQuickstartCrossContractCallsForTest = async (
     mockRelayerFeeRecipient,
     false, // sendWithPublicWallet
     undefined, // overallBatchMinGasPrice
-    {
-      ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1,
-      gasEstimate:
-        gasEstimate ?? MINIMUM_RELAY_ADAPT_CROSS_CONTRACT_CALLS_GAS_LIMIT,
-    },
+    transactionGasDetails,
   );
 
   return { gasEstimate, transaction };
