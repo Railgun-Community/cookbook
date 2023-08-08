@@ -16,9 +16,16 @@ import { ShieldStep } from '../steps/railgun/shield-step';
 import { UnshieldStep } from '../steps/railgun/unshield-step';
 import { Step } from '../steps/step';
 import { ContractTransaction } from 'ethers';
+import { generateID } from '../utils/id';
 
 export abstract class Recipe {
+  readonly id: string;
+
   abstract readonly config: RecipeConfig;
+
+  constructor() {
+    this.id = generateID();
+  }
 
   protected abstract getInternalSteps(
     firstInternalStepInput: StepInput,

@@ -19,6 +19,10 @@ export abstract class SwapRecipe extends Recipe {
 
   protected readonly destinationAddress: Optional<string>;
 
+  constructor() {
+    super();
+  }
+
   getLatestQuote(): Optional<SwapQuoteData> {
     return this.quote;
   }
