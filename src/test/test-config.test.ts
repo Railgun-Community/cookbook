@@ -8,6 +8,8 @@ export let testConfig = {
   signerMnemonic: 'test test test test test test test test test test test junk',
   railgunMnemonic:
     'test test test test test test test test test test test junk',
+  railgunMnemonic2:
+    'nation page hawk lawn rescue slim cup tired clutch brand holiday genuine',
   encryptionKey:
     '0101010101010101010101010101010101010101010101010101010101010101',
 

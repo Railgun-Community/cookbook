@@ -4,7 +4,6 @@ import {
   balanceForERC20Token,
   createRailgunWallet,
   getProver,
-  getRandomBytes,
   loadProvider,
   populateShield,
   setLoggers,
@@ -33,9 +32,11 @@ import {
   getTestEthersWallet,
   getTestRailgunWallet,
   setSharedTestRailgunWallet,
+  setSharedTestRailgunWallet2,
 } from './shared.test';
 import { groth16 } from 'snarkjs';
 import { getLocalhostRPC, getRPCPort } from './common.test';
+import { getRandomShieldPrivateKey } from '../utils/random';
 
 const dbgRailgunSetup = debug('railgun:setup');
 
@@ -127,6 +128,21 @@ export const createRailgunWalletForTests = async () => {
   dbgRailgunSetup('RAILGUN wallet created.');
 };
 
+export const createRailgunWallet2ForTests = async () => {
+  const railgunWalletInfo = await createRailgunWallet(
+    testConfig.encryptionKey,
+    testConfig.railgunMnemonic2,
+    {},
+  );
+  if (!isDefined(railgunWalletInfo)) {
+    throw new Error('Error creating Railgun wallet.');
+  }
+
+  const railgunWallet = walletForID(railgunWalletInfo.id);
+  setSharedTestRailgunWallet2(railgunWallet);
+  dbgRailgunSetup('RAILGUN wallet 2 created.');
+};
+
 const approveShield = async (wallet: Wallet, tokenAddress: string) => {
   const token = new ERC20Contract(tokenAddress, testRPCProvider);
   const tx = await token.createSpenderApproval(
@@ -161,7 +177,7 @@ export const shieldAllTokensForTests = async (
       recipientAddress: railgunAddress,
     }));
 
-  const shieldPrivateKey = getRandomBytes(32);
+  const shieldPrivateKey = getRandomShieldPrivateKey();
   const { transaction } = await populateShield(
     networkName,
     shieldPrivateKey,

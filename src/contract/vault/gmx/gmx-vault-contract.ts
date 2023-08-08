@@ -1,4 +1,4 @@
-import { validateAddress } from '../../../utils/address';
+import { validateContractAddress } from '../../../utils/address';
 import { abi } from '../../../abi/abi';
 import { Contract, Provider } from 'ethers';
 import { Vault } from '../../../typechain';
@@ -7,7 +7,7 @@ export class GmxVaultContract {
   private readonly contract: Vault;
 
   constructor(address: string, provider: Provider) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid address for GMX Vault contract');
     }
     this.contract = new Contract(

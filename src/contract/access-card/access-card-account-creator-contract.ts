@@ -1,13 +1,13 @@
 import { Contract, ContractTransaction, Provider } from 'ethers';
 import { abi } from '../../abi/abi';
 import { AccessCardAccountCreator } from '../../typechain';
-import { validateAddress } from '../../utils/address';
+import { validateContractAddress } from '../../utils/address';
 
 export class AccessCardAccountCreatorContract {
   private readonly contract: AccessCardAccountCreator;
 
   constructor(address: string, provider: Provider) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error(
         'Invalid factory address for Access Card Account Creator contract',
       );

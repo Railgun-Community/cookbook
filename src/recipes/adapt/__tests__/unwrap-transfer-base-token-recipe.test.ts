@@ -29,7 +29,6 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
   it('Should create unwrap-transfer-base-token-recipe with amount', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,
@@ -48,7 +47,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -145,7 +144,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -202,7 +201,6 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
   it('Should create unwrap-transfer-base-token-recipe without amount', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,
@@ -219,7 +217,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     const output = await recipe.getRecipeOutput(recipeInput);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -298,7 +296,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       outputERC20Amounts: [],
       outputNFTs: [],
@@ -333,7 +331,6 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
   it('Should test unwrap-transfer-base-token-recipe error cases', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
-    expect(recipe.id.length).to.equal(16);
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {

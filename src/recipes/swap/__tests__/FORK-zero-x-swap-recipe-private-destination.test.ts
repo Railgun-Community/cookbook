@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
-
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -17,6 +16,8 @@ import {
 } from '../../../test/mocks.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 import { testConfig } from '../../../test/test-config.test';
+import { testRailgunWallet2 } from '../../../test/shared.test';
+import { shouldSkipForkTest } from '../../../test/common.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -38,8 +39,6 @@ const buyToken: RecipeERC20Info = {
 };
 
 const slippagePercentage = 0.01;
-
-const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',
@@ -74,6 +73,7 @@ describe('zero-x-swap-recipe', () => {
       MOCK_SHIELD_FEE_BASIS_POINTS,
       MOCK_UNSHIELD_FEE_BASIS_POINTS,
     );
+
     stub0xQuote = Sinon.stub(ZeroXQuote, 'getSwapQuote').resolves(quote);
 
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
@@ -83,8 +83,20 @@ describe('zero-x-swap-recipe', () => {
     stub0xQuote.resetBehavior();
   });
 
-  it('Should create zero-x-swap-recipe with amount and change', async () => {
-    const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+  it('[FORK] Should create zero-x-swap-recipe with amount and private destination address', async function () {
+    if (shouldSkipForkTest(networkName)) {
+      this.skip();
+      return;
+    }
+
+    const privateWalletAddress = testRailgunWallet2.getAddress();
+
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippagePercentage,
+      privateWalletAddress, // destinationAddress
+    );
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -100,13 +112,13 @@ describe('zero-x-swap-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs.length).to.equal(4);
+    expect(output.stepOutputs.length).to.equal(5);
 
     expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
       sellUnshieldFee: 30n,
-      buyAmount: 499n,
-      buyMinimum: 494n,
-      buyShieldFee: 1n,
+      buyAmount: 500n,
+      buyMinimum: 495n,
+      buyShieldFee: 0n,
     });
 
     expect(output.stepOutputs[0]).to.deep.equal({
@@ -197,15 +209,48 @@ describe('zero-x-swap-recipe', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
-      name: 'Shield (Default)',
-      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      name: 'Shield ERC20s',
+      description: 'Shield ERC20s into private RAILGUN balance.',
+      outputERC20Amounts: [
+        {
+          approvedSpender: spender,
+          expectedBalance: 1970n,
+          minBalance: 1970n,
+          tokenAddress: sellTokenAddress,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [
+        {
+          // NOTE: DATA field is generated with a new random value each time.
+          data: output.stepOutputs[3].crossContractCalls[0].data,
+          to: '0xfa7093cdd9ee6932b4eb2c9e1cde7ce00b1fa4b9',
+        },
+      ],
       feeERC20AmountRecipients: [
         {
           amount: 1n,
-          recipient: 'RAILGUN Shield Fee',
           tokenAddress: buyTokenAddress,
+          recipient: 'RAILGUN Shield Fee',
           decimals: 18n,
         },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: 499n,
+          tokenAddress: buyTokenAddress,
+          recipient: privateWalletAddress,
+          decimals: 18n,
+        },
+      ],
+    });
+
+    expect(output.stepOutputs[4]).to.deep.equal({
+      name: 'Shield (Default)',
+      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      feeERC20AmountRecipients: [
         {
           amount: 4n,
           recipient: 'RAILGUN Shield Fee',
@@ -214,14 +259,6 @@ describe('zero-x-swap-recipe', () => {
         },
       ],
       outputERC20Amounts: [
-        {
-          approvedSpender: undefined,
-          expectedBalance: 499n,
-          minBalance: 494n,
-          tokenAddress: buyTokenAddress,
-          isBaseToken: undefined,
-          decimals: 18n,
-        },
         {
           approvedSpender: spender,
           expectedBalance: 1966n,

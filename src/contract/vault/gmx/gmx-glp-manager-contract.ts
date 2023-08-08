@@ -1,4 +1,4 @@
-import { validateAddress } from '../../../utils/address';
+import { validateContractAddress } from '../../../utils/address';
 import { abi } from '../../../abi/abi';
 import { Contract, Provider } from 'ethers';
 import { GlpManager } from '../../../typechain';
@@ -7,7 +7,7 @@ export class GmxGlpManagerContract {
   private readonly contract: GlpManager;
 
   constructor(address: string, provider: Provider) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid address for GMX GlpManager contract');
     }
     this.contract = new Contract(

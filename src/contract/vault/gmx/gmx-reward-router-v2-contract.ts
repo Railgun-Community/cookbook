@@ -1,4 +1,4 @@
-import { validateAddress } from '../../../utils/address';
+import { validateContractAddress } from '../../../utils/address';
 import { abi } from '../../../abi/abi';
 import { RewardRouterV2 } from '../../../typechain';
 import { Contract, ContractTransaction, Provider } from 'ethers';
@@ -7,7 +7,7 @@ export class GmxRewardRouterV2Contract {
   private readonly contract: RewardRouterV2;
 
   constructor(address: string, provider?: Provider) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid address for GMX RewardRouterV2 contract');
     }
     this.contract = new Contract(

@@ -169,8 +169,9 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   }
   if (txReceipt.status === 0) {
     // eslint-disable-next-line no-console
-    console.log(txReceipt);
-    throw new Error(`${name}: Transaction reverted`);
+    throw new Error(
+      `${name}: Transaction reverted. Make sure the configured min gas limit is high enough.`,
+    );
   }
 
   // TODO: Wait for private balances to re-scan.

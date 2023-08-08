@@ -1,13 +1,13 @@
 import { Contract, Provider } from 'ethers';
 import { abi } from '../../abi/abi';
 import { UniV2LikeFactory } from '../../typechain';
-import { validateAddress } from '../../utils/address';
+import { validateContractAddress } from '../../utils/address';
 
 export class UniV2LikeFactoryContract {
   private readonly contract: UniV2LikeFactory;
 
   constructor(address: string, provider: Provider) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid factory address for LP factory contract');
     }
     this.contract = new Contract(

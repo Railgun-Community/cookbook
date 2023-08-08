@@ -9,9 +9,9 @@ import { Step } from '../step';
 import { NetworkName } from '@railgun-community/shared-models';
 import { getShieldFee, getShieldedAmountAfterFee } from '../../utils/fee';
 
-export class ShieldStep extends Step {
+export class ShieldDefaultStep extends Step {
   readonly config: StepConfig = {
-    name: 'Shield',
+    name: 'Shield (Default)',
     description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
   };
 
@@ -19,7 +19,10 @@ export class ShieldStep extends Step {
 
   async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
     const { outputERC20Amounts, feeERC20AmountRecipients } =
-      this.getOutputERC20AmountsAndFees(input.networkName, input.erc20Amounts);
+      ShieldDefaultStep.getOutputERC20AmountsAndFees(
+        input.networkName,
+        input.erc20Amounts,
+      );
     if (
       !outputERC20Amounts.every(
         erc20Amount => !(erc20Amount.isBaseToken ?? false),
@@ -30,14 +33,13 @@ export class ShieldStep extends Step {
 
     return {
       crossContractCalls: [],
-
       outputERC20Amounts,
       outputNFTs: input.nfts,
       feeERC20AmountRecipients,
     };
   }
 
-  private getOutputERC20AmountsAndFees(
+  static getOutputERC20AmountsAndFees(
     networkName: NetworkName,
     inputERC20Amounts: StepOutputERC20Amount[],
   ) {
@@ -74,6 +76,15 @@ export class ShieldStep extends Step {
         recipient: 'RAILGUN Shield Fee',
       });
     });
+
+    if (
+      !outputERC20Amounts.every(
+        erc20Amount => !(erc20Amount.isBaseToken ?? false),
+      )
+    ) {
+      throw new Error('Cannot shield base token.');
+    }
+
     return { outputERC20Amounts, feeERC20AmountRecipients };
   }
 }

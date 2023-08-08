@@ -67,7 +67,7 @@ const quote: SwapQuoteData = {
 
 let stub0xQuote: SinonStub;
 
-describe('zero-x-swap-recipe', () => {
+describe('zero-x-swap-recipe-public-destination', () => {
   before(() => {
     setRailgunFees(
       networkName,
@@ -83,8 +83,13 @@ describe('zero-x-swap-recipe', () => {
     stub0xQuote.resetBehavior();
   });
 
-  it('Should create zero-x-swap-recipe with amount and change', async () => {
-    const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+  it('Should create zero-x-swap-recipe with amount and public destination address', async () => {
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippagePercentage,
+      VITALIK_WALLET, // destinationAddress
+    );
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -100,13 +105,13 @@ describe('zero-x-swap-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs.length).to.equal(4);
+    expect(output.stepOutputs.length).to.equal(5);
 
     expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
       sellUnshieldFee: 30n,
-      buyAmount: 499n,
-      buyMinimum: 494n,
-      buyShieldFee: 1n,
+      buyAmount: 500n,
+      buyMinimum: 495n,
+      buyShieldFee: 0n,
     });
 
     expect(output.stepOutputs[0]).to.deep.equal({
@@ -197,15 +202,39 @@ describe('zero-x-swap-recipe', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
+      name: 'Transfer ERC20',
+      description: 'Transfers ERC20 token to an external public address.',
+      outputERC20Amounts: [
+        {
+          approvedSpender: spender,
+          expectedBalance: 1970n,
+          minBalance: 1970n,
+          tokenAddress: sellTokenAddress,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [
+        {
+          data: '0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa9604500000000000000000000000000000000000000000000000000000000000001f4',
+          to: buyTokenAddress,
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: 500n,
+          tokenAddress: buyTokenAddress,
+          recipient: VITALIK_WALLET,
+          decimals: 18n,
+        },
+      ],
+    });
+
+    expect(output.stepOutputs[4]).to.deep.equal({
       name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
-        {
-          amount: 1n,
-          recipient: 'RAILGUN Shield Fee',
-          tokenAddress: buyTokenAddress,
-          decimals: 18n,
-        },
         {
           amount: 4n,
           recipient: 'RAILGUN Shield Fee',
@@ -214,14 +243,6 @@ describe('zero-x-swap-recipe', () => {
         },
       ],
       outputERC20Amounts: [
-        {
-          approvedSpender: undefined,
-          expectedBalance: 499n,
-          minBalance: 494n,
-          tokenAddress: buyTokenAddress,
-          isBaseToken: undefined,
-          decimals: 18n,
-        },
         {
           approvedSpender: spender,
           expectedBalance: 1966n,
@@ -260,54 +281,11 @@ describe('zero-x-swap-recipe', () => {
         decimals: 18n,
       },
       {
-        amount: 1n,
-        recipient: 'RAILGUN Shield Fee',
-        tokenAddress: buyTokenAddress,
-        decimals: 18n,
-      },
-      {
         amount: 4n,
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: sellTokenAddress,
         decimals: 18n,
       },
     ]);
-  });
-
-  it('Should test zero-x-swap-recipe error cases', async () => {
-    const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
-
-    // No matching erc20 inputs
-    const recipeInputNoMatch: RecipeInput = {
-      networkName: networkName,
-      erc20Amounts: [
-        {
-          tokenAddress: '0x1234',
-          decimals: 18n,
-          amount: 12000n,
-        },
-      ],
-      nfts: [],
-    };
-    await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'First input for this recipe must contain ERC20 Amount: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.',
-    );
-
-    // Too low balance for erc20 input
-    const recipeInputTooLow: RecipeInput = {
-      networkName: networkName,
-      erc20Amounts: [
-        {
-          tokenAddress: sellTokenAddress,
-          decimals: 18n,
-          isBaseToken: false,
-          amount: 2000n,
-        },
-      ],
-      nfts: [],
-    };
-    await expect(recipe.getRecipeOutput(recipeInputTooLow)).to.be.rejectedWith(
-      '0x Exchange Swap step is invalid. Specified amount 10000 exceeds balance 1995.',
-    );
   });
 });

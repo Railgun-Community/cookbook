@@ -2,26 +2,35 @@ import { abi } from '../../abi/abi';
 import {
   NETWORK_CONFIG,
   NetworkName,
+  RailgunERC20AmountRecipient,
+  RailgunNFTAmountRecipient,
   isDefined,
 } from '@railgun-community/shared-models';
-
 import { ZERO_ADDRESS } from '../../models/constants';
-import { validateAddress } from '../../utils/address';
+import { validateContractAddress } from '../../utils/address';
 import { RelayAdapt } from '../../typechain';
 import { TokenDataStruct } from '../../typechain/adapt/RelayAdapt';
 import { Contract, ContractTransaction } from 'ethers';
+import {
+  generateShieldTransaction,
+  getRandomBytes,
+} from '@railgun-community/wallet';
+import { getRandomShieldPrivateKey } from '../../utils/random';
 
 export class RelayAdaptContract {
   private readonly contract: RelayAdapt;
+
+  private readonly networkName: NetworkName;
 
   constructor(networkName: NetworkName) {
     const network = NETWORK_CONFIG[networkName];
     if (!isDefined(network)) {
       throw new Error(`Network not found: ${networkName}`);
     }
-    if (!validateAddress(network.relayAdaptContract)) {
+    if (!validateContractAddress(network.relayAdaptContract)) {
       throw new Error('Invalid address for Relay Adapt contract.');
     }
+    this.networkName = networkName;
     this.contract = new Contract(
       network.relayAdaptContract,
       abi.adapt.relay,
@@ -75,5 +84,25 @@ export class RelayAdaptContract {
       value: amount ?? 0n,
     };
     return this.contract.transfer.populateTransaction([erc20Transfer]);
+  }
+
+  async createShield(toAddress: string, tokenAddresses: string[]) {
+    const shieldPrivateKey = getRandomShieldPrivateKey();
+    const erc20AmountRecipients: RailgunERC20AmountRecipient[] =
+      tokenAddresses.map(tokenAddress => {
+        return {
+          tokenAddress,
+          amount: 0n, // 0n to shield entire balance.
+          recipientAddress: toAddress,
+        };
+      });
+    const nftAmountRecipients: RailgunNFTAmountRecipient[] = [];
+
+    return generateShieldTransaction(
+      this.networkName,
+      shieldPrivateKey,
+      erc20AmountRecipients,
+      nftAmountRecipients,
+    );
   }
 }

@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { UnshieldStep } from '../unshield-step';
-
+import { ShieldDefaultStep } from '../shield-default-step';
 import { StepInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
@@ -16,7 +15,7 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
-describe('unshield-step', () => {
+describe('shield-default-step', () => {
   before(() => {
     setRailgunFees(
       networkName,
@@ -25,8 +24,8 @@ describe('unshield-step', () => {
     );
   });
 
-  it('Should create unshield step', async () => {
-    const step = new UnshieldStep();
+  it('Should create shield default step', async () => {
+    const step = new ShieldDefaultStep();
 
     const stepInput: StepInput = {
       networkName: networkName,
@@ -44,9 +43,9 @@ describe('unshield-step', () => {
     };
     const output = await step.getValidStepOutput(stepInput);
 
-    expect(output.name).to.equal('Unshield');
+    expect(output.name).to.equal('Shield (Default)');
     expect(output.description).to.equal(
-      'Unshield ERC20s and NFTs from private RAILGUN balance.',
+      'Shield ERC20s and NFTs into private RAILGUN balance.',
     );
 
     expect(output.spentERC20Amounts).to.equal(undefined);
@@ -67,18 +66,18 @@ describe('unshield-step', () => {
 
     expect(output.feeERC20AmountRecipients).to.deep.equal([
       {
-        decimals: 18n,
         tokenAddress,
+        decimals: 18n,
         amount: 30n,
-        recipient: 'RAILGUN Unshield Fee',
+        recipient: 'RAILGUN Shield Fee',
       },
     ]);
 
     expect(output.crossContractCalls).to.deep.equal([]);
   });
 
-  it('Should test unshield step error cases', async () => {
-    const step = new UnshieldStep();
+  it('Should test shield default step error cases', async () => {
+    const step = new ShieldDefaultStep();
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {
@@ -96,7 +95,7 @@ describe('unshield-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Unshield step is invalid. Cannot unshield base token.',
+      'Shield step is invalid. Cannot shield base token.',
     );
   });
 });

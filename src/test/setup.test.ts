@@ -1,5 +1,6 @@
 import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import {
+  createRailgunWallet2ForTests,
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
   removeTestDB,
@@ -90,4 +91,7 @@ export const setupForkTests = async () => {
 
   // Make sure shielded balances are updated
   await waitForShieldedTokenBalances(networkName, tokenAddresses);
+
+  // Set up secondary wallets
+  await createRailgunWallet2ForTests();
 };

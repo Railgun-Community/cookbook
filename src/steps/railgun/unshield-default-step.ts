@@ -9,9 +9,9 @@ import { Step } from '../step';
 import { NetworkName } from '@railgun-community/shared-models';
 import { getUnshieldFee, getUnshieldedAmountAfterFee } from '../../utils/fee';
 
-export class UnshieldStep extends Step {
+export class UnshieldDefaultStep extends Step {
   readonly config: StepConfig = {
-    name: 'Unshield',
+    name: 'Unshield (Default)',
     description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
   };
 
@@ -32,7 +32,6 @@ export class UnshieldStep extends Step {
 
     return {
       crossContractCalls: [],
-
       outputERC20Amounts,
       outputNFTs: input.nfts,
       feeERC20AmountRecipients,

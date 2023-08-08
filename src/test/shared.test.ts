@@ -19,6 +19,7 @@ import { AbstractWallet } from '@railgun-community/engine';
 
 export let testRPCProvider: Optional<JsonRpcProvider>;
 export let testRailgunWallet: AbstractWallet;
+export let testRailgunWallet2: AbstractWallet;
 
 export const setSharedTestRPCProvider = (provider: JsonRpcProvider) => {
   testRPCProvider = provider;
@@ -26,6 +27,10 @@ export const setSharedTestRPCProvider = (provider: JsonRpcProvider) => {
 
 export const setSharedTestRailgunWallet = (wallet: AbstractWallet) => {
   testRailgunWallet = wallet;
+};
+
+export const setSharedTestRailgunWallet2 = (wallet: AbstractWallet) => {
+  testRailgunWallet2 = wallet;
 };
 
 export const getGanacheProvider = (): JsonRpcProvider => {
@@ -46,6 +51,14 @@ export const getTestRailgunWallet = () => {
   const wallet = testRailgunWallet;
   if (!isDefined(wallet)) {
     throw new Error('No test railgun wallet created');
+  }
+  return wallet;
+};
+
+export const getTestRailgunWallet2 = () => {
+  const wallet = testRailgunWallet2;
+  if (!isDefined(wallet)) {
+    throw new Error('No test railgun wallet 2 created');
   }
   return wallet;
 };

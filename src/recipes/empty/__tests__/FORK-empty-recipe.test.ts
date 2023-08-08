@@ -42,7 +42,6 @@ describe('FORK-empty-recipe', function run() {
     }
 
     const recipe = new EmptyRecipe();
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,

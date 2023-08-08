@@ -101,7 +101,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
     expect(output.stepOutputs.length).to.equal(5);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -236,7 +236,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
     });
 
     expect(output.stepOutputs[4]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {

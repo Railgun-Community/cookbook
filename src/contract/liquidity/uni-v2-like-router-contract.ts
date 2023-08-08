@@ -1,13 +1,13 @@
 import { Contract, ContractTransaction } from 'ethers';
 import { abi } from '../../abi/abi';
 import { UniV2LikeRouter } from '../../typechain';
-import { validateAddress } from '../../utils/address';
+import { validateContractAddress } from '../../utils/address';
 
 export class UniV2LikeRouterContract {
   private readonly contract: UniV2LikeRouter;
 
   constructor(address: string) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid address for LP router contract');
     }
     this.contract = new Contract(

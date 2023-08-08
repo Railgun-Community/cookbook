@@ -1,13 +1,13 @@
 import { Contract, ContractTransaction, Provider } from 'ethers';
 import { abi } from '../../../abi/abi';
 import { BeefyVaultMergedV6V7 } from '../../../typechain';
-import { validateAddress } from '../../../utils/address';
+import { validateContractAddress } from '../../../utils/address';
 
 export class BeefyVaultContract {
   private readonly contract: BeefyVaultMergedV6V7;
 
   constructor(address: string, provider?: Provider) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid Vault address for Beefy contract');
     }
     this.contract = new Contract(

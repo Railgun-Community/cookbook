@@ -1,13 +1,13 @@
 import { Contract, ContractTransaction } from 'ethers';
 import { abi } from '../../abi/abi';
 import { Erc721 } from '../../typechain';
-import { validateAddress } from '../../utils/address';
+import { validateContractAddress } from '../../utils/address';
 
 export class ERC721Contract {
   private readonly contract: Erc721;
 
   constructor(address: string) {
-    if (!validateAddress(address)) {
+    if (!validateContractAddress(address)) {
       throw new Error('Invalid ERC20 address for contract');
     }
     this.contract = new Contract(

@@ -12,8 +12,8 @@ import {
   StepInput,
   StepOutput,
 } from '../models/export-models';
-import { ShieldStep } from '../steps/railgun/shield-step';
-import { UnshieldStep } from '../steps/railgun/unshield-step';
+import { ShieldDefaultStep } from '../steps/railgun/shield-default-step';
+import { UnshieldDefaultStep } from '../steps/railgun/unshield-default-step';
 import { Step } from '../steps/step';
 import { ContractTransaction } from 'ethers';
 import { generateID } from '../utils/id';
@@ -40,9 +40,11 @@ export abstract class Recipe {
   ): Promise<Step[]> {
     if (skipUnshield) {
       const internalSteps = await this.getInternalSteps(firstStepInput);
-      return skipShield ? internalSteps : [...internalSteps, new ShieldStep()];
+      return skipShield
+        ? internalSteps
+        : [...internalSteps, new ShieldDefaultStep()];
     }
-    const unshieldStep = new UnshieldStep();
+    const unshieldStep = new UnshieldDefaultStep();
     const unshieldOutput = await unshieldStep.getValidStepOutput(
       firstStepInput,
     );
@@ -53,7 +55,7 @@ export abstract class Recipe {
     const internalSteps = await this.getInternalSteps(firstInternalStepInput);
     return skipShield
       ? [unshieldStep, ...internalSteps]
-      : [unshieldStep, ...internalSteps, new ShieldStep()];
+      : [unshieldStep, ...internalSteps, new ShieldDefaultStep()];
   }
 
   private createNextStepInput(

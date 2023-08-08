@@ -141,7 +141,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
     expect(output.stepOutputs.length).to.equal(7);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -364,7 +364,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
     });
 
     expect(output.stepOutputs[6]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {

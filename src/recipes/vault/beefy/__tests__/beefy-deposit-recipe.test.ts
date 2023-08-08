@@ -92,7 +92,7 @@ describe('beefy-deposit-recipe', () => {
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -176,7 +176,7 @@ describe('beefy-deposit-recipe', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -262,7 +262,7 @@ describe('beefy-deposit-recipe', () => {
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -346,7 +346,7 @@ describe('beefy-deposit-recipe', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {

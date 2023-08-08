@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
-
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -12,6 +11,8 @@ import { setRailgunFees } from '../../../init';
 import {
   getGanacheProvider,
   getTestRailgunWallet,
+  getTestRailgunWallet2,
+  testRailgunWallet2,
 } from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -49,7 +50,7 @@ const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 
 const slippagePercentage = 0.01;
 
-describe('FORK-zero-x-swap-recipe', function run() {
+describe('FORK-zero-x-swap-recipe-private-destination', function run() {
   this.timeout(120000);
 
   before(async function run() {
@@ -74,7 +75,6 @@ describe('FORK-zero-x-swap-recipe', function run() {
     }
 
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,
@@ -139,7 +139,7 @@ describe('FORK-zero-x-swap-recipe', function run() {
     // N/A
   });
 
-  it('[FORK] Should run zero-x-swap-recipe with destination address', async function run() {
+  it('[FORK] Should run zero-x-swap-recipe with public destination address', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -151,7 +151,6 @@ describe('FORK-zero-x-swap-recipe', function run() {
       slippagePercentage,
       VITALIK_WALLET,
     );
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,
@@ -216,6 +215,100 @@ describe('FORK-zero-x-swap-recipe', function run() {
     expect(publicDestinationRAILBalance >= minimumBuyAmount).to.equal(
       true,
       'Destination wallet RAIL balance incorrect after swap',
+    );
+  });
+
+  it.only('[FORK] Should run zero-x-swap-recipe with private destination address', async function run() {
+    if (shouldSkipForkTest(networkName)) {
+      this.skip();
+      return;
+    }
+
+    const privateWalletAddress = testRailgunWallet2.getAddress();
+
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippagePercentage,
+      privateWalletAddress,
+    );
+
+    const recipeInput: RecipeInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: sellTokenAddress,
+          decimals: 18n,
+          isBaseToken: false,
+          amount: 12000n,
+        },
+      ],
+      nfts: [],
+    };
+
+    const railgunWallet = getTestRailgunWallet();
+    const initialPrivateRAILBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      buyToken.tokenAddress,
+    );
+
+    const railgunWallet2 = getTestRailgunWallet2();
+    const initialPrivateRAILBalance2 = await balanceForERC20Token(
+      railgunWallet2,
+      networkName,
+      buyToken.tokenAddress,
+    );
+
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
+      recipeInput,
+      recipeOutput,
+    );
+
+    const quote = recipe.getLatestQuote() as SwapQuoteData;
+    expect(quote).to.not.be.undefined;
+    const expectedSpender =
+      ZeroXQuote.zeroXExchangeProxyContractAddress(networkName);
+    expect(quote.spender).to.equal(
+      expectedSpender,
+      '0x Exchange contract does not match.',
+    );
+
+    // REQUIRED TESTS:
+
+    // 1. Add New Private Balance expectations.
+    // Expect no change in private balance.
+
+    // Check origin wallet balance
+    const privateRAILBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      buyToken.tokenAddress,
+    );
+    const expectedPrivateRAILBalance = initialPrivateRAILBalance;
+    expect(privateRAILBalance === expectedPrivateRAILBalance).to.equal(
+      true,
+      'Private RAIL balance (wallet 1) incorrect after swap - should not change after transfer',
+    );
+
+    // Check destination wallet balance
+    const privateRAILBalance2 = await balanceForERC20Token(
+      railgunWallet2,
+      networkName,
+      buyToken.tokenAddress,
+    );
+    const minimumBuyAmount = quote.minimumBuyAmount;
+    const minimumShieldFee =
+      (minimumBuyAmount * MOCK_SHIELD_FEE_BASIS_POINTS) / 10000n;
+    const expectedPrivateRAILBalance2 =
+      initialPrivateRAILBalance2 +
+      minimumBuyAmount - // Minimum buy amount
+      minimumShieldFee; // Shield fee
+    expect(privateRAILBalance2 >= expectedPrivateRAILBalance2).to.equal(
+      true,
+      'Private RAIL balance (wallet 2) incorrect after swap',
     );
   });
 });

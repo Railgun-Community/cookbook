@@ -41,9 +41,9 @@ describe('custom-recipe', () => {
     const steps = await recipe.getFullSteps(firstStepInput);
 
     expect(steps.map(step => step.config.name)).to.deep.equal([
-      'Unshield',
+      'Unshield (Default)',
       'Unwrap Base Token',
-      'Shield',
+      'Shield (Default)',
     ]);
   });
 });

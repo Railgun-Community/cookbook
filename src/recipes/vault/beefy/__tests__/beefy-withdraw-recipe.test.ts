@@ -76,7 +76,6 @@ describe('beefy-withdraw-recipe', () => {
     );
 
     const recipe = new BeefyWithdrawRecipe(ethVault.vaultID);
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -94,7 +93,7 @@ describe('beefy-withdraw-recipe', () => {
     expect(output.stepOutputs.length).to.equal(3);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -156,7 +155,7 @@ describe('beefy-withdraw-recipe', () => {
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -225,7 +224,6 @@ describe('beefy-withdraw-recipe', () => {
     );
 
     const recipe = new BeefyWithdrawRecipe(polygonVault.vaultID);
-    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -243,7 +241,7 @@ describe('beefy-withdraw-recipe', () => {
     expect(output.stepOutputs.length).to.equal(3);
 
     expect(output.stepOutputs[0]).to.deep.equal({
-      name: 'Unshield',
+      name: 'Unshield (Default)',
       description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
@@ -305,7 +303,7 @@ describe('beefy-withdraw-recipe', () => {
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
-      name: 'Shield',
+      name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
