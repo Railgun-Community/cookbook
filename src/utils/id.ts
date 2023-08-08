@@ -1,4 +1,4 @@
-export const generateID = () => {
+export const generateID = (length = 16) => {
   const CHARSET = 'abcdefghijklnopqrstuvwxyz0123456789';
   let retVal = '';
   for (let i = 0; i < length; i += 1) {

@@ -80,6 +80,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
       slippagePercentage,
       testRPCProvider,
     );
+    expect(addLiquidityRecipe.id.length).to.equal(16);
 
     const usdcAmount: RecipeERC20Amount = {
       tokenAddress: USDC_TOKEN.tokenAddress,
@@ -207,6 +208,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
       slippagePercentage,
       testRPCProvider,
     );
+    expect(removeLiquidityRecipe.id.length).to.equal(16);
 
     const preUnshieldLPERC20Amount: RecipeERC20Amount = {
       tokenAddress: LP_TOKEN.tokenAddress,

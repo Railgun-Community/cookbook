@@ -85,6 +85,7 @@ describe('zero-x-swap-recipe', () => {
 
   it('Should create zero-x-swap-recipe with amount and change', async () => {
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -281,6 +282,7 @@ describe('zero-x-swap-recipe', () => {
       slippagePercentage,
       VITALIK_WALLET, // destinationAddress
     );
+    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -482,6 +484,7 @@ describe('zero-x-swap-recipe', () => {
 
   it('Should test zero-x-swap-recipe error cases', async () => {
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+    expect(recipe.id.length).to.equal(16);
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {

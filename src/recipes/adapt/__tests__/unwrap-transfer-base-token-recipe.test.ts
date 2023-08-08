@@ -29,6 +29,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
   it('Should create unwrap-transfer-base-token-recipe with amount', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
+    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,
@@ -201,6 +202,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
   it('Should create unwrap-transfer-base-token-recipe without amount', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
+    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName,
@@ -331,6 +333,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
   it('Should test unwrap-transfer-base-token-recipe error cases', async () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
+    expect(recipe.id.length).to.equal(16);
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {

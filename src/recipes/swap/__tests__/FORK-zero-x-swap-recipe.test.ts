@@ -74,6 +74,8 @@ describe('FORK-zero-x-swap-recipe', function run() {
     }
 
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+    expect(recipe.id.length).to.equal(16);
+
     const recipeInput: RecipeInput = {
       networkName,
       erc20Amounts: [
@@ -149,6 +151,8 @@ describe('FORK-zero-x-swap-recipe', function run() {
       slippagePercentage,
       VITALIK_WALLET,
     );
+    expect(recipe.id.length).to.equal(16);
+
     const recipeInput: RecipeInput = {
       networkName,
       erc20Amounts: [

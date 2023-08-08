@@ -62,6 +62,8 @@ describe('FORK-beefy-vault-recipes', function run() {
     ).to.equal(true);
 
     const depositRecipe = new BeefyDepositRecipe(vaultID);
+    expect(depositRecipe.id.length).to.equal(16);
+
     const depositRecipeInput: RecipeInput = {
       networkName,
       erc20Amounts: [
@@ -143,6 +145,8 @@ describe('FORK-beefy-vault-recipes', function run() {
     ).to.equal(true);
 
     const withdrawRecipe = new BeefyWithdrawRecipe(vaultID);
+    expect(withdrawRecipe.id.length).to.equal(16);
+
     const withdrawRecipeInput: RecipeInput = {
       networkName,
       erc20Amounts: [

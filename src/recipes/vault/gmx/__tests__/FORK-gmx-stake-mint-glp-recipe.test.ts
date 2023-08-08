@@ -63,6 +63,7 @@ describe.skip('FORK-gmx-stake-mint-glp-recipe', function run() {
       slippagePercentage,
       testRPCProvider,
     );
+    expect(gmxStakeMintGlpRecipe.id.length).to.equal(16);
 
     const daiAmount: RecipeERC20Amount = {
       ...DAI_TOKEN,

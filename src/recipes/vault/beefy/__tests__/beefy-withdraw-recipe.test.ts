@@ -76,6 +76,7 @@ describe('beefy-withdraw-recipe', () => {
     );
 
     const recipe = new BeefyWithdrawRecipe(ethVault.vaultID);
+    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
@@ -224,6 +225,7 @@ describe('beefy-withdraw-recipe', () => {
     );
 
     const recipe = new BeefyWithdrawRecipe(polygonVault.vaultID);
+    expect(recipe.id.length).to.equal(16);
 
     const recipeInput: RecipeInput = {
       networkName: networkName,
