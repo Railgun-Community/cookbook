@@ -54,14 +54,26 @@ export class RelayAdaptContract {
     toAddress: string,
     amount?: bigint,
   ): Promise<ContractTransaction> {
-    const baseTokenData = this.createERC20TokenData(ZERO_ADDRESS);
-
     const baseTokenTransfer: RelayAdapt.TokenTransferStruct = {
-      token: baseTokenData,
+      token: this.createERC20TokenData(ZERO_ADDRESS),
       to: toAddress,
       // 0 will automatically transfer full balance.
       value: amount ?? 0n,
     };
     return this.contract.transfer.populateTransaction([baseTokenTransfer]);
+  }
+
+  createERC20Transfer(
+    toAddress: string,
+    tokenAddress: string,
+    amount?: bigint,
+  ) {
+    const erc20Transfer: RelayAdapt.TokenTransferStruct = {
+      token: this.createERC20TokenData(tokenAddress),
+      to: toAddress,
+      // 0 will automatically transfer full balance.
+      value: amount ?? 0n,
+    };
+    return this.contract.transfer.populateTransaction([erc20Transfer]);
   }
 }

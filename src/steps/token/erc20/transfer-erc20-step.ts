@@ -9,6 +9,7 @@ import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
 import { ERC20Contract } from '../../../contract/token/erc20-contract';
 import { ContractTransaction } from 'ethers';
+import { RelayAdaptContract } from '../../../contract';
 
 export class TransferERC20Step extends Step {
   readonly config: StepConfig = {
@@ -41,11 +42,12 @@ export class TransferERC20Step extends Step {
         this.amount,
       );
 
-    const contract = new ERC20Contract(this.erc20Info.tokenAddress);
+    const contract = new RelayAdaptContract(input.networkName);
     const crossContractCalls: ContractTransaction[] = [
-      await contract.createTransfer(
+      await contract.createERC20Transfer(
         this.toAddress,
-        this.amount ?? erc20AmountForStep.expectedBalance,
+        this.erc20Info.tokenAddress,
+        this.amount,
       ),
     ];
 
