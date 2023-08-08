@@ -59,18 +59,20 @@ describe('uni-v2-like-sdk', () => {
 
   // TODO: Fix this test.
   it.skip('Should get Uniswap LP pairs for USDC and WETH', async () => {
-    const pairsOnlyUSDC = await UniV2LikeSDK.getAllLPPairsForTokenAddresses(
-      UniswapV2Fork.Uniswap,
-      networkName,
-      [USDC_TOKEN.tokenAddress],
-    );
+    const pairsOnlyUSDC =
+      await UniV2LikeSDK.getAllLPPairsForTokenAddressesPerFork(
+        UniswapV2Fork.Uniswap,
+        networkName,
+        [USDC_TOKEN.tokenAddress],
+      );
     expect(pairsOnlyUSDC.length).to.equal(0);
 
-    const pairsUSDCAndWeth = await UniV2LikeSDK.getAllLPPairsForTokenAddresses(
-      UniswapV2Fork.Uniswap,
-      networkName,
-      [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
-    );
+    const pairsUSDCAndWeth =
+      await UniV2LikeSDK.getAllLPPairsForTokenAddressesPerFork(
+        UniswapV2Fork.Uniswap,
+        networkName,
+        [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
+      );
     expect(pairsUSDCAndWeth.length).to.equal(1);
 
     const oneWithDecimals = 10n ** 18n;
@@ -99,18 +101,20 @@ describe('uni-v2-like-sdk', () => {
   }).timeout(30000);
 
   it('Should get Sushiswap LP pairs for USDC and WETH', async () => {
-    const pairsOnlyUSDC = await UniV2LikeSDK.getAllLPPairsForTokenAddresses(
-      UniswapV2Fork.Sushiswap,
-      networkName,
-      [USDC_TOKEN.tokenAddress],
-    );
+    const pairsOnlyUSDC =
+      await UniV2LikeSDK.getAllLPPairsForTokenAddressesPerFork(
+        UniswapV2Fork.Sushiswap,
+        networkName,
+        [USDC_TOKEN.tokenAddress],
+      );
     expect(pairsOnlyUSDC.length).to.equal(0);
 
-    const pairsUSDCAndWeth = await UniV2LikeSDK.getAllLPPairsForTokenAddresses(
-      UniswapV2Fork.Sushiswap,
-      networkName,
-      [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
-    );
+    const pairsUSDCAndWeth =
+      await UniV2LikeSDK.getAllLPPairsForTokenAddressesPerFork(
+        UniswapV2Fork.Sushiswap,
+        networkName,
+        [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
+      );
     expect(pairsUSDCAndWeth.length).to.equal(1);
 
     const oneWithDecimals = 10n ** 18n;

@@ -393,7 +393,7 @@ export class UniV2LikeSDK {
     return feeAmount;
   }
 
-  static getAllLPPairsForTokenAddresses(
+  static getAllLPPairsForTokenAddressesPerFork(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
     tokenAddresses: string[],
@@ -411,5 +411,14 @@ export class UniV2LikeSDK {
       CookbookDebug.error(err);
       throw new Error('Failed to get LP pairs');
     }
+  }
+
+  static getAllLPPairsForTokenAddresses(
+    networkName: NetworkName,
+    tokenAddresses: string[],
+  ) {
+    return Promise.all(Object.values(UniswapV2Fork).map(fork => {
+      return this.getAllLPPairsForTokenAddressesPerFork(fork, networkName, tokenAddresses);
+    })
   }
 }
