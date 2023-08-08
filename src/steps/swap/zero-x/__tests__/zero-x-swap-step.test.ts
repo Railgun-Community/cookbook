@@ -37,9 +37,9 @@ const quote: SwapQuoteData = {
   buyERC20Amount: {
     tokenAddress: buyTokenAddress,
     decimals: 18n,
-    amount: BigInt('500'),
+    amount: 500n,
   },
-  minimumBuyAmount: BigInt('495'),
+  minimumBuyAmount: 495n,
 
   // base token - 0x's filler address
   sellTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -105,8 +105,8 @@ describe('zero-x-swap-step', () => {
       {
         approvedSpender: undefined,
         isBaseToken: undefined,
-        expectedBalance: BigInt('500'),
-        minBalance: BigInt('495'),
+        expectedBalance: 500n,
+        minBalance: 495n,
         tokenAddress: buyTokenAddress,
         decimals: 18n,
       },
@@ -174,8 +174,8 @@ describe('zero-x-swap-step', () => {
       {
         approvedSpender: undefined,
         isBaseToken: undefined,
-        expectedBalance: BigInt('500'),
-        minBalance: BigInt('495'),
+        expectedBalance: 500n,
+        minBalance: 495n,
         tokenAddress: buyTokenAddress,
         decimals: 18n,
       },

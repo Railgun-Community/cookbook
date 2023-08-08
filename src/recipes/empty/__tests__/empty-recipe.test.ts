@@ -58,8 +58,8 @@ describe('empty-recipe', () => {
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           approvedSpender: undefined,
           isBaseToken: false,
           decimals: 18n,
@@ -76,8 +76,8 @@ describe('empty-recipe', () => {
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           approvedSpender: undefined,
           isBaseToken: false,
           decimals: 18n,

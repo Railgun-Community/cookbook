@@ -39,6 +39,8 @@ const buyToken: RecipeERC20Info = {
 
 const slippagePercentage = 0.01;
 
+const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
+
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',
   spender,
@@ -50,9 +52,9 @@ const quote: SwapQuoteData = {
   buyERC20Amount: {
     tokenAddress: buyTokenAddress,
     decimals: 18n,
-    amount: BigInt('500'),
+    amount: 500n,
   },
-  minimumBuyAmount: BigInt('495'),
+  minimumBuyAmount: 495n,
 
   // base token - 0x's filler address
   sellTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -81,7 +83,7 @@ describe('zero-x-swap-recipe', () => {
     stub0xQuote.resetBehavior();
   });
 
-  it('Should create zero-x-swap-recipe with amount', async () => {
+  it('Should create zero-x-swap-recipe with amount and change', async () => {
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
 
     const recipeInput: RecipeInput = {
@@ -101,10 +103,10 @@ describe('zero-x-swap-recipe', () => {
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
-      sellFee: 30n,
-      buyAmount: BigInt('499'),
-      buyMinimum: BigInt('494'),
-      buyFee: 1n,
+      sellUnshieldFee: 30n,
+      buyAmount: 499n,
+      buyMinimum: 494n,
+      buyShieldFee: 1n,
     });
 
     expect(output.stepOutputs[0]).to.deep.equal({
@@ -121,8 +123,8 @@ describe('zero-x-swap-recipe', () => {
       outputERC20Amounts: [
         {
           tokenAddress: sellTokenAddress,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           approvedSpender: undefined,
           isBaseToken: false,
           decimals: 18n,
@@ -138,8 +140,8 @@ describe('zero-x-swap-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: spender,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
           decimals: 18n,
@@ -160,8 +162,8 @@ describe('zero-x-swap-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigInt('500'),
-          minBalance: BigInt('495'),
+          expectedBalance: 500n,
+          minBalance: 495n,
           tokenAddress: buyTokenAddress,
           isBaseToken: undefined,
           decimals: 18n,
@@ -214,8 +216,8 @@ describe('zero-x-swap-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigInt('499'),
-          minBalance: BigInt('494'),
+          expectedBalance: 499n,
+          minBalance: 494n,
           tokenAddress: buyTokenAddress,
           isBaseToken: undefined,
           decimals: 18n,
@@ -261,6 +263,212 @@ describe('zero-x-swap-recipe', () => {
         amount: 1n,
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: buyTokenAddress,
+        decimals: 18n,
+      },
+      {
+        amount: 4n,
+        recipient: 'RAILGUN Shield Fee',
+        tokenAddress: sellTokenAddress,
+        decimals: 18n,
+      },
+    ]);
+  });
+
+  it('Should create zero-x-swap-recipe with amount and destination address', async () => {
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippagePercentage,
+      VITALIK_WALLET, // destinationAddress
+    );
+
+    const recipeInput: RecipeInput = {
+      networkName: networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: sellTokenAddress,
+          decimals: 18n,
+          isBaseToken: false,
+          amount: 12000n,
+        },
+      ],
+      nfts: [],
+    };
+    const output = await recipe.getRecipeOutput(recipeInput);
+
+    expect(output.stepOutputs.length).to.equal(5);
+
+    expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
+      sellUnshieldFee: 30n,
+      buyAmount: 500n,
+      buyMinimum: 495n,
+      buyShieldFee: 0n,
+    });
+
+    expect(output.stepOutputs[0]).to.deep.equal({
+      name: 'Unshield',
+      description: 'Unshield ERC20s and NFTs from private RAILGUN balance.',
+      feeERC20AmountRecipients: [
+        {
+          amount: 30n,
+          recipient: 'RAILGUN Unshield Fee',
+          tokenAddress: sellTokenAddress,
+          decimals: 18n,
+        },
+      ],
+      outputERC20Amounts: [
+        {
+          tokenAddress: sellTokenAddress,
+          expectedBalance: 11970n,
+          minBalance: 11970n,
+          approvedSpender: undefined,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [],
+    });
+
+    expect(output.stepOutputs[1]).to.deep.equal({
+      name: 'Approve ERC20 Spender',
+      description: 'Approves ERC20 for spender contract.',
+      outputERC20Amounts: [
+        {
+          approvedSpender: spender,
+          expectedBalance: 11970n,
+          minBalance: 11970n,
+          tokenAddress: sellTokenAddress,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [
+        {
+          data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        },
+      ],
+    });
+
+    expect(output.stepOutputs[2]).to.deep.equal({
+      name: '0x Exchange Swap',
+      description: 'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.',
+      outputERC20Amounts: [
+        {
+          approvedSpender: undefined,
+          expectedBalance: 500n,
+          minBalance: 495n,
+          tokenAddress: buyTokenAddress,
+          isBaseToken: undefined,
+          decimals: 18n,
+        },
+        {
+          approvedSpender: spender,
+          expectedBalance: 1970n,
+          minBalance: 1970n,
+          tokenAddress: sellTokenAddress,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [
+        {
+          data: '0x5678',
+          to: '0x1234',
+          value: 0n,
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: 10000n,
+          isBaseToken: false,
+          tokenAddress: sellTokenAddress,
+          recipient: '0x Exchange',
+          decimals: 18n,
+        },
+      ],
+    });
+
+    expect(output.stepOutputs[3]).to.deep.equal({
+      name: 'Transfer ERC20',
+      description: 'Transfers ERC20 token to an external public address.',
+      outputERC20Amounts: [
+        {
+          approvedSpender: spender,
+          expectedBalance: 1970n,
+          minBalance: 1970n,
+          tokenAddress: sellTokenAddress,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [
+        {
+          data: '0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa9604500000000000000000000000000000000000000000000000000000000000001f4',
+          to: buyTokenAddress,
+        },
+      ],
+      spentERC20Amounts: [
+        {
+          amount: 500n,
+          tokenAddress: buyTokenAddress,
+          recipient: VITALIK_WALLET,
+          decimals: 18n,
+        },
+      ],
+    });
+
+    expect(output.stepOutputs[4]).to.deep.equal({
+      name: 'Shield',
+      description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
+      feeERC20AmountRecipients: [
+        {
+          amount: 4n,
+          recipient: 'RAILGUN Shield Fee',
+          tokenAddress: sellTokenAddress,
+          decimals: 18n,
+        },
+      ],
+      outputERC20Amounts: [
+        {
+          approvedSpender: spender,
+          expectedBalance: 1966n,
+          minBalance: 1966n,
+          tokenAddress: sellTokenAddress,
+          isBaseToken: false,
+          decimals: 18n,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [],
+    });
+
+    expect(
+      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+    ).to.deep.equal(
+      [sellTokenAddress, buyTokenAddress].map(tokenAddress =>
+        tokenAddress.toLowerCase(),
+      ),
+    );
+
+    expect(output.nfts).to.deep.equal([]);
+
+    const crossContractCallsFlattened = output.stepOutputs.flatMap(
+      stepOutput => stepOutput.crossContractCalls,
+    );
+    expect(output.crossContractCalls).to.deep.equal(
+      crossContractCallsFlattened,
+    );
+
+    expect(output.feeERC20AmountRecipients).to.deep.equal([
+      {
+        amount: 30n,
+        recipient: 'RAILGUN Unshield Fee',
+        tokenAddress: sellTokenAddress,
         decimals: 18n,
       },
       {

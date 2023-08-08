@@ -60,8 +60,8 @@ describe('unwrap-transfer-base-token-recipe', () => {
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           approvedSpender: undefined,
           isBaseToken: false,
           decimals: 18n,
@@ -230,8 +230,8 @@ describe('unwrap-transfer-base-token-recipe', () => {
       outputERC20Amounts: [
         {
           tokenAddress,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           approvedSpender: undefined,
           isBaseToken: false,
           decimals: 18n,
@@ -249,8 +249,8 @@ describe('unwrap-transfer-base-token-recipe', () => {
           // Wrapped - ETH
           approvedSpender: undefined,
           isBaseToken: true,
-          expectedBalance: BigInt('11970'),
-          minBalance: BigInt('11970'),
+          expectedBalance: 11970n,
+          minBalance: 11970n,
           tokenAddress,
           decimals: 18n,
         },
@@ -264,7 +264,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigInt('11970'),
+          amount: 11970n,
           isBaseToken: false,
           recipient: 'Wrapped Token Contract',
           tokenAddress,
@@ -286,7 +286,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       ],
       spentERC20Amounts: [
         {
-          amount: BigInt('11970'),
+          amount: 11970n,
           isBaseToken: true,
           tokenAddress,
           recipient: toAddress,

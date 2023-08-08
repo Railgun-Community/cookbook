@@ -9,7 +9,10 @@ import {
 } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
-import { getTestRailgunWallet } from '../../../test/shared.test';
+import {
+  getGanacheProvider,
+  getTestRailgunWallet,
+} from '../../../test/shared.test';
 import {
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
@@ -22,6 +25,7 @@ import {
 } from '../../../test/common.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 import { testConfig } from '../../../test/test-config.test';
+import { ERC20Contract } from '../../../contract/token/erc20-contract';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -41,9 +45,11 @@ const buyToken: RecipeERC20Info = {
   decimals: 18n,
 };
 
+const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
+
 const slippagePercentage = 0.01;
 
-describe('FORK-zero-x-swap-recipe', function run() {
+describe.only('FORK-zero-x-swap-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
@@ -129,5 +135,83 @@ describe('FORK-zero-x-swap-recipe', function run() {
 
     // 2. Add External Balance expectations.
     // N/A
+  });
+
+  it('[FORK] Should run zero-x-swap-recipe with destination address', async function run() {
+    if (shouldSkipForkTest(networkName)) {
+      this.skip();
+      return;
+    }
+
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippagePercentage,
+      VITALIK_WALLET,
+    );
+    const recipeInput: RecipeInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: sellTokenAddress,
+          decimals: 18n,
+          isBaseToken: false,
+          amount: 12000n,
+        },
+      ],
+      nfts: [],
+    };
+
+    const railgunWallet = getTestRailgunWallet();
+    const initialPrivateRAILBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      buyToken.tokenAddress,
+    );
+
+    const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
+      recipeInput,
+      recipeOutput,
+    );
+
+    const quote = recipe.getLatestQuote() as SwapQuoteData;
+    expect(quote).to.not.be.undefined;
+    const expectedSpender =
+      ZeroXQuote.zeroXExchangeProxyContractAddress(networkName);
+    expect(quote.spender).to.equal(
+      expectedSpender,
+      '0x Exchange contract does not match.',
+    );
+
+    // REQUIRED TESTS:
+
+    // 1. Add New Private Balance expectations.
+    // Expect no change in private balance.
+
+    const privateRAILBalance = await balanceForERC20Token(
+      railgunWallet,
+      networkName,
+      buyToken.tokenAddress,
+    );
+
+    const expectedPrivateRAILBalance = initialPrivateRAILBalance;
+    expect(privateRAILBalance === expectedPrivateRAILBalance).to.equal(
+      true,
+      'Private RAIL balance incorrect after swap - should not change after transfer',
+    );
+
+    // 2. Add External Balance expectations.
+    // Expect new swapped token in destination public balance.
+
+    const provider = getGanacheProvider();
+    const token = new ERC20Contract(buyToken.tokenAddress, provider);
+    const publicDestinationRAILBalance = await token.balanceOf(VITALIK_WALLET);
+    const minimumBuyAmount = quote.minimumBuyAmount;
+    expect(publicDestinationRAILBalance >= minimumBuyAmount).to.equal(
+      true,
+      'Destination wallet RAIL balance incorrect after swap',
+    );
   });
 });

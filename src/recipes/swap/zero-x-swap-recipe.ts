@@ -11,9 +11,13 @@ import {
   SwapQuoteParams,
 } from '../../models/export-models';
 import { SwapRecipe } from './swap-recipe';
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { findFirstInputERC20Amount } from '../../utils';
-import { MIN_GAS_LIMIT_0X_SWAP } from '../../models/min-gas-limits';
+import {
+  MIN_GAS_LIMIT_0X_SWAP,
+  MIN_GAS_LIMIT_0X_SWAP_TRANSFER,
+} from '../../models/min-gas-limits';
+import { TransferERC20Step } from '../../steps';
 
 export class ZeroXSwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
@@ -27,15 +31,23 @@ export class ZeroXSwapRecipe extends SwapRecipe {
 
   private readonly slippagePercentage: number;
 
+  protected readonly destinationAddress: Optional<string>;
+
   constructor(
     sellERC20Info: RecipeERC20Info,
     buyERC20Info: RecipeERC20Info,
     slippagePercentage: number,
+    destinationAddress?: string,
   ) {
     super();
     this.sellERC20Info = sellERC20Info;
     this.buyERC20Info = buyERC20Info;
     this.slippagePercentage = slippagePercentage;
+    this.destinationAddress = destinationAddress;
+    if (isDefined(this.destinationAddress)) {
+      this.config.name += ' and Transfer';
+      this.config.minGasLimit = MIN_GAS_LIMIT_0X_SWAP_TRANSFER;
+    }
   }
 
   protected supportsNetwork(networkName: NetworkName): boolean {
@@ -66,9 +78,15 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     );
     this.quote = await this.getSwapQuote(networkName, sellERC20Amount);
 
-    return [
+    const steps: Step[] = [
       new ApproveERC20SpenderStep(this.quote.spender, sellERC20Amount),
       new ZeroXSwapStep(this.quote, this.sellERC20Info),
     ];
+    if (isDefined(this.destinationAddress)) {
+      steps.push(
+        new TransferERC20Step(this.destinationAddress, this.buyERC20Info),
+      );
+    }
+    return steps;
   }
 }

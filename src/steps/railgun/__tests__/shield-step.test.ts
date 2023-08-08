@@ -54,8 +54,8 @@ describe('shield-step', () => {
     expect(output.outputERC20Amounts).to.deep.equal([
       {
         tokenAddress,
-        expectedBalance: BigInt('11970'),
-        minBalance: BigInt('11970'),
+        expectedBalance: 11970n,
+        minBalance: 11970n,
         approvedSpender: undefined,
         isBaseToken: false,
         decimals: 18n,

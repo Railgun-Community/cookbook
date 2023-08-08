@@ -168,6 +168,8 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
     );
   }
   if (txReceipt.status === 0) {
+    // eslint-disable-next-line no-console
+    console.log(txReceipt);
     throw new Error(`${name}: Transaction reverted`);
   }
 
