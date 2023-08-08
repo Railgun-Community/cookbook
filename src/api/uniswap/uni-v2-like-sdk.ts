@@ -413,12 +413,19 @@ export class UniV2LikeSDK {
     }
   }
 
-  static getAllLPPairsForTokenAddresses(
+  static async getAllLPPairsForTokenAddresses(
     networkName: NetworkName,
     tokenAddresses: string[],
-  ) {
-    return Promise.all(Object.values(UniswapV2Fork).map(fork => {
-      return this.getAllLPPairsForTokenAddressesPerFork(fork, networkName, tokenAddresses);
-    })
+  ): Promise<PairDataWithRate[]> {
+    const allLPPairs = await Promise.all(
+      Object.values(UniswapV2Fork).map(fork => {
+        return this.getAllLPPairsForTokenAddressesPerFork(
+          fork,
+          networkName,
+          tokenAddresses,
+        );
+      }),
+    );
+    return allLPPairs.flat();
   }
 }
