@@ -52,6 +52,7 @@ export class UniV2LikeSubgraph {
           tokenDecimalsB,
         );
         const pairDataWithRate: PairDataWithRate = {
+          uniswapV2Fork,
           pairAddress: pair.id,
           tokenAddressA: pair.token0.id,
           tokenDecimalsA,

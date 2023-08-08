@@ -8,7 +8,7 @@ import { Recipe } from '../../recipes';
 import { UniV2LikeAddLiquidityRecipe } from '../../recipes/liquidity/uni-v2-like/uni-v2-like-add-liquidity-recipe';
 import { BeefyDepositRecipe } from '../../recipes/vault/beefy/beefy-deposit-recipe';
 import { ComboMeal } from '../combo-meal';
-import { UniV2LikeSDK } from '../../api/uniswap/uni-v2-like-sdk';
+import { UniV2LikeSDK } from '../../api/uni-v2-like/uni-v2-like-sdk';
 import { NetworkName } from '@railgun-community/shared-models';
 import { Provider } from 'ethers';
 import { MIN_GAS_LIMIT_COMBO_MEAL } from '../../models/min-gas-limits';

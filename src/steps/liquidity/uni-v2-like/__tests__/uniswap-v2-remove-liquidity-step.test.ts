@@ -9,7 +9,7 @@ import {
   UniswapV2Fork,
 } from '../../../../models/export-models';
 import { UniswapV2RemoveLiquidityStep } from '../uniswap-v2-remove-liquidity-step';
-import { UniV2LikeSDK } from '../../../../api/uniswap/uni-v2-like-sdk';
+import { UniV2LikeSDK } from '../../../../api/uni-v2-like/uni-v2-like-sdk';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

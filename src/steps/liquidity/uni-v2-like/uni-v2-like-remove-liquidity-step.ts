@@ -9,7 +9,7 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils';
 import { Step } from '../../step';
-import { UniV2LikeSDK } from '../../../api/uniswap/uni-v2-like-sdk';
+import { UniV2LikeSDK } from '../../../api/uni-v2-like/uni-v2-like-sdk';
 import { minBalanceAfterSlippage } from '../../../utils/number';
 import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like-router-contract';
 import { NETWORK_CONFIG } from '@railgun-community/shared-models';

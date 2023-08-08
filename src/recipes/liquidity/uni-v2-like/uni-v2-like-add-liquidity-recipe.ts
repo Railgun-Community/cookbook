@@ -5,7 +5,7 @@ import {
   StepInput,
   UniswapV2Fork,
 } from '../../../models/export-models';
-import { UniV2LikeSDK } from '../../../api/uniswap/uni-v2-like-sdk';
+import { UniV2LikeSDK } from '../../../api/uni-v2-like/uni-v2-like-sdk';
 import { NetworkName } from '@railgun-community/shared-models';
 import { RecipeERC20Amount } from '../../../models';
 import { ApproveERC20SpenderStep } from '../../../steps/token/erc20/approve-erc20-spender-step';
