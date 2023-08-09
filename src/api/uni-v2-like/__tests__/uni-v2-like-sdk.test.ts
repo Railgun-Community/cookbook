@@ -132,6 +132,7 @@ describe('uni-v2-like-sdk', () => {
     delete pairsUSDCAndWeth[0].rateWith18Decimals;
 
     expect(pairsUSDCAndWeth[0]).to.deep.equal({
+      uniswapV2Fork: 'Sushiswap',
       pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
       tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
