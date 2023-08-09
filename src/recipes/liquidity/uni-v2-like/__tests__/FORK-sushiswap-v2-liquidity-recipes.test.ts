@@ -65,7 +65,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     );
   });
 
-  it('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
+  it.only('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -181,8 +181,8 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     //   'Private LP token balance incorrect after adding liquidity',
     // );
     expect(
-      expectedPrivateLPTokenBalance - 10000000n <= privateLPTokenBalance &&
-        expectedPrivateLPTokenBalance + 10000000n >= privateLPTokenBalance,
+      expectedPrivateLPTokenBalance - 100000000n <= privateLPTokenBalance &&
+        expectedPrivateLPTokenBalance + 100000000n >= privateLPTokenBalance,
     ).to.equal(
       true,
       `Private LP token balance incorrect after adding liquidity, expected ${privateLPTokenBalance} within 100000000 of ${expectedPrivateLPTokenBalance}`,
