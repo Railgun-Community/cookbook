@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXSwapRecipe } from '../zero-x-swap-recipe';
-
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -12,6 +11,7 @@ import { setRailgunFees } from '../../../init';
 import { ZeroXQuote } from '../../../api/zero-x';
 import Sinon, { SinonStub } from 'sinon';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -80,7 +80,7 @@ describe('zero-x-swap-recipe-public-destination', () => {
   });
 
   after(() => {
-    stub0xQuote.resetBehavior();
+    stub0xQuote.restore();
   });
 
   it('Should create zero-x-swap-recipe with amount and public destination address', async () => {
@@ -92,6 +92,7 @@ describe('zero-x-swap-recipe-public-destination', () => {
     );
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
@@ -217,8 +218,8 @@ describe('zero-x-swap-recipe-public-destination', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa9604500000000000000000000000000000000000000000000000000000000000001f4',
-          to: buyTokenAddress,
+          data: '0xc2e9ffd8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e76c6c83af64e4c60245d8c7de953df673a7a33d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
+          to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
         },
       ],
       spentERC20Amounts: [
@@ -250,6 +251,7 @@ describe('zero-x-swap-recipe-public-destination', () => {
           tokenAddress: sellTokenAddress,
           isBaseToken: false,
           decimals: 18n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -257,14 +259,14 @@ describe('zero-x-swap-recipe-public-destination', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [sellTokenAddress, buyTokenAddress].map(tokenAddress =>
         tokenAddress.toLowerCase(),
       ),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,

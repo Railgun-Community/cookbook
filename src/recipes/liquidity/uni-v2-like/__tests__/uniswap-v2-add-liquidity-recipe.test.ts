@@ -1,10 +1,10 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-
 import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../../init';
 import Sinon, { SinonStub } from 'sinon';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
@@ -81,6 +81,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
     );
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
@@ -258,6 +259,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
           decimals: LP_TOKEN.decimals,
           isBaseToken: false,
           approvedSpender: undefined,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -265,7 +267,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [
         USDC_TOKEN.tokenAddress,
@@ -274,7 +276,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       ].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -315,6 +317,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {

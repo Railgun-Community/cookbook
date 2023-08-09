@@ -1,12 +1,12 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { BeefyWithdrawRecipe } from '../beefy-withdraw-recipe';
-
 import { RecipeInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../../init';
 import Sinon, { SinonStub } from 'sinon';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
@@ -78,6 +78,7 @@ describe('beefy-withdraw-recipe', () => {
     const recipe = new BeefyWithdrawRecipe(ethVault.vaultID);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
@@ -173,6 +174,7 @@ describe('beefy-withdraw-recipe', () => {
           tokenAddress: ethVault.depositERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -180,14 +182,14 @@ describe('beefy-withdraw-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [ethVault.vaultERC20Address, ethVault.depositERC20Address].map(
         tokenAddress => tokenAddress.toLowerCase(),
       ),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -226,6 +228,7 @@ describe('beefy-withdraw-recipe', () => {
     const recipe = new BeefyWithdrawRecipe(polygonVault.vaultID);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
@@ -321,6 +324,7 @@ describe('beefy-withdraw-recipe', () => {
           tokenAddress: polygonVault.depositERC20Address,
           isBaseToken: undefined,
           decimals: 6n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -328,14 +332,14 @@ describe('beefy-withdraw-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [polygonVault.vaultERC20Address, polygonVault.depositERC20Address].map(
         tokenAddress => tokenAddress.toLowerCase(),
       ),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -375,6 +379,7 @@ describe('beefy-withdraw-recipe', () => {
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {

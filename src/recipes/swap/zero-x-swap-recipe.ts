@@ -19,7 +19,7 @@ import {
   MIN_GAS_LIMIT_0X_SWAP_TRANSFER,
 } from '../../models/min-gas-limits';
 import { TransferERC20Step } from '../../steps';
-import { ShieldERC20sStep } from '../../steps/railgun/shield-erc20s-step';
+import { DesignateShieldERC20RecipientStep } from '../../steps/railgun/designate-shield-erc20-recipient-step';
 
 export class ZeroXSwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
@@ -98,7 +98,9 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     if (isDefined(this.destinationAddress)) {
       steps.push(
         this.isRailgunDestinationAddress === true
-          ? new ShieldERC20sStep(this.destinationAddress, [this.buyERC20Info])
+          ? new DesignateShieldERC20RecipientStep(this.destinationAddress, [
+              this.buyERC20Info,
+            ])
           : new TransferERC20Step(this.destinationAddress, this.buyERC20Info),
       );
     }

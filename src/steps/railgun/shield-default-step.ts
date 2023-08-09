@@ -67,6 +67,7 @@ export class ShieldDefaultStep extends Step {
         approvedSpender: erc20Amount.approvedSpender,
         expectedBalance: shieldedAmount,
         minBalance: shieldedAmountMinimum,
+        recipient: erc20Amount.recipient,
       });
 
       feeERC20AmountRecipients.push({

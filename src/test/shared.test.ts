@@ -7,8 +7,9 @@ import {
 import {
   EVMGasType,
   NetworkName,
-  RailgunERC20Amount,
   RailgunERC20AmountRecipient,
+  RailgunERC20Recipient,
+  RailgunNFTAmountRecipient,
   TransactionGasDetails,
   isDefined,
 } from '@railgun-community/shared-models';
@@ -97,18 +98,27 @@ export const createQuickstartCrossContractCallsForTest = async (
 }> => {
   const railgunWallet = getTestRailgunWallet();
 
-  const { erc20Amounts, nfts: unshieldNFTs } = recipeInput;
+  const { erc20Amounts: unshieldERC20Amounts, nfts: unshieldNFTs } =
+    recipeInput;
   const { minGasLimit } = recipeOutput;
-  const unshieldERC20Amounts: RailgunERC20Amount[] = erc20Amounts;
 
-  const {
-    crossContractCalls,
-    erc20Amounts: shieldERC20Amounts,
-    nfts: shieldNFTs,
-  } = recipeOutput;
+  const { crossContractCalls, erc20AmountRecipients, nftRecipients } =
+    recipeOutput;
 
-  const shieldERC20Addresses = shieldERC20Amounts.map(
-    shieldERC20Amount => shieldERC20Amount.tokenAddress,
+  const shieldERC20Recipients: RailgunERC20Recipient[] =
+    erc20AmountRecipients.map(erc20AmountRecipient => ({
+      tokenAddress: erc20AmountRecipient.tokenAddress,
+      recipientAddress: erc20AmountRecipient.recipient,
+    }));
+
+  const shieldNFTRecipients: RailgunNFTAmountRecipient[] = nftRecipients.map(
+    nftRecipient => ({
+      nftAddress: nftRecipient.nftAddress,
+      nftTokenType: nftRecipient.nftTokenType,
+      tokenSubID: nftRecipient.tokenSubID,
+      amount: nftRecipient.amount,
+      recipientAddress: nftRecipient.recipient,
+    }),
   );
 
   if (unshieldERC20Amounts.length < 1) {
@@ -134,8 +144,8 @@ export const createQuickstartCrossContractCallsForTest = async (
         testConfig.encryptionKey,
         unshieldERC20Amounts,
         unshieldNFTs,
-        shieldERC20Addresses,
-        shieldNFTs,
+        shieldERC20Recipients,
+        shieldNFTRecipients,
         crossContractCalls,
         MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
         undefined, // feeTokenDetails
@@ -158,8 +168,8 @@ export const createQuickstartCrossContractCallsForTest = async (
     testConfig.encryptionKey,
     unshieldERC20Amounts,
     unshieldNFTs,
-    shieldERC20Addresses,
-    shieldNFTs,
+    shieldERC20Recipients,
+    shieldNFTRecipients,
     crossContractCalls,
     mockRelayerFeeRecipient,
     false, // sendWithPublicWallet
@@ -177,8 +187,8 @@ export const createQuickstartCrossContractCallsForTest = async (
     railgunWallet.id,
     unshieldERC20Amounts,
     unshieldNFTs,
-    shieldERC20Addresses,
-    shieldNFTs,
+    shieldERC20Recipients,
+    shieldNFTRecipients,
     crossContractCalls,
     mockRelayerFeeRecipient,
     false, // sendWithPublicWallet

@@ -1,11 +1,12 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { EmptyRecipe } from '../empty-recipe';
-import { RecipeInput } from '../../../models/export-models';
+import { DesignateShieldERC20RecipientEmptyRecipe } from '../designate-shield-erc20-recipient-empty-recipe';
+import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
   MOCK_RAILGUN_WALLET_ADDRESS,
+  MOCK_RAILGUN_WALLET_ADDRESS_2,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -16,7 +17,13 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
-describe('empty-recipe', () => {
+const erc20Info: RecipeERC20Info = {
+  tokenAddress,
+  decimals: 18n,
+  isBaseToken: false,
+};
+
+describe('shield-empty-recipe', () => {
   before(() => {
     setRailgunFees(
       networkName,
@@ -25,8 +32,13 @@ describe('empty-recipe', () => {
     );
   });
 
-  it('Should create empty-recipe with amount', async () => {
-    const recipe = new EmptyRecipe();
+  it('Should create shield-empty-recipe with amount', async () => {
+    const privateWalletAddress = MOCK_RAILGUN_WALLET_ADDRESS_2;
+
+    const recipe = new DesignateShieldERC20RecipientEmptyRecipe(
+      privateWalletAddress,
+      [erc20Info],
+    );
 
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
@@ -43,7 +55,7 @@ describe('empty-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
-    expect(output.stepOutputs.length).to.equal(3);
+    expect(output.stepOutputs.length).to.equal(4);
 
     expect(output.stepOutputs[0]).to.deep.equal({
       name: 'Unshield (Default)',
@@ -95,6 +107,25 @@ describe('empty-recipe', () => {
     });
 
     expect(output.stepOutputs[2]).to.deep.equal({
+      name: 'Designate Shield ERC20s Recipient',
+      description:
+        'Designates ERC20s to shield into a private RAILGUN balance.',
+      outputERC20Amounts: [
+        {
+          tokenAddress,
+          expectedBalance: 11970n,
+          minBalance: 11970n,
+          approvedSpender: undefined,
+          isBaseToken: false,
+          decimals: 18n,
+          recipient: privateWalletAddress,
+        },
+      ],
+      outputNFTs: [],
+      crossContractCalls: [],
+    });
+
+    expect(output.stepOutputs[3]).to.deep.equal({
       name: 'Shield (Default)',
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
@@ -113,7 +144,7 @@ describe('empty-recipe', () => {
           tokenAddress,
           isBaseToken: false,
           decimals: 18n,
-          recipient: undefined,
+          recipient: privateWalletAddress,
         },
       ],
       outputNFTs: [],

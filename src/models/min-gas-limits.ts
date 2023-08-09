@@ -6,6 +6,7 @@ export const MIN_GAS_LIMIT_COMBO_MEAL: bigint = 2_900_000n; // 2.741
 // Recipes
 export const MIN_GAS_LIMIT_ANY_RECIPE: bigint = 2_800_000n;
 export const MIN_GAS_LIMIT_EMPTY: bigint = 1_800_000n; // 1.783
+export const MIN_GAS_LIMIT_EMPTY_SHIELD: bigint = 2_600_000n;
 export const MIN_GAS_LIMIT_0X_SWAP: bigint = 2_400_000n; // 1.916
 export const MIN_GAS_LIMIT_0X_SWAP_TRANSFER: bigint = 2_500_000n;
 export const MIN_GAS_LIMIT_0X_SWAP_SHIELD: bigint = 3_500_000n;

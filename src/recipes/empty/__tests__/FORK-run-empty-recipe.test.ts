@@ -1,10 +1,10 @@
-import chai, { expect } from 'chai';
+import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -19,15 +19,10 @@ chai.use(chaiAsPromised);
 const networkName = NetworkName.Ethereum;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
-describe('FORK-empty-recipe', function run() {
+describe('FORK-run-empty-recipe', function run() {
   this.timeout(45000);
 
   before(async function run() {
-    if (shouldSkipForkTest(networkName)) {
-      this.skip();
-      return;
-    }
-
     setRailgunFees(
       networkName,
       MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -44,6 +39,7 @@ describe('FORK-empty-recipe', function run() {
     const recipe = new EmptyRecipe();
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {

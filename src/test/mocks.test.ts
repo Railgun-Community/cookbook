@@ -1,2 +1,10 @@
 export const MOCK_SHIELD_FEE_BASIS_POINTS = 25n;
 export const MOCK_UNSHIELD_FEE_BASIS_POINTS = 25n;
+
+// testRailgunWallet address
+export const MOCK_RAILGUN_WALLET_ADDRESS =
+  '0zk1qyk9nn28x0u3rwn5pknglda68wrn7gw6anjw8gg94mcj6eq5u48tlrv7j6fe3z53lama02nutwtcqc979wnce0qwly4y7w4rls5cq040g7z8eagshxrw5ajy990';
+
+// testRailgunWallet2 address
+export const MOCK_RAILGUN_WALLET_ADDRESS_2 =
+  '0zk1qygxma3y6ljx3205z7lxreftpx47zr25z0nmt3a32zzygcyz5mg5mrv7j6fe3z53l74h5eldal4evywm297acap2thxn7c9pp8vhvmwzvz32m36a70y06gejrsw';

@@ -13,6 +13,7 @@ import {
   testRPCProvider,
 } from '../../../test/shared.test';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -51,15 +52,10 @@ const VAULT_TOKEN: RecipeERC20Info = {
 };
 const vaultID = 'sushi-mainnet-usdc-weth';
 
-describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
+describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (shouldSkipForkTest(networkName)) {
-      this.skip();
-      return;
-    }
-
     setRailgunFees(
       networkName,
       MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -99,6 +95,7 @@ describe('FORK-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       );
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [usdcAmount, wethAmount],
       nfts: [],

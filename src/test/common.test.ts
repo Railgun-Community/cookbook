@@ -22,12 +22,17 @@ import { ERC20Contract } from '../contract';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const SCAN_BALANCE_WAIT = 11000;
+// TODO: Can we find a way to decrease this?
+const SCAN_BALANCE_WAIT = 10000;
+
+export const getForkTestNetworkName = (): NetworkName => {
+  return (process.env.NETWORK_NAME as NetworkName) ?? NetworkName.Ethereum;
+};
 
 export const shouldSkipForkTest = (networkName: NetworkName) => {
   return (
     !isDefined(process.env.RUN_FORK_TESTS) ||
-    process.env.NETWORK_NAME !== networkName
+    getForkTestNetworkName() !== networkName
   );
 };
 
@@ -60,6 +65,11 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   expectPossiblePrecisionLossOverflow?: boolean,
 ) => {
   const railgunWallet = getTestRailgunWallet();
+  if (recipeInput.railgunAddress !== railgunWallet.getAddress()) {
+    throw new Error(
+      'Recipe Input must use railgunAddress from testRailgunWallet (ie. MOCK_RAILGUN_WALLET_ADDRESS).',
+    );
+  }
 
   const { networkName } = recipeInput;
   const { minGasLimit } = recipeOutput;
@@ -111,10 +121,11 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
 
   const wallet = getTestEthersWallet();
 
-  let txResponse;
+  let txReceipt;
 
   try {
-    txResponse = await wallet.sendTransaction(transaction);
+    const txResponse = await wallet.sendTransaction(transaction);
+    txReceipt = await txResponse.wait();
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
@@ -131,7 +142,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
 
     // eslint-disable-next-line no-console
     console.log(
-      'Run this command to debug the transaction, followed by `node debug_return_value <returnValue>`:\n',
+      'Run this command to debug the transaction, followed by `node debug-return-value <returnValue>`:\n',
     );
     // eslint-disable-next-line no-console
     console.log(
@@ -154,7 +165,6 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   //   ),
   // );
 
-  const txReceipt = await txResponse.wait();
   if (txReceipt == null) {
     throw new Error('No transaction receipt');
   }
@@ -186,16 +196,26 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   const shieldTokenMap: Record<string, bigint> = {};
   const shieldStepOutput =
     recipeOutput.stepOutputs[recipeOutput.stepOutputs.length - 1];
-  shieldStepOutput.outputERC20Amounts.forEach(shieldERC20Output => {
-    shieldTokenMap[shieldERC20Output.tokenAddress] =
-      shieldERC20Output.expectedBalance;
-  });
+  shieldStepOutput.outputERC20Amounts
+    .filter(shieldERC20Output => {
+      return (
+        !isDefined(shieldERC20Output.recipient) ||
+        shieldERC20Output.recipient === recipeInput.railgunAddress
+      );
+    })
+    .forEach(shieldERC20Output => {
+      shieldTokenMap[shieldERC20Output.tokenAddress] =
+        shieldERC20Output.expectedBalance;
+    });
 
   await Promise.all(
     recipeInput.erc20Amounts.map(async ({ tokenAddress }) => {
       const token = new ERC20Contract(tokenAddress, provider);
       const relayAdaptTokenBalance = await token.balanceOf(relayAdaptContract);
-      expect(relayAdaptTokenBalance).to.equal(0n);
+      expect(relayAdaptTokenBalance).to.equal(
+        0n,
+        `RelayAdapt token balance for ${tokenAddress} should be 0 after recipe execution.`,
+      );
 
       const postBalance = await balanceForERC20Token(
         railgunWallet,

@@ -6,6 +6,7 @@ import { RecipeInput } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
 import { getTestRailgunWallet } from '../../../../test/shared.test';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
@@ -34,15 +35,10 @@ const vaultERC20Address = testConfig.contractsEthereum.mooConvexStETH;
 
 const oneWithDecimals = 10n ** 18n;
 
-describe('FORK-beefy-vault-recipes', function run() {
+describe('FORK-run-beefy-vault-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (shouldSkipForkTest(networkName)) {
-      this.skip();
-      return;
-    }
-
     setRailgunFees(
       networkName,
       MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -65,6 +61,7 @@ describe('FORK-beefy-vault-recipes', function run() {
     expect(depositRecipe.id.length).to.equal(16);
 
     const depositRecipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -148,6 +145,7 @@ describe('FORK-beefy-vault-recipes', function run() {
     expect(withdrawRecipe.id.length).to.equal(16);
 
     const withdrawRecipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {

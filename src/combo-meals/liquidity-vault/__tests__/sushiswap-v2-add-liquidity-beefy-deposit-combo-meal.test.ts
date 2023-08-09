@@ -10,6 +10,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import Sinon, { SinonStub } from 'sinon';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -132,6 +133,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       );
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [usdcAmount, wethAmount],
       nfts: [],
@@ -382,6 +384,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
           tokenAddress: vault.vaultERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -389,7 +392,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [
         USDC_TOKEN.tokenAddress,
@@ -399,7 +402,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       ].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,

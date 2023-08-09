@@ -6,6 +6,7 @@ import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import { getGanacheProvider } from '../../../test/shared.test';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -24,14 +25,10 @@ const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
-describe('FORK-unwrap-transfer-base-token-recipe', function run() {
+describe('FORK-run-unwrap-transfer-base-token-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (shouldSkipForkTest(networkName)) {
-      this.skip();
-      return;
-    }
     setRailgunFees(
       networkName,
       MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -47,6 +44,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
 
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -97,6 +95,7 @@ describe('FORK-unwrap-transfer-base-token-recipe', function run() {
 
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {

@@ -1,11 +1,11 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UnwrapTransferBaseTokenRecipe } from '../unwrap-transfer-base-token-recipe';
-
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -31,6 +31,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -162,6 +163,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
           tokenAddress,
           isBaseToken: false,
           decimals: 18n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -169,12 +171,12 @@ describe('unwrap-transfer-base-token-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [tokenAddress].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -203,6 +205,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
     const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -305,12 +308,12 @@ describe('unwrap-transfer-base-token-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [tokenAddress].map(tokenAddress => tokenAddress.toLowerCase()),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -334,6 +337,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -350,6 +354,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
 
     // Too low balance for erc20 input
     const recipeInputTooLow: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {

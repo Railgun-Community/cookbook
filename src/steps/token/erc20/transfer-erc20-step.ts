@@ -7,7 +7,6 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
-import { ERC20Contract } from '../../../contract/token/erc20-contract';
 import { ContractTransaction } from 'ethers';
 import { RelayAdaptContract } from '../../../contract';
 

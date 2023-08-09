@@ -15,6 +15,7 @@ import {
   testRailgunWallet2,
 } from '../../../test/shared.test';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../test/mocks.test';
@@ -50,15 +51,10 @@ const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 
 const slippagePercentage = 0.01;
 
-describe('FORK-zero-x-swap-recipe-private-destination', function run() {
+describe('FORK-run-zero-x-swap-recipe', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (shouldSkipForkTest(networkName)) {
-      this.skip();
-      return;
-    }
-
     setRailgunFees(
       networkName,
       MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -77,6 +73,7 @@ describe('FORK-zero-x-swap-recipe-private-destination', function run() {
     const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -153,6 +150,7 @@ describe('FORK-zero-x-swap-recipe-private-destination', function run() {
     );
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -218,7 +216,7 @@ describe('FORK-zero-x-swap-recipe-private-destination', function run() {
     );
   });
 
-  it.only('[FORK] Should run zero-x-swap-recipe with private destination address', async function run() {
+  it('[FORK] Should run zero-x-swap-recipe with private destination address', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -234,6 +232,7 @@ describe('FORK-zero-x-swap-recipe-private-destination', function run() {
     );
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [
         {
@@ -308,7 +307,7 @@ describe('FORK-zero-x-swap-recipe-private-destination', function run() {
       minimumShieldFee; // Shield fee
     expect(privateRAILBalance2 >= expectedPrivateRAILBalance2).to.equal(
       true,
-      'Private RAIL balance (wallet 2) incorrect after swap',
+      `Private RAIL balance (wallet 2) incorrect after swap, expected ${privateRAILBalance2} >= ${expectedPrivateRAILBalance2}`,
     );
   });
 });

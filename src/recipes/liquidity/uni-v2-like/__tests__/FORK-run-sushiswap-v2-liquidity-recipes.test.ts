@@ -2,7 +2,6 @@ import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { SushiswapV2AddLiquidityRecipe } from '../sushiswap-v2-add-liquidity-recipe';
 import { SushiswapV2RemoveLiquidityRecipe } from '../sushiswap-v2-remove-liquidity-recipe';
-
 import {
   RecipeAddLiquidityData,
   RecipeERC20Amount,
@@ -16,6 +15,7 @@ import {
   testRPCProvider,
 } from '../../../../test/shared.test';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
@@ -49,15 +49,10 @@ const LP_TOKEN: RecipeERC20Info = {
   decimals: 18n,
 };
 
-describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
+describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
   this.timeout(120000);
 
   before(async function run() {
-    if (shouldSkipForkTest(networkName)) {
-      this.skip();
-      return;
-    }
-
     setRailgunFees(
       networkName,
       MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -65,7 +60,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     );
   });
 
-  it.only('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
+  it('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -108,6 +103,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     );
 
     const addLiquidityRecipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [usdcAmount, wethAmount],
       nfts: [],
@@ -245,6 +241,7 @@ describe('FORK-sushiswap-v2-liquidity-recipes', function run() {
     );
 
     const removeLiquidityRecipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
       erc20Amounts: [preUnshieldLPERC20Amount],
       nfts: [],

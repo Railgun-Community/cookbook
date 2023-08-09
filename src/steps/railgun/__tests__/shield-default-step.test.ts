@@ -58,6 +58,7 @@ describe('shield-default-step', () => {
         approvedSpender: undefined,
         isBaseToken: false,
         decimals: 18n,
+        recipient: undefined,
       },
     ]);
 
@@ -95,7 +96,7 @@ describe('shield-default-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Shield step is invalid. Cannot shield base token.',
+      'Shield (Default) step is invalid. Cannot shield base token.',
     );
   });
 });

@@ -17,6 +17,7 @@ export type RecipeERC20Info = {
 
 export type RecipeERC20Amount = RecipeERC20Info & {
   amount: bigint;
+  recipient?: string;
 };
 
 export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
@@ -25,10 +26,16 @@ export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
 
 export type RecipeNFTInfo = RailgunNFTAmount & {
   owns?: string;
+  recipient?: string;
+};
+
+export type RecipeNFTRecipient = RailgunNFTAmount & {
+  recipient: string;
 };
 
 export type RecipeInput = {
   networkName: NetworkName;
+  railgunAddress: string;
   erc20Amounts: RecipeERC20Amount[];
   nfts: RecipeNFTInfo[];
 };
@@ -43,8 +50,8 @@ export type RecipeOutput = {
   name: string;
   stepOutputs: StepOutput[];
   crossContractCalls: ContractTransaction[];
-  erc20Amounts: RecipeERC20Amount[];
-  nfts: RecipeNFTInfo[];
+  erc20AmountRecipients: RecipeERC20AmountRecipient[];
+  nftRecipients: RecipeNFTRecipient[];
   feeERC20AmountRecipients: RecipeERC20AmountRecipient[];
   minGasLimit: bigint;
 };
@@ -53,6 +60,7 @@ export type StepOutputERC20Amount = RecipeERC20Info & {
   expectedBalance: bigint;
   minBalance: bigint;
   approvedSpender: Optional<string>;
+  recipient?: string;
 };
 
 export type UnvalidatedStepOutput = {

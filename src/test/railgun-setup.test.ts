@@ -110,7 +110,8 @@ export const loadLocalhostFallbackProviderForTests = async (
   };
 
   dbgRailgunSetup(`Loading provider for chain ${chainId} to RAILGUN Engine.`);
-  await loadProvider(localhostProviderConfig, networkName);
+  const pollingInterval = 300;
+  await loadProvider(localhostProviderConfig, networkName, pollingInterval);
 };
 
 export const createRailgunWalletForTests = async () => {
@@ -170,18 +171,19 @@ export const shieldAllTokensForTests = async (
   const railgunAddress = testRailgunWallet.getAddress();
 
   const oneThousand18Decimals = 10n ** 18n * 1000n;
-  const erc20AmountRecipients: RailgunERC20AmountRecipient[] =
-    tokenAddresses.map(tokenAddress => ({
+  const erc20Amounts: RailgunERC20AmountRecipient[] = tokenAddresses.map(
+    tokenAddress => ({
       tokenAddress,
       amount: oneThousand18Decimals,
       recipientAddress: railgunAddress,
-    }));
+    }),
+  );
 
   const shieldPrivateKey = getRandomShieldPrivateKey();
   const { transaction } = await populateShield(
     networkName,
     shieldPrivateKey,
-    erc20AmountRecipients,
+    erc20Amounts,
     [], // nftAmountRecipients
   );
 

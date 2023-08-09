@@ -10,6 +10,7 @@ import {
 } from './railgun-setup.test';
 import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
+import { getForkTestNetworkName } from './common.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
@@ -55,12 +56,7 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
 };
 
 export const setupForkTests = async () => {
-  const networkName = process.env.NETWORK_NAME as NetworkName;
-  if (!isDefined(networkName)) {
-    throw new Error(
-      `Run fork tests with NETWORK_NAME env variable. See README.`,
-    );
-  }
+  const networkName = getForkTestNetworkName();
 
   if (!Object.keys(NetworkName).includes(networkName)) {
     throw new Error(
@@ -83,15 +79,18 @@ export const setupForkTests = async () => {
 
   // Quickstart setup
   startRailgunForTests();
+
   await loadLocalhostFallbackProviderForTests(networkName);
 
-  // Wallet setup and initial shield
+  // Set up primary wallet
   await createRailgunWalletForTests();
+
+  // Set up secondary wallets
+  await createRailgunWallet2ForTests();
+
+  // Shield tokens for tests
   await shieldAllTokensForTests(networkName, tokenAddresses);
 
   // Make sure shielded balances are updated
   await waitForShieldedTokenBalances(networkName, tokenAddresses);
-
-  // Set up secondary wallets
-  await createRailgunWallet2ForTests();
 };

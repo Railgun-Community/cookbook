@@ -6,6 +6,7 @@ import { NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../../init';
 import Sinon, { SinonStub } from 'sinon';
 import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
@@ -77,6 +78,7 @@ describe('beefy-deposit-recipe', () => {
     const recipe = new BeefyDepositRecipe(ethVault.vaultID);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
@@ -194,6 +196,7 @@ describe('beefy-deposit-recipe', () => {
           tokenAddress: ethVault.vaultERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -201,14 +204,14 @@ describe('beefy-deposit-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [ethVault.depositERC20Address, ethVault.vaultERC20Address].map(
         tokenAddress => tokenAddress.toLowerCase(),
       ),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -247,6 +250,7 @@ describe('beefy-deposit-recipe', () => {
     const recipe = new BeefyDepositRecipe(polygonVault.vaultID);
 
     const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
@@ -364,6 +368,7 @@ describe('beefy-deposit-recipe', () => {
           tokenAddress: polygonVault.vaultERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
+          recipient: undefined,
         },
       ],
       outputNFTs: [],
@@ -371,14 +376,14 @@ describe('beefy-deposit-recipe', () => {
     });
 
     expect(
-      output.erc20Amounts.map(({ tokenAddress }) => tokenAddress),
+      output.erc20AmountRecipients.map(({ tokenAddress }) => tokenAddress),
     ).to.deep.equal(
       [polygonVault.depositERC20Address, polygonVault.vaultERC20Address].map(
         tokenAddress => tokenAddress.toLowerCase(),
       ),
     );
 
-    expect(output.nfts).to.deep.equal([]);
+    expect(output.nftRecipients).to.deep.equal([]);
 
     const crossContractCallsFlattened = output.stepOutputs.flatMap(
       stepOutput => stepOutput.crossContractCalls,
@@ -418,6 +423,7 @@ describe('beefy-deposit-recipe', () => {
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName: networkName,
       erc20Amounts: [
         {
