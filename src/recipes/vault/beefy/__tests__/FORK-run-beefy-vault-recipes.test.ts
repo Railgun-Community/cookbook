@@ -4,7 +4,10 @@ import { BeefyDepositRecipe } from '../beefy-deposit-recipe';
 import { BeefyWithdrawRecipe } from '../beefy-withdraw-recipe';
 import { RecipeInput } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
-import { getTestRailgunWallet } from '../../../../test/shared.test';
+import {
+  getTestProvider,
+  getTestRailgunWallet,
+} from '../../../../test/shared.test';
 import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -23,6 +26,7 @@ import {
   calculateOutputsForBeefyDeposit,
   calculateOutputsForBeefyWithdraw,
 } from '../../../../steps/vault/beefy/beefy-util';
+import { ERC20Contract } from '../../../../contract';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -80,6 +84,12 @@ describe('FORK-run-beefy-vault-recipes', function run() {
       vaultERC20Address,
     );
 
+    const provider = getTestProvider();
+    const vaultERC20 = new ERC20Contract(vaultERC20Address, provider);
+    const preTreasuryVaultBalance = await vaultERC20.balanceOf(
+      testConfig.contractsEthereum.treasuryProxy,
+    );
+
     const recipeOutput = await depositRecipe.getRecipeOutput(
       depositRecipeInput,
     );
@@ -106,22 +116,34 @@ describe('FORK-run-beefy-vault-recipes', function run() {
 
     const { receivedVaultTokenAmount } = calculateOutputsForBeefyDeposit(
       depositAmountAfterUnshieldFee,
-      vault.depositFeeBasisPoints,
-      vault.depositERC20Decimals,
-      vault.vaultRate,
+      vault,
     );
 
     const shieldFee =
       (receivedVaultTokenAmount * MOCK_SHIELD_FEE_BASIS_POINTS) / 10000n;
+
+    const postTreasuryVaultBalance = await vaultERC20.balanceOf(
+      testConfig.contractsEthereum.treasuryProxy,
+    );
+    expect(postTreasuryVaultBalance).to.equal(
+      preTreasuryVaultBalance + shieldFee,
+      'Treasury balance incorrect after shield',
+    );
 
     const expectedPrivateVaultTokenBalance =
       initialPrivateVaultTokenBalance +
       receivedVaultTokenAmount - // Vault tokens acquired by deposit
       shieldFee; // Shield fee
 
-    expect(expectedPrivateVaultTokenBalance).to.equal(
-      privateVaultTokenBalance,
-      'Private vault token balance incorrect after deposit',
+    // vaultRate is a rounded value from Beefy API, so we need to check this adjusted value (see comments in beefy-util.test.ts).
+    const expectedStartRange = expectedPrivateVaultTokenBalance - 1n;
+    const expectedEndRange = expectedPrivateVaultTokenBalance + 1n;
+    expect(
+      privateVaultTokenBalance >= expectedStartRange ||
+        privateVaultTokenBalance <= expectedEndRange,
+    ).to.equal(
+      true,
+      `Private vault token balance incorrect after deposit, got ${privateVaultTokenBalance}, expected ${expectedStartRange} - ${expectedEndRange}`,
     );
 
     // 2. Add External Balance expectations.
@@ -164,6 +186,12 @@ describe('FORK-run-beefy-vault-recipes', function run() {
       tokenAddress,
     );
 
+    const provider = getTestProvider();
+    const depositERC20 = new ERC20Contract(tokenAddress, provider);
+    const preTreasuryVaultBalance = await depositERC20.balanceOf(
+      testConfig.contractsEthereum.treasuryProxy,
+    );
+
     const recipeOutput = await withdrawRecipe.getRecipeOutput(
       withdrawRecipeInput,
     );
@@ -191,22 +219,34 @@ describe('FORK-run-beefy-vault-recipes', function run() {
 
     const { withdrawAmountAfterFee } = calculateOutputsForBeefyWithdraw(
       withdrawAmountAfterUnshieldFee,
-      vault.withdrawFeeBasisPoints,
-      vault.depositERC20Decimals,
-      vault.vaultRate,
+      vault,
     );
 
     const shieldFeeWithdraw =
       (withdrawAmountAfterFee * MOCK_SHIELD_FEE_BASIS_POINTS) / 10000n;
+
+    const postTreasuryVaultBalance = await depositERC20.balanceOf(
+      testConfig.contractsEthereum.treasuryProxy,
+    );
+    expect(postTreasuryVaultBalance).to.equal(
+      preTreasuryVaultBalance + shieldFeeWithdraw,
+      'Treasury balance incorrect after shield',
+    );
 
     const expectedPrivateTokenBalance =
       initialTokenBalance +
       withdrawAmountAfterFee - // Vault tokens acquired by withdraw
       shieldFeeWithdraw; // Shield fee
 
-    expect(expectedPrivateTokenBalance).to.equal(
-      privateTokenBalance,
-      'Private vault token balance incorrect after withdraw',
+    // vaultRate is a rounded value from Beefy API, so we need to check this adjusted value (see comments in beefy-util.test.ts).
+    const expectedStartRange = expectedPrivateTokenBalance - 1n;
+    const expectedEndRange = expectedPrivateTokenBalance + 1n;
+    expect(
+      privateTokenBalance >= expectedStartRange ||
+        privateTokenBalance <= expectedEndRange,
+    ).to.equal(
+      true,
+      `Private vault token balance incorrect after withdraw, got ${privateTokenBalance}, expected ${expectedStartRange} - ${expectedEndRange}`,
     );
 
     // 2. Add External Balance expectations.

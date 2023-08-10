@@ -4,7 +4,7 @@ import { UnwrapTransferBaseTokenRecipe } from '../unwrap-transfer-base-token-rec
 import { RecipeInput } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
-import { getGanacheProvider } from '../../../test/shared.test';
+import { getTestProvider } from '../../../test/shared.test';
 import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
@@ -56,7 +56,7 @@ describe('FORK-run-unwrap-transfer-base-token-recipe', function run() {
       nfts: [],
     };
 
-    const provider = getGanacheProvider();
+    const provider = getTestProvider();
     const initialToAddressETHBalance = await provider.getBalance(toAddress);
 
     const railgun = NETWORK_CONFIG[networkName].proxyContract;
@@ -107,7 +107,7 @@ describe('FORK-run-unwrap-transfer-base-token-recipe', function run() {
       nfts: [],
     };
 
-    const provider = getGanacheProvider();
+    const provider = getTestProvider();
     const initialToAddressETHBalance = await provider.getBalance(toAddress);
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);

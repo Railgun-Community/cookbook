@@ -1,11 +1,11 @@
-import { BEEFY_VAULT_ERC20_DECIMALS } from '../../../api';
+import { BEEFY_VAULT_ERC20_DECIMALS, BeefyVaultData } from '../../../api';
 
 export const calculateOutputsForBeefyDeposit = (
   stepInitialBalance: bigint,
-  depositFeeBasisPoints: bigint,
-  depositERC20Decimals: bigint,
-  vaultRate: bigint,
+  vault: BeefyVaultData,
 ) => {
+  const { depositERC20Decimals, vaultRate, depositFeeBasisPoints } = vault;
+
   const depositFeeAmount =
     (stepInitialBalance * depositFeeBasisPoints) / 10000n;
   const depositAmountAfterFee = stepInitialBalance - depositFeeAmount;
@@ -29,10 +29,10 @@ export const calculateOutputsForBeefyDeposit = (
 
 export const calculateOutputsForBeefyWithdraw = (
   stepInitialBalance: bigint,
-  withdrawFeeBasisPoints: bigint,
-  depositERC20Decimals: bigint,
-  vaultRate: bigint,
+  vault: BeefyVaultData,
 ) => {
+  const { depositERC20Decimals, vaultRate, withdrawFeeBasisPoints } = vault;
+
   const depositERC20DecimalsAdjustment = 10n ** BigInt(depositERC20Decimals);
   const vaultERC20DecimalsAdjustment =
     10n ** BigInt(BEEFY_VAULT_ERC20_DECIMALS);
@@ -48,5 +48,9 @@ export const calculateOutputsForBeefyWithdraw = (
     (receivedWithdrawAmount * withdrawFeeBasisPoints) / 10000n;
   const withdrawAmountAfterFee = receivedWithdrawAmount - withdrawFeeAmount;
 
-  return { receivedWithdrawAmount, withdrawFeeAmount, withdrawAmountAfterFee };
+  return {
+    receivedWithdrawAmount,
+    withdrawFeeAmount,
+    withdrawAmountAfterFee,
+  };
 };

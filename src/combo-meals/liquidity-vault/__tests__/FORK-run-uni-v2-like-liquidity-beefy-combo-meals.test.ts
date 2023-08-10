@@ -132,9 +132,7 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
 
     const { receivedVaultTokenAmount } = calculateOutputsForBeefyDeposit(
       expectedLPTokenReceived,
-      vault.depositFeeBasisPoints,
-      vault.depositERC20Decimals,
-      vault.vaultRate,
+      vault,
     );
 
     const shieldFee =

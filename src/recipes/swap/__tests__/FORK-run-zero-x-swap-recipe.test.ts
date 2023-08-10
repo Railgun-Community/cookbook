@@ -9,7 +9,7 @@ import {
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
-  getGanacheProvider,
+  getTestProvider,
   getTestRailgunWallet,
   getTestRailgunWallet2,
   testRailgunWallet2,
@@ -206,7 +206,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
     // 2. Add External Balance expectations.
     // Expect new swapped token in destination public balance.
 
-    const provider = getGanacheProvider();
+    const provider = getTestProvider();
     const token = new ERC20Contract(buyToken.tokenAddress, provider);
     const publicDestinationRAILBalance = await token.balanceOf(VITALIK_WALLET);
     const minimumBuyAmount = quote.minimumBuyAmount;

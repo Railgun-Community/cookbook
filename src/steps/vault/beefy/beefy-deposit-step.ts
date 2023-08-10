@@ -34,8 +34,6 @@ export class BeefyDepositStep extends Step {
       depositERC20Decimals,
       vaultContractAddress,
       vaultERC20Address,
-      vaultRate,
-      depositFeeBasisPoints,
     } = this.vault;
     const { erc20Amounts } = input;
 
@@ -61,9 +59,7 @@ export class BeefyDepositStep extends Step {
       receivedVaultTokenAmount,
     } = calculateOutputsForBeefyDeposit(
       erc20AmountForStep.expectedBalance,
-      depositFeeBasisPoints,
-      depositERC20Decimals,
-      vaultRate,
+      this.vault,
     );
 
     const spentERC20AmountRecipient: RecipeERC20AmountRecipient = {

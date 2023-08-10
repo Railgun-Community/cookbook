@@ -34,7 +34,7 @@ export const setSharedTestRailgunWallet2 = (wallet: AbstractWallet) => {
   testRailgunWallet2 = wallet;
 };
 
-export const getGanacheProvider = (): JsonRpcProvider => {
+export const getTestProvider = (): JsonRpcProvider => {
   const provider = testRPCProvider;
   if (!provider) {
     throw new Error('No test ethers provider');
@@ -43,7 +43,7 @@ export const getGanacheProvider = (): JsonRpcProvider => {
 };
 
 export const getTestEthersWallet = (): Wallet => {
-  const provider = getGanacheProvider();
+  const provider = getTestProvider();
   const pkey = mnemonicToPKey(testConfig.signerMnemonic);
   return new Wallet(pkey).connect(provider);
 };
@@ -66,11 +66,11 @@ export const getTestRailgunWallet2 = () => {
 
 export const takeGanacheSnapshot = async (): Promise<number> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  return (await getGanacheProvider().send('evm_snapshot', [])) as number;
+  return (await getTestProvider().send('evm_snapshot', [])) as number;
 };
 
 export const restoreGanacheSnapshot = async (snapshot: number) => {
-  await getGanacheProvider().send('evm_revert', [snapshot]);
+  await getTestProvider().send('evm_revert', [snapshot]);
 };
 
 const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1: TransactionGasDetails = {
