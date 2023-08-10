@@ -22,8 +22,7 @@ import { ERC20Contract } from '../contract';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-// TODO: Can we find a way to decrease this?
-const SCAN_BALANCE_WAIT = 10000;
+const SCAN_BALANCE_WAIT = 5000;
 
 export const getForkTestNetworkName = (): NetworkName => {
   return (process.env.NETWORK_NAME as NetworkName) ?? NetworkName.Ethereum;

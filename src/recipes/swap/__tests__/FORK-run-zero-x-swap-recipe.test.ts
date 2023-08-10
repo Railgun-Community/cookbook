@@ -52,7 +52,7 @@ const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const slippagePercentage = 0.01;
 
 describe('FORK-run-zero-x-swap-recipe', function run() {
-  this.timeout(120000);
+  this.timeout(40000);
 
   before(async function run() {
     setRailgunFees(

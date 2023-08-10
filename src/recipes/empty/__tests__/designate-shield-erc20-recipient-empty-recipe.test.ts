@@ -23,7 +23,7 @@ const erc20Info: RecipeERC20Info = {
   isBaseToken: false,
 };
 
-describe('shield-empty-recipe', () => {
+describe('designate-shield-erc20-recipient-empty-recipe', () => {
   before(() => {
     setRailgunFees(
       networkName,
@@ -32,7 +32,7 @@ describe('shield-empty-recipe', () => {
     );
   });
 
-  it('Should create shield-empty-recipe with amount', async () => {
+  it('Should create designate-shield-erc20-recipient-empty-recipe with amount', async () => {
     const privateWalletAddress = MOCK_RAILGUN_WALLET_ADDRESS_2;
 
     const recipe = new DesignateShieldERC20RecipientEmptyRecipe(

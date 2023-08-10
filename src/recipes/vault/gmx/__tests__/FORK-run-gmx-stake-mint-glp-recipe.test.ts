@@ -34,7 +34,7 @@ const DAI_TOKEN: RecipeERC20Info = {
 };
 
 describe.skip('FORK-run-gmx-stake-mint-glp-recipe', function run() {
-  this.timeout(120000);
+  this.timeout(40000);
 
   before(async function run() {
     setRailgunFees(

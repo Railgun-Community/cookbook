@@ -21,6 +21,7 @@
     "test-fork": "env DEBUG=railgun*,rpc*,cookbook* NODE_ENV=test RUN_FORK_TESTS=1 npm test",
     "tsc-test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
     "compile-test": "npm run clean && npm run tsc-test",
+    "test-coverage-fork": "env RUN_FORK_TESTS=1 npm run test-coverage",
     "test-coverage": "npm run compile-test && c8 mocha",
     "test": "npm run compile-test && NODE_ENV=test mocha",
     "build-graphql": "graphclient build && rm -rf src/graph/graphql/.graphclient && mv .graphclient src/graph/graphql",
