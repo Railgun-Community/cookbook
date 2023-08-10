@@ -12,7 +12,10 @@ import {
 } from '../../models/export-models';
 import { SwapRecipe } from './swap-recipe';
 import { NetworkName, isDefined } from '@railgun-community/shared-models';
-import { findFirstInputERC20Amount, getIsRailgunAddress } from '../../utils';
+import {
+  findFirstInputERC20Amount,
+  getIsUnvalidatedRailgunAddress,
+} from '../../utils';
 import {
   MIN_GAS_LIMIT_0X_SWAP,
   MIN_GAS_LIMIT_0X_SWAP_SHIELD,
@@ -52,7 +55,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     this.destinationAddress = destinationAddress;
     if (isDefined(destinationAddress)) {
       this.isRailgunDestinationAddress =
-        getIsRailgunAddress(destinationAddress);
+        getIsUnvalidatedRailgunAddress(destinationAddress);
       if (this.isRailgunDestinationAddress) {
         this.config.name += ' and Shield';
         this.config.minGasLimit = MIN_GAS_LIMIT_0X_SWAP_SHIELD;

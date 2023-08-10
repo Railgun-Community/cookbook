@@ -1,15 +1,14 @@
 import { isAddress } from '@ethersproject/address';
-import { validateRailgunAddress } from '@railgun-community/wallet';
 
 export const validateContractAddress = (address: string) => {
   return isAddress(address);
 };
 
-export const getIsRailgunAddress = (address: string): boolean => {
-  if (validateRailgunAddress(address)) {
+export const getIsUnvalidatedRailgunAddress = (address: string): boolean => {
+  if (address.startsWith('0zk')) {
     return true;
   }
-  if (validateContractAddress(address)) {
+  if (address.startsWith('0x')) {
     return false;
   }
   throw new Error(`Invalid address: ${address}`);
