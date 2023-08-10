@@ -7,7 +7,7 @@ import {
   StepOutputERC20Amount,
   SwapQuoteData,
 } from '../../models/export-models';
-import { compareERC20Info } from '../../utils';
+import { compareERC20Info, getIsUnvalidatedRailgunAddress } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 
@@ -64,8 +64,11 @@ export abstract class SwapRecipe extends Recipe {
       let buyOutput: Optional<StepOutputERC20Amount>;
       let buyShieldFee: Optional<RecipeERC20AmountRecipient>;
 
-      if (isDefined(this.destinationAddress)) {
-        // If there's a destination address:
+      if (
+        isDefined(this.destinationAddress) &&
+        !getIsUnvalidatedRailgunAddress(this.destinationAddress)
+      ) {
+        // If there's a public destination address:
         // Buy output is from swap value, which is transferred out before it's shielded.
         buyOutput = swapStepOutput.outputERC20Amounts.find(outputAmount => {
           return compareERC20Info(outputAmount, this.buyERC20Info);
@@ -74,7 +77,7 @@ export abstract class SwapRecipe extends Recipe {
           throw new Error('Expected swap output to match buy token.');
         }
       } else {
-        // If there's no destination address:
+        // If there's no destination address, or a private destination:
         // Buy output is from final shield value.
         const lastOutputIndex = recipeOutput.stepOutputs.length - 1;
         const shieldStepOutput = recipeOutput.stepOutputs[lastOutputIndex];
