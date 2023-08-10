@@ -99,6 +99,14 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
+    expect(recipe.getExpectedLPAmountFromRecipeOutput(output)).to.deep.equal({
+      aUnshieldFee: 5000000n,
+      bUnshieldFee: 2500000000000000n,
+      lpAmount: 1990012500000000000n,
+      lpMinimum: 1970112375000000000n,
+      lpShieldFee: 4987500000000000n,
+    });
+
     expect(output.stepOutputs.length).to.equal(5);
 
     expect(output.stepOutputs[0]).to.deep.equal({

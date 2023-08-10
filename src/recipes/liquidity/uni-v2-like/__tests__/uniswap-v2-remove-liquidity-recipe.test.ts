@@ -95,6 +95,16 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
     };
     const output = await recipe.getRecipeOutput(recipeInput);
 
+    expect(recipe.getExpectedABAmountsFromRecipeOutput(output)).to.deep.equal({
+      aAmount: 1990012500n,
+      aMinimum: 1970112375n,
+      aShieldFee: 4987500n,
+      bAmount: 995006250000000000n,
+      bMinimum: 985056187500000000n,
+      bShieldFee: 2493750000000000n,
+      lpUnshieldFee: 5000000000000000n,
+    });
+
     expect(output.stepOutputs.length).to.equal(4);
 
     expect(output.stepOutputs[0]).to.deep.equal({
