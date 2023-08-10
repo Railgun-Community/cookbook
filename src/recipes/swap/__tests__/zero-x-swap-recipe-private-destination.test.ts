@@ -112,9 +112,9 @@ describe('zero-x-swap-recipe-private-destination', () => {
 
     expect(recipe.getBuySellAmountsFromRecipeOutput(output)).to.deep.equal({
       sellUnshieldFee: 30n,
-      buyAmount: 500n,
-      buyMinimum: 495n,
-      buyShieldFee: 0n,
+      buyAmount: 499n,
+      buyMinimum: 494n,
+      buyShieldFee: 1n,
     });
 
     expect(output.stepOutputs[0]).to.deep.equal({
