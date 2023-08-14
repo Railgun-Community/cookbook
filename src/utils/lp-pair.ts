@@ -2,6 +2,10 @@ import { UniswapV2Fork } from '../models';
 
 const DECIMALS_18 = 10n ** 18n;
 
+export const getPairTokenDecimals = () => {
+  return 18n;
+};
+
 export const calculatePairRateWith18Decimals = (
   reserveA: bigint,
   tokenDecimalsA: bigint,

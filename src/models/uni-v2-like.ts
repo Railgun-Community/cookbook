@@ -11,5 +11,6 @@ export type PairDataWithRate = {
   pairAddress: string;
   pairTokenName: string;
   pairTokenSymbol: string;
+  pairTokenDecimals: bigint;
   rateWith18Decimals: bigint;
 };

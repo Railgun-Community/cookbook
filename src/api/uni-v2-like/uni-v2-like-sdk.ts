@@ -10,7 +10,10 @@ import {
 } from '../../models/export-models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
 import { PairDataWithRate } from '../../models/uni-v2-like';
-import { calculatePairRateWith18Decimals } from '../../utils/lp-pair';
+import {
+  calculatePairRateWith18Decimals,
+  getPairTokenDecimals,
+} from '../../utils/lp-pair';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { UniV2LikeFactoryContract } from '../../contract/liquidity/uni-v2-like-factory-contract';
@@ -19,8 +22,6 @@ import { babylonianSqrt } from '../../utils/big-number';
 import { Provider } from 'ethers';
 
 export class UniV2LikeSDK {
-  static LIQUIDITY_TOKEN_DECIMALS = 18n;
-
   private static getFactoryAddressAndInitCodeHash(
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
@@ -278,7 +279,7 @@ export class UniV2LikeSDK {
     const expectedLPBalance = (erc20AmountA.amount * newTotalSupply) / reserveA;
     const expectedLPAmount: RecipeERC20Amount = {
       tokenAddress: pairAddress,
-      decimals: this.LIQUIDITY_TOKEN_DECIMALS,
+      decimals: getPairTokenDecimals(),
       amount: expectedLPBalance,
     };
 

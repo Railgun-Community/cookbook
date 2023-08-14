@@ -142,6 +142,7 @@ describe('uni-v2-like-sdk', () => {
       pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
       pairTokenName: 'SushiSwap USDC/WETH LP',
       pairTokenSymbol: 'USDC/WETH LP',
+      pairTokenDecimals: 18n,
     });
   }).timeout(5000);
 });

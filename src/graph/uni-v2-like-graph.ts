@@ -6,6 +6,7 @@ import {
   calculatePairRateWith18Decimals,
   getLPPairTokenName,
   getLPPairTokenSymbol,
+  getPairTokenDecimals,
 } from '../utils/lp-pair';
 import { UniswapV2Fork } from '../models/export-models';
 import { CookbookDebug } from '../utils/cookbook-debug';
@@ -72,6 +73,7 @@ export class UniV2LikeSubgraph {
             tokenSymbolB,
           ),
           pairTokenSymbol: getLPPairTokenSymbol(tokenSymbolA, tokenSymbolB),
+          pairTokenDecimals: getPairTokenDecimals(),
           rateWith18Decimals,
         };
         return pairDataWithRate;
