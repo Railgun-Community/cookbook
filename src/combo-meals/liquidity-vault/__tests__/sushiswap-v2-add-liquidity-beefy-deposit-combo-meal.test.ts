@@ -113,7 +113,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
 
   it('Should create sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', async () => {
     const comboMeal = new UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal(
-      UniswapV2Fork.Sushiswap,
+      UniswapV2Fork.SushiSwap,
       USDC_TOKEN,
       WETH_TOKEN,
       slippagePercentage,
@@ -278,8 +278,8 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
     });
 
     expect(output.stepOutputs[3]).to.deep.equal({
-      name: 'Sushiswap V2 Add Liquidity',
-      description: 'Adds liquidity to a Sushiswap V2 Pool.',
+      name: 'SushiSwap V2 Add Liquidity',
+      description: 'Adds liquidity to a SushiSwap V2 Pool.',
       outputERC20Amounts: [
         {
           expectedBalance: BigInt('0x1bafa9ee16e78000'),
@@ -301,14 +301,14 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
         {
           amount: getUnshieldedAmountAfterFee(networkName, wethAmount.amount),
           tokenAddress: WETH_TOKEN.tokenAddress,
-          recipient: 'Sushiswap V2 Pool',
+          recipient: 'SushiSwap V2 Pool',
           decimals: 18n,
         },
         {
           amount: getUnshieldedAmountAfterFee(networkName, usdcAmount.amount),
           tokenAddress: USDC_TOKEN.tokenAddress,
           decimals: USDC_TOKEN.decimals,
-          recipient: 'Sushiswap V2 Pool',
+          recipient: 'SushiSwap V2 Pool',
         },
       ],
     });

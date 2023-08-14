@@ -100,10 +100,10 @@ describe('uni-v2-like-sdk', () => {
     });
   }).timeout(30000);
 
-  it('Should get Sushiswap LP pairs for USDC and WETH', async () => {
+  it('Should get SushiSwap LP pairs for USDC and WETH', async () => {
     const pairsOnlyUSDC =
       await UniV2LikeSDK.getAllLPPairsForTokenAddressesPerFork(
-        UniswapV2Fork.Sushiswap,
+        UniswapV2Fork.SushiSwap,
         networkName,
         [USDC_TOKEN.tokenAddress],
       );
@@ -111,7 +111,7 @@ describe('uni-v2-like-sdk', () => {
 
     const pairsUSDCAndWeth =
       await UniV2LikeSDK.getAllLPPairsForTokenAddressesPerFork(
-        UniswapV2Fork.Sushiswap,
+        UniswapV2Fork.SushiSwap,
         networkName,
         [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
       );
@@ -132,14 +132,16 @@ describe('uni-v2-like-sdk', () => {
     delete pairsUSDCAndWeth[0].rateWith18Decimals;
 
     expect(pairsUSDCAndWeth[0]).to.deep.equal({
-      uniswapV2Fork: 'Sushiswap',
-      pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
+      uniswapV2Fork: 'SushiSwap',
       tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       tokenDecimalsA: 6n,
       tokenDecimalsB: 18n,
       tokenSymbolA: 'USDC',
       tokenSymbolB: 'WETH',
+      pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
+      pairTokenName: 'SushiSwap USDC/WETH LP',
+      pairTokenSymbol: 'USDC/WETH LP',
     });
   }).timeout(5000);
 });

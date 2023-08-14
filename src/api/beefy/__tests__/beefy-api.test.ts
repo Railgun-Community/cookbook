@@ -34,7 +34,7 @@ describe('beefy-api', () => {
       NetworkName.Ethereum,
       false, // skipCache
       false, // includeInactiveVaults
-      testConfig.contractsEthereum.usdcWethSushiswapV2LPToken.toUpperCase(),
+      testConfig.contractsEthereum.usdcWethSushiSwapV2LPToken.toUpperCase(),
     );
     expect(vaultsForEthereumToken.length).to.equal(1);
     expect({

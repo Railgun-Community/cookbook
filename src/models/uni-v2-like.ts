@@ -9,5 +9,7 @@ export type PairDataWithRate = {
   tokenSymbolB: string;
   tokenDecimalsB: bigint;
   pairAddress: string;
+  pairTokenName: string;
+  pairTokenSymbol: string;
   rateWith18Decimals: bigint;
 };

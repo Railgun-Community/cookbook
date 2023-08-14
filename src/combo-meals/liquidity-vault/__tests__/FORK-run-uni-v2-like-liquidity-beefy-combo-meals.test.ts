@@ -75,7 +75,7 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     const vault = await BeefyAPI.getBeefyVaultForID(vaultID, networkName);
 
     const comboMeal = new UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal(
-      UniswapV2Fork.Sushiswap,
+      UniswapV2Fork.SushiSwap,
       USDC_TOKEN,
       WETH_TOKEN,
       slippagePercentage,

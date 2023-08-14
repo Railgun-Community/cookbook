@@ -139,5 +139,5 @@ export type RecipeRemoveLiquidityData = {
 
 export enum UniswapV2Fork {
   Uniswap = 'Uniswap',
-  Sushiswap = 'Sushiswap',
+  SushiSwap = 'SushiSwap',
 }

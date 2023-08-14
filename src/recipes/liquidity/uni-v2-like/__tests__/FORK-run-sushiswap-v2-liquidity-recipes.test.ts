@@ -1,7 +1,7 @@
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { SushiswapV2AddLiquidityRecipe } from '../sushiswap-v2-add-liquidity-recipe';
-import { SushiswapV2RemoveLiquidityRecipe } from '../sushiswap-v2-remove-liquidity-recipe';
+import { SushiSwapV2AddLiquidityRecipe } from '../sushiswap-v2-add-liquidity-recipe';
+import { SushiSwapV2RemoveLiquidityRecipe } from '../sushiswap-v2-remove-liquidity-recipe';
 import {
   RecipeAddLiquidityData,
   RecipeERC20Amount,
@@ -69,7 +69,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       throw new Error('Requires test rpc provider');
     }
 
-    const addLiquidityRecipe = new SushiswapV2AddLiquidityRecipe(
+    const addLiquidityRecipe = new SushiSwapV2AddLiquidityRecipe(
       USDC_TOKEN,
       WETH_TOKEN,
       slippagePercentage,
@@ -197,7 +197,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       throw new Error('Requires test rpc provider');
     }
 
-    const removeLiquidityRecipe = new SushiswapV2RemoveLiquidityRecipe(
+    const removeLiquidityRecipe = new SushiSwapV2RemoveLiquidityRecipe(
       LP_TOKEN,
       USDC_TOKEN,
       WETH_TOKEN,

@@ -2,7 +2,11 @@ import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { getMeshOptions, getSdk } from './graphql/.graphclient';
 import { MeshInstance, getMesh } from '@graphql-mesh/runtime';
 import { PairDataWithRate } from '../models/uni-v2-like';
-import { calculatePairRateWith18Decimals } from '../utils/pair-rate';
+import {
+  calculatePairRateWith18Decimals,
+  getLPPairTokenName,
+  getLPPairTokenSymbol,
+} from '../utils/lp-pair';
 import { UniswapV2Fork } from '../models/export-models';
 import { CookbookDebug } from '../utils/cookbook-debug';
 import { parseUnits } from 'ethers';
@@ -51,15 +55,23 @@ export class UniV2LikeSubgraph {
           reserveB,
           tokenDecimalsB,
         );
+        const tokenSymbolA = pair.token0.symbol;
+        const tokenSymbolB = pair.token1.symbol;
         const pairDataWithRate: PairDataWithRate = {
           uniswapV2Fork,
-          pairAddress: pair.id,
           tokenAddressA: pair.token0.id,
           tokenDecimalsA,
-          tokenSymbolA: pair.token0.symbol,
+          tokenSymbolA,
           tokenAddressB: pair.token1.id,
           tokenDecimalsB,
-          tokenSymbolB: pair.token1.symbol,
+          tokenSymbolB,
+          pairAddress: pair.id,
+          pairTokenName: getLPPairTokenName(
+            uniswapV2Fork,
+            tokenSymbolA,
+            tokenSymbolB,
+          ),
+          pairTokenSymbol: getLPPairTokenSymbol(tokenSymbolA, tokenSymbolB),
           rateWith18Decimals,
         };
         return pairDataWithRate;
@@ -97,7 +109,7 @@ export class UniV2LikeSubgraph {
         throw new Error(
           'Uniswap V2 LP Subgraph is not supported on this network',
         );
-      case UniswapV2Fork.Sushiswap: {
+      case UniswapV2Fork.SushiSwap: {
         switch (networkName) {
           case NetworkName.Ethereum:
             return 'sushiswap-v2-ethereum';

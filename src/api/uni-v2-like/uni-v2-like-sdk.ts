@@ -9,9 +9,8 @@ import {
   UniswapV2Fork,
 } from '../../models/export-models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
-
 import { PairDataWithRate } from '../../models/uni-v2-like';
-import { calculatePairRateWith18Decimals } from '../../utils/pair-rate';
+import { calculatePairRateWith18Decimals } from '../../utils/lp-pair';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { UniV2LikeFactoryContract } from '../../contract/liquidity/uni-v2-like-factory-contract';
@@ -39,7 +38,7 @@ export class UniV2LikeSDK {
         }
         throw new Error('Uniswap V2 LP is not supported on this network');
 
-      case UniswapV2Fork.Sushiswap: {
+      case UniswapV2Fork.SushiSwap: {
         // If adding any networks, make sure to check both factory address and initCodeHash:
         // https://github.com/sushiswap/sushiswap-sdk/tree/canary/src/constants
 
@@ -59,7 +58,7 @@ export class UniV2LikeSDK {
           case NetworkName.EthereumRopsten_DEPRECATED:
           case NetworkName.Railgun:
           case NetworkName.Hardhat:
-            throw new Error('Sushiswap V2 LP is not supported on this network');
+            throw new Error('SushiSwap V2 LP is not supported on this network');
         }
         return {
           factoryAddress,
@@ -81,7 +80,7 @@ export class UniV2LikeSDK {
         }
         throw new Error('Uniswap V2 LP is not supported on this network');
 
-      case UniswapV2Fork.Sushiswap: {
+      case UniswapV2Fork.SushiSwap: {
         // Look for "SushiSwapRouter" for each chain:
         // https://dev.sushi.com/docs/Developers/Deployment%20Addresses
         switch (networkName) {
@@ -101,7 +100,7 @@ export class UniV2LikeSDK {
           case NetworkName.EthereumRopsten_DEPRECATED:
           case NetworkName.Railgun:
           case NetworkName.Hardhat:
-            throw new Error('Sushiswap V2 LP is not supported on this network');
+            throw new Error('SushiSwap V2 LP is not supported on this network');
         }
       }
     }
@@ -166,8 +165,8 @@ export class UniV2LikeSDK {
     switch (uniswapV2Fork) {
       case UniswapV2Fork.Uniswap:
         return 'Uniswap V2';
-      case UniswapV2Fork.Sushiswap:
-        return 'Sushiswap V2';
+      case UniswapV2Fork.SushiSwap:
+        return 'SushiSwap V2';
     }
   }
 

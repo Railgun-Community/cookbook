@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import { calculatePairRateWith18Decimals } from '../pair-rate';
+import { calculatePairRateWith18Decimals } from '../lp-pair';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

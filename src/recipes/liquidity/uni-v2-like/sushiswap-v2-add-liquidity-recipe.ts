@@ -2,7 +2,7 @@ import { Provider } from 'ethers';
 import { RecipeERC20Info, UniswapV2Fork } from '../../../models/export-models';
 import { UniV2LikeAddLiquidityRecipe } from './uni-v2-like-add-liquidity-recipe';
 
-export class SushiswapV2AddLiquidityRecipe extends UniV2LikeAddLiquidityRecipe {
+export class SushiSwapV2AddLiquidityRecipe extends UniV2LikeAddLiquidityRecipe {
   constructor(
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
@@ -10,7 +10,7 @@ export class SushiswapV2AddLiquidityRecipe extends UniV2LikeAddLiquidityRecipe {
     provider: Provider,
   ) {
     super(
-      UniswapV2Fork.Sushiswap,
+      UniswapV2Fork.SushiSwap,
       erc20InfoA,
       erc20InfoB,
       slippagePercentage,
