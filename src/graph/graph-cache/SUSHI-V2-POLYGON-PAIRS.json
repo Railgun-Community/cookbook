@@ -1,0 +1,5202 @@
+[
+  {
+    "id": "0xc4e595acdd7d12fec385e5da5d43160e8a0bac0e",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5786b267d35f9d011c4750e0b0ba584e1fdbead1",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x4e78011ce80ee02d2c3e649fb657e45898257815",
+      "symbol": "KLIMA",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x9803c7ae526049210a1725f7487af26fe2c24614",
+    "token0": {
+      "id": "0x2f800db0fdb5223b3c3f354886d907a671414a7f",
+      "symbol": "BCT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x4e78011ce80ee02d2c3e649fb657e45898257815",
+      "symbol": "KLIMA",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0xa34ec05da1e4287fa351c74469189345990a3f0c",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590",
+      "symbol": "STG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xdb995f975f1bfc3b2157495c47e4efb31196b2ca",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd838290e877e0188a4a44700463419ed96c16107",
+      "symbol": "NCT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x34965ba0ac2451a34a0471f04cca3f990b8dea27",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xde990994309bc08e57aca82b1a19170ad84323e8",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x67eb41a14c0fe5cd701fc9d5a3d6597a72f641a6",
+      "symbol": "GDDY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4b1f1e2435a9c96f7330faea190ef6a7c8d70001",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x5d9ac8993b714df01d079d1b5b0b592e579ca099",
+    "token0": {
+      "id": "0x12a34a6759c871c4c1e8a0a42cfc97e4d7aaf68d",
+      "symbol": "TUT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xe62ec2e799305e0d367b0cc3ee2cda135bf89816",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xdfe1c52f29defb9b956c9ddad3716d5bb2c09164",
+    "token0": {
+      "id": "0x11b37c9388420d79d48e8d531227f43c9bf1bbf1",
+      "symbol": "FIT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0x6ff62bfb8c12109e8000935a6de54dad83a4f39f",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcd353f79d9fade311fc3119b841e1f456b54e858",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x014ac2a53aa6fba4dcd93fde6d3c787b79a1a6e6",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe06bd4f5aac8d0aa337d13ec88db6defc6eaeefe",
+      "symbol": "IXT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcd578f016888b57f1b1e3f887f392f0159e26747",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2813d43463c374a680f235c428fb1d7f08de0b69",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+      "symbol": "AAVE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x505fbc1330e0b440637024529eae55f6e23651ef",
+    "token0": {
+      "id": "0xaed2aca44bc81cd7478dd027158d4f1eec9b073f",
+      "symbol": "AKSG",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xc2c88da3bc73d927293e4c516c446f87884b84c6",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd4945a3d0de9923035521687d4bf18cc9b0c7c2a",
+      "symbol": "LUXY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xabee7668a96c49d27886d1a8914a54a5f9805041",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x34d4ab47bee066f361fa52d792e69ac7bd05ee23",
+      "symbol": "AURUM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x91670a2a69554c61d814cd7f406d7793387e68ef",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x34d4ab47bee066f361fa52d792e69ac7bd05ee23",
+      "symbol": "AURUM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb2d0d5c86d933b0acefe9b95bec160d514d152e1",
+    "token0": {
+      "id": "0x4e78011ce80ee02d2c3e649fb657e45898257815",
+      "symbol": "KLIMA",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xd838290e877e0188a4a44700463419ed96c16107",
+      "symbol": "NCT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc1214b61965594b3e08ea4950747d5a077cd1886",
+    "token0": {
+      "id": "0x6e8a8726639d12935b3219892155520bdc57366b",
+      "symbol": "GNOME",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x74d23f21f780ca26b47db16b0504f2e3832b9321",
+    "token0": {
+      "id": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+      "symbol": "LINK",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2e7d6490526c7d7e2fdea5c6ec4b0d1b9f8b25b7",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcd7361ac3307d1c5a46b63086a90742ff44c63b3",
+      "symbol": "RAIDER",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf69e93771f11aecd8e554aa165c3fe7fd811530c",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
+      "symbol": "GHST",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x374552804f7ca26c307c8d31f4cc0d9215c87f46",
+    "token0": {
+      "id": "0x5ec03c1f7fa7ff05ec476d19e34a22eddb48acdc",
+      "symbol": "ZED",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc2755915a85c6f6c1c0f3a86ac8c058f11caa9c9",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x5b14b9205d79cb9e8b6a3bca759f51a65e0155e2",
+    "token0": {
+      "id": "0x1fa2f83ba2df61c3d370071d61b17be01e224f3a",
+      "symbol": "HNY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x426a56f6923c2b8a488407fc1b38007317ecafb1",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcd7361ac3307d1c5a46b63086a90742ff44c63b3",
+      "symbol": "RAIDER",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1549e0e8127d380080aab448b82d280433ce4030",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd8ca34fd379d9ca3c6ee3b3905678320f5b45195",
+      "symbol": "gOHM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3d4219987fbb25c3dcf73fbd9aa85fbe3c7411d9",
+    "token0": {
+      "id": "0x34667ed7c36cbbbf2d5d5c5c8d6eb76a094edb9f",
+      "symbol": "GENE",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbc58e7a5947ecbbbda60d76e4d027b05ebbd6e9b",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x4ca7bf91e4384d7c7a48ed4c04b555f350eb6719",
+      "symbol": "ZEEM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd8e7d368ab9bdf0010a9934b0e801b3f38cecef6",
+    "token0": {
+      "id": "0x071ac29d569a47ebffb9e57517f855cb577dcc4c",
+      "symbol": "GFC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcf63fc72c931bd88850602114f2bcbc98dc97b5b",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6acda5e7eb1117733dc7cb6158fc67f226b32022",
+      "symbol": "ZRO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x73a041fef8271c619791e0af6a6224945b7a446f",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xf796969fa47fb0748c80b8b153cbb895e88cbd54",
+      "symbol": "OCAVU",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb556fed3b348634a9a010374c406824ae93f0cf8",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe20b9e246db5a0d21bf9209e4858bc9a3ff7a034",
+      "symbol": "wBAN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x396e655c309676caf0acf4607a868e0cded876db",
+    "token0": {
+      "id": "0x172370d5cd63279efa6d502dab29171933a610af",
+      "symbol": "CRV",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1e67124681b402064cd0abe8ed1b5c79d2e02f64",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x2f800db0fdb5223b3c3f354886d907a671414a7f",
+      "symbol": "BCT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbe69026ac368e0852408705a92e5701a47e7698f",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xe26cda27c13f4f87cffc2f437c5900b27ebb5bbb",
+      "symbol": "RBLS",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0x399cbaa1ad52e46afb2935ccba7cf5c8b1df93bf",
+    "token0": {
+      "id": "0x0a1dcc07160935f78b0849e6af83eb9c98fa2e37",
+      "symbol": "BET",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1ceda73c034218255f50ef8a2c282e6b4c301d60",
+    "token0": {
+      "id": "0x5fe2b58c013d7601147dcdd68c143a77499f5531",
+      "symbol": "GRT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6f21996181915d688c787a1ec7c987e2a31b6829",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x8a0e8b4b0903929f47c3ea30973940d4a9702067",
+      "symbol": "INSUR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xadd053a09f95e565b25d8b9b84d0fcfaa962465e",
+    "token0": {
+      "id": "0x3ad707da309f3845cd602059901e39c4dcd66473",
+      "symbol": "ETH2x-FLI-P",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x941eb28e750c441aef465a89e43ddfec2561830b",
+    "token0": {
+      "id": "0x4e1581f01046efdd7a1a2cdb0f82cdd7f71f2e59",
+      "symbol": "ICE",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc48ae82ca34c63887b975f20aba91a38f2a900b8",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4",
+      "symbol": "MANA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcffbfa978ac3fb10e829ca6b763c307daafe8a77",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd125443f38a69d776177c2b9c041f462936f8218",
+      "symbol": "FBX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x93ef615f1ddd27d0e141ad7192623a5c45e8f200",
+    "token0": {
+      "id": "0x65a05db8322701724c197af82c9cae41195b0aa8",
+      "symbol": "FOX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8f8e95ff4b4c5e354ccb005c6b0278492d7b5907",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x4eac4c4e9050464067d673102f8e24b2fcceb350",
+      "symbol": "ibBTC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfc067766349d0960bdc993806ea2e13fcfc03c4d",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x90f3edc7d5298918f7bb51694134b07356f7d0c7",
+      "symbol": "DDAO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2b4ac37c8d1efd56a2281b492e2cf5afccb5ee35",
+    "token0": {
+      "id": "0x4a841df9a67ff3403d03f04d32e28d0d19e9ca29",
+      "symbol": "TWY",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x1274de0de2e9d9b1d0e06313c0e5edd01cc335ef",
+    "token0": {
+      "id": "0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b",
+      "symbol": "AVAX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x55bc7d9e44b730c4a42b52c818c805476156d9c9",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdb725f82818de83e99f1dac22a9b5b51d3d04dd4",
+      "symbol": "GET",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x30933831b71710d0551b518b74032242b2a71d2c",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x4c3bf0a3de9524af68327d1d2558a3b70d17d42a",
+      "symbol": "DYDX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5976e166fcceec2c071a048b556822ae19b01f6b",
+    "token0": {
+      "id": "0x1ce4a2c355f0dcc24e32a9af19f1836d6f4f98ae",
+      "symbol": "CPD",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x600435e924d7bde66a91765753db68bf5d46a7d2",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x8373cd56a39276f2f5ec7ce55b923caac79992c1",
+      "symbol": "SHIBA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc30d6bc42911aa21a63e51c7121b33b3e65cc3c4",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x9af3b7dc29d3c4b1a5731408b6a9656fa7ac3b72",
+      "symbol": "PUSD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd08244e604ca67e2f3fa9b8d3b580e751c42fbc3",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x61f95bd637e3034133335c1baa0148e518d438ad",
+      "symbol": "MHUNT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2d48d88227dd15a7058655e9260f394f502abaf4",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc294f7b002433a1e6e52ec301d8cf4d007e44e65",
+      "symbol": "ZHAZ",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa7b9e574fecc72697198e057bcef19655b177bb7",
+    "token0": {
+      "id": "0x60c38d48508b842fecbde425cff9d2a39cc94fa5",
+      "symbol": "JEGS",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x5a2ba689663fd35ec111676294055bd9fa47fde8",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8f6196901a4a153d8ee8f3fa779a042f6092d908",
+      "symbol": "SALE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xdcb0c125df19598501427c28e7991564504c947b",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7f67639ffc8c93dd558d452b8920b28815638c44",
+      "symbol": "LIME",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x61f1d8c911bff2d9e698f3ba8f7cbd5c1373dd7b",
+    "token0": {
+      "id": "0x182f1d39df9460d7aef29afbc80bbd68ed0a41d5",
+      "symbol": "RUUF",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9ad5cdc89001a2eb0cc7713c788f843de881d803",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe7804d91dfcde7f776c90043e03eaa6df87e6395",
+      "symbol": "DFX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3a96a8e95019832d0a8eed53f6f3d0f0de0a875d",
+    "token0": {
+      "id": "0x0f289de02c03c7a84a6a10898dd882a2f3caa3a0",
+      "symbol": "TURIN",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xa769c6786c3717945438d4c4feb8494a1a6ca443",
+    "token0": {
+      "id": "0x596ebe76e2db4470966ea395b0d063ac6197a8c5",
+      "symbol": "JRT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd10bb4ed281a84492343573885168027cc625bf7",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xe8377a076adabb3f9838afb77bee96eac101ffb1",
+      "symbol": "MSU",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x47bb2d406a9b936106558be20e8aca5a3c5d006b",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd0513db39d87e8825389feb10bd911dc53b3a153",
+      "symbol": "FINT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x25e8bbc103842f0dad2465f4e04cb8d44fb787bc",
+    "token0": {
+      "id": "0x0361bdeab89df6bbcc52c43589fabba5143d19dd",
+      "symbol": "dTOP",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1534d7c91bd77eb447acb7fb92ea042b918f58bb",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd3f07ea86ddf7baebefd49731d7bbd207fedc53b",
+      "symbol": "nDEFI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x55ff76bffc3cdd9d5fdbbc2ece4528ecce45047e",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x9e20a8d3501bf96eda8e69b96dd84840058a1cb0",
+    "token0": {
+      "id": "0x104592a158490a9228070e0a8e5343b499e125d0",
+      "symbol": "FRAX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xa375d23a751124359568f3a22576528bd1c8c3e3",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8c92e38eca8210f4fcbf17f0951b198dd7668292",
+      "symbol": "DHT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe427b62b495c1dfe1fe9f78bebfceb877ad05dce",
+    "token0": {
+      "id": "0x84342e932797fc62814189f01f0fb05f52519708",
+      "symbol": "NHT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xd53a56ae0f48c9a03660cd36c2e4ae20493a1eca",
+    "token0": {
+      "id": "0x104592a158490a9228070e0a8e5343b499e125d0",
+      "symbol": "FRAX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x3e121107f6f22da4911079845a470757af4e1a1b",
+      "symbol": "FXS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x116ff0d1caa91a6b94276b3471f33dbeb52073e7",
+    "token0": {
+      "id": "0x50b728d8d964fd00c2d0aad81718b71311fef68a",
+      "symbol": "SNX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x87dbeb21f704f9bfb05de0dc35f579db9f70f4d5",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xe83ce6bfb580583bd6a62b4be7b34fc25f02910d",
+      "symbol": "MABBC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xf07a55656fbf6ad3246b6a5f8c808fde8bb83227",
+    "token0": {
+      "id": "0x45514256bab552c504e68c00f883d3b054f3856a",
+      "symbol": "OIRT",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x3f2def48b2cbe76aff492a860ed2911840a510b4",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xcb186acb5139e1961ae0c269a4cbd743d630815f",
+      "symbol": "FSSP",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0xf8095ffd24f02bd8aedc96e5a3617310815cc4c7",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xf826a91e8de52bc1baf40d88203e572dc2551aa3",
+      "symbol": "pLEO",
+      "decimals": "3"
+    }
+  },
+  {
+    "id": "0xcbf6f78981e63ef813cb71852d72a060b583eecf",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x3a3df212b7aa91aa0402b9035b098891d276572b",
+      "symbol": "FISH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6a3bb9af91ea7cf519cdf88af7e04ae8ae1425f4",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6811079e3c63ed96eb005384d7e7ec8810e3d521",
+      "symbol": "xSUSHI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc536098172c0b04ada7c8e02674aa3ed03c3ec50",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcd150b1f528f326f5194c012f32eb30135c7c2c9",
+      "symbol": "OOKI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x34f28a44f296990de3ab6229da2bf67e9ebdb687",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xaec815ae1e9ab58f49692aec2840ffc82c56f7e5",
+      "symbol": "IDOL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xae2dff60750f72eac23ad302e4fc5365149ebba4",
+    "token0": {
+      "id": "0xa99f880bc17b09b5b1262175d06b17ffa914fcdd",
+      "symbol": "KLZX",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xa16892c41a7b5b620bd432e4a0f088baf89d45b4",
+    "token0": {
+      "id": "0xb347add1cf34509d12842c40ab94a26144624eb7",
+      "symbol": "ONBE",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x1234773ecc6e00761435b05dd29545e5b2f41efa",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xecf7efc68218d2f9c4bd1fbc68cb81f794ab3a2a",
+      "symbol": "ELONTC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd3924ad8f881514eff89503be9027b877e9e2bd0",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x5a3064cbdccf428ae907796cf6ad5a664cd7f3d8",
+      "symbol": "PYQ",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7b23afe559433aace4d61ed65e225a74094defcb",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x68ee0d0aad9e1984af85ca224117e4d20eaf68be",
+      "symbol": "ROY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7c07cecd8cdd65c0dad449808cc5f9ad74c22bd1",
+    "token0": {
+      "id": "0x35b937583f04a24963eb685f728a542240f28dd8",
+      "symbol": "SFI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb5846453b67d0b4b4ce655930cf6e4129f4416d7",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2110c882c446357ac38e36cae03df1578eb390b2",
+    "token0": {
+      "id": "0x46f48fbdedaa6f5500993bede9539ef85f4bee8e",
+      "symbol": "ARIA20",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3324af8417844e70b81555a6d1568d78f4d4bf1f",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xaa9654becca45b5bdfa5ac646c939c62b527d394",
+      "symbol": "DINO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x597a9bc3b24c2a578ccb3aa2c2c62c39427c6a49",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xdedef8a9ebd5fb001a596348eb825f0b9edaf126",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xab3d689c22a2bb821f50a4ff0f21a7980dcb8591",
+      "symbol": "PRXY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4642dafc5281ba5a8d35b2896e0d925b23c6883c",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xfe712251173a2cd5f5be2b46bb528328ea3565e1",
+      "symbol": "MVI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbffad6894968cc81e5f583ae02a746aa1fab44be",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xf1c1a3c2481a3a8a3f173a9ab5ade275292a6fa3",
+      "symbol": "VEE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x29f13baded9ade12acc4069a8ffeef95146b8bc9",
+    "token0": {
+      "id": "0x456320e9b87a7c84a53b8ab300067f3a29aab301",
+      "symbol": "pHIVE",
+      "decimals": "3"
+    },
+    "token1": {
+      "id": "0x7cc15fef543f205bf21018f038f591c6bada941c",
+      "symbol": "POLYCUB",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x84b840df3017831a6ee22bcb12cd13cb9e9a78f9",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xfd0cbddec28a93bb86b9db4a62258f5ef25fefde",
+      "symbol": "BITT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4414b5a6356e9f1a5daade9eb5f3fe9e37af1635",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x6d969cea201e427d2875724fd4e8044833fbc7f4",
+      "symbol": "pHBD",
+      "decimals": "3"
+    }
+  },
+  {
+    "id": "0x180237bd326d5245d0898336f54b3c8012c5c62f",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xfbdd194376de19a88118e84e279b977f165d01b8",
+      "symbol": "BIFI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x77bcd2b9d087f4d4a33ae299fcb8e47c701299d9",
+    "token0": {
+      "id": "0x0527c8c43250279d6eb74da1078193f5316fc9a0",
+      "symbol": "PYD",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x48da66bc52df56b8efbf947645e224049fde7047",
+    "token0": {
+      "id": "0x1ea936097a79ae4f520c3b4ae8ec057675aee801",
+      "symbol": "OAG",
+      "decimals": "0"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xcb05bfa2293ce9b246aa034d4791ca094717ac8a",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x840195888db4d6a99ed9f73fcd3b225bb3cb1a79",
+      "symbol": "SX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6e004beba41827e70ce58681d67b085b5cfd19ab",
+    "token0": {
+      "id": "0x7283879a7dc8d4aeccda305ec2cdbd4704912d24",
+      "symbol": "VNH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x75d348ba5904fedacb88abfb472abf5b1faea2e5",
+    "token0": {
+      "id": "0x1aeb4176049e25697033aa50445b130240c5412c",
+      "symbol": "VIP",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x10756316ba4ca180099fdd7fa08c316f0769323f",
+    "token0": {
+      "id": "0x368aaa731089f0beab2988ccb69a52c313b4122b",
+      "symbol": "NL",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xb2c5765923268b8bbd1f51d895f9ecf86e542ad9",
+    "token0": {
+      "id": "0x75442c3d83302cfba105a356eb6812489c8c9cd7",
+      "symbol": "MXH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x999fc000f3f5176306c0753bad01d6a37644feef",
+    "token0": {
+      "id": "0x228b5c21ac00155cf62c57bcc704c0da8187950b",
+      "symbol": "NXD",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xc5c7f2308a5c3862a49f23fe51ba2284d3aa2697",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x5430a0b6c11f870571ffa891d59dec8c4608ea9a",
+      "symbol": "tPOKT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x7e24a40439fabcf42ef75099bcae123c6d8dc0e9",
+    "token0": {
+      "id": "0x08be454de533509e8832b257116c5506e55b0b64",
+      "symbol": "STND",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xacd50fedc46fefee64790eab404eb52dec9e3ad9",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x723b17718289a91af252d616de2c77944962d122",
+      "symbol": "GAIA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x34209a5f702a81b62197dbfc36a48c3fe04af8d7",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x48e1eec032171f871890c86308147032bb246508",
+      "symbol": "rChili",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc9ba162d07d762ad4c2a759cf806f8650b6c9a93",
+    "token0": {
+      "id": "0x7cc15fef543f205bf21018f038f591c6bada941c",
+      "symbol": "POLYCUB",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x72bdf2dbcd73dddda84d78994095fbcfd1253127",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x41e5ae7581c06c4c53ac2d29a8857260c161ee71",
+      "symbol": "SHARD",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xd74d23d2f23cd06a7d94f740a74c6e906f0c9005",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2ab4f9ac80f33071211729e45cfc346c1f8446d5",
+      "symbol": "CGG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x41d9de53ebf26f766229e42aa02904eb2495e397",
+    "token0": {
+      "id": "0x60ed6acef3a96f8cdaf0c0d207bbafa66e751af2",
+      "symbol": "EP",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd125443f38a69d776177c2b9c041f462936f8218",
+      "symbol": "FBX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8a3f448f7cfad19581b9876d695554897ac334b9",
+    "token0": {
+      "id": "0x6d969cea201e427d2875724fd4e8044833fbc7f4",
+      "symbol": "pHBD",
+      "decimals": "3"
+    },
+    "token1": {
+      "id": "0x7cc15fef543f205bf21018f038f591c6bada941c",
+      "symbol": "POLYCUB",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x84ecaf1e5e241a61e9b596f6c957b2bea9ad92d9",
+    "token0": {
+      "id": "0xc08e94e12ca1357df36f3c16c3a1df5f84c7b801",
+      "symbol": "$GGWTT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x5aefd5c04ed6dbd856a5aeb691efcc80c0ab7472",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x7cc15fef543f205bf21018f038f591c6bada941c",
+      "symbol": "POLYCUB",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd9ef432ce0e6ee314c4297af7524688c7c89911d",
+    "token0": {
+      "id": "0x5d2375c6af4b7de4e395ada20aab937895b4fa70",
+      "symbol": "MSC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe8377a076adabb3f9838afb77bee96eac101ffb1",
+      "symbol": "MSU",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc5666d43f06c073e869bce02407569f578b2072d",
+    "token0": {
+      "id": "0x4c16f69302ccb511c5fac682c7626b9ef0dc126a",
+      "symbol": "polyBUNNY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe8137f0c422249e7acda2e05d401b3e4b608d062",
+    "token0": {
+      "id": "0x9a4eb698e5de3d3df0a68f681789072de1e50222",
+      "symbol": "FID",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xcea28c2b744c0d159a070e11a0f04dc7182f155d",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc6d54d2f624bc83815b49d9c2203b1330b841ca0",
+      "symbol": "SAND",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x509645caa3d644ad1d5b8a6093f968013d16b823",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7e94de269df2eb9f4d0443d46500191f19c9a8da",
+      "symbol": "UNITY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa79983daf2a92c2c902cd74217efe3d8af9fba2a",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xaaa5b9e6c589642f98a1cda99b9d024b8407285a",
+      "symbol": "TITAN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd7217619279f31da063d738cf1bf7435764a07d9",
+    "token0": {
+      "id": "0x76e63a3e7ba1e2e61d3da86a87479f983de89a7e",
+      "symbol": "OMEN",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4ab66a7138f50db9b7adaf8ce8afb3f638b22f7f",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x2e1ad108ff1d8c782fcbbb89aad783ac49586756",
+      "symbol": "TUSD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfbae8e2d04a67c10047d83ee9b8aeffe7f6ea3f4",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x6ae7dfc73e0dde2aa99ac063dcf7e8a63265108c",
+      "symbol": "JPYC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x89e110150fb7df2f20cf79201b81877baffc3797",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2db4c131adaf01c15a1db654c040c8578929d55",
+      "symbol": "WASABI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2fb17fb8b22d13cddacc1aeb4ff6d75135ed56d0",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x4f6cbaca3151f7746273004fd7295933a9b70e69",
+      "symbol": "WHIRL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7cf69af2a017452754f7fbbc36d4a12cc5bc631b",
+    "token0": {
+      "id": "0x0a97853c72cb28c98b3112ae45215391675cac43",
+      "symbol": "CPTC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x89176dc7b5aebd0d5efffc2592e2068266f4b783",
+    "token0": {
+      "id": "0x06f34105b7dfedc95125348a8349bda209928730",
+      "symbol": "GRIMWEED",
+      "decimals": "0"
+    },
+    "token1": {
+      "id": "0x34d4ab47bee066f361fa52d792e69ac7bd05ee23",
+      "symbol": "AURUM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe9bb87c33d1607b06fb3988b31e9601bd21ff3bd",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x76e63a3e7ba1e2e61d3da86a87479f983de89a7e",
+      "symbol": "OMEN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8929d3fea77398f64448c85015633c2d6472fb29",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3b31bb4b6ba4f67f4ef54e78bcb0aaa4f53dc7ff",
+    "token0": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x1bf9805b40a5f69c7d0f9e5d1ab718642203c652",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x840195888db4d6a99ed9f73fcd3b225bb3cb1a79",
+      "symbol": "SX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x20ac8c75d6391cd6bf9d4663eb66e36e82ca8902",
+    "token0": {
+      "id": "0x72992804a8e487cec129ac71c70ea97f2c261053",
+      "symbol": "LLGKO",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xcffd96e0bf09faa298eed46c4e60f5386f192739",
+    "token0": {
+      "id": "0xb5e35767c4c17b768bcfe42825520ec9484bcb4e",
+      "symbol": "EGYJ",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xc879bc72136cb6519b5e0e456bc9d727e106c582",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xe06bd4f5aac8d0aa337d13ec88db6defc6eaeefe",
+      "symbol": "IXT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe15e9d2a5af5c1d3524bbc594ddc4a7d80ad27cd",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xc2ccc6a9eefe3aec414ee3f549decd361aa17e7e",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x53677d896b16a1d109e38cb1421ea099264dcd34",
+      "symbol": "WKF",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3c2646a14b43c872a09ec9dc6135fc5920a50f56",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8eef5a82e6aa222a60f009ac18c24ee12dbf4b41",
+      "symbol": "TXL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x57602582eb5e82a197bae4e8b6b80e39abfc94eb",
+    "token0": {
+      "id": "0x2b88ad57897a8b496595925f43048301c37615da",
+      "symbol": "PICKLE",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x211f8e61113edaf00cf37a804b0ba721875ef560",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd0660cd418a64a1d44e9214ad8e459324d8157f1",
+      "symbol": "WOOFY",
+      "decimals": "12"
+    }
+  },
+  {
+    "id": "0xdbe3ebacf6274ac15cbdaf1a1ef57d61220b760f",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0xec79b78bcedf3c4b6d12c27ba6d092ad178b5b30",
+      "symbol": "XBBX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1d79b55113738319dedac94c2f0952eee10fad40",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xff39754755237b13441308db986e97d599034aac",
+      "symbol": "POLYPIG",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0xf850c261adc576e6713d14af590a40d55936a982",
+    "token0": {
+      "id": "0x1a3acf6d19267e2d3e7f898f42803e90c9219062",
+      "symbol": "FXS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x8ceed6619aeffd5476315b90eb081485da2aebca",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xa3fa99a148fa48d14ed51d610c367c61876997f1",
+      "symbol": "miMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9b967c6db1a8cc1e73eca79ca3e5b32ba9ac6465",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdb982a636807b3acd9fd28a99410b68c2159fb32",
+      "symbol": "THEOS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x03b67a0ce884e806673cc92e9a1c4a77d5bc770b",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe58e8391ba17731c5671f9c6e00e420608dca10e",
+      "symbol": "GNFT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf89261d86c6e8bd4c719f1fd769220dfc746d67a",
+    "token0": {
+      "id": "0x28cead9e4ff96806c79f4189ef28fc61418e2216",
+      "symbol": "pSPS",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x7cc15fef543f205bf21018f038f591c6bada941c",
+      "symbol": "POLYCUB",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc320de28cd13e845692baf2e9890c0ed4fafe242",
+    "token0": {
+      "id": "0x2d7f650602416a9d73cf143e2bcb5a8ebe62395d",
+      "symbol": "SCAPE",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x831600a19ff2a0eb9805e13f873f1b06a57e36ef",
+    "token0": {
+      "id": "0x27a073a20c16971184bdba854950228716317ef4",
+      "symbol": "TM",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xec4819a14a15d104fd1075032a28e38569f182cb",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xe6ebb385f84777165ee392be80fb4412eacff3a5",
+      "symbol": "ZQMNW",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x7c25b21568da36eb662998bab2c2c7e70aac554f",
+    "token0": {
+      "id": "0x692c6af9502b0b26b3fc15a29b2e5696b769b5da",
+      "symbol": "SEIEP",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x5ab6064e07a3bbd95fd143247c100f454b662b55",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xb1163002c7cb1892d8b188580e9b7e92dc140a49",
+      "symbol": "PET",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfbba6eaa27080321aa75efe72216989a675fcc5f",
+    "token0": {
+      "id": "0x1488c7cdee1b8b534a1789e9da8b447c7999e04b",
+      "symbol": "ET",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x42acf553bca8f9af8dc0b3e507931ed96f8a91f5",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xf9c1f70f9bf57fad5f63c6e1e25c2e895f04c0a6",
+      "symbol": "DHC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7ba331a8b360f4c31e6014abdd6852f92fb21557",
+    "token0": {
+      "id": "0x61bdd9c7d4df4bf47a4508c0c8245505f2af5b7b",
+      "symbol": "AXS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe66f274542fb624f5489ebb9f6e953e91a9908d1",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x6804b07d883d0169c05233332ccf17aa956424c5",
+      "symbol": "FLEATO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcccec4a90b3435065f5e1fec6346be9da1b7b5ed",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xf5ea626334037a2cf0155d49ea6462fddc6eff19",
+      "symbol": "SPADE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5fcb390b4422f4ff7940c23618a62bf5f69658a8",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc3fdbadc7c795ef1d6ba111e06ff8f16a20ea539",
+      "symbol": "ADDY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x0a7f27e370168b1e1be2ef77a8ba28d66983c515",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xeb45921fedadf41df0bfcf5c33453acedda32441",
+      "symbol": "pZUG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8abf49602f865b6c3d3e73868da0cca5042781e4",
+    "token0": {
+      "id": "0x219eee45d4c17bfc0dcf61a829bafe412c718ca2",
+      "symbol": "PDME",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xe17b6fae6e6d16c5dd3436345e4fc4bbdfee7663",
+    "token0": {
+      "id": "0x5b0a0cd03e9df1829e00128ebe277cc3247da346",
+      "symbol": "BFLY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6a29285d01dfeead4f139373ed10a867ae57835f",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xfc282ac08482076e805c9f62052212c1200e9b21",
+      "symbol": "OOIKT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x095fc71521668d5bcc0fc3e3a9848e8911af21d9",
+    "token0": {
+      "id": "0x4c392822d4be8494b798cea17b43d48b2308109c",
+      "symbol": "Polly",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd3f07ea86ddf7baebefd49731d7bbd207fedc53b",
+      "symbol": "nDEFI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf27c14aedad4c1cfa7207f826c64ade3d5c741c3",
+    "token0": {
+      "id": "0x4c392822d4be8494b798cea17b43d48b2308109c",
+      "symbol": "Polly",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x34908ec7f451beaa88c46c60a394cf324f86f67e",
+    "token0": {
+      "id": "0x25788a1a171ec66da6502f9975a15b609ff54cf6",
+      "symbol": "POOL",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x67508e590e1cda1b239b9b4847ac5544b0f32fe4",
+    "token0": {
+      "id": "0x32b2e15fd9b5a843943f5c796f0f30fc57e96134",
+      "symbol": "USDZ",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x6ff08982dc3abf98fba0b65bb5f9f2a701ab885b",
+    "token0": {
+      "id": "0x01b3b7b4656f60e849ab6016ec70fcb0d1f336c8",
+      "symbol": "POZZ",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xd0fa2eaa5d854f184394e93f7b75624084600685",
+    "token0": {
+      "id": "0x00e5646f60ac6fb446f621d146b6e1886f002905",
+      "symbol": "RAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd3f07ea86ddf7baebefd49731d7bbd207fedc53b",
+      "symbol": "nDEFI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x97c45f96e3ac73a0ffd7f0473b4730958ecf9d22",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x6804b07d883d0169c05233332ccf17aa956424c5",
+      "symbol": "FLEATO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2481cbe674fb72cf8cd3031ff4747078d168c9b3",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc81278a52ad0e1485b7c3cdf79079220ddd68b7d",
+      "symbol": "BAO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc255866457219caac635c527c300302b709f3103",
+    "token0": {
+      "id": "0x6804b07d883d0169c05233332ccf17aa956424c5",
+      "symbol": "FLEATO",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7f2f223a851e8380473cebdbb14ca67d323e061d",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xa1388e73c51b37383b1ab9dce8317ef5a0349cc5",
+      "symbol": "VERSE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9facdd2b79fdca9978945bed0cc35fcfe32b45b4",
+    "token0": {
+      "id": "0x14743e1c6f812154f7ecc980d890f0f5234103e7",
+      "symbol": "APYS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xc16e382aa7353aad0f598856afd9a93513542970",
+    "token0": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xac63686230f64bdeaf086fe6764085453ab3023f",
+      "symbol": "USV",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0xd8d51ea2edca2c2ea15a053a5730f559d79a1570",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x7f426f6dc648e50464a0392e60e1bb465a67e9cf",
+      "symbol": "PAUTO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5518a3af961eee8771657050c5cb23d2b3e2f6ee",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc25351811983818c9fe6d8c580531819c8ade90f",
+      "symbol": "IDLE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x590f5e967d73ea06dae9aed2788108dcf52da269",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xee800b277a96b0f490a1a732e1d6395fad960a26",
+      "symbol": "ARPA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x755e5ea5e2ec6278d0ccc7a6ad7094ee453f20b7",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7eec9ef58166ae951a979b2c2a203d4c1e5e0ccb",
+      "symbol": "MISO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa982a2a9ebe0623de7350c228fc5335a413ad5c4",
+    "token0": {
+      "id": "0x3d244d67d680cadcccf34f8f996cea777b6d9ffe",
+      "symbol": "waPUSD",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9af3b7dc29d3c4b1a5731408b6a9656fa7ac3b72",
+      "symbol": "PUSD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb8f54cc0106bdf662591d7e8b01a9b6a01ca74c8",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcd966b72cff52dc349089b6b6f5865b5743b4e08",
+      "symbol": "TOMI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3684a6fe161c203c493d78b962d979ec56c50f76",
+    "token0": {
+      "id": "0xae40178e666bdd8bef631d28d91b9a027cb96900",
+      "symbol": "DMZUC",
+      "decimals": "9"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x235aeb304cc1a06602321eaf0f1dbafd6a34fb5f",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8eef5a82e6aa222a60f009ac18c24ee12dbf4b41",
+      "symbol": "TXL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfea0b7e4227520362b4c57fa356cea08bbc8dd47",
+    "token0": {
+      "id": "0x0df0f72ee0e5c9b7ca761ecec42754992b2da5bf",
+      "symbol": "ATA",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc6e50c7906327237e15f5c5234ffe9f8123ce84b",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc54a5024b6c5e565772729b783021f60a8f9139c",
+      "symbol": "SMOKE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3446436efb03aaf3477a0081002ec139e4fdc903",
+    "token0": {
+      "id": "0xaa5b3db457e9c2bff5f6e6de66ea68e225531bfc",
+      "symbol": "CI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x320a12caa9e4879d2082aad714c78c5f4507ac59",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6804b07d883d0169c05233332ccf17aa956424c5",
+      "symbol": "FLEATO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc0c6cf26c9a4bf3df4ef9cce24ccaed94e166d55",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc91e8a9de83ea150757598d06c0bb5c596cdf22f",
+      "symbol": "BNS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x42d5556e253e2857f8838ddcf00c4667a8a9a4de",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9611452965b63cfea2c9774e5386ab6d4f0abf16",
+      "symbol": "IND",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbf1d9b1f3940f5f8f12cfdd3ccb91bf647a7a9ef",
+    "token0": {
+      "id": "0x9d8a030a60cfbce4e81a702e8b234c5bb269fa0c",
+      "symbol": "OLQV",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x62710dd5aaca0eb00a68db5896f6e7a085daa57b",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x262bee6504cc30db0a19f6bea177ead8c0d139a4",
+      "symbol": "LLAMA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6abbef4779508a376df7f67b1618ba04cc1e9d60",
+    "token0": {
+      "id": "0x11602a402281974a70c2b4824d58ebede967e2be",
+      "symbol": "BYN",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6fd8aae9f85a7db14c45453daab81aa3085e4ba3",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xf5ea626334037a2cf0155d49ea6462fddc6eff19",
+      "symbol": "SPADE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4961760a63807180ebd8dc08430d45ae7f1b7b6a",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xf854225caaef5a722884a68a23215dfa5386751e",
+      "symbol": "wXLM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x74276857987726c3e4b523e1339e5a2093e9ad28",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xefee2de82343be622dcb4e545f75a3b9f50c272d",
+      "symbol": "TRY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x85f5e5e0e93d1fcebb72aa5a5e449aa8cb9a1083",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xaa404804ba583c025fa64c9a276a6127ceb355c6",
+      "symbol": "CPR",
+      "decimals": "2"
+    }
+  },
+  {
+    "id": "0xc698b8a1391f88f497a4ef169ca85b492860b502",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd5d84e75f48e75f01fb2eb6dfd8ea148ee3d0feb",
+      "symbol": "PGOV",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xab0454b98daf4a02ea29292e6a8882fb2c787dd4",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x6002410dda2fb88b4d0dc3c1d562f7761191ea80",
+      "symbol": "WORK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xeb80fa09ac0b4bf01e088e40acc5d5acb0261621",
+    "token0": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd69b31c3225728cc57ddaf9be532a4ee1620be51",
+      "symbol": "anyUSDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x0c98d36908dfbe11c9a4d1f3cd8a9b94baba7521",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9bf320bd1796a7495bb6187f9eb4db2679b74ed3",
+      "symbol": "nSTBL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfa71ecac520c2074b4dd047d3696c0aed1b7c3e2",
+    "token0": {
+      "id": "0x34f380a4e3389e99c0369264453523bbe5af7fab",
+      "symbol": "KANGAL",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x23ea49740dad04653b9d73694a40ef14bfff8833",
+    "token0": {
+      "id": "0x18e7bdb379928a651f093ef1bc328889b33a560c",
+      "symbol": "wRNBW",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe221a2903f7f3aa52ce09e0b218e4382a6ac60ff",
+    "token0": {
+      "id": "0x672255e73e9fcb8d8971b6e2622057baa84b5afe",
+      "symbol": "PLAY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd1ce80f3b78444e368516737e24b729676625f1e",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xf7e24ea0511bde59a2343ebeaa0390e7c44c078c",
+      "symbol": "TRIPS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb3b7f5df1c8272aa9fb0649922384ea6904bc25d",
+    "token0": {
+      "id": "0x888888d87d85bc11549b17907e8f589214eb90c2",
+      "symbol": "PLUT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xc37b4b0f0d0afa52b8217388acacf8a834dff48d",
+    "token0": {
+      "id": "0x50bcbc40306230713239ae1bddd5eefeeaa273dc",
+      "symbol": "ASIA",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x4818b51430065b3a54fc4a3162134bdc634d8852",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x53feab56aad08e47ed03ad4eb996e9709f9f7cfd",
+      "symbol": "BUM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x26b7c77e9a0ddb1fe467f6922462a735e1cccdcb",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x92868a5255c628da08f550a858a802f5351c5223",
+      "symbol": "BRIDGE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5e5c517ec55d6393d91d6a1379e5ae393a01a423",
+    "token0": {
+      "id": "0x3ae490db48d74b1bc626400135d4616377d0109f",
+      "symbol": "ALPHA",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfdceea661f599cf25abd39fd0188ba4f0b29308d",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xdd638b2159a8f374f7ada9dee59371e86ec164e9",
+      "symbol": "DRKH",
+      "decimals": "16"
+    }
+  },
+  {
+    "id": "0xf734c0cee5b9165781504d0f05b09c36c08e7a11",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x524d42592b2235f30c4cbe70e273912d616a1356",
+      "symbol": "EQUA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xea502bd4f454690e7baf347e2c2b1476e5fcd6c7",
+    "token0": {
+      "id": "0x6b1e22bc4d28dac283197cf44347639c8360ece6",
+      "symbol": "nINFR",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xae67289a092387184f6286788a6c8c6d8a8abe79",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x632fbf85f77978437073a8ce5ceec29e3209514c",
+      "symbol": "vUNIT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbf77267c7de1120331d3c7749fd1282430610905",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xcbea2812b2d2d387fc9c871da55f70e6f470f70d",
+      "symbol": "safe-meta",
+      "decimals": "0"
+    }
+  },
+  {
+    "id": "0x15b590e3ba006047c5a2b025034e95131134f15c",
+    "token0": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x395ab6556774e613ec38a15e004c6d0367c00ca2",
+    "token0": {
+      "id": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+      "symbol": "LINK",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9dde7c87a2e0010dab8df8fe071f0df6e7cd8cb8",
+    "token0": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe6a823862ee153168c772cf494e9dff77140c696",
+      "symbol": "BBL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1fec149e363b9c3282c2c3509f171ce2ac77dd27",
+    "token0": {
+      "id": "0x1346fdb62241e238be9f84a2fc364c0657757015",
+      "symbol": "NEWT",
+      "decimals": "0"
+    },
+    "token1": {
+      "id": "0x34d4ab47bee066f361fa52d792e69ac7bd05ee23",
+      "symbol": "AURUM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2cc4a8f03983bdd1958717d3d4e5e30564989cf7",
+    "token0": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+      "symbol": "AAVE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa6ea6904651c11b937e8c9f5d632ef7b77f30e39",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xf4b0903774532aee5ee567c02aab681a81539e92",
+      "symbol": "GAJ",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcea9785d0c20c6e8a855ec9c3f51166cfabeec98",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2b91dae24fa2b24bee6e831eede3c6cae63e6b00",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdadbb4681dee476f2f4dece54e6b53d9c824ed35",
+      "symbol": "🌕",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x0630a5b9ff42e85ff52c91cbed97d81c3a4aba3a",
+    "token0": {
+      "id": "0x50b728d8d964fd00c2d0aad81718b71311fef68a",
+      "symbol": "SNX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6cf10e6fcc0730bfa42dfc0df63fd126abdf4b46",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2484bca09f9a4f3e4b0a3c56690527cfa8c8dd63",
+      "symbol": "TOKX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x21ef14b5580a852477ef31e7ea9373485bf50377",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xede1b77c0ccc45bfa949636757cd2ca7ef30137f",
+      "symbol": "WFIL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa63e5b5e68a522a357e2191e1fb128296d58d12c",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xb7bcb34180183c698c3f937a7dbc927f5722031b",
+      "symbol": "STABLEM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9e1292bdb3053abac0ec9e574b660bd7d780be2e",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe8654f2b0a038a01bc273a2a7b7c48a76c0e58c5",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc5b57e9a1e7914fda753a88f24e5703e617ee50c",
+      "symbol": "POP",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe7c714dd3dd70ee04eb69a856655765454e77c88",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x45c32fa6df82ead1e2ef74d17b76547eddfaff89",
+      "symbol": "FRAX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6be10c5c7178af8c49997d07d6a5444c15e58170",
+    "token0": {
+      "id": "0x3066818837c5e6ed6601bd5a91b0762877a6b731",
+      "symbol": "UMA",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3370c17c0411d2ce90a59162e3b3ec348c84768d",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b",
+      "symbol": "AVAX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7d88d931504d04bfbee6f9745297a93063cab24c",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+      "symbol": "AAVE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8f1dbed8545d743ccf752ff1805142778928c835",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x61daecab65ee2a1d5b6032df030f3faa3d116aa7",
+      "symbol": "DMAGIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcb3716006b3b468624b2a246505ec0d22673e077",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x85955046df4668e1dd369d2de9f3aeb98dd2a369",
+      "symbol": "DPI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8531c4e29491fe6e5e87af6054fc20fccf0b4290",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xd04934d47cbc46c535cbbee9238a7cfd8c215115",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8a953cfe442c5e8855cc6c61b1293fa648bae472",
+      "symbol": "PolyDoge",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x53d62e9fec7a6b1edd5960851c17762e87db33ee",
+    "token0": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4",
+      "symbol": "MANA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x85de135ff062df790a5f20b79120f17d3da63b2d",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd86b5923f3ad7b585ed81b448170ae026c65ae9a",
+      "symbol": "IRON",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x552f06f5222a677b5dc1915c66540b6fb7d54686",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xdc3acb92712d1d44ffe15d3a8d66d9d18c81e038",
+      "symbol": "POLAR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xaa37a31755e36aab0c62dce390415ba8f6dbbdce",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfb659315e36ae39917014da60f362b600e8cd0ca",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2a93172c8dccbfbc60a39d56183b7279a2f647b4",
+      "symbol": "$DG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc56060af39152c614fa67e169c0dd1809a886e4f",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb33eaad8d922b1083446dc23f610c2567fb5180f",
+      "symbol": "UNI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9021a31062a1d9c9c35d632ed54a9d923e46809f",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8505b9d2254a7ae468c0e9dd10ccea3a837aef5c",
+      "symbol": "COMP",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x60327778bfbe10944781292735cc600dd856cdf8",
+    "token0": {
+      "id": "0x3f717919def69f81d17b80839bf8af35697ccbfa",
+      "symbol": "DTX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xb137fb17be1436f855cbdc04ab4ea618444c8847",
+    "token0": {
+      "id": "0xad1d50bdd82fff71babdfa5cb170a598e142fe06",
+      "symbol": "CTT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x9895ac52fd78095720f2e4155a018b4e9dde0452",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb349cd243e455b9fae6aa85a1eb52bcde133b2e3",
+      "symbol": "CPL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x14dbe3e6814fd532ef87e4be9b4192c018752823",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x95c300e7740d2a88a44124b424bfc1cb2f9c3b89",
+      "symbol": "ALCX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfeaa7ea246b560f8d31cfefb880d7c3c2ea8591c",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x8e3dac652540a8e5128afd2ddf2d0c2099e4d4ab",
+      "symbol": "DFX-TVL-KPI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe1c99c7481421e299bf3945e5e91817e6d60c91b",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4",
+      "symbol": "MANA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa671ffdf5d303a8dbda9881f95229597bd50387d",
+    "token0": {
+      "id": "0x544571caa8e2bc26120d554ea62610e1601acba6",
+      "symbol": "KAVI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xbb469f2620968a785f828e035c6eefe9afc961be",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x14520807406da50e6e7a1daa58da6775a2e0c992",
+      "symbol": "KOR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x54b149c3349aadfd283711aa4f05e102345c773d",
+    "token0": {
+      "id": "0x172370d5cd63279efa6d502dab29171933a610af",
+      "symbol": "CRV",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9b034262e0095210ab9ddec60199741a8a1fbfe7",
+      "symbol": "THREE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9f0c603476c3e41de989fc830e63961b23255332",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x85955046df4668e1dd369d2de9f3aeb98dd2a369",
+      "symbol": "DPI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x34da30d1f8ef9799f5ae3b9989e1def926052e78",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x255707b70bf90aa112006e1b07b9aea6de021424",
+      "symbol": "TETU",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x55674956a8407ed694ad3a68edf65b52e5a65ae5",
+    "token0": {
+      "id": "0x14bbe7d3826b5f257b7dde0852036bc94c323cca",
+      "symbol": "nPOLY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1da0cc0e874945574bef4888c23687eed9581e76",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc3764139e5b8eb34f9bf29cbe95096e296530acd",
+      "symbol": "syg",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x32e228a6086c684f1391c0935cb34c296e0dd9cb",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2f800db0fdb5223b3c3f354886d907a671414a7f",
+      "symbol": "BCT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xffc654a0d0f740748d9d4d0061c96c284c3cdf88",
+    "token0": {
+      "id": "0x02649c1ff4296038de4b9ba8f491b42b940a8252",
+      "symbol": "XGEM",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3461da025e838c72bad1ee580f6eb3b6376d86e7",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd825a7c94cf92b2e08ac51972a43f96a3f89aeb0",
+      "symbol": "ZCAT",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe10823b95d5f5e9dca2d9c188f62d4735b2f585d",
+    "token0": {
+      "id": "0x209bc5c788cdd15df9afb9a66e94a9e9a4090ac4",
+      "symbol": "DTN",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4d18c480a9f09f3d66b79523b2f3c8775dbd454c",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xcfdd91d29db246267383d6d7ffc6b1a0c72fe49d",
+      "symbol": "WLND",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xce8246bdfb1232f84b73b40d4cb27d184324c7b8",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x86995070be5ecfa2850cc42ba0358d98966f3203",
+      "symbol": "mELC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc67136e235785727a0d3b5cfd08325327b81d373",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3",
+      "symbol": "BAL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xfb079009417fd337a6ff470fe980cdb11ff7f145",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x67eb41a14c0fe5cd701fc9d5a3d6597a72f641a6",
+      "symbol": "GDDY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb01f765d598471103178d4cf22be3cf86ca72875",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xf6a09deadf5a10aa7822d95e3228b2315de8f6fa",
+      "symbol": "MM",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xb8a7635fdb8b19c0c3a7fc2cb2b896a507671e73",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb89fd55ef1ea71560469d55637ef9c2770d4830d",
+      "symbol": "FLAG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x33518bc7de6637826fc8cc4af9639dcbf474ebe5",
+    "token0": {
+      "id": "0x0d962a1a2a27b402e4d84772dea65ac8592eb6bf",
+      "symbol": "GMS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x1b99906477b913d6e35ab5ebea851fc319ca8fe1",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc1642422d9ea78aa064d72a1dc6536e2c41748a2",
+      "symbol": "SOPHIE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3398787dca0f1bd830713ec5294ade196a198984",
+    "token0": {
+      "id": "0x7c4a54f5d20b4023d6746f1f765f4dfe7c39a7e6",
+      "symbol": "renDOGE",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xdbf5d66d77a83b96763c965d193d0fdd1f8a184b",
+    "token0": {
+      "id": "0x263026e7e53dbfdce5ae55ade22493f828922965",
+      "symbol": "RIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x9ea47db6476f6bfb493d872ad1d6654550a7613a",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x98d9d01ac0e34109f26329ab999a4320089381f3",
+      "symbol": "SHIBLONMOON",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcb60e17ea720ef331446e434be5de5f35fae8bc8",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6ddb31002abc64e1479fc439692f7ea061e78165",
+      "symbol": "COMBO",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x92e3b2a85d6a5071c0a344861e14b7762a7edf87",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x896bc51151b3bf94b1cdfb8a2536a54b87e172d6",
+      "symbol": "COCA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb788384ce6bda66acaac9ed237f001c8e9bfb673",
+    "token0": {
+      "id": "0x07d5bf841beb877c9be550b79cb0d49e4e091dec",
+      "symbol": "IAN",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5dc5a2c0f00a7715160a52e402c50623944c8ef7",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdc5f49d8a2944b32256f05c062c85cfb5cede33b",
+      "symbol": "QUEBEC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xf1c97b5d031f09f64580fe79fe30110a8c971bf9",
+    "token0": {
+      "id": "0x255707b70bf90aa112006e1b07b9aea6de021424",
+      "symbol": "TETU",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x4eab9556bd46f552691fe75c16d1c2ed1622df51",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+      "symbol": "LINK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x905dcc700fcce9a49b7d907e371230995a45ebce",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc68e83a305b0fad69e264a1769a0a070f190d2d6",
+      "symbol": "ROLL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x67cf45e239793a72f4bd4d46303735aeedf5d2b4",
+    "token0": {
+      "id": "0x00e5646f60ac6fb446f621d146b6e1886f002905",
+      "symbol": "RAI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc2fec6e52a2e4622eb91e5ae4f23f0ea73c47aa2",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x3a3e7650f8b9f667da98f236010fbf44ee4b2975",
+      "symbol": "xUSD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf2c9650fd759f93e59d2ae8f42a97c0600150f0e",
+    "token0": {
+      "id": "0x1d607faa0a51518a7728580c238d912747e71f7a",
+      "symbol": "DATA",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xaf75e8ad35a37d51aed8a2f35c1ab5768b19fda2",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x5e12f36bf1739a3a740d5916a8b22b0f5275f717",
+      "symbol": "PIE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7c64e0e133a93a725be0e04637b9b82fa1ba5bce",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x349eade791a30f00f690cf2ae0d5d78c06786cb0",
+      "symbol": "PARI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb493ec489b6a459bfe0959e2b00b59be8ab9bd07",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x8f18dc399594b451eda8c5da02d0563c0b2d0f16",
+      "symbol": "WOLF",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0xa93e3e80544fea28abbd828644f65209ec381bd5",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1fd6cf265fd3428f655378a803658942095b4c4e",
+      "symbol": "YELD V2",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3bffd4ca16197ad48dc610c41a022664905b7ffc",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0x920e9fdff5d10d4a0af0de610c253a816c2487c9",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xda6f726e2088f129d3ecb2257206adf7d8537ba5",
+      "symbol": "NCR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xc43d6163a14d98d459f58a5bd21f180244db3192",
+    "token0": {
+      "id": "0x1a8cd27a4ed1d0d9d566516156ef963c20dbe207",
+      "symbol": "OMT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xce5b8977f5021f1ef1232b1d4a0cfd03e8bcba9b",
+    "token0": {
+      "id": "0x4257ea7637c355f81616050cbb6a9b709fd72683",
+      "symbol": "CVX",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x11dadd62bdc87171d7960ec28f1e6e0c8e454ee8",
+    "token0": {
+      "id": "0x50bcbc40306230713239ae1bddd5eefeeaa273dc",
+      "symbol": "ASIA",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x95ad49c07a50da43770a85bc4a1f4abf7e58b1af",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xaaa5b9e6c589642f98a1cda99b9d024b8407285a",
+      "symbol": "TITAN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbef1666f1a3849bcc6b314f8eb83ba2e16df38d6",
+    "token0": {
+      "id": "0x71b821aa52a49f32eed535fca6eb5aa130085978",
+      "symbol": "0xBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xab37e709caa261166771776f6b5b54cb8f23a1a4",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcbf4ab00b6aa19b4d5d29c7c3508b393a1c01fe3",
+      "symbol": "MegaDoge",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6bc74373f010cdbb4175f023cd85c97fdc70ffc6",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xfdc26cda2d2440d0e83cd1dee8e8be48405806dc",
+      "symbol": "BTU",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x64fe815c207cbd40fe04590d6ad02824dc5a87a4",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x60ac2e84078ce30cbc68e3d7b18bcf613271ce6b",
+      "symbol": "ALOHA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb6d9a4649c579b8768f1cb55e9dd6ba99581e4a9",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc3fdbadc7c795ef1d6ba111e06ff8f16a20ea539",
+      "symbol": "ADDY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xcea5689406e342725bd3f25378f525622611669d",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x2ab4f9ac80f33071211729e45cfc346c1f8446d5",
+      "symbol": "CGG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe079838d84e827cbd2ab4dd7e1aef14e07f52bd1",
+    "token0": {
+      "id": "0x0e94314f9e6067595929fa31c86c3c5268e2491b",
+      "symbol": "AOM",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x647eca4fddd45f1b3429ac253db57c709d7a51f5",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x3ad707da309f3845cd602059901e39c4dcd66473",
+      "symbol": "ETH2x-FLI-P",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x32a768e3f7dc13d4e8975c37183fef6289a8f090",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xce4e6da9c509cb33c23d748713c681c959f68658",
+      "symbol": "YIELD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3685eabc43d18ecf04b0f8ed75e4894b4dbb85b2",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xccbe9b810d6574701d324fd6dbe0a1b68f9d5bf7",
+      "symbol": "STACK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5e49bb1a62a824fdd0cd756eace0d4c907e550a2",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xbac4fbd731bbeaef5e2131a6009d06c064ff5f89",
+      "symbol": "MONOCL",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0x7c5b028ea6a2a123bb1c8be5d3d2935d4532961b",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xb33eaad8d922b1083446dc23f610c2567fb5180f",
+      "symbol": "UNI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x821bf75683ef8fda78731230af23d0a43775ebda",
+    "token0": {
+      "id": "0xdb982a636807b3acd9fd28a99410b68c2159fb32",
+      "symbol": "THEOS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe3e77171b0cccc2293ea48f0430f75f1a6103f78",
+      "symbol": "GEN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd02b870c556480491c70aaf98c297fddd93f6f5c",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xbf61e1d82bd440cb9da11d325c046f029a663890",
+    "token0": {
+      "id": "0x6f7c932e7684666c9fd1d44527765433e01ff61d",
+      "symbol": "MKR",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5c981300a2fd35aed8427b2d6d004e0ab11602b0",
+    "token0": {
+      "id": "0x2f800db0fdb5223b3c3f354886d907a671414a7f",
+      "symbol": "BCT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xa3fa99a148fa48d14ed51d610c367c61876997f1",
+      "symbol": "miMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x373b1f9b678637570479e31e09f7640f5e7a30df",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd598ca14eaff048bb98f8e56475cc6b1f3e5d319",
+      "symbol": "GASS",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x516f3d5c323ab9ac8f92b14040d3b2ddb4dbac35",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x2e2dde47952b9c7defde7424d00dd2341ad927ca",
+      "symbol": "CHUM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd86cfec4ddaaceb6b7114b7d65278d407e5e03aa",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9ca6a77c8b38159fd2da9bd25bc3e259c33f5e39",
+      "symbol": "SPORK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x00ca0dd51dcd486cde843c7b2b734fec203dd289",
+    "token0": {
+      "id": "0xaa404804ba583c025fa64c9a276a6127ceb355c6",
+      "symbol": "CPR",
+      "decimals": "2"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xfe4e86ad1e6ede8760d7609e7cc05271fdbc376b",
+    "token0": {
+      "id": "0x0d0b8488222f7f83b23e365320a4021b12ead608",
+      "symbol": "NXTT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5518037ab78552b4a043d89522aca16206ef9eaf",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x50b728d8d964fd00c2d0aad81718b71311fef68a",
+      "symbol": "SNX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd4d5fcd0e7a56c4fe139841db6be699393d8c671",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x25ace4409d2ff52ca4789d706f699a5084273af5",
+      "symbol": "SPACOIN",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0xbf0ea60f6dbb35f9bfe9ea5b532b7795772af541",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc4e595acdd7d12fec385e5da5d43160e8a0bac0e",
+      "symbol": "SLP",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb234c8d1394a717f602a6bcc2405b1039ae2c7d4",
+    "token0": {
+      "id": "0x1a3acf6d19267e2d3e7f898f42803e90c9219062",
+      "symbol": "FXS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x3e121107f6f22da4911079845a470757af4e1a1b",
+      "symbol": "FXS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3bf199ed7a1c150a7a28af25157da5d80a7a84fb",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc05c25d1a11006fdfcf885e27b307ca62d5da04b",
+      "symbol": "NGMI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xeeb7a4b92853552fa2e9fce5958f4d030ab00f78",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc8e616a6189fd5519e91968fb33cb66a45dbcbeb",
+      "symbol": "HAKON",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe75183e98fd42e6b88d3a05590c260030e1407b3",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8f7c1e76599a7e5abc10e2746e9c4fa74099d78b",
+      "symbol": "PAPER",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x993e0342a307d0ac7e16d8b0ae0262f237ec1b4b",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x840b5fc8c6dee2b1140174a3abdc215190426ccf",
+      "symbol": "polyGAS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa79dce7c620a128aa06284f5d9f4c4d843a2b114",
+    "token0": {
+      "id": "0x0bd49815ea8e2682220bcb41524c0dd10ba71d41",
+      "symbol": "PYM",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xbbe5f4998cc537a91e7b90c7925d1c7c5bab7ee0",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8df26a1bd9bd98e2ec506fc9d8009954716a05dc",
+      "symbol": "COLLAR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x82d5bcc22856a3316f993340662d6253b3bc3f76",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x45c32fa6df82ead1e2ef74d17b76547eddfaff89",
+      "symbol": "FRAX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe205dbfbcda1276a9eb0eaa87f5db597e833c084",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x983c0083127b9b65000e918b10d65a0f5d7500f5",
+      "symbol": "BLOCKS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7e4bf278021e484d69fe1d63222275ae96b50a2b",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x293b3b56ccf37fce9bd4d8a3e276ff6c24bc72b4",
+      "symbol": "BDG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x33e05dacdd6254fdccadab11ccf69a2e877dbc7d",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x8df26a1bd9bd98e2ec506fc9d8009954716a05dc",
+      "symbol": "COLLAR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe1bebbaef1e1fc21ec3cb0e4bb6b154907e4687a",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x831753dd7087cac61ab5644b308642cc1c33dc13",
+      "symbol": "QUICK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x35955c9171e5343b9546febdd7da7999e5107f06",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc30f68091fb72469b0e0481e2551aa5e759d6271",
+      "symbol": "EVG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x54c3bb4cb56ff00c980aa4f742e400c08b0d46eb",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x4e1581f01046efdd7a1a2cdb0f82cdd7f71f2e59",
+      "symbol": "ICE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x47ee7e6a997ba0d1b02b1de786a6324f8e8cef20",
+    "token0": {
+      "id": "0x1b43b97094aa3c6cc678edb9e28ac67daaa7cc64",
+      "symbol": "LICP",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x986978028b10966c5a8ccc41ae97655b00962e2b",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xff2035c39c7ed6981fb61ab75f436a098305ed43",
+      "symbol": "SHERMAN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9510e61c6caeecc9636b06ba633cc7af6ef8d6b1",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x5ed16822c279019dee31892990859ff013633068",
+      "symbol": "WONSTER",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x3e9a0586088caeb2adff32b0c06cfa44151c7a5b",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+      "symbol": "AAVE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x42f9845d7dfcf5eec927ede77c9d90ff382178cb",
+    "token0": {
+      "id": "0x34d4ab47bee066f361fa52d792e69ac7bd05ee23",
+      "symbol": "AURUM",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcd7361ac3307d1c5a46b63086a90742ff44c63b3",
+      "symbol": "RAIDER",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xef63779c9bf3c9569da711e4572adf1093e446f7",
+    "token0": {
+      "id": "0x2f82c5e183dc165115da32d6b46b88fe411f22f7",
+      "symbol": "EBC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x15328dec67b2d9c90845fb2b789c8498a9d8ec46",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xec79b78bcedf3c4b6d12c27ba6d092ad178b5b30",
+      "symbol": "XBBX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1fc05157e66300377b637e93262b355d405f71c6",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xbbba073c31bf03b8acf7c28ef0738decf3695683",
+      "symbol": "SAND",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x163c45fb7f84848786a16d8cdb396f78787d6d99",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1942b8262a0683b54f4f91d0c08ddd92ed6e8fe6",
+      "symbol": "DARK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa0b841cae5991b6b44c590ad24888181135ce3ce",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x20f4f80d2cb021c59ae3ef42f6da176e1b8e801c",
+      "symbol": "AGZ22",
+      "decimals": "16"
+    }
+  },
+  {
+    "id": "0x553e541daafaa355a7e90ed737c4a24cc04f3a82",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x0d962a1a2a27b402e4d84772dea65ac8592eb6bf",
+      "symbol": "GMS",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x0e72bde17446324643b9e62912bddc0a2aab28aa",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xefb9770c85a6531ef9767b8b815ccc98e6c6fd8f",
+      "symbol": "DD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf716a43d66c40ee90df429af2459e580c1afc09b",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x839f1a22a59eaaf26c85958712ab32f80fea23d9",
+      "symbol": "AXN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6dbac975a4f91e65800569ec2e813bdb35e4d99f",
+    "token0": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xf9c1f70f9bf57fad5f63c6e1e25c2e895f04c0a6",
+      "symbol": "DHC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x40e107a627f51c70a635b1fb2d3f61885cc68219",
+    "token0": {
+      "id": "0x010e5c03a7dd52ff58421bbe84ca4d2b6c22e4e9",
+      "symbol": "FB1Y",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd125443f38a69d776177c2b9c041f462936f8218",
+      "symbol": "FBX",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6b98a63aad9a4234b5fa68a9979ef511816f470d",
+    "token0": {
+      "id": "0xb44cf912e9d0341e92f64f4a0642393b7f3526c4",
+      "symbol": "PULL",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xe20b9e246db5a0d21bf9209e4858bc9a3ff7a034",
+      "symbol": "wBAN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xbb722b7748638efcc059a312c6fc2925e195aa59",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc48ae82ca34c63887b975f20aba91a38f2a900b8",
+      "symbol": "SLP",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1f4e51a4d0e9b065c515169219bb3c82909efe6a",
+    "token0": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb884d159241677f4624856dc650204ee9f592ef0",
+      "symbol": "GAIAC",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x181975b18d048d0c4432d15f7690e74139045163",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9469603f3efbcf17e4a5868d81c701bdbd222555",
+      "symbol": "QUOKK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5804b3141f7efb2fb52181765f5671696c8b239b",
+    "token0": {
+      "id": "0x45d9dfd954afed83c5bad2e2239e1602dc9b2053",
+      "symbol": "EAR",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xfa104cea1a90fd58c0a3a42fd46dcbb263212c78",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x4a9bdfdd47d8e3e17c89f6155e78e93b1b644a28",
+      "symbol": "DAD",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x68cce7049013ca8df91cd512cefee8fc0bb8d926",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+      "symbol": "LINK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf4699ff00cb9b4096793202fb8c94da9d70cf83c",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xbcf131997de512bcdfe468843b0fc19221847b9b",
+      "symbol": "CIMA.AI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x24619c126cc93c6dfb2cf4ecc5d4d7cfce73c97d",
+    "token0": {
+      "id": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "symbol": "WBTC",
+      "decimals": "8"
+    },
+    "token1": {
+      "id": "0xdbf31df14b66535af65aac99c32e9ea844e14501",
+      "symbol": "renBTC",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0x8b2fb601ccac91456f49b523b4d10e84a62a1c0a",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x50bcbc40306230713239ae1bddd5eefeeaa273dc",
+      "symbol": "ASIA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x701b6f4e494537dfcb232797231a5f21ac3d3c8c",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x149eade9b543779ae20562f7f1fcfebf520f6a54",
+      "symbol": "EGG",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4026895a93d720083e4469ee675156a8ff8d3853",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x80244c2441779361f35803b8c711c6c8fc6054a3",
+      "symbol": "BONE",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb6b0abf70b19757d6b953d0abc62ae7415ec3a83",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xfac26a651b24330f25da7f7791a8d806ffaed768",
+      "symbol": "STR",
+      "decimals": "13"
+    }
+  },
+  {
+    "id": "0x0668e13dc61991ac8abe1880e0acf5f58eac7141",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x46d502fac9aea7c5bc7b13c8ec9d02378c33d36f",
+      "symbol": "WSPP",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xea9243a150e53e857a98aa579df8464333eacf13",
+    "token0": {
+      "id": "0x316b4db72ec7eacdb6e998257c4349c2b08ff27d",
+      "symbol": "🌾",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x97a95deb56d689802f02f50c25ebcda5d0a49591",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xf153eff70dc0bf3b085134928daeea248d9b30d0",
+      "symbol": "xMARK",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x356ce197b043378f90a9d2c26fd542bf91bc8ed6",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x1d607faa0a51518a7728580c238d912747e71f7a",
+      "symbol": "DATA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x6d498562e878f3b7971d78a535b0749ffdf4676d",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdb4f47b9f50c6ed2e1434afebb5f1dcb118ed050",
+      "symbol": "BVV",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd4b829db6e1ea8e85e9f8e55185e0a52474a575a",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x6664c64c8582e62da861fcac33a627b0f92ff0f8",
+      "symbol": "CZDIAMOND",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x72ff240bc94e5e8de48409b680eaf152fbeb6598",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x88f089d4ff0f929a9026142adfe62c97859b2442",
+      "symbol": "QAAA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x50a7e903627acbcaf018b198b2ec738bfab848bf",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd4945a3d0de9923035521687d4bf18cc9b0c7c2a",
+      "symbol": "LUXY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x7719758df93eedd66c8722a702f4d517d71a881c",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6ae7dfc73e0dde2aa99ac063dcf7e8a63265108c",
+      "symbol": "JPYC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd402e14998402566bbc3cda2bb6dc89f5abc6bce",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xabe93454f00826555746e65422ee882fe5e4ee3c",
+      "symbol": "DAIKI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf19144bc9b66bd9b999167b41ccb17d473419d1d",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xded742cbc781de332b61d6e91f693ade8c3b6116",
+    "token0": {
+      "id": "0x2f800db0fdb5223b3c3f354886d907a671414a7f",
+      "symbol": "BCT",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "symbol": "DAI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe2462633284f2266f199ce92bcd2b0b654f53f76",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd4a9a52040d154928f6d219a5c24d1aedd8453fe",
+      "symbol": "mSTM",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x75fda6897540c7288a21ef383fdf871595bac61e",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdf7837de1f2fa4631d716cf2502f8b230f1dcc32",
+      "symbol": "TEL",
+      "decimals": "2"
+    }
+  },
+  {
+    "id": "0xb5e9c3eca60879d93ab43186ff77246cb2b8bd11",
+    "token0": {
+      "id": "0x18399b57d09ad3a8aacd3978f4aa167fd1929848",
+      "symbol": "LIUHE",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0x226347758594348d7770686d3280414100d5c2a0",
+    "token0": {
+      "id": "0x4878f691640254542a952f684f54d0f293e81cd8",
+      "symbol": "🌾",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x672d867b6f598a24fa0588c7bc181019d7db84ca",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4",
+      "symbol": "MANA",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe0482e366c574eea353db2799e09454846335b66",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x5316f8106d71362e40d0f01724ee6218007e620d",
+      "symbol": "GASB",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa641c96da7060481ae54684f716651c4041867c4",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xb0c22d8d350c67420f06f48936654f567c73e8c8",
+      "symbol": "sKLIMA",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x72def214b363d646f0aba67717a9a8412212f916",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xb44cf912e9d0341e92f64f4a0642393b7f3526c4",
+      "symbol": "PULL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x5c26e61c6153805b073beb185319de61adbdcb98",
+    "token0": {
+      "id": "0x172370d5cd63279efa6d502dab29171933a610af",
+      "symbol": "CRV",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "symbol": "USDT",
+      "decimals": "6"
+    }
+  },
+  {
+    "id": "0xf6eedc72e38229093e6ca95c7d224e0ed9d99d72",
+    "token0": {
+      "id": "0x6ae7dfc73e0dde2aa99ac063dcf7e8a63265108c",
+      "symbol": "JPYC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x506ed0b4996ee9e043d1fd7e49207d92aff40b08",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x9c4d6d35f1a1c465e5298aacc053c1279dc7630f",
+      "symbol": "CYPUNK",
+      "decimals": "8"
+    }
+  },
+  {
+    "id": "0xbf79de8d42555256ff27fbb8baa9d1e311cc67a7",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0x9469603f3efbcf17e4a5868d81c701bdbd222555",
+      "symbol": "QUOKK",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x1a45a8de4d836cd7549b7f2c1b69e141f08c9051",
+    "token0": {
+      "id": "0x172370d5cd63279efa6d502dab29171933a610af",
+      "symbol": "CRV",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xa3fa99a148fa48d14ed51d610c367c61876997f1",
+      "symbol": "miMATIC",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xd713447fa8410061649e07a79f43656582adc569",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xdc3acb92712d1d44ffe15d3a8d66d9d18c81e038",
+      "symbol": "POLAR",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe09da9eec98be5fde86aa700a56239139617093f",
+    "token0": {
+      "id": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "symbol": "WMATIC",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6871b66eb20bb9743512a2db7899f6a7cabb267a",
+      "symbol": "🌕",
+      "decimals": "9"
+    }
+  },
+  {
+    "id": "0x32eb817d549d348a2ba1cf39ee19bda7b5da77c4",
+    "token0": {
+      "id": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+      "symbol": "SUSHI",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x6c3b2f402cd7d22ae2c319b9d2f16f57927a4a17",
+      "symbol": "KRW",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xe4984fc367ab9a8c9dc6978d5c0d22c6626c6c54",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xaaa5b9e6c589642f98a1cda99b9d024b8407285a",
+      "symbol": "TITAN",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xb24db6fc569f709728e4aa67fe10ac6d0b38bcd4",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xcb83443b74ff7ee2ecf1407dbb73a67b1adecd9c",
+      "symbol": "COP",
+      "decimals": "0"
+    }
+  },
+  {
+    "id": "0xdfa3ddd1807db8e4b4851d2e5421374e433a2983",
+    "token0": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xda537104d6a5edd53c6fbba9a898708e465260b6",
+      "symbol": "YFI",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x28e2e51de5e135863edb0796b6d3d3cec6ef2304",
+    "token0": {
+      "id": "0x5564c932fcde85191ce3bef7263a369b2e2f5ee5",
+      "symbol": "MURAL",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xde1530276a3eba2c0aa1f46903d9b1d541cb693f",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xe1f186285252fe4d3b0d5aa161f58320cb5057b8",
+      "symbol": "KNAB",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xa1c91f9685a1aeabddfd0c70d666644f5ef97db1",
+    "token0": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xd6f05d867c1ef3663719ad89673975b38e808cef",
+      "symbol": "MURAL",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x8cf0acaa35d584fea0784e1c44293a4576819923",
+    "token0": {
+      "id": "0x5c173a51468694c0114aad0c14cbea350f40c33e",
+      "symbol": "LORB",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+      "symbol": "WETH",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x2a39cb0ab8201f3078b9ab93c2f877d5b56911e6",
+    "token0": {
+      "id": "0x31172dd9a7ce3e6b470126edbfbe318ec0003743",
+      "symbol": "LNW",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x545a4c914e516695cc5e04385a05cc6f1680a58f",
+    "token0": {
+      "id": "0x4f287583f7c0a19722256ecd282398d224ac2d7a",
+      "symbol": "ATS",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x4524636c5e7cc34e1044b91f8cd552f8ebb4d305",
+    "token0": {
+      "id": "0x901eb48a8394ea3a135c6ac611030d297da9dc8b",
+      "symbol": "HNY",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0xf46538bee8bb14fb3f14fc0b3e9936a3b522ad7b",
+    "token0": {
+      "id": "0x7cd5c5f50ba2862229abe41a516329bb7ddc7e1e",
+      "symbol": "GDN",
+      "decimals": "18"
+    },
+    "token1": {
+      "id": "0xb371248dd0f9e4061ccf8850e9223ca48aa7ca4b",
+      "symbol": "HNY",
+      "decimals": "18"
+    }
+  },
+  {
+    "id": "0x9e4ef772a42ef7b96505b226fca4a85ecb18530f",
+    "token0": {
+      "id": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "symbol": "USDC",
+      "decimals": "6"
+    },
+    "token1": {
+      "id": "0xd578187a60efb690493d5f32dd0e9127fc6245b9",
+      "symbol": "HUNJ",
+      "decimals": "18"
+    }
+  }
+]

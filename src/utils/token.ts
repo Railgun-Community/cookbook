@@ -33,7 +33,7 @@ export const compareTokenAddresses = (list: string[], b: string): boolean => {
   if (!list.length || !b) {
     return false;
   }
-  return list.find(a => !compareTokenAddress(a, b)) != null;
+  return list.find(a => compareTokenAddress(a, b)) != null;
 };
 
 export const compareERC20Info = (

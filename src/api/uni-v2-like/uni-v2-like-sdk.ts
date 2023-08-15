@@ -14,7 +14,7 @@ import {
   calculatePairRateWith18Decimals,
   getPairTokenDecimals,
 } from '../../utils/lp-pair';
-import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-graph';
+import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-subgraph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { UniV2LikeFactoryContract } from '../../contract/liquidity/uni-v2-like-factory-contract';
 import { ZERO_ADDRESS } from '../../models/constants';
@@ -391,41 +391,5 @@ export class UniV2LikeSDK {
 
     const feeAmount = (liquidity * 3n) / 1000n;
     return feeAmount;
-  }
-
-  static getAllLPPairsForTokenAddressesPerFork(
-    uniswapV2Fork: UniswapV2Fork,
-    networkName: NetworkName,
-    tokenAddresses: string[],
-  ): Promise<PairDataWithRate[]> {
-    try {
-      return UniV2LikeSubgraph.getPairsForTokenAddresses(
-        uniswapV2Fork,
-        networkName,
-        tokenAddresses,
-      );
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
-      }
-      CookbookDebug.error(err);
-      throw new Error('Failed to get LP pairs');
-    }
-  }
-
-  static async getAllLPPairsForTokenAddresses(
-    networkName: NetworkName,
-    tokenAddresses: string[],
-  ): Promise<PairDataWithRate[]> {
-    const allLPPairs = await Promise.all(
-      Object.values(UniswapV2Fork).map(fork => {
-        return this.getAllLPPairsForTokenAddressesPerFork(
-          fork,
-          networkName,
-          tokenAddresses,
-        );
-      }),
-    );
-    return allLPPairs.flat();
   }
 }
