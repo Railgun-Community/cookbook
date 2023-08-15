@@ -10,11 +10,11 @@ sources:
   - name: sushiswap-v2-polygon
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
+        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange
   - name: sushiswap-v2-bsc
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange
+        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
   - name: sushiswap-v2-arbitrum
     handler:
       graphql:
