@@ -33,17 +33,19 @@ export class UniV2LikeSubgraph {
     tokenAddresses: string[],
     retryCount = 0,
   ): Promise<PairDataWithRate[]> => {
-    if (tokenAddresses.length < 2) {
-      return [];
-    }
-
     try {
       const sdk = this.getBuiltGraphSDK(uniswapV2Fork, networkName);
       const tokenAddressesLowercase = tokenAddresses.map(address =>
         address.toLowerCase(),
       );
 
-      const { pairs } = await sdk.Pairs({ tokens: tokenAddressesLowercase });
+      const [{ pairs: pairsByTokensAB }, { pairs: pairsByLPToken }] =
+        await Promise.all([
+          sdk.PairsByTokensAB({ tokens: tokenAddressesLowercase }),
+          sdk.PairsByLPToken({ tokens: tokenAddressesLowercase }),
+        ]);
+
+      const pairs = [...pairsByTokensAB, ...pairsByLPToken];
 
       const pairData: PairDataWithRate[] = pairs.map(pair => {
         const tokenDecimalsA = BigInt(pair.token0.decimals);

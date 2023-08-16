@@ -22,7 +22,7 @@ export const queryAllLPPairsForTokenAddressesPerFork = async (
       throw err;
     }
     CookbookDebug.error(err);
-    throw new Error('Failed to get LP pairs');
+    throw new Error(err.message);
   }
 };
 
@@ -58,7 +58,7 @@ export const getCachedLPPairsForTokenAddresses = async (
       throw err;
     }
     CookbookDebug.error(err);
-    throw new Error('Failed to get LP pairs');
+    throw new Error(`Failed to get LP pairs: ${err.message}`);
   }
 };
 
@@ -74,6 +74,10 @@ export const getLPPairsForTokenAddresses = async (
       tokenAddresses,
     );
   } catch (err) {
+    if (!(err instanceof Error)) {
+      throw err;
+    }
+    CookbookDebug.error(err);
     return queryAllLPPairsForTokenAddresses(networkName, tokenAddresses);
   }
 };

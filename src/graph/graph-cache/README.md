@@ -28,5 +28,5 @@ https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange
 
 ## How to update lists:
 
-1. Run full query against proper URL. If you get 'indexing_error', the data source is currently unavailable. Try again later.
+1. Run full query against proper URL.
 2. Remove "data" and "pairs" fields to get final array

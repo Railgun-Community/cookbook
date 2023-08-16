@@ -39,10 +39,13 @@ export class UniV2LikeSubgraphCache {
     const lpCachedList: LPCachedListItemWithFork[] =
       UniV2LikeSubgraphCache.getCachedLPListForNetwork(networkName);
 
-    const filtered = lpCachedList.filter(({ token0, token1 }) => {
+    const filtered = lpCachedList.filter(({ id, token0, token1 }) => {
       return (
-        compareTokenAddresses(tokenAddresses, token0.id) &&
-        compareTokenAddresses(tokenAddresses, token1.id)
+        // Token A + B are both in list
+        (compareTokenAddresses(tokenAddresses, token0.id) &&
+          compareTokenAddresses(tokenAddresses, token1.id)) ||
+        // LP token is in list
+        compareTokenAddresses(tokenAddresses, id)
       );
     });
 

@@ -61,7 +61,7 @@ describe('uni-v2-like-pairs', () => {
     provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
   });
 
-  it('Should get Uniswap LP pairs for USDC and WETH', async () => {
+  it('Should query Uniswap LP pairs for USDC and WETH', async () => {
     const pairsOnlyUSDC = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.Uniswap,
       networkName,
@@ -105,7 +105,7 @@ describe('uni-v2-like-pairs', () => {
     });
   }).timeout(30000);
 
-  it('Should get SushiSwap LP pairs for USDC and WETH', async () => {
+  it('Should query SushiSwap LP pairs for USDC and WETH', async () => {
     const pairsOnlyUSDC = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.SushiSwap,
       networkName,
@@ -122,6 +122,16 @@ describe('uni-v2-like-pairs', () => {
     assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 
+  it('Should query SushiSwap LP pair from USDC/WETH LP token', async () => {
+    const pairsLPToken = await queryAllLPPairsForTokenAddressesPerFork(
+      UniswapV2Fork.SushiSwap,
+      networkName,
+      ['0x397ff1542f962076d0bfe58ea045ffa2d347aca0'],
+    );
+    expect(pairsLPToken.length).to.equal(1);
+    assertValidSushiSwapUSDCWethPair(pairsLPToken[0]);
+  }).timeout(5000);
+
   it('Should get cached LP pairs for USDC and WETH', async () => {
     const pairsOnlyUSDC = await getCachedLPPairsForTokenAddresses(
       provider,
@@ -134,6 +144,16 @@ describe('uni-v2-like-pairs', () => {
       provider,
       networkName,
       [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
+    );
+    expect(pairsUSDCAndWeth.length).to.equal(1);
+    assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
+  }).timeout(5000);
+
+  it('Should get LP pairs for USDC/WETH LP token (returns first option from cache)', async () => {
+    const pairsUSDCAndWeth = await getLPPairsForTokenAddresses(
+      provider,
+      networkName,
+      ['0x397ff1542f962076d0bfe58ea045ffa2d347aca0'],
     );
     expect(pairsUSDCAndWeth.length).to.equal(1);
     assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);

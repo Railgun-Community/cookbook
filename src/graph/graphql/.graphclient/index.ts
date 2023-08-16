@@ -20,16 +20,16 @@ import { getMesh, ExecuteMeshFn, SubscribeMeshFn, MeshContext as BaseMeshContext
 import { MeshStore, FsStoreStorageAdapter } from '@graphql-mesh/store';
 import { path as pathModule } from '@graphql-mesh/cross-helpers';
 import { ImportFn } from '@graphql-mesh/types';
+import type { SushiswapV2ArbitrumTypes } from './sources/sushiswap-v2-arbitrum/types';
 import type { SushiswapV2EthereumTypes } from './sources/sushiswap-v2-ethereum/types';
-import type { UniswapV2EthereumTypes } from './sources/uniswap-v2-ethereum/types';
 import type { SushiswapV2PolygonTypes } from './sources/sushiswap-v2-polygon/types';
 import type { SushiswapV2BscTypes } from './sources/sushiswap-v2-bsc/types';
-import type { SushiswapV2ArbitrumTypes } from './sources/sushiswap-v2-arbitrum/types';
+import type { UniswapV2EthereumTypes } from './sources/uniswap-v2-ethereum/types';
 import * as importedModule$0 from "./sources/uniswap-v2-ethereum/introspectionSchema";
-import * as importedModule$1 from "./sources/sushiswap-v2-polygon/introspectionSchema";
-import * as importedModule$2 from "./sources/sushiswap-v2-arbitrum/introspectionSchema";
-import * as importedModule$3 from "./sources/sushiswap-v2-ethereum/introspectionSchema";
-import * as importedModule$4 from "./sources/sushiswap-v2-bsc/introspectionSchema";
+import * as importedModule$1 from "./sources/sushiswap-v2-arbitrum/introspectionSchema";
+import * as importedModule$2 from "./sources/sushiswap-v2-polygon/introspectionSchema";
+import * as importedModule$3 from "./sources/sushiswap-v2-bsc/introspectionSchema";
+import * as importedModule$4 from "./sources/sushiswap-v2-ethereum/introspectionSchema";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -4981,7 +4981,7 @@ export type DirectiveResolvers<ContextType = MeshContext> = ResolversObject<{
   derivedFrom?: derivedFromDirectiveResolver<any, any, ContextType>;
 }>;
 
-export type MeshContext = UniswapV2EthereumTypes.Context & SushiswapV2PolygonTypes.Context & SushiswapV2ArbitrumTypes.Context & SushiswapV2EthereumTypes.Context & SushiswapV2BscTypes.Context & BaseMeshContext;
+export type MeshContext = UniswapV2EthereumTypes.Context & SushiswapV2ArbitrumTypes.Context & SushiswapV2PolygonTypes.Context & SushiswapV2BscTypes.Context & SushiswapV2EthereumTypes.Context & BaseMeshContext;
 
 
 const baseDir = pathModule.join(typeof __dirname === 'string' ? __dirname : '/', '..');
@@ -4992,16 +4992,16 @@ const importFn: ImportFn = <T>(moduleId: string) => {
     case ".graphclient/sources/uniswap-v2-ethereum/introspectionSchema":
       return Promise.resolve(importedModule$0) as T;
     
-    case ".graphclient/sources/sushiswap-v2-polygon/introspectionSchema":
+    case ".graphclient/sources/sushiswap-v2-arbitrum/introspectionSchema":
       return Promise.resolve(importedModule$1) as T;
     
-    case ".graphclient/sources/sushiswap-v2-arbitrum/introspectionSchema":
+    case ".graphclient/sources/sushiswap-v2-polygon/introspectionSchema":
       return Promise.resolve(importedModule$2) as T;
     
-    case ".graphclient/sources/sushiswap-v2-ethereum/introspectionSchema":
+    case ".graphclient/sources/sushiswap-v2-bsc/introspectionSchema":
       return Promise.resolve(importedModule$3) as T;
     
-    case ".graphclient/sources/sushiswap-v2-bsc/introspectionSchema":
+    case ".graphclient/sources/sushiswap-v2-ethereum/introspectionSchema":
       return Promise.resolve(importedModule$4) as T;
     
     default:
@@ -5136,11 +5136,17 @@ const merger = new(StitchingMerger as any)({
     get documents() {
       return [
       {
-        document: PairsDocument,
+        document: PairsByTokensAbDocument,
         get rawSDL() {
-          return printWithCache(PairsDocument);
+          return printWithCache(PairsByTokensAbDocument);
         },
-        location: 'PairsDocument.graphql'
+        location: 'PairsByTokensAbDocument.graphql'
+      },{
+        document: PairsByLpTokenDocument,
+        get rawSDL() {
+          return printWithCache(PairsByLpTokenDocument);
+        },
+        location: 'PairsByLpTokenDocument.graphql'
       }
     ];
     },
@@ -5179,19 +5185,29 @@ export function getBuiltGraphSDK<TGlobalContext = any, TOperationContext = any>(
   const sdkRequester$ = getBuiltGraphClient().then(({ sdkRequesterFactory }) => sdkRequesterFactory(globalContext));
   return getSdk<TOperationContext, TGlobalContext>((...args) => sdkRequester$.then(sdkRequester => sdkRequester(...args)));
 }
-export type PairsQueryVariables = Exact<{
+export type PairsByTokensABQueryVariables = Exact<{
   tokens?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
 }>;
 
 
-export type PairsQuery = { pairs: Array<(
+export type PairsByTokensABQuery = { pairs: Array<(
+    Pick<Pair, 'id' | 'reserve0' | 'reserve1'>
+    & { token0: Pick<Token, 'id' | 'symbol' | 'decimals'>, token1: Pick<Token, 'id' | 'symbol' | 'decimals'> }
+  )> };
+
+export type PairsByLPTokenQueryVariables = Exact<{
+  tokens?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
+}>;
+
+
+export type PairsByLPTokenQuery = { pairs: Array<(
     Pick<Pair, 'id' | 'reserve0' | 'reserve1'>
     & { token0: Pick<Token, 'id' | 'symbol' | 'decimals'>, token1: Pick<Token, 'id' | 'symbol' | 'decimals'> }
   )> };
 
 
-export const PairsDocument = gql`
-    query Pairs($tokens: [String!]) {
+export const PairsByTokensABDocument = gql`
+    query PairsByTokensAB($tokens: [String!]) {
   pairs(where: {token0_in: $tokens, token1_in: $tokens}) {
     id
     reserve0
@@ -5208,14 +5224,37 @@ export const PairsDocument = gql`
     }
   }
 }
-    ` as unknown as DocumentNode<PairsQuery, PairsQueryVariables>;
+    ` as unknown as DocumentNode<PairsByTokensABQuery, PairsByTokensABQueryVariables>;
+export const PairsByLPTokenDocument = gql`
+    query PairsByLPToken($tokens: [ID!]) {
+  pairs(where: {id_in: $tokens}) {
+    id
+    reserve0
+    reserve1
+    token0 {
+      id
+      symbol
+      decimals
+    }
+    token1 {
+      id
+      symbol
+      decimals
+    }
+  }
+}
+    ` as unknown as DocumentNode<PairsByLPTokenQuery, PairsByLPTokenQueryVariables>;
+
 
 
 export type Requester<C = {}, E = unknown> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
-    Pairs(variables?: PairsQueryVariables, options?: C): Promise<PairsQuery> {
-      return requester<PairsQuery, PairsQueryVariables>(PairsDocument, variables, options) as Promise<PairsQuery>;
+    PairsByTokensAB(variables?: PairsByTokensABQueryVariables, options?: C): Promise<PairsByTokensABQuery> {
+      return requester<PairsByTokensABQuery, PairsByTokensABQueryVariables>(PairsByTokensABDocument, variables, options) as Promise<PairsByTokensABQuery>;
+    },
+    PairsByLPToken(variables?: PairsByLPTokenQueryVariables, options?: C): Promise<PairsByLPTokenQuery> {
+      return requester<PairsByLPTokenQuery, PairsByLPTokenQueryVariables>(PairsByLPTokenDocument, variables, options) as Promise<PairsByLPTokenQuery>;
     }
   };
 }
