@@ -9,7 +9,7 @@ import {
   UniswapV2Fork,
 } from '../../models/export-models';
 import { UniV2LikePairContract } from '../../contract/liquidity/uni-v2-like-pair-contract';
-import { PairDataWithRate } from '../../models/uni-v2-like';
+import { LiquidityV2Pool } from '../../models/uni-v2-like';
 import {
   calculatePairRateWith18Decimals,
   getPairTokenDecimals,

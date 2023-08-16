@@ -20,6 +20,14 @@ export const calculatePairRateWith18Decimals = (
   return rateWith18Decimals;
 };
 
+export const getLPPoolName = (
+  uniswapV2Fork: UniswapV2Fork,
+  tokenSymbolA: string,
+  tokenSymbolB: string,
+) => {
+  return `${uniswapV2Fork} V2 ${tokenSymbolA}/${tokenSymbolB}`;
+};
+
 export const getLPPairTokenName = (
   uniswapV2Fork: UniswapV2Fork,
   tokenSymbolA: string,

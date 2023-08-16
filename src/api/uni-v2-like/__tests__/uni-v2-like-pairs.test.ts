@@ -8,7 +8,7 @@ import {
 } from '../uni-v2-like-pairs';
 import { RecipeERC20Info, UniswapV2Fork } from '../../../models/export-models';
 import { JsonRpcProvider } from 'ethers';
-import { PairDataWithRate } from '../../../models';
+import { LiquidityV2Pool } from '../../../models';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -24,7 +24,7 @@ const WETH_TOKEN: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const assertValidSushiSwapUSDCWethPair = (pair: PairDataWithRate) => {
+const assertValidSushiSwapUSDCWethPair = (pair: LiquidityV2Pool) => {
   const oneWithDecimals = 10n ** 18n;
   const rate = pair.rateWith18Decimals;
   expect(rate > oneWithDecimals * 500n).to.equal(
@@ -40,6 +40,7 @@ const assertValidSushiSwapUSDCWethPair = (pair: PairDataWithRate) => {
   delete pair.rateWith18Decimals;
 
   expect(pair).to.deep.equal({
+    name: 'SushiSwap V2 USDC/WETH',
     uniswapV2Fork: 'SushiSwap',
     tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
     tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -91,6 +92,7 @@ describe('uni-v2-like-pairs', () => {
     delete pairsUSDCAndWeth[0].rateWith18Decimals;
 
     expect(pairsUSDCAndWeth[0]).to.deep.equal({
+      name: 'Uniswap V2 USDC/WETH',
       uniswapV2Fork: 'Uniswap',
       pairAddress: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
       tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',

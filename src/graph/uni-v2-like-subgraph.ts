@@ -1,11 +1,12 @@
 import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { getMeshOptions, getSdk } from './graphql/.graphclient';
 import { MeshInstance, getMesh } from '@graphql-mesh/runtime';
-import { PairDataWithRate } from '../models/uni-v2-like';
+import { LiquidityV2Pool } from '../models/uni-v2-like';
 import {
   calculatePairRateWith18Decimals,
   getLPPairTokenName,
   getLPPairTokenSymbol,
+  getLPPoolName,
   getPairTokenDecimals,
 } from '../utils/lp-pair';
 import { UniswapV2Fork } from '../models/export-models';
@@ -32,7 +33,7 @@ export class UniV2LikeSubgraph {
     networkName: NetworkName,
     tokenAddresses: string[],
     retryCount = 0,
-  ): Promise<PairDataWithRate[]> => {
+  ): Promise<LiquidityV2Pool[]> => {
     try {
       const sdk = this.getBuiltGraphSDK(uniswapV2Fork, networkName);
       const tokenAddressesLowercase = tokenAddresses.map(address =>
@@ -47,7 +48,7 @@ export class UniV2LikeSubgraph {
 
       const pairs = [...pairsByTokensAB, ...pairsByLPToken];
 
-      const pairData: PairDataWithRate[] = pairs.map(pair => {
+      const pairData: LiquidityV2Pool[] = pairs.map(pair => {
         const tokenDecimalsA = BigInt(pair.token0.decimals);
         const reserveA = parseUnits(pair.reserve0, tokenDecimalsA);
         const tokenDecimalsB = BigInt(pair.token1.decimals);
@@ -60,7 +61,8 @@ export class UniV2LikeSubgraph {
         );
         const tokenSymbolA = pair.token0.symbol;
         const tokenSymbolB = pair.token1.symbol;
-        const pairDataWithRate: PairDataWithRate = {
+        const liquidityV2Pool: LiquidityV2Pool = {
+          name: getLPPoolName(uniswapV2Fork, tokenSymbolA, tokenSymbolB),
           uniswapV2Fork,
           tokenAddressA: pair.token0.id,
           tokenDecimalsA,
@@ -78,7 +80,7 @@ export class UniV2LikeSubgraph {
           pairTokenDecimals: getPairTokenDecimals(),
           rateWith18Decimals,
         };
-        return pairDataWithRate;
+        return liquidityV2Pool;
       });
 
       return pairData;

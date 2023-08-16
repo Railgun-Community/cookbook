@@ -5,12 +5,13 @@ import SUSHI_V2_POLYGON_PAIRS from './SUSHI-V2-POLYGON-PAIRS.json';
 import SUSHI_V2_BSC_PAIRS from './SUSHI-V2-BSC-PAIRS.json';
 import SUSHI_V2_ARBITRUM_PAIRS from './SUSHI-V2-ARBITRUM-PAIRS.json';
 import { compareTokenAddresses } from '../../utils';
-import { PairDataWithRate, RecipeERC20Info, UniswapV2Fork } from '../../models';
+import { LiquidityV2Pool, RecipeERC20Info, UniswapV2Fork } from '../../models';
 import { UniV2LikeSDK } from '../../api';
 import { Provider } from 'ethers';
 import {
   getLPPairTokenName,
   getLPPairTokenSymbol,
+  getLPPoolName,
   getPairTokenDecimals,
 } from '../../utils/lp-pair';
 
@@ -35,7 +36,7 @@ export class UniV2LikeSubgraphCache {
     provider: Provider,
     networkName: NetworkName,
     tokenAddresses: string[],
-  ): Promise<PairDataWithRate[]> {
+  ): Promise<LiquidityV2Pool[]> {
     const lpCachedList: LPCachedListItemWithFork[] =
       UniV2LikeSubgraphCache.getCachedLPListForNetwork(networkName);
 
@@ -67,7 +68,8 @@ export class UniV2LikeSubgraphCache {
           erc20InfoB,
         );
 
-        const pairData: PairDataWithRate = {
+        const pairData: LiquidityV2Pool = {
+          name: getLPPoolName(uniswapV2Fork, token0.symbol, token1.symbol),
           uniswapV2Fork: uniswapV2Fork,
           tokenAddressA: erc20InfoA.tokenAddress,
           tokenSymbolA: token0.symbol,

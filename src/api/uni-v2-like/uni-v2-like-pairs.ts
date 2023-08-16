@@ -1,6 +1,6 @@
 import { NetworkName } from '@railgun-community/shared-models';
 import { UniswapV2Fork } from '../../models/export-models';
-import { PairDataWithRate } from '../../models/uni-v2-like';
+import { LiquidityV2Pool } from '../../models/uni-v2-like';
 import { UniV2LikeSubgraph } from '../../graph/uni-v2-like-subgraph';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 import { Provider } from 'ethers';
@@ -10,7 +10,7 @@ export const queryAllLPPairsForTokenAddressesPerFork = async (
   uniswapV2Fork: UniswapV2Fork,
   networkName: NetworkName,
   tokenAddresses: string[],
-): Promise<PairDataWithRate[]> => {
+): Promise<LiquidityV2Pool[]> => {
   try {
     return await UniV2LikeSubgraph.queryPairsForTokenAddresses(
       uniswapV2Fork,
@@ -29,7 +29,7 @@ export const queryAllLPPairsForTokenAddressesPerFork = async (
 export const queryAllLPPairsForTokenAddresses = async (
   networkName: NetworkName,
   tokenAddresses: string[],
-): Promise<PairDataWithRate[]> => {
+): Promise<LiquidityV2Pool[]> => {
   const allLPPairs = await Promise.all(
     Object.values(UniswapV2Fork).map(fork => {
       return queryAllLPPairsForTokenAddressesPerFork(
@@ -46,7 +46,7 @@ export const getCachedLPPairsForTokenAddresses = async (
   provider: Provider,
   networkName: NetworkName,
   tokenAddresses: string[],
-): Promise<PairDataWithRate[]> => {
+): Promise<LiquidityV2Pool[]> => {
   try {
     return await UniV2LikeSubgraphCache.getCachedPairsForTokenAddresses(
       provider,
@@ -66,7 +66,7 @@ export const getLPPairsForTokenAddresses = async (
   provider: Provider,
   networkName: NetworkName,
   tokenAddresses: string[],
-): Promise<PairDataWithRate[]> => {
+): Promise<LiquidityV2Pool[]> => {
   try {
     return await getCachedLPPairsForTokenAddresses(
       provider,

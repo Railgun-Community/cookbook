@@ -1,6 +1,7 @@
 import { UniswapV2Fork } from './export-models';
 
-export type PairDataWithRate = {
+export type LiquidityV2Pool = {
+  name: string;
   uniswapV2Fork: UniswapV2Fork;
   tokenAddressA: string;
   tokenSymbolA: string;
