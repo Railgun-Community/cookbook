@@ -6,23 +6,23 @@ curl -L -H "Content-Type: application/json" -X POST -d '{ "query": "query Pairs 
 
 ## URLs
 
-<!-- UNISWAP ETH -->
+<!-- UNISWAP V2 ETH -->
 
-https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2
+https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v2-dev
 
-<!-- SUSHISWAP ETH -->
+<!-- SUSHISWAP V2 ETH -->
 
 https://api.thegraph.com/subgraphs/name/sushiswap/exchange
 
-<!-- SUSHISWAP POLYGON -->
+<!-- SUSHISWAP V2 POLYGON -->
 
 https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange
 
-<!-- SUSHISWAP BSC -->
+<!-- SUSHISWAP V2 BSC -->
 
 https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
 
-<!-- SUSHISWAP ARBITRUM -->
+<!-- SUSHISWAP V2 ARBITRUM -->
 
 https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange
 

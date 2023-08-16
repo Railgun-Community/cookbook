@@ -27,7 +27,7 @@ export class UniV2LikeSubgraph {
     }
   };
 
-  static getPairsForTokenAddresses = async (
+  static queryPairsForTokenAddresses = async (
     uniswapV2Fork: UniswapV2Fork,
     networkName: NetworkName,
     tokenAddresses: string[],
@@ -85,7 +85,7 @@ export class UniV2LikeSubgraph {
         throw err;
       }
       if (retryCount < 2) {
-        return this.getPairsForTokenAddresses(
+        return this.queryPairsForTokenAddresses(
           uniswapV2Fork,
           networkName,
           tokenAddresses,

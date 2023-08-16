@@ -2,7 +2,9 @@ sources:
   - name: uniswap-v2-ethereum
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2
+        # The core Uniswap V2 subgraph is experiencing problems with indexing.
+        # endpoint: https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2
+        endpoint: https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v2-dev
   - name: sushiswap-v2-ethereum
     handler:
       graphql:

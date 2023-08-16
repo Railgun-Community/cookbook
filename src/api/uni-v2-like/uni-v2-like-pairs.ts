@@ -6,13 +6,13 @@ import { CookbookDebug } from '../../utils/cookbook-debug';
 import { Provider } from 'ethers';
 import { UniV2LikeSubgraphCache } from '../../graph/graph-cache/uni-v2-like-subgraph-cache';
 
-export const getAllLPPairsForTokenAddressesPerFork = (
+export const queryAllLPPairsForTokenAddressesPerFork = async (
   uniswapV2Fork: UniswapV2Fork,
   networkName: NetworkName,
   tokenAddresses: string[],
 ): Promise<PairDataWithRate[]> => {
   try {
-    return UniV2LikeSubgraph.getPairsForTokenAddresses(
+    return await UniV2LikeSubgraph.queryPairsForTokenAddresses(
       uniswapV2Fork,
       networkName,
       tokenAddresses,
@@ -26,13 +26,13 @@ export const getAllLPPairsForTokenAddressesPerFork = (
   }
 };
 
-export const getAllLPPairsForTokenAddresses = async (
+export const queryAllLPPairsForTokenAddresses = async (
   networkName: NetworkName,
   tokenAddresses: string[],
 ): Promise<PairDataWithRate[]> => {
   const allLPPairs = await Promise.all(
     Object.values(UniswapV2Fork).map(fork => {
-      return getAllLPPairsForTokenAddressesPerFork(
+      return queryAllLPPairsForTokenAddressesPerFork(
         fork,
         networkName,
         tokenAddresses,
@@ -42,13 +42,13 @@ export const getAllLPPairsForTokenAddresses = async (
   return allLPPairs.flat();
 };
 
-export const getCachedLPPairsForTokenAddresses = (
+export const getCachedLPPairsForTokenAddresses = async (
   provider: Provider,
   networkName: NetworkName,
   tokenAddresses: string[],
 ): Promise<PairDataWithRate[]> => {
   try {
-    return UniV2LikeSubgraphCache.getCachedPairsForTokenAddresses(
+    return await UniV2LikeSubgraphCache.getCachedPairsForTokenAddresses(
       provider,
       networkName,
       tokenAddresses,
@@ -74,6 +74,6 @@ export const getLPPairsForTokenAddresses = async (
       tokenAddresses,
     );
   } catch (err) {
-    return getAllLPPairsForTokenAddresses(networkName, tokenAddresses);
+    return queryAllLPPairsForTokenAddresses(networkName, tokenAddresses);
   }
 };

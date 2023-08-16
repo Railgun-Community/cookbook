@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { NetworkName } from '@railgun-community/shared-models';
 import {
-  getAllLPPairsForTokenAddressesPerFork,
+  queryAllLPPairsForTokenAddressesPerFork,
   getCachedLPPairsForTokenAddresses,
   getLPPairsForTokenAddresses,
 } from '../uni-v2-like-pairs';
@@ -61,16 +61,15 @@ describe('uni-v2-like-pairs', () => {
     provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
   });
 
-  // TODO: Fix this test.
-  it.skip('Should get Uniswap LP pairs for USDC and WETH', async () => {
-    const pairsOnlyUSDC = await getAllLPPairsForTokenAddressesPerFork(
+  it('Should get Uniswap LP pairs for USDC and WETH', async () => {
+    const pairsOnlyUSDC = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.Uniswap,
       networkName,
       [USDC_TOKEN.tokenAddress],
     );
     expect(pairsOnlyUSDC.length).to.equal(0);
 
-    const pairsUSDCAndWeth = await getAllLPPairsForTokenAddressesPerFork(
+    const pairsUSDCAndWeth = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.Uniswap,
       networkName,
       [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
@@ -92,6 +91,7 @@ describe('uni-v2-like-pairs', () => {
     delete pairsUSDCAndWeth[0].rateWith18Decimals;
 
     expect(pairsUSDCAndWeth[0]).to.deep.equal({
+      uniswapV2Fork: 'Uniswap',
       pairAddress: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
       tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -99,18 +99,21 @@ describe('uni-v2-like-pairs', () => {
       tokenDecimalsB: 18n,
       tokenSymbolA: 'USDC',
       tokenSymbolB: 'WETH',
+      pairTokenName: 'Uniswap USDC/WETH LP',
+      pairTokenSymbol: 'USDC/WETH LP',
+      pairTokenDecimals: 18n,
     });
   }).timeout(30000);
 
   it('Should get SushiSwap LP pairs for USDC and WETH', async () => {
-    const pairsOnlyUSDC = await getAllLPPairsForTokenAddressesPerFork(
+    const pairsOnlyUSDC = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.SushiSwap,
       networkName,
       [USDC_TOKEN.tokenAddress],
     );
     expect(pairsOnlyUSDC.length).to.equal(0);
 
-    const pairsUSDCAndWeth = await getAllLPPairsForTokenAddressesPerFork(
+    const pairsUSDCAndWeth = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.SushiSwap,
       networkName,
       [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
