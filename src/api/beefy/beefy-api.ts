@@ -184,6 +184,11 @@ export class BeefyAPI {
     return vaultData;
   }
 
+  static async getBeefyVaultAPY(vaultID: string): Promise<number> {
+    const apys = await this.getBeefyVaultAPYs();
+    return apys[vaultID];
+  }
+
   private static convertAPIDataToBeefyVaultData(
     vaultAPIData: BeefyVaultAPIData,
     feesData: BeefyFeesAPIData,

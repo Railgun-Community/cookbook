@@ -71,7 +71,7 @@ describe('beefy-api', () => {
       '0xEcd5e75AFb02eFa118AF914515D6521aaBd189F1'.toUpperCase(),
     );
     expect(vaultsForPolygonToken.length).to.equal(0);
-  }).timeout(20000);
+  }).timeout(7500);
 
   it('Should get specific Beefy vault data', async () => {
     const vaultID = 'sushi-mainnet-usdc-weth';
@@ -80,12 +80,18 @@ describe('beefy-api', () => {
       NetworkName.Ethereum,
     );
     expect(vault.vaultID).to.equal(vaultID);
-  }).timeout(20000);
+  }).timeout(7500);
+
+  it('Should get specific Beefy vault APY', async () => {
+    const vaultID = 'gns-poly-gns';
+    const apy = await BeefyAPI.getBeefyVaultAPY(vaultID);
+    expect(apy).to.be.greaterThan(0.001);
+  }).timeout(7500);
 
   it('Should error for inactive Beefy Vault', async () => {
     const vaultID = 'convex-crveth';
     await expect(
       BeefyAPI.getBeefyVaultForID(vaultID, NetworkName.Ethereum),
     ).to.be.rejectedWith(`Beefy vault is not active for ID: ${vaultID}.`);
-  }).timeout(20000);
+  }).timeout(7500);
 });
