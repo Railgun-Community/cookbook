@@ -6,7 +6,7 @@ import SUSHI_V2_BSC_PAIRS from './SUSHI-V2-BSC-PAIRS.json';
 import SUSHI_V2_ARBITRUM_PAIRS from './SUSHI-V2-ARBITRUM-PAIRS.json';
 import { compareTokenAddresses } from '../../utils';
 import { LiquidityV2Pool, RecipeERC20Info, UniswapV2Fork } from '../../models';
-import { UniV2LikeSDK } from '../../api';
+import { UniV2LikeSDK } from '../../api/uni-v2-like/uni-v2-like-sdk';
 import { Provider } from 'ethers';
 import {
   getLPPairTokenName,
