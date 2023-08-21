@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
     echo "ERROR: Requires 2 parameters: run-anvil <chain-identifier> <fork-url>"
     exit 1;
 fi
@@ -20,7 +20,10 @@ case $1 in
     ;;
 esac
 
+# $3 allows for additional options to be passed to anvil
+
 anvil \
+    $3 \
     --fork-url $2 \
     --port $PORT \
     --chain-id $CHAIN_ID \
