@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: '0 13,23 * * *'
 
 jobs:
   unit-tests:
@@ -22,11 +24,12 @@ jobs:
       - run: env ZERO_X_PROXY_API_DOMAIN=${{ secrets.ZERO_X_PROXY_API_DOMAIN }} env ZERO_X_API_KEY=${{ secrets.ZERO_X_API_KEY }} env NETWORK_NAME=Ethereum yarn test-fork
 
   fail-report:
-    if: ${{ failure() }}
+    if: ${{ failure() && github.event_name == 'schedule' }}
     needs: unit-tests
     runs-on: ubuntu-latest
-
     steps:
+      - name: Get repository name
+        run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - name: Send Telegram message with fail report
         uses: appleboy/telegram-action@master
         with:
@@ -34,5 +37,5 @@ jobs:
           token: ${{ secrets.CI_TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            ❌ **${{ github.repository }}** - Workflow: ${{ github.workflow }}
-            [Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for commit "[${{ github.event.commits[0].message }}](https://github.com/${{ github.repository }}/commit/${{github.sha}})" (${{github.actor}})
+            ❌ **${{ env.REPOSITORY_NAME }}**
+            [${{ github.workflow }} failed](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for commit "[${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{github.sha}})" (${{github.actor}})
