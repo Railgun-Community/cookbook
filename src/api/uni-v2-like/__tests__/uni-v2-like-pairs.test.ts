@@ -40,7 +40,7 @@ const assertValidSushiSwapUSDCWethPair = (pair: LiquidityV2Pool) => {
   delete pair.rateWith18Decimals;
 
   expect(pair).to.deep.equal({
-    name: 'SushiSwap V2 USDC/WETH',
+    name: 'SushiSwap V2 USDC-WETH',
     uniswapV2Fork: 'SushiSwap',
     tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
     tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -49,8 +49,8 @@ const assertValidSushiSwapUSDCWethPair = (pair: LiquidityV2Pool) => {
     tokenSymbolA: 'USDC',
     tokenSymbolB: 'WETH',
     pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
-    pairTokenName: 'SushiSwap USDC/WETH LP',
-    pairTokenSymbol: 'USDC/WETH LP',
+    pairTokenName: 'SushiSwap USDC-WETH LP',
+    pairTokenSymbol: 'USDC-WETH LP',
     pairTokenDecimals: 18n,
   });
 };
@@ -92,7 +92,7 @@ describe('uni-v2-like-pairs', () => {
     delete pairsUSDCAndWeth[0].rateWith18Decimals;
 
     expect(pairsUSDCAndWeth[0]).to.deep.equal({
-      name: 'Uniswap V2 USDC/WETH',
+      name: 'Uniswap V2 USDC-WETH',
       uniswapV2Fork: 'Uniswap',
       pairAddress: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
       tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -101,8 +101,8 @@ describe('uni-v2-like-pairs', () => {
       tokenDecimalsB: 18n,
       tokenSymbolA: 'USDC',
       tokenSymbolB: 'WETH',
-      pairTokenName: 'Uniswap USDC/WETH LP',
-      pairTokenSymbol: 'USDC/WETH LP',
+      pairTokenName: 'Uniswap USDC-WETH LP',
+      pairTokenSymbol: 'USDC-WETH LP',
       pairTokenDecimals: 18n,
     });
   }).timeout(30000);
@@ -124,7 +124,7 @@ describe('uni-v2-like-pairs', () => {
     assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 
-  it('Should query SushiSwap LP pair from USDC/WETH LP token', async () => {
+  it('Should query SushiSwap LP pair from USDC-WETH LP token', async () => {
     const pairsLPToken = await queryAllLPPairsForTokenAddressesPerFork(
       UniswapV2Fork.SushiSwap,
       networkName,
@@ -151,7 +151,7 @@ describe('uni-v2-like-pairs', () => {
     assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 
-  it('Should get LP pairs for USDC/WETH LP token (returns first option from cache)', async () => {
+  it('Should get LP pairs for USDC-WETH LP token (returns first option from cache)', async () => {
     const pairsUSDCAndWeth = await getLPPairsForTokenAddresses(
       provider,
       networkName,
