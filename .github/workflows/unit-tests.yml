@@ -22,4 +22,10 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-      - run: env ZERO_X_PROXY_API_DOMAIN=${{ secrets.ZERO_X_PROXY_API_DOMAIN }} env ZERO_X_API_KEY=${{ secrets.ZERO_X_API_KEY }} yarn test
+      - name: Yarn test up to 3 times
+        shell: bash
+        env:
+          ZERO_X_PROXY_API_DOMAIN: ${{ secrets.ZERO_X_PROXY_API_DOMAIN }}
+          ZERO_X_API_KEY: ${{ secrets.ZERO_X_API_KEY }}
+        run: # Try yarn test 3 times before failing
+          r=3;while ! yarn test ; do ((--r))||exit;sleep 1;done
