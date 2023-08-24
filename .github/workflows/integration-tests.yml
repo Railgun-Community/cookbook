@@ -22,4 +22,14 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-      - run: env ZERO_X_PROXY_API_DOMAIN=${{ secrets.ZERO_X_PROXY_API_DOMAIN }} env ZERO_X_API_KEY=${{ secrets.ZERO_X_API_KEY }} env NETWORK_NAME=Ethereum yarn test-fork
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Run Anvil and fork test
+        uses: BerniWittmann/background-server-action@v1
+        env:
+          ZERO_X_PROXY_API_DOMAIN: ${{ secrets.ZERO_X_PROXY_API_DOMAIN }}
+          ZERO_X_API_KEY: ${{ secrets.ZERO_X_API_KEY }}
+          NETWORK_NAME: Ethereum
+        with:
+          command: r=3;while ! yarn test-fork ; do ((--r))||exit;sleep 1;done
+          start: ./run-anvil Ethereum https://uber.us.proxy.railwayapi.xyz/rpc/alchemy/eth-mainnet --silent
