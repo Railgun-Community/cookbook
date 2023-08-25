@@ -5,8 +5,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '30 12,22 * * *'
 
 jobs:
   unit-tests:
@@ -31,5 +29,5 @@ jobs:
           ZERO_X_API_KEY: ${{ secrets.ZERO_X_API_KEY }}
           NETWORK_NAME: Ethereum
         with:
-          command: r=3;while ! yarn test-fork ; do ((--r))||exit;sleep 1;done
+          command: yarn test-fork
           start: ./run-anvil Ethereum https://uber.us.proxy.railwayapi.xyz/rpc/alchemy/eth-mainnet --silent
