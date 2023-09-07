@@ -37,6 +37,26 @@ export class UniV2LikeSDK {
         }
         throw new Error('Uniswap V2 LP is not supported on this network');
 
+      case UniswapV2Fork.PancakeSwap:
+        if (networkName === NetworkName.BNBChain) {
+          return {
+            factoryAddress: '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73',
+            initCodeHash:
+              '0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5',
+          };
+        }
+        throw new Error('PancakeSwap V2 LP is not supported on this network');
+
+      case UniswapV2Fork.Quickswap:
+        if (networkName === NetworkName.Polygon) {
+          return {
+            factoryAddress: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',
+            initCodeHash:
+              '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
+          };
+        }
+        throw new Error('Quickswap V2 LP is not supported on this network');
+
       case UniswapV2Fork.SushiSwap: {
         // If adding any networks, make sure to check both factory address and initCodeHash:
         // https://github.com/sushiswap/sushiswap-sdk/tree/canary/src/constants
@@ -59,6 +79,7 @@ export class UniV2LikeSDK {
           case NetworkName.Hardhat:
             throw new Error('SushiSwap V2 LP is not supported on this network');
         }
+
         return {
           factoryAddress,
           initCodeHash:
@@ -78,6 +99,18 @@ export class UniV2LikeSDK {
           return '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45';
         }
         throw new Error('Uniswap V2 LP is not supported on this network');
+
+      case UniswapV2Fork.PancakeSwap:
+        if (networkName === NetworkName.BNBChain) {
+          return '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+        }
+        throw new Error('PancakeSwap V2 LP is not supported on this network');
+
+      case UniswapV2Fork.Quickswap:
+        if (networkName === NetworkName.Polygon) {
+          return '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff';
+        }
+        throw new Error('Quickswap V2 LP is not supported on this network');
 
       case UniswapV2Fork.SushiSwap: {
         // Look for "SushiSwapRouter" for each chain:
@@ -166,6 +199,10 @@ export class UniV2LikeSDK {
         return 'Uniswap V2';
       case UniswapV2Fork.SushiSwap:
         return 'SushiSwap V2';
+      case UniswapV2Fork.PancakeSwap:
+        return 'PancakeSwap V2';
+      case UniswapV2Fork.Quickswap:
+        return 'Quickswap V2';
     }
   }
 
