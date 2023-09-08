@@ -41,6 +41,16 @@ export let testConfig = {
     dai: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
   },
 
+  contractsPolygon: {
+    proxy: '0xfa7093cdd9ee6932b4eb2c9e1cde7ce00b1fa4b9',
+    treasuryProxy: '0xE8A8B458BcD1Ececc6b6b58F80929b29cCecFF40',
+    weth9: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+    relayAdapt: '0x0355B7B8cb128fA5692729Ab3AAa199C1753f726',
+
+    // Standard tokens
+    usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+  },
+
   // OVERRIDES - override using test-config-overrides.ts
 
   // API Domain for a proxy server equipped with 0x nginx config that includes private API key.

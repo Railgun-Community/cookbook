@@ -41,8 +41,9 @@ export const getRPCPort = (networkName: NetworkName) => {
       return 8600;
     case NetworkName.Arbitrum:
       return 8601;
-    case NetworkName.BNBChain:
     case NetworkName.Polygon:
+      return 8602;
+    case NetworkName.BNBChain:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli:
     case NetworkName.PolygonMumbai:
