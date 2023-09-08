@@ -115,6 +115,20 @@ export class UniV2LikeSubgraph {
         throw new Error(
           'Uniswap V2 LP Subgraph is not supported on this network',
         );
+      case UniswapV2Fork.PancakeSwap:
+        if (networkName === NetworkName.BNBChain) {
+          return 'pancakeswap-v2-bsc';
+        }
+        throw new Error(
+          'PancakeSwap V2 LP Subgraph is not supported on this network',
+        );
+      case UniswapV2Fork.Quickswap:
+        if (networkName === NetworkName.Polygon) {
+          return 'quickswap-v2-polygon';
+        }
+        throw new Error(
+          'Quickswap V2 LP Subgraph is not supported on this network',
+        );
       case UniswapV2Fork.SushiSwap: {
         switch (networkName) {
           case NetworkName.Ethereum:

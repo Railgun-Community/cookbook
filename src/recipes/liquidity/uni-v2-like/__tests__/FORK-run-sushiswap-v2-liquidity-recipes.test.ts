@@ -1,13 +1,14 @@
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { SushiSwapV2AddLiquidityRecipe } from '../sushiswap-v2-add-liquidity-recipe';
-import { SushiSwapV2RemoveLiquidityRecipe } from '../sushiswap-v2-remove-liquidity-recipe';
+import { UniV2LikeAddLiquidityRecipe } from '../uni-v2-like-add-liquidity-recipe';
+import { UniV2LikeRemoveLiquidityRecipe } from '../uni-v2-like-remove-liquidity-recipe';
 import {
   RecipeAddLiquidityData,
   RecipeERC20Amount,
   RecipeERC20Info,
   RecipeInput,
   RecipeRemoveLiquidityData,
+  UniswapV2Fork,
 } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
 import {
@@ -69,7 +70,8 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       throw new Error('Requires test rpc provider');
     }
 
-    const addLiquidityRecipe = new SushiSwapV2AddLiquidityRecipe(
+    const addLiquidityRecipe = new UniV2LikeAddLiquidityRecipe(
+      UniswapV2Fork.SushiSwap,
       USDC_TOKEN,
       WETH_TOKEN,
       slippagePercentage,
@@ -197,7 +199,8 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       throw new Error('Requires test rpc provider');
     }
 
-    const removeLiquidityRecipe = new SushiSwapV2RemoveLiquidityRecipe(
+    const removeLiquidityRecipe = new UniV2LikeRemoveLiquidityRecipe(
+      UniswapV2Fork.SushiSwap,
       LP_TOKEN,
       USDC_TOKEN,
       WETH_TOKEN,

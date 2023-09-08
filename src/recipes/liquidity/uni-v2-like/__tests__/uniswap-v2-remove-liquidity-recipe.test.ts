@@ -9,8 +9,12 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
-import { RecipeERC20Info, RecipeInput } from '../../../../models/export-models';
-import { UniswapV2RemoveLiquidityRecipe } from '../uniswap-v2-remove-liquidity-recipe';
+import {
+  RecipeERC20Info,
+  RecipeInput,
+  UniswapV2Fork,
+} from '../../../../models/export-models';
+import { UniV2LikeRemoveLiquidityRecipe } from '../uni-v2-like-remove-liquidity-recipe';
 import { JsonRpcProvider } from 'ethers';
 
 chai.use(chaiAsPromised);
@@ -73,7 +77,8 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
   });
 
   it('Should create uniswap-v2-remove-liquidity-recipe', async () => {
-    const recipe = new UniswapV2RemoveLiquidityRecipe(
+    const recipe = new UniV2LikeRemoveLiquidityRecipe(
+      UniswapV2Fork.Uniswap,
       LP_TOKEN,
       USDC_TOKEN,
       WETH_TOKEN,
@@ -284,7 +289,8 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
   });
 
   it('Should test uniswap-v2-remove-liquidity-recipe error cases', async () => {
-    const recipe = new UniswapV2RemoveLiquidityRecipe(
+    const recipe = new UniV2LikeRemoveLiquidityRecipe(
+      UniswapV2Fork.Uniswap,
       LP_TOKEN,
       USDC_TOKEN,
       WETH_TOKEN,

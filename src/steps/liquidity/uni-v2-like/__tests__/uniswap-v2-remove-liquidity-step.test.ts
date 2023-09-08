@@ -8,7 +8,7 @@ import {
   StepInput,
   UniswapV2Fork,
 } from '../../../../models/export-models';
-import { UniswapV2RemoveLiquidityStep } from '../uniswap-v2-remove-liquidity-step';
+import { UniV2LikeRemoveLiquidityStep } from '../uni-v2-like-remove-liquidity-step';
 import { UniV2LikeSDK } from '../../../../api/uni-v2-like/uni-v2-like-sdk';
 
 chai.use(chaiAsPromised);
@@ -59,7 +59,10 @@ const removeLiquidityData: RecipeRemoveLiquidityData = {
 
 describe('uniswap-v2-remove-liquidity-step', () => {
   it('Should create uniswap-v2-remove-liquidity-step step', async () => {
-    const step = new UniswapV2RemoveLiquidityStep(removeLiquidityData);
+    const step = new UniV2LikeRemoveLiquidityStep(
+      UniswapV2Fork.Uniswap,
+      removeLiquidityData,
+    );
 
     const stepInput: StepInput = {
       networkName,
@@ -125,7 +128,10 @@ describe('uniswap-v2-remove-liquidity-step', () => {
   });
 
   it('Should test uniswap-v2-remove-liquidity-step step error cases', async () => {
-    const step = new UniswapV2RemoveLiquidityStep(removeLiquidityData);
+    const step = new UniV2LikeRemoveLiquidityStep(
+      UniswapV2Fork.Uniswap,
+      removeLiquidityData,
+    );
 
     // Not both matching erc20 inputs
     const stepInputNotBothERC20s: StepInput = {

@@ -4,6 +4,8 @@ import SUSHI_V2_ETH_PAIRS from './SUSHI-V2-ETH-PAIRS.json';
 import SUSHI_V2_POLYGON_PAIRS from './SUSHI-V2-POLYGON-PAIRS.json';
 import SUSHI_V2_BSC_PAIRS from './SUSHI-V2-BSC-PAIRS.json';
 import SUSHI_V2_ARBITRUM_PAIRS from './SUSHI-V2-ARBITRUM-PAIRS.json';
+import PANCAKE_V2_BSC_PAIRS from './PANCAKE-V2-BSC-PAIRS.json';
+import QUICK_V2_POLYGON_PAIRS from './QUICK-V2-POLYGON-PAIRS.json';
 import { compareTokenAddresses } from '../../utils';
 import { LiquidityV2Pool, RecipeERC20Info, UniswapV2Fork } from '../../models';
 import { UniV2LikeSDK } from '../../api/uni-v2-like/uni-v2-like-sdk';
@@ -108,15 +110,27 @@ export class UniV2LikeSubgraphCache {
           ),
         ];
       case NetworkName.BNBChain:
-        return UniV2LikeSubgraphCache.mapItemsToFork(
-          SUSHI_V2_BSC_PAIRS,
-          UniswapV2Fork.SushiSwap,
-        );
+        return [
+          ...UniV2LikeSubgraphCache.mapItemsToFork(
+            SUSHI_V2_BSC_PAIRS,
+            UniswapV2Fork.SushiSwap,
+          ),
+          ...UniV2LikeSubgraphCache.mapItemsToFork(
+            PANCAKE_V2_BSC_PAIRS,
+            UniswapV2Fork.PancakeSwap,
+          ),
+        ];
       case NetworkName.Polygon:
-        return UniV2LikeSubgraphCache.mapItemsToFork(
-          SUSHI_V2_POLYGON_PAIRS,
-          UniswapV2Fork.SushiSwap,
-        );
+        return [
+          ...UniV2LikeSubgraphCache.mapItemsToFork(
+            SUSHI_V2_POLYGON_PAIRS,
+            UniswapV2Fork.SushiSwap,
+          ),
+          ...UniV2LikeSubgraphCache.mapItemsToFork(
+            QUICK_V2_POLYGON_PAIRS,
+            UniswapV2Fork.Quickswap,
+          ),
+        ];
       case NetworkName.Arbitrum:
         return UniV2LikeSubgraphCache.mapItemsToFork(
           SUSHI_V2_ARBITRUM_PAIRS,

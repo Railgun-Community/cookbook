@@ -26,6 +26,14 @@ https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
 
 https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange
 
+<!-- PANCAKESWAP V2 BSC -->
+
+https://api.thegraph.com/subgraphs/name/ord786/pancakeswap
+
+<!-- QUICKSWAP V2 POLYGON -->
+
+https://api.thegraph.com/subgraphs/name/shivannguyen/quickswap-matic2
+
 ## How to update lists:
 
 1. Run full query against proper URL.
