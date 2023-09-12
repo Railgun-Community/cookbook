@@ -37,7 +37,7 @@ const buyToken: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const slippageBasisPoints = BigInt(0.01);
+const slippageBasisPoints = BigInt(100);
 
 const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 

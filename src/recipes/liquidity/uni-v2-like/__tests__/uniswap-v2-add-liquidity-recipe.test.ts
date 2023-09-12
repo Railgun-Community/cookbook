@@ -24,7 +24,7 @@ const networkName = NetworkName.Ethereum;
 
 const oneInDecimals6 = 10n ** 6n;
 const oneInDecimals18 = 10n ** 18n;
-const slippageBasisPoints = BigInt(0.01);
+const slippageBasisPoints = BigInt(100);
 
 // Assume 2000:1 rate.for USDC:WETH.
 const USDC_TOKEN: RecipeERC20Info = {

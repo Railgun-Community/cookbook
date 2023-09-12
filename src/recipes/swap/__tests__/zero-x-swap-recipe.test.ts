@@ -37,7 +37,7 @@ const buyToken: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const slippageBasisPoints = BigInt(0.01);
+const slippageBasisPoints = BigInt(100);
 
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',

@@ -31,7 +31,7 @@ const runQuoteTest = async () => {
     networkName,
     sellERC20Amount,
     buyERC20Info,
-    slippageBasisPoints: BigInt(0.01),
+    slippageBasisPoints: BigInt(100),
     isRailgun: true,
   });
 

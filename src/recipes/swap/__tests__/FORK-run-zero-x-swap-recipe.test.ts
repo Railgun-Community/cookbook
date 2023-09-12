@@ -49,7 +49,7 @@ const buyToken: RecipeERC20Info = {
 
 const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 
-const slippageBasisPoints = BigInt(0.01);
+const slippageBasisPoints = BigInt(100);
 
 describe('FORK-run-zero-x-swap-recipe', function run() {
   this.timeout(40000);

@@ -26,7 +26,7 @@ const { expect } = chai;
 const networkName = NetworkName.Arbitrum;
 
 const oneInDecimals18 = 10n ** 18n;
-const slippageBasisPoints = BigInt(0.01);
+const slippageBasisPoints = BigInt(100);
 
 const DAI_TOKEN: RecipeERC20Info = {
   tokenAddress: testConfig.contractsArbitrum.dai,

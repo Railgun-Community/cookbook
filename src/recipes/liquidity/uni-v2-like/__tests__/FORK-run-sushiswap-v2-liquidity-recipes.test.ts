@@ -35,7 +35,7 @@ const networkName = NetworkName.Ethereum;
 
 const oneInDecimals6 = 10n ** 6n;
 const oneInDecimals18 = 10n ** 18n;
-const slippageBasisPoints = BigInt(0.01);
+const slippageBasisPoints = BigInt(100);
 
 const USDC_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
