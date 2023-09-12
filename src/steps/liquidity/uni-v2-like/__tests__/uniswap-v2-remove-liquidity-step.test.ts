@@ -53,7 +53,7 @@ const removeLiquidityData: RecipeRemoveLiquidityData = {
     uniswapV2Fork,
     networkName,
   ),
-  slippagePercentage: 0.01,
+  slippageBasisPoints: BigInt(100),
   deadlineTimestamp: 1234567890,
 };
 

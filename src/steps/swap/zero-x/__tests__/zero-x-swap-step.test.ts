@@ -47,7 +47,7 @@ const quote: SwapQuoteData = {
   // Unused
   price: 0n,
   guaranteedPrice: 0n,
-  slippagePercentage: 0.01,
+  slippageBasisPoints: BigInt(100),
 };
 
 describe('zero-x-swap-step', () => {

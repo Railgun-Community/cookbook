@@ -34,7 +34,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
   protected readonly sellERC20Info: RecipeERC20Info;
   protected readonly buyERC20Info: RecipeERC20Info;
 
-  private readonly slippagePercentage: number;
+  private readonly slippageBasisPoints: bigint;
 
   protected readonly destinationAddress: Optional<string>;
   protected readonly isRailgunDestinationAddress: Optional<boolean>;
@@ -42,7 +42,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
   constructor(
     sellERC20Info: RecipeERC20Info,
     buyERC20Info: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     destinationAddress?: string,
   ) {
     super();
@@ -50,7 +50,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
     this.sellERC20Info = sellERC20Info;
     this.buyERC20Info = buyERC20Info;
 
-    this.slippagePercentage = slippagePercentage;
+    this.slippageBasisPoints = slippageBasisPoints;
 
     this.destinationAddress = destinationAddress;
     if (isDefined(destinationAddress)) {
@@ -78,7 +78,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
       networkName,
       sellERC20Amount,
       buyERC20Info: this.buyERC20Info,
-      slippagePercentage: this.slippagePercentage,
+      slippageBasisPoints: this.slippageBasisPoints,
       isRailgun: true,
     };
     return ZeroXQuote.getSwapQuote(quoteParams);

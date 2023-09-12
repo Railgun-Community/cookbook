@@ -26,7 +26,7 @@ const { expect } = chai;
 const networkName = NetworkName.Arbitrum;
 
 const oneInDecimals18 = 10n ** 18n;
-const slippagePercentage = 0.01;
+const slippageBasisPoints = BigInt(100);
 
 const DAI_TOKEN: RecipeERC20Info = {
   tokenAddress: testConfig.contractsArbitrum.dai,
@@ -55,7 +55,7 @@ describe.skip('FORK-run-gmx-stake-mint-glp-recipe', function run() {
 
     const gmxStakeMintGlpRecipe = new GMXMintStakeGLPRecipe(
       DAI_TOKEN,
-      slippagePercentage,
+      slippageBasisPoints,
       testRPCProvider,
     );
     expect(gmxStakeMintGlpRecipe.id.length).to.equal(16);

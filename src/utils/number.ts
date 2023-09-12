@@ -1,7 +1,7 @@
 export const minBalanceAfterSlippage = (
   balance: bigint,
-  slippagePercentage: number,
+  slippageBasisPoints: bigint,
 ): bigint => {
-  const slippageMax = (balance * BigInt(slippagePercentage * 10000)) / 10000n;
+  const slippageMax = (balance * slippageBasisPoints) / 10000n;
   return balance - slippageMax;
 };

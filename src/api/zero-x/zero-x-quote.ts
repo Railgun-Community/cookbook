@@ -96,7 +96,7 @@ export class ZeroXQuote {
     networkName,
     sellERC20Amount,
     buyERC20Info,
-    slippagePercentage,
+    slippageBasisPoints,
     isRailgun,
   }: SwapQuoteParams): Promise<SwapQuoteData> => {
     if (sellERC20Amount.amount === 0n) {
@@ -111,7 +111,7 @@ export class ZeroXQuote {
       sellToken: sellTokenAddress,
       buyToken: buyTokenAddress,
       sellAmount: sellERC20Amount.amount.toString(),
-      slippagePercentage: String(slippagePercentage),
+      slippagePercentage: String(slippageBasisPoints),
     };
 
     try {
@@ -144,7 +144,7 @@ export class ZeroXQuote {
 
       const minimumBuyAmount = minBalanceAfterSlippage(
         BigInt(buyAmount),
-        slippagePercentage,
+        slippageBasisPoints,
       );
       const crossContractCall: ContractTransaction = {
         to: to,
@@ -164,7 +164,7 @@ export class ZeroXQuote {
         minimumBuyAmount,
         spender,
         crossContractCall,
-        slippagePercentage,
+        slippageBasisPoints,
         sellTokenAddress: sellTokenAddressResponse,
         sellTokenValue: sellTokenValueResponse,
       };

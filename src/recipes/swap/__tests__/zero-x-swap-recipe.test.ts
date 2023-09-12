@@ -37,7 +37,7 @@ const buyToken: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const slippagePercentage = 0.01;
+const slippageBasisPoints = BigInt(100);
 
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',
@@ -60,7 +60,7 @@ const quote: SwapQuoteData = {
   // Unused
   price: 0n,
   guaranteedPrice: 0n,
-  slippagePercentage,
+  slippageBasisPoints,
 };
 
 let stub0xQuote: SinonStub;
@@ -82,7 +82,11 @@ describe('zero-x-swap-recipe', () => {
   });
 
   it('Should create zero-x-swap-recipe with amount and change', async () => {
-    const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippageBasisPoints,
+    );
 
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
@@ -276,7 +280,11 @@ describe('zero-x-swap-recipe', () => {
   });
 
   it('Should test zero-x-swap-recipe error cases', async () => {
-    const recipe = new ZeroXSwapRecipe(sellToken, buyToken, slippagePercentage);
+    const recipe = new ZeroXSwapRecipe(
+      sellToken,
+      buyToken,
+      slippageBasisPoints,
+    );
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {

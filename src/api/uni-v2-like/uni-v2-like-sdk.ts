@@ -289,7 +289,7 @@ export class UniV2LikeSDK {
     networkName: NetworkName,
     erc20AmountA: RecipeERC20Amount,
     erc20InfoB: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     provider: Provider,
   ): Promise<RecipeAddLiquidityData> {
     const { factoryAddress } = this.getFactoryAddressAndInitCodeHash(
@@ -335,7 +335,7 @@ export class UniV2LikeSDK {
       erc20AmountB,
       expectedLPAmount,
       routerContractAddress,
-      slippagePercentage,
+      slippageBasisPoints,
       deadlineTimestamp,
     };
   }
@@ -346,7 +346,7 @@ export class UniV2LikeSDK {
     lpERC20Amount: RecipeERC20Amount,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     provider: Provider,
   ): Promise<RecipeRemoveLiquidityData> {
     const { factoryAddress } = this.getFactoryAddressAndInitCodeHash(
@@ -396,7 +396,7 @@ export class UniV2LikeSDK {
       expectedERC20AmountA,
       expectedERC20AmountB,
       routerContractAddress,
-      slippagePercentage,
+      slippageBasisPoints,
       deadlineTimestamp,
     };
   }

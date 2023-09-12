@@ -46,7 +46,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
       erc20AmountA,
       erc20AmountB,
       expectedLPAmount,
-      slippagePercentage,
+      slippageBasisPoints,
       deadlineTimestamp,
     } = this.addLiquidityData;
 
@@ -72,11 +72,11 @@ export class UniV2LikeAddLiquidityStep extends Step {
 
     const minAmountA = minBalanceAfterSlippage(
       validatedERC20AmountA.expectedBalance,
-      slippagePercentage,
+      slippageBasisPoints,
     );
     const minAmountB = minBalanceAfterSlippage(
       validatedERC20AmountB.expectedBalance,
-      slippagePercentage,
+      slippageBasisPoints,
     );
 
     const { relayAdaptContract } = NETWORK_CONFIG[input.networkName];
@@ -109,7 +109,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
 
     const minLPBalance = minBalanceAfterSlippage(
       expectedLPAmount.amount,
-      slippagePercentage,
+      slippageBasisPoints,
     );
     const outputLPERC20Amount: StepOutputERC20Amount = {
       tokenAddress: expectedLPAmount.tokenAddress,

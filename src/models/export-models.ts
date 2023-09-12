@@ -102,7 +102,7 @@ export type SwapQuoteData = {
   minimumBuyAmount: bigint;
   spender: Optional<string>;
   crossContractCall: ContractTransaction;
-  slippagePercentage: number;
+  slippageBasisPoints: bigint;
   sellTokenAddress: string;
   sellTokenValue: string;
 };
@@ -111,7 +111,7 @@ export type SwapQuoteParams = {
   networkName: NetworkName;
   sellERC20Amount: RecipeERC20Amount;
   buyERC20Info: RecipeERC20Info;
-  slippagePercentage: number;
+  slippageBasisPoints: bigint;
   isRailgun: boolean;
 };
 
@@ -123,7 +123,7 @@ export type RecipeAddLiquidityData = {
   erc20AmountA: RecipeERC20Amount;
   erc20AmountB: RecipeERC20Amount;
   expectedLPAmount: RecipeERC20Amount;
-  slippagePercentage: number;
+  slippageBasisPoints: bigint;
   routerContractAddress: string;
   deadlineTimestamp: number;
 };
@@ -132,7 +132,7 @@ export type RecipeRemoveLiquidityData = {
   lpERC20Amount: RecipeERC20Amount;
   expectedERC20AmountA: RecipeERC20Amount;
   expectedERC20AmountB: RecipeERC20Amount;
-  slippagePercentage: number;
+  slippageBasisPoints: bigint;
   routerContractAddress: string;
   deadlineTimestamp: number;
 };
