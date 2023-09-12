@@ -46,7 +46,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
       lpERC20Amount,
       expectedERC20AmountA,
       expectedERC20AmountB,
-      slippagePercentage,
+      slippageBasisPoints,
       deadlineTimestamp,
     } = this.removeLiquidityData;
 
@@ -63,11 +63,11 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
 
     const minAmountA = minBalanceAfterSlippage(
       expectedERC20AmountA.amount,
-      slippagePercentage,
+      slippageBasisPoints,
     );
     const minAmountB = minBalanceAfterSlippage(
       expectedERC20AmountB.amount,
-      slippagePercentage,
+      slippageBasisPoints,
     );
 
     const contract = new UniV2LikeRouterContract(routerContractAddress);

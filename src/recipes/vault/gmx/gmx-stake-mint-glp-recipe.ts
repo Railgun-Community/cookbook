@@ -30,7 +30,7 @@ export class GMXMintStakeGLPRecipe extends Recipe {
 
   protected readonly stakeERC20Info: RecipeERC20Info;
 
-  private readonly slippagePercentage: number;
+  private readonly slippageBasisPoints: bigint;
 
   private readonly provider: Provider;
 
@@ -38,12 +38,12 @@ export class GMXMintStakeGLPRecipe extends Recipe {
 
   constructor(
     stakeERC20Info: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     provider: Provider,
   ) {
     super();
     this.stakeERC20Info = stakeERC20Info;
-    this.slippagePercentage = slippagePercentage;
+    this.slippageBasisPoints = slippageBasisPoints;
     this.provider = provider;
     this.nftTokenSubID = getRandomNFTID();
   }
@@ -88,7 +88,7 @@ export class GMXMintStakeGLPRecipe extends Recipe {
       ),
       new GMXMintStakeGLPStep(
         this.stakeERC20Info,
-        this.slippagePercentage,
+        this.slippageBasisPoints,
         ownableContractAddress,
         this.provider,
       ),

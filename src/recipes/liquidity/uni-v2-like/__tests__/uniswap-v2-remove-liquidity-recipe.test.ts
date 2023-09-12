@@ -24,7 +24,7 @@ const networkName = NetworkName.Ethereum;
 
 const oneInDecimals6 = 10n ** 6n;
 const oneInDecimals18 = 10n ** 18n;
-const slippagePercentage = 0.01;
+const slippageBasisPoints = BigInt(0.01);
 
 // Assume 2000:1 rate.for USDC:WETH.
 const USDC_TOKEN: RecipeERC20Info = {
@@ -82,7 +82,7 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       LP_TOKEN,
       USDC_TOKEN,
       WETH_TOKEN,
-      slippagePercentage,
+      slippageBasisPoints,
       provider,
     );
 
@@ -294,7 +294,7 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       LP_TOKEN,
       USDC_TOKEN,
       WETH_TOKEN,
-      slippagePercentage,
+      slippageBasisPoints,
       provider,
     );
 

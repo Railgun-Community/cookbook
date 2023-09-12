@@ -29,7 +29,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
     uniswapV2Fork: UniswapV2Fork,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     vaultID: string,
     provider: Provider,
   ) {
@@ -39,7 +39,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
       uniswapV2Fork,
       erc20InfoA,
       erc20InfoB,
-      slippagePercentage,
+      slippageBasisPoints,
       provider,
     );
     this.beefyDepositRecipe = new BeefyDepositRecipe(vaultID);

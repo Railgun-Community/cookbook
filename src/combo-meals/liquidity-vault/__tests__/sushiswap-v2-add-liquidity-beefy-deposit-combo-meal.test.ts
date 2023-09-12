@@ -32,7 +32,7 @@ const networkName = NetworkName.Ethereum;
 
 const oneInDecimals6 = 10n ** 6n;
 const oneInDecimals18 = 10n ** 18n;
-const slippagePercentage = 0.01;
+const slippageBasisPoints = BigInt(0.01);
 
 const USDC_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -116,7 +116,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       UniswapV2Fork.SushiSwap,
       USDC_TOKEN,
       WETH_TOKEN,
-      slippagePercentage,
+      slippageBasisPoints,
       vaultID,
       provider,
     );

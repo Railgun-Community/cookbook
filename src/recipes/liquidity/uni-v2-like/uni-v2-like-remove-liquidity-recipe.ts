@@ -30,7 +30,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
   private readonly erc20InfoA: RecipeERC20Info;
   private readonly erc20InfoB: RecipeERC20Info;
 
-  private readonly slippagePercentage: number;
+  private readonly slippageBasisPoints: bigint;
   private readonly provider: Provider;
 
   constructor(
@@ -38,7 +38,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
     lpERC20Info: RecipeERC20Info,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     provider: Provider,
   ) {
     super();
@@ -48,7 +48,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
     this.erc20InfoA = erc20InfoA;
     this.erc20InfoB = erc20InfoB;
 
-    this.slippagePercentage = slippagePercentage;
+    this.slippageBasisPoints = slippageBasisPoints;
     this.provider = provider;
 
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
@@ -70,7 +70,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
       lpERC20Amount,
       this.erc20InfoA,
       this.erc20InfoB,
-      this.slippagePercentage,
+      this.slippageBasisPoints,
       this.provider,
     );
     return this.removeLiquidityData;

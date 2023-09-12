@@ -37,7 +37,7 @@ const buyToken: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const slippagePercentage = 0.01;
+const slippageBasisPoints = BigInt(0.01);
 
 const VITALIK_WALLET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 
@@ -62,7 +62,7 @@ const quote: SwapQuoteData = {
   // Unused
   price: 0n,
   guaranteedPrice: 0n,
-  slippagePercentage,
+  slippageBasisPoints,
 };
 
 let stub0xQuote: SinonStub;
@@ -87,7 +87,7 @@ describe('zero-x-swap-recipe-public-destination', () => {
     const recipe = new ZeroXSwapRecipe(
       sellToken,
       buyToken,
-      slippagePercentage,
+      slippageBasisPoints,
       VITALIK_WALLET, // destinationAddress
     );
 

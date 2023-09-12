@@ -38,7 +38,7 @@ const buyToken: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const slippagePercentage = 0.01;
+const slippageBasisPoints = BigInt(0.01);
 
 const quote: SwapQuoteData = {
   sellTokenValue: '10000',
@@ -61,7 +61,7 @@ const quote: SwapQuoteData = {
   // Unused
   price: 0n,
   guaranteedPrice: 0n,
-  slippagePercentage,
+  slippageBasisPoints,
 };
 
 let stub0xQuote: SinonStub;
@@ -89,7 +89,7 @@ describe('zero-x-swap-recipe-private-destination', () => {
     const recipe = new ZeroXSwapRecipe(
       sellToken,
       buyToken,
-      slippagePercentage,
+      slippageBasisPoints,
       privateWalletAddress, // destinationAddress
     );
 

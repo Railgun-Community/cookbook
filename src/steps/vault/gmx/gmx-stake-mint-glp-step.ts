@@ -28,7 +28,7 @@ export class GMXMintStakeGLPStep extends Step {
 
   private readonly stakeERC20Info: RecipeERC20Info;
 
-  private readonly slippagePercentage: number;
+  private readonly slippageBasisPoints: bigint;
 
   private readonly nftOwnedAccountAddress: string;
 
@@ -36,13 +36,13 @@ export class GMXMintStakeGLPStep extends Step {
 
   constructor(
     stakeERC20Info: RecipeERC20Info,
-    slippagePercentage: number,
+    slippageBasisPoints: bigint,
     nftOwnedAccountAddress: string,
     provider: Provider,
   ) {
     super();
     this.stakeERC20Info = stakeERC20Info;
-    this.slippagePercentage = slippagePercentage;
+    this.slippageBasisPoints = slippageBasisPoints;
     this.nftOwnedAccountAddress = nftOwnedAccountAddress;
     this.provider = provider;
   }
@@ -83,7 +83,7 @@ export class GMXMintStakeGLPStep extends Step {
     );
     const minGlpAmount: bigint = minBalanceAfterSlippage(
       expectedGlpAmount,
-      this.slippagePercentage,
+      this.slippageBasisPoints,
     );
 
     const gmxRewardRouter = new GmxRewardRouterV2Contract(
