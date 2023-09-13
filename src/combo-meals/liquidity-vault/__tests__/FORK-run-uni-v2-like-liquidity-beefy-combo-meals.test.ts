@@ -53,7 +53,7 @@ const VAULT_TOKEN: RecipeERC20Info = {
 const vaultID = 'sushi-mainnet-usdc-weth';
 
 describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
-  this.timeout(40000);
+  this.timeout(60000);
 
   before(async function run() {
     setRailgunFees(

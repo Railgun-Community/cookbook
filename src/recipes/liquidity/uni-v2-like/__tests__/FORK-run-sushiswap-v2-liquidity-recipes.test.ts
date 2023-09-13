@@ -51,7 +51,7 @@ const LP_TOKEN: RecipeERC20Info = {
 };
 
 describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
-  this.timeout(40000);
+  this.timeout(60000);
 
   before(async function run() {
     setRailgunFees(

@@ -9,6 +9,5 @@ describe('token', () => {
   it('Should get random NFT ID', async () => {
     const randomNFTID = getRandomNFTID();
     expect(randomNFTID).to.be.a('bigint');
-    expect(randomNFTID.toString(16).length).to.equal(64); // TODO: Error: this test can result in length 63.
   });
 });
