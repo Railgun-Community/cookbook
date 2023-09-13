@@ -102,16 +102,20 @@ export class ZeroXQuote {
     if (sellERC20Amount.amount === 0n) {
       throw new Error('Swap sell amount is 0.');
     }
+
     const sellTokenAddress = this.getZeroXTokenAddress(sellERC20Amount);
     const buyTokenAddress = this.getZeroXTokenAddress(buyERC20Info);
+
     if (sellTokenAddress === buyTokenAddress) {
       throw new Error('Swap sell and buy tokens are the same.');
     }
+
+    const slippagePercentage = Number(slippageBasisPoints) / 10000;
     const params: ZeroXAPIQuoteParams = {
       sellToken: sellTokenAddress,
       buyToken: buyTokenAddress,
       sellAmount: sellERC20Amount.amount.toString(),
-      slippagePercentage: String(slippageBasisPoints),
+      slippagePercentage: String(slippagePercentage),
     };
 
     try {
@@ -138,6 +142,7 @@ export class ZeroXQuote {
         sellTokenAddress,
         buyTokenAddress,
       );
+
       if (invalidError) {
         throw invalidError;
       }
