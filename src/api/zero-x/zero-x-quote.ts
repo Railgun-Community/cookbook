@@ -174,6 +174,7 @@ export class ZeroXQuote {
         sellTokenValue: sellTokenValueResponse,
       };
     } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const msg = this.formatApiError(err);
       throw new Error(msg);
     }
@@ -205,7 +206,7 @@ export class ZeroXQuote {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return `0x Exchange: ${response?.data.reason}. ${firstValidationErrorReason}.`;
     } catch {
-      return '0x API request failed.';
+      return `0x API request failed: ${err.message}.`;
     }
   };
 }

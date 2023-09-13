@@ -24,7 +24,7 @@ const WETH_TOKEN: RecipeERC20Info = {
   decimals: 18n,
 };
 
-const assertValidSushiSwapUSDCWethPair = (pair: LiquidityV2Pool) => {
+const assertValidUSDCWethPair = (pair: LiquidityV2Pool) => {
   const oneWithDecimals = 10n ** 18n;
   const rate = pair.rateWith18Decimals;
   expect(rate > oneWithDecimals * 500n).to.equal(
@@ -39,20 +39,37 @@ const assertValidSushiSwapUSDCWethPair = (pair: LiquidityV2Pool) => {
   // @ts-expect-error - Remove for obj comparison.
   delete pair.rateWith18Decimals;
 
-  expect(pair).to.deep.equal({
-    name: 'SushiSwap V2 USDC-WETH',
-    uniswapV2Fork: 'SushiSwap',
-    tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-    tokenDecimalsA: 6n,
-    tokenDecimalsB: 18n,
-    tokenSymbolA: 'USDC',
-    tokenSymbolB: 'WETH',
-    pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
-    pairTokenName: 'SushiSwap USDC-WETH LP',
-    pairTokenSymbol: 'USDC-WETH LP',
-    pairTokenDecimals: 18n,
-  });
+  if (pair.uniswapV2Fork === UniswapV2Fork.SushiSwap) {
+    expect(pair).to.deep.equal({
+      name: 'SushiSwap V2 USDC-WETH',
+      uniswapV2Fork: 'SushiSwap',
+      tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      tokenDecimalsA: 6n,
+      tokenDecimalsB: 18n,
+      tokenSymbolA: 'USDC',
+      tokenSymbolB: 'WETH',
+      pairAddress: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
+      pairTokenName: 'SushiSwap USDC-WETH LP',
+      pairTokenSymbol: 'USDC-WETH LP',
+      pairTokenDecimals: 18n,
+    });
+  } else {
+    expect(pair).to.deep.equal({
+      name: 'Uniswap V2 USDC-WETH',
+      uniswapV2Fork: 'Uniswap',
+      tokenAddressA: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      tokenAddressB: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      tokenDecimalsA: 6n,
+      tokenDecimalsB: 18n,
+      tokenSymbolA: 'USDC',
+      tokenSymbolB: 'WETH',
+      pairAddress: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
+      pairTokenName: 'Uniswap USDC-WETH LP',
+      pairTokenSymbol: 'USDC-WETH LP',
+      pairTokenDecimals: 18n,
+    });
+  }
 };
 
 let provider: JsonRpcProvider;
@@ -121,7 +138,7 @@ describe('uni-v2-like-pairs', () => {
       [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
     );
     expect(pairsUSDCAndWeth.length).to.equal(1);
-    assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
+    assertValidUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 
   it('Should query SushiSwap LP pair from USDC-WETH LP token', async () => {
@@ -131,7 +148,7 @@ describe('uni-v2-like-pairs', () => {
       ['0x397ff1542f962076d0bfe58ea045ffa2d347aca0'],
     );
     expect(pairsLPToken.length).to.equal(1);
-    assertValidSushiSwapUSDCWethPair(pairsLPToken[0]);
+    assertValidUSDCWethPair(pairsLPToken[0]);
   }).timeout(5000);
 
   it('Should get cached LP pairs for USDC and WETH', async () => {
@@ -147,8 +164,8 @@ describe('uni-v2-like-pairs', () => {
       networkName,
       [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
     );
-    expect(pairsUSDCAndWeth.length).to.equal(1);
-    assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
+    expect(pairsUSDCAndWeth.length).to.equal(2);
+    assertValidUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 
   it('Should get LP pairs for USDC-WETH LP token (returns first option from cache)', async () => {
@@ -158,7 +175,7 @@ describe('uni-v2-like-pairs', () => {
       ['0x397ff1542f962076d0bfe58ea045ffa2d347aca0'],
     );
     expect(pairsUSDCAndWeth.length).to.equal(1);
-    assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
+    assertValidUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 
   it('Should get LP pairs for USDC and WETH (returns first option from cache)', async () => {
@@ -167,7 +184,7 @@ describe('uni-v2-like-pairs', () => {
       networkName,
       [USDC_TOKEN.tokenAddress, WETH_TOKEN.tokenAddress],
     );
-    expect(pairsUSDCAndWeth.length).to.equal(1);
-    assertValidSushiSwapUSDCWethPair(pairsUSDCAndWeth[0]);
+    expect(pairsUSDCAndWeth.length).to.equal(2);
+    assertValidUSDCWethPair(pairsUSDCAndWeth[0]);
   }).timeout(5000);
 });
