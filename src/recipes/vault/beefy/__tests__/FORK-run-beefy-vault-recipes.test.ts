@@ -32,10 +32,10 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-const vaultID = 'convex-steth';
+const vaultID = 'convex-tricrypto-usdc';
 
-const tokenAddress = testConfig.contractsEthereum.steCRV;
-const vaultERC20Address = testConfig.contractsEthereum.mooConvexStETH;
+const tokenAddress = testConfig.contractsEthereum.crvUSDCWBTCWETH;
+const vaultERC20Address = testConfig.contractsEthereum.mooConvexTriCryptoUSDC;
 
 const oneWithDecimals = 10n ** 18n;
 

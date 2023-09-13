@@ -27,8 +27,8 @@ export let testConfig = {
     // LP tokens
     usdcWethSushiSwapV2LPToken: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
     // Vault tokens
-    steCRV: '0x06325440D014e39736583c165C2963BA99fAf14E',
-    mooConvexStETH: '0xa7739fd3d12ac7F16D8329AF3Ee407e19De10D8D',
+    crvUSDCWBTCWETH: '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B',
+    mooConvexTriCryptoUSDC: '0xD1BeaD7CadcCC6b6a715A6272c39F1EC54F6EC99',
   },
 
   contractsArbitrum: {

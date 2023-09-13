@@ -34,8 +34,8 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
         testConfig.contractsEthereum.rail,
         testConfig.contractsEthereum.usdc,
         testConfig.contractsEthereum.usdcWethSushiSwapV2LPToken,
-        testConfig.contractsEthereum.steCRV,
-        testConfig.contractsEthereum.mooConvexStETH,
+        testConfig.contractsEthereum.crvUSDCWBTCWETH,
+        testConfig.contractsEthereum.mooConvexTriCryptoUSDC,
       ];
     case NetworkName.Arbitrum:
       return [testConfig.contractsArbitrum.dai];
