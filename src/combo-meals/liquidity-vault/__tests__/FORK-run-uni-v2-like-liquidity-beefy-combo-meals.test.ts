@@ -148,13 +148,14 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     //   privateVaultTokenBalance,
     //   'Private LP token balance incorrect after adding liquidity',
     // );
+    const differenceWithExpected =
+      expectedPrivateVaultTokenBalance - privateVaultTokenBalance;
+    const tolerance = 10_000_000n;
     expect(
-      expectedPrivateVaultTokenBalance <= privateVaultTokenBalance &&
-        expectedPrivateVaultTokenBalance + 1000000000n >=
-          privateVaultTokenBalance,
+      -tolerance < differenceWithExpected && differenceWithExpected < tolerance,
     ).to.equal(
       true,
-      `Private Vault token balance incorrect after adding liquidity and depositing to vault, expected ${privateVaultTokenBalance} within 1000000000 of ${expectedPrivateVaultTokenBalance}`,
+      `Private Vault token balance incorrect after adding liquidity and depositing to vault, expected ${privateVaultTokenBalance} within ${tolerance} of ${expectedPrivateVaultTokenBalance}`,
     );
 
     // 2. Add External Balance expectations.
