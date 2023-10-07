@@ -73,6 +73,8 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   const { networkName } = recipeInput;
   const { minGasLimit } = recipeOutput;
 
+  // TODO: Add unshield assertions for ERC721 (NFT)
+
   // Get original balances for all unshielded ERC20s.
   const preRecipeUnshieldMap: Record<
     string,

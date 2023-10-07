@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { RecipeInput } from '../../../models/export-models';
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import { NFTTokenType, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
   MOCK_RAILGUN_WALLET_ADDRESS,
@@ -17,9 +17,10 @@ import {
 chai.use(chaiAsPromised);
 
 const networkName = NetworkName.Ethereum;
-const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
+const nftAddress = '0x1234567890';
+const tokenSubID = '0x0000';
 
-describe('FORK-run-empty-recipe with ERC20 inputs', function run() {
+describe.skip('FORK-run-empty-recipe', function run() {
   this.timeout(45000);
 
   before(async function run() {
@@ -30,7 +31,7 @@ describe('FORK-run-empty-recipe with ERC20 inputs', function run() {
     );
   });
 
-  it('[FORK] Should run empty-recipe', async function run() {
+  it('[FORK] Should run empty-recipe with ERC721 inputs', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -41,18 +42,25 @@ describe('FORK-run-empty-recipe with ERC20 inputs', function run() {
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
-      erc20Amounts: [
+      erc20Amounts: [],
+      nfts: [
         {
-          tokenAddress,
-          decimals: 18n,
-          isBaseToken: false,
-          amount: 12000n,
+          nftAddress,
+          tokenSubID,
+          amount: 1n,
+          nftTokenType: NFTTokenType.ERC721,
         },
       ],
-      nfts: [],
     };
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      recipe.config.name,
+      recipeInput,
+      recipeOutput,
+    );
+
+    // RUN AGAIN TO MAKE SURE THE NFT WAS SHIELDED PROPERLY:
     await executeRecipeStepsAndAssertUnshieldBalances(
       recipe.config.name,
       recipeInput,

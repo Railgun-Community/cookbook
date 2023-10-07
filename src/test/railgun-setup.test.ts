@@ -16,6 +16,8 @@ import fs from 'fs';
 import {
   FallbackProviderJsonConfig,
   NETWORK_CONFIG,
+  NFTAmountRecipient,
+  NFTTokenType,
   NetworkName,
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
@@ -37,6 +39,7 @@ import {
 import { groth16 } from 'snarkjs';
 import { getLocalhostRPC, getRPCPort } from './common.test';
 import { getRandomShieldPrivateKey } from '../utils/random';
+import { ERC721Contract } from '../contract';
 
 const dbgRailgunSetup = debug('railgun:setup');
 
@@ -153,6 +156,17 @@ const approveShield = async (wallet: Wallet, tokenAddress: string) => {
   return sendTransactionWithRetries(wallet, tx);
 };
 
+const approveShieldERC721Collection = async (
+  wallet: Wallet,
+  nftAddress: string,
+) => {
+  const token = new ERC721Contract(nftAddress);
+  const tx = await token.createSpenderApprovalForAll(
+    testConfig.contractsEthereum.proxy,
+  );
+  return sendTransactionWithRetries(wallet, tx);
+};
+
 export const shieldAllTokensForTests = async (
   networkName: NetworkName,
   tokenAddresses: string[],
@@ -190,6 +204,45 @@ export const shieldAllTokensForTests = async (
   await sendTransactionWithRetries(wallet, transaction);
 
   dbgRailgunSetup('Shielded tokens.');
+};
+
+export const mintAndShieldERC721 = async (
+  networkName: NetworkName,
+  nftAddress: string,
+  tokenSubID: string,
+) => {
+  // TODO: Mint NFT with a specified tokenSubID.
+
+  const wallet = getTestEthersWallet();
+
+  dbgRailgunSetup('Approving NFT ERC721 for shielding...');
+
+  await approveShieldERC721Collection(wallet, nftAddress);
+
+  dbgRailgunSetup('Shielding NFT...');
+
+  const testRailgunWallet = getTestRailgunWallet();
+  const railgunAddress = testRailgunWallet.getAddress();
+
+  const shieldPrivateKey = getRandomShieldPrivateKey();
+  const { transaction } = await populateShield(
+    networkName,
+    shieldPrivateKey,
+    [], // erc20Amounts
+    [
+      {
+        nftAddress,
+        tokenSubID,
+        amount: 1n,
+        nftTokenType: NFTTokenType.ERC721,
+        recipientAddress: railgunAddress,
+      },
+    ],
+  );
+
+  await sendTransactionWithRetries(wallet, transaction);
+
+  dbgRailgunSetup('Shielded ERC721.');
 };
 
 const sendTransactionWithRetries = async (

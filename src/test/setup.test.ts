@@ -3,6 +3,7 @@ import {
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
+  mintAndShieldERC721,
   removeTestDB,
   shieldAllTokensForTests,
   startRailgunForTests,
@@ -93,4 +94,10 @@ export const setupForkTests = async () => {
 
   // Make sure shielded balances are updated
   await waitForShieldedTokenBalances(networkName, tokenAddresses);
+
+  // TODO: Deploy NFT contract
+  // ...
+
+  // TODO: Add nftAddress / tokenSubID
+  // await mintAndShieldERC721(networkName, nftAddress, tokenSubID);
 };

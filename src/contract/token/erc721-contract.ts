@@ -16,7 +16,7 @@ export class ERC721Contract {
     ) as unknown as Erc721;
   }
 
-  createSpenderApproval(spender: string): Promise<ContractTransaction> {
+  createSpenderApprovalForAll(spender: string): Promise<ContractTransaction> {
     return this.contract.setApprovalForAll.populateTransaction(spender, true);
   }
 }
