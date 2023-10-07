@@ -1,6 +1,6 @@
 import {
   ArtifactStore,
-  Groth16,
+  SnarkJSGroth16,
   balanceForERC20Token,
   createRailgunWallet,
   getProver,
@@ -16,11 +16,11 @@ import fs from 'fs';
 import {
   FallbackProviderJsonConfig,
   NETWORK_CONFIG,
-  NFTAmountRecipient,
   NFTTokenType,
   NetworkName,
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
+  TXIDVersion,
   delay,
   isDefined,
   poll,
@@ -93,7 +93,7 @@ export const startRailgunForTests = () => {
     (error: string | Error) => dbgRailgunWalletSDK(error),
   );
 
-  getProver().setSnarkJSGroth16(groth16 as Groth16);
+  getProver().setSnarkJSGroth16(groth16 as SnarkJSGroth16);
 };
 
 export const loadLocalhostFallbackProviderForTests = async (
@@ -264,6 +264,7 @@ const sendTransactionWithRetries = async (
 };
 
 export const waitForShieldedTokenBalances = async (
+  txidVersion: TXIDVersion,
   networkName: NetworkName,
   tokenAddresses: string[],
 ) => {
@@ -281,7 +282,12 @@ export const waitForShieldedTokenBalances = async (
   ): (() => Promise<bigint>) => {
     dbgRailgunSetup(`Polling for updated token balance... ${tokenAddress}`);
     return () =>
-      balanceForERC20Token(testRailgunWallet, networkName, tokenAddress);
+      balanceForERC20Token(
+        txidVersion,
+        testRailgunWallet,
+        networkName,
+        tokenAddress,
+      );
   };
 
   await Promise.all(

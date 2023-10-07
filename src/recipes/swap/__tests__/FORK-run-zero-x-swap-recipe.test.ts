@@ -6,7 +6,11 @@ import {
   RecipeInput,
   SwapQuoteData,
 } from '../../../models/export-models';
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  TXIDVersion,
+} from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
   getTestProvider,
@@ -33,6 +37,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
+const txidVersion = TXIDVersion.V2_PoseidonMerkle;
 const sellTokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 const buyTokenAddress = '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D';
 
@@ -92,6 +97,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
 
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateRAILBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
@@ -119,6 +125,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
     // Expect new swapped token in private balance.
 
     const privateRAILBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
@@ -169,6 +176,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
 
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateRAILBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
@@ -196,6 +204,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
     // Expect no change in private balance.
 
     const privateRAILBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
@@ -251,6 +260,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
 
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateRAILBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
@@ -258,6 +268,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
 
     const railgunWallet2 = getTestRailgunWallet2();
     const initialPrivateRAILBalance2 = await balanceForERC20Token(
+      txidVersion,
       railgunWallet2,
       networkName,
       buyToken.tokenAddress,
@@ -286,6 +297,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
 
     // Check origin wallet balance
     const privateRAILBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
@@ -298,6 +310,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
 
     // Check destination wallet balance
     const privateRAILBalance2 = await balanceForERC20Token(
+      txidVersion,
       railgunWallet2,
       networkName,
       buyToken.tokenAddress,

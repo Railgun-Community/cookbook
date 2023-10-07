@@ -1,15 +1,15 @@
 diff --git a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
-index da21a24..7346e56 100644
+index 7e1da90..d6437a7 100644
 --- a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
 +++ b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/railgun-smart-wallet.js
-@@ -250,6 +250,10 @@ class RailgunSmartWalletContract extends events_1.default {
-      * @param latestBlock - block to scan to
-      */
+@@ -253,6 +253,10 @@ class RailgunSmartWalletContract extends events_1.default {
      async getHistoricalEvents(chain, initialStartBlock, latestBlock, getNextStartBlockFromValidMerkletree, eventsListener, eventsNullifierListener, eventsUnshieldListener, setLastSyncedBlock) {
+         const engineV3StartBlockNumber = RailgunSmartWalletContract.getEngineV2StartBlockNumber(chain);
+         const engineV3ShieldEventUpdate030923BlockNumber = RailgunSmartWalletContract.getEngineV2ShieldEventUpdate030923BlockNumber(chain);
 +
 +        // Cookbook does not need event scanning.
 +        return;
 +
-         const engineV3StartBlockNumber = RailgunSmartWalletContract.getEngineV3StartBlockNumber(chain);
-         const engineV3ShieldEventUpdate030923BlockNumber = RailgunSmartWalletContract.getEngineV3ShieldEventUpdate030923BlockNumber(chain);
          // TODO: Possible data integrity issue in using commitment block numbers.
+         // Unshields and Nullifiers are scanned from the latest commitment block.
+         // Unshields/Nullifiers are not validated using the same merkleroot validation.

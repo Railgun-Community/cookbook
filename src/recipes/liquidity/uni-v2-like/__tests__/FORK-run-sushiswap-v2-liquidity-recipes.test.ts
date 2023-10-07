@@ -25,13 +25,14 @@ import {
   executeRecipeStepsAndAssertUnshieldBalances,
   shouldSkipForkTest,
 } from '../../../../test/common.test';
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
 import { getUnshieldedAmountAfterFee } from '../../../../utils/fee';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
+const txidVersion = TXIDVersion.V2_PoseidonMerkle;
 
 const oneInDecimals6 = 10n ** 6n;
 const oneInDecimals18 = 10n ** 18n;
@@ -113,6 +114,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
 
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateLPTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       LP_TOKEN.tokenAddress,
@@ -158,6 +160,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
     // Expect new swapped token in private balance.
 
     const privateLPTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       LP_TOKEN.tokenAddress,
@@ -252,11 +255,13 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
 
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateTokenABalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       USDC_TOKEN.tokenAddress,
     );
     const initialPrivateTokenBBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       WETH_TOKEN.tokenAddress,
@@ -295,11 +300,13 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
     // Expect new swapped token in private balance.
 
     const privateTokenABalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       USDC_TOKEN.tokenAddress,
     );
     const privateTokenBBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       WETH_TOKEN.tokenAddress,

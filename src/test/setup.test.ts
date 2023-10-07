@@ -1,9 +1,12 @@
-import { NetworkName, isDefined } from '@railgun-community/shared-models';
+import {
+  NetworkName,
+  TXIDVersion,
+  isDefined,
+} from '@railgun-community/shared-models';
 import {
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
-  mintAndShieldERC721,
   removeTestDB,
   shieldAllTokensForTests,
   startRailgunForTests,
@@ -57,6 +60,7 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
 };
 
 export const setupForkTests = async () => {
+  const txidVersion = TXIDVersion.V2_PoseidonMerkle;
   const networkName = getForkTestNetworkName();
 
   if (!Object.keys(NetworkName).includes(networkName)) {
@@ -93,7 +97,7 @@ export const setupForkTests = async () => {
   await shieldAllTokensForTests(networkName, tokenAddresses);
 
   // Make sure shielded balances are updated
-  await waitForShieldedTokenBalances(networkName, tokenAddresses);
+  await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
 
   // TODO: Deploy NFT contract
   // ...

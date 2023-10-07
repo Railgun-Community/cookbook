@@ -1,7 +1,11 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  TXIDVersion,
+} from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import {
   MOCK_RAILGUN_WALLET_ADDRESS,
@@ -19,6 +23,7 @@ import { balanceForERC20Token } from '@railgun-community/wallet';
 chai.use(chaiAsPromised);
 
 const networkName = NetworkName.Ethereum;
+const txidVersion = TXIDVersion.V2_PoseidonMerkle;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 const erc20Info: RecipeERC20Info = {
@@ -67,6 +72,7 @@ describe('FORK-designate-shield-erc20-recipient-empty-recipe', function run() {
     };
 
     const initialPrivateRAILBalance2 = await balanceForERC20Token(
+      txidVersion,
       wallet2,
       networkName,
       tokenAddress,
@@ -83,6 +89,7 @@ describe('FORK-designate-shield-erc20-recipient-empty-recipe', function run() {
 
     // 1. Add New Private Balance expectations.
     const privateRAILBalance2 = await balanceForERC20Token(
+      txidVersion,
       wallet2,
       networkName,
       tokenAddress,

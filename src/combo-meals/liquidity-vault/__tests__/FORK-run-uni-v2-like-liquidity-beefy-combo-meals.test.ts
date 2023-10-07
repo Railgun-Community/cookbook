@@ -22,7 +22,7 @@ import {
   executeRecipeStepsAndAssertUnshieldBalances,
   shouldSkipForkTest,
 } from '../../../test/common.test';
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
 import { BeefyAPI } from '../../../api/beefy/beefy-api';
 import { calculateOutputsForBeefyDeposit } from '../../../steps/vault/beefy/beefy-util';
 
@@ -102,7 +102,9 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     };
 
     const railgunWallet = getTestRailgunWallet();
+    const txidVersion = TXIDVersion.V2_PoseidonMerkle;
     const initialPrivateVaultTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       VAULT_TOKEN.tokenAddress,
@@ -123,6 +125,7 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     // Expect new swapped token in private balance.
 
     const privateVaultTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       VAULT_TOKEN.tokenAddress,

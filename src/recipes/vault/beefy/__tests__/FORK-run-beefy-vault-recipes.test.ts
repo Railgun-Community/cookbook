@@ -18,7 +18,7 @@ import {
   executeRecipeStepsAndAssertUnshieldBalances,
   shouldSkipForkTest,
 } from '../../../../test/common.test';
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
 import { testConfig } from '../../../../test/test-config.test';
 import { BeefyAPI } from '../../../../api/beefy/beefy-api';
 import { compareTokenAddress } from '../../../../utils';
@@ -32,6 +32,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
+const txidVersion = TXIDVersion.V2_PoseidonMerkle;
 const vaultID = 'convex-tricrypto-usdc';
 
 const tokenAddress = testConfig.contractsEthereum.crvUSDCWBTCWETH;
@@ -78,7 +79,9 @@ describe('FORK-run-beefy-vault-recipes', function run() {
     };
 
     const railgunWallet = getTestRailgunWallet();
+    const txidVersion = TXIDVersion.V2_PoseidonMerkle;
     const initialPrivateVaultTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       vaultERC20Address,
@@ -105,6 +108,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
     // Expect new swapped token in private balance.
 
     const privateVaultTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       vaultERC20Address,
@@ -181,6 +185,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
 
     const railgunWallet = getTestRailgunWallet();
     const initialTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       tokenAddress,
@@ -207,6 +212,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
     // Expect new swapped token in private balance.
 
     const privateTokenBalance = await balanceForERC20Token(
+      txidVersion,
       railgunWallet,
       networkName,
       tokenAddress,

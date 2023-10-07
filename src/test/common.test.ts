@@ -5,6 +5,7 @@ import {
 import {
   NETWORK_CONFIG,
   NetworkName,
+  TXIDVersion,
   delay,
   isDefined,
 } from '@railgun-community/shared-models';
@@ -75,6 +76,8 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
 
   // TODO: Add unshield assertions for ERC721 (NFT)
 
+  const txidVersion = TXIDVersion.V2_PoseidonMerkle;
+
   // Get original balances for all unshielded ERC20s.
   const preRecipeUnshieldMap: Record<
     string,
@@ -83,6 +86,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   await Promise.all(
     recipeInput.erc20Amounts.map(async ({ tokenAddress, amount }) => {
       const balance = await balanceForERC20Token(
+        txidVersion,
         railgunWallet,
         networkName,
         tokenAddress,
@@ -96,6 +100,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   );
 
   const { gasEstimate, transaction } = await createCrossContractCallsForTest(
+    txidVersion,
     networkName,
     recipeInput,
     recipeOutput,
@@ -218,6 +223,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
       );
 
       const postBalance = await balanceForERC20Token(
+        txidVersion,
         railgunWallet,
         networkName,
         tokenAddress,
