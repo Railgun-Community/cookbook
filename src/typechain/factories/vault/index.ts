@@ -2,4 +2,3 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as beefy from "./beefy";
-export * as gmx from "./gmx";

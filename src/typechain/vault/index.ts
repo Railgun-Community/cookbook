@@ -3,5 +3,3 @@
 /* eslint-disable */
 import type * as beefy from "./beefy";
 export type { beefy };
-import type * as gmx from "./gmx";
-export type { gmx };
