@@ -88,7 +88,7 @@ const MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2: TransactionGasDetails = {
 const MOCK_RAILGUN_ADDRESS =
   '0zk1q8hxknrs97q8pjxaagwthzc0df99rzmhl2xnlxmgv9akv32sua0kfrv7j6fe3z53llhxknrs97q8pjxaagwthzc0df99rzmhl2xnlxmgv9akv32sua0kg0zpzts';
 
-export const createQuickstartCrossContractCallsForTest = async (
+export const createCrossContractCallsForTest = async (
   networkName: NetworkName,
   recipeInput: RecipeInput,
   recipeOutput: RecipeOutput,
@@ -121,19 +121,19 @@ export const createQuickstartCrossContractCallsForTest = async (
     }),
   );
 
-  if (unshieldERC20Amounts.length < 1) {
-    throw new Error(
-      'Test cross-contract call runner requires at least 1 unshield ERC20 amount.',
-    );
-  }
-
   // Proof/transaction requires relayer fee in order to parse the relay adapt error for testing.
   // Ie. RelayAdapt transaction must continue after revert, and emit event with error details.
-  const mockRelayerFeeRecipient: RailgunERC20AmountRecipient = {
-    tokenAddress: unshieldERC20Amounts[0].tokenAddress,
-    amount: 0n,
-    recipientAddress: MOCK_RAILGUN_ADDRESS,
-  };
+  // NFT-only tests will not have this benefit.
+  const useRelayerFee = unshieldERC20Amounts.length < 1;
+  const mockRelayerFeeRecipient: Optional<RailgunERC20AmountRecipient> =
+    useRelayerFee
+      ? {
+          tokenAddress: unshieldERC20Amounts[0].tokenAddress,
+          amount: 0n,
+          recipientAddress: MOCK_RAILGUN_ADDRESS,
+        }
+      : undefined;
+  const sendWithPublicWallet = !useRelayerFee;
 
   let gasEstimate: Optional<bigint>;
   try {
@@ -149,7 +149,7 @@ export const createQuickstartCrossContractCallsForTest = async (
         crossContractCalls,
         MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
         undefined, // feeTokenDetails
-        true, // sendWithPublicWallet
+        sendWithPublicWallet,
         minGasLimit,
       );
     gasEstimate = resolvedGasEstimate;
@@ -172,16 +172,21 @@ export const createQuickstartCrossContractCallsForTest = async (
     shieldNFTRecipients,
     crossContractCalls,
     mockRelayerFeeRecipient,
-    false, // sendWithPublicWallet
+    sendWithPublicWallet,
     undefined, // overallBatchMinGasPrice
     minGasLimit,
     () => {}, // progressCallback
   );
 
-  const transactionGasDetails: TransactionGasDetails = {
-    ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1,
-    gasEstimate: gasEstimate ?? minGasLimit,
-  };
+  const transactionGasDetails: TransactionGasDetails = useRelayerFee
+    ? {
+        ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1,
+        gasEstimate: gasEstimate ?? minGasLimit,
+      }
+    : {
+        ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_2,
+        gasEstimate: gasEstimate ?? minGasLimit,
+      };
   const { transaction } = await populateProvedCrossContractCalls(
     networkName,
     railgunWallet.id,
@@ -191,7 +196,7 @@ export const createQuickstartCrossContractCallsForTest = async (
     shieldNFTRecipients,
     crossContractCalls,
     mockRelayerFeeRecipient,
-    false, // sendWithPublicWallet
+    sendWithPublicWallet,
     undefined, // overallBatchMinGasPrice
     transactionGasDetails,
   );

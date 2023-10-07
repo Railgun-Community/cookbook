@@ -10,7 +10,7 @@ import {
 } from '@railgun-community/shared-models';
 import { RecipeInput, RecipeOutput } from '../models/export-models';
 import {
-  createQuickstartCrossContractCallsForTest,
+  createCrossContractCallsForTest,
   getTestEthersWallet,
   getTestRailgunWallet,
   testRPCProvider,
@@ -95,12 +95,11 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
     }),
   );
 
-  const { gasEstimate, transaction } =
-    await createQuickstartCrossContractCallsForTest(
-      networkName,
-      recipeInput,
-      recipeOutput,
-    );
+  const { gasEstimate, transaction } = await createCrossContractCallsForTest(
+    networkName,
+    recipeInput,
+    recipeOutput,
+  );
 
   // console.log(`gas estimate for ${recipeOutput.name}: ${gasEstimate}`);
 
