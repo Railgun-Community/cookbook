@@ -1,7 +1,10 @@
 import {
   ArtifactStore,
+  NFTTokenData,
   SnarkJSGroth16,
+  TokenType,
   balanceForERC20Token,
+  balanceForNFT,
   createRailgunWallet,
   getProver,
   loadProvider,
@@ -304,7 +307,40 @@ export const waitForShieldedTokenBalances = async (
     }),
   );
 
-  dbgRailgunSetup('---');
   dbgRailgunSetup('Shielded token balances found. Test setup complete.');
-  dbgRailgunSetup('---');
+};
+
+export const waitForShieldedNFTBalance = async (
+  txidVersion: TXIDVersion,
+  networkName: NetworkName,
+  nftAddress: string,
+  tokenSubID: string,
+) => {
+  const onBalancesUpdate = (balancesEvent: RailgunBalancesEvent) => {
+    dbgRailgunWalletSDK('onBalancesUpdate', balancesEvent);
+  };
+  setOnBalanceUpdateCallback(onBalancesUpdate);
+
+  dbgRailgunSetup('Scanning private balances and populating test.db...');
+
+  const testRailgunWallet = getTestRailgunWallet();
+
+  const nftTokenData: NFTTokenData = {
+    tokenAddress: nftAddress,
+    tokenSubID,
+    tokenType: TokenType.ERC721,
+  };
+
+  const balance = await poll(
+    () =>
+      balanceForNFT(txidVersion, testRailgunWallet, networkName, nftTokenData),
+    balance => balance === 1n,
+    100, // Delay in MS
+    300, // Iterations - 30sec total
+  );
+  if (!isDefined(balance)) {
+    throw new Error(`Could not find shielded balance for NFT: ${nftAddress}`);
+  }
+
+  dbgRailgunSetup('Shielded NFT balance found. Test setup complete.');
 };
