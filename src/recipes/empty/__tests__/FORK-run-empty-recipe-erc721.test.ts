@@ -20,7 +20,7 @@ const networkName = NetworkName.Ethereum;
 const nftAddress = '0x1234567890';
 const tokenSubID = '0x0000';
 
-describe.skip('FORK-run-empty-recipe', function run() {
+describe.skip('FORK-run-empty-recipe-erc721', function run() {
   this.timeout(45000);
 
   before(async function run() {
