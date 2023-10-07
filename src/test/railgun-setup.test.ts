@@ -46,6 +46,7 @@ import { groth16 } from 'snarkjs';
 import { getLocalhostRPC, getRPCPort } from './common.test';
 import { getRandomShieldPrivateKey } from '../utils/random';
 import { ERC721Contract } from '../contract';
+import fse from 'fs-extra';
 
 const dbgRailgunSetup = debug('railgun:setup');
 
@@ -59,6 +60,10 @@ export const removeTestDB = () => {
   fs.rm(ENGINE_TEST_DB, { recursive: true }, () => {
     // console.warn('Error removing test db.');
   });
+};
+
+export const loadDBFromCache = () => {
+  fse.copySync('test.db.cached', 'test.db', { overwrite: true });
 };
 
 const fileExists = (path: string): Promise<boolean> => {

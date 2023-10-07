@@ -120,3 +120,7 @@ await wallet.sendTransaction(transaction);
 - See [Chainlist](https://chainlist.org/) or [Pokt](https://docs.pokt.network/use/public-rpc/) for public RPC endpoints (however paid RPCs are recommended for stability).
 
 3. Run tests (in another terminal): `env NETWORK_NAME=Ethereum yarn test-fork`.
+
+### RUN CACHE FORK TESTS
+
+`./run-anvil Ethereum https://er.us.proxy.railwayapi.xyz/rpc/alchemy/eth-mainnet --fork-block-number=18300328`

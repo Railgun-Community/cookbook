@@ -6,6 +6,7 @@ import {
 import {
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
+  loadDBFromCache,
   loadLocalhostFallbackProviderForTests,
   pollUntilUTXOMerkletreeScanned,
   removeTestDB,
@@ -19,8 +20,9 @@ import { getForkTestNetworkName } from './common.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
+    loadDBFromCache();
     this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
-    removeTestDB();
+    // removeTestDB();
     await setupForkTests();
   }
 });
