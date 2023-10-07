@@ -11,6 +11,7 @@ import {
   populateShield,
   setLoggers,
   setOnBalanceUpdateCallback,
+  setOnUTXOMerkletreeScanCallback,
   startRailgunEngine,
   walletForID,
 } from '@railgun-community/wallet';
@@ -18,6 +19,8 @@ import LevelDOWN from 'leveldown';
 import fs from 'fs';
 import {
   FallbackProviderJsonConfig,
+  MerkletreeScanStatus,
+  MerkletreeScanUpdateEvent,
   NETWORK_CONFIG,
   NFTTokenType,
   NetworkName,
@@ -115,9 +118,37 @@ export const loadLocalhostFallbackProviderForTests = async (
     ],
   };
 
+  setOnUTXOMerkletreeScanCallback(utxoMerkletreeHistoryScanCallback);
+
   dbgRailgunSetup(`Loading provider for chain ${chainId} to RAILGUN Engine.`);
   const pollingInterval = 300;
   await loadProvider(localhostProviderConfig, networkName, pollingInterval);
+};
+
+let currentUTXOMerkletreeScanStatus: Optional<MerkletreeScanStatus>;
+export const utxoMerkletreeHistoryScanCallback = (
+  scanData: MerkletreeScanUpdateEvent,
+): void => {
+  dbgRailgunSetup(
+    `UTXO merkletree scan update: ${Math.round(scanData.progress * 100)}% [${
+      scanData.scanStatus
+    }]`,
+  );
+  currentUTXOMerkletreeScanStatus = scanData.scanStatus;
+};
+
+export const pollUntilUTXOMerkletreeScanned = async () => {
+  dbgRailgunSetup('Polling for UTXO merkletree scan to complete...');
+  const status = await poll(
+    async () => currentUTXOMerkletreeScanStatus,
+    status => status === MerkletreeScanStatus.Complete,
+    50,
+    50000 / 50, // 50 sec.
+  );
+  if (status !== MerkletreeScanStatus.Complete) {
+    throw new Error(`Merkletree scan should be completed - timed out`);
+  }
+  dbgRailgunSetup('UTXO merkletree complete');
 };
 
 export const createRailgunWalletForTests = async () => {

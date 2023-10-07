@@ -7,6 +7,7 @@ import {
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
+  pollUntilUTXOMerkletreeScanned,
   removeTestDB,
   shieldAllTokensForTests,
   startRailgunForTests,
@@ -60,8 +61,8 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
 };
 
 export const setupForkTests = async () => {
-  const txidVersion = TXIDVersion.V2_PoseidonMerkle;
   const networkName = getForkTestNetworkName();
+  const txidVersion = TXIDVersion.V2_PoseidonMerkle;
 
   if (!Object.keys(NetworkName).includes(networkName)) {
     throw new Error(
@@ -87,6 +88,8 @@ export const setupForkTests = async () => {
 
   await loadLocalhostFallbackProviderForTests(networkName);
 
+  await pollUntilUTXOMerkletreeScanned();
+
   // Set up primary wallet
   await createRailgunWalletForTests();
 
@@ -98,10 +101,4 @@ export const setupForkTests = async () => {
 
   // Make sure shielded balances are updated
   await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
-
-  // TODO: Deploy NFT contract
-  // ...
-
-  // TODO: Add nftAddress / tokenSubID
-  // await mintAndShieldERC721(networkName, nftAddress, tokenSubID);
 };
