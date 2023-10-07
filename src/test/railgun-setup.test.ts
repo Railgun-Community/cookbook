@@ -142,8 +142,8 @@ export const pollUntilUTXOMerkletreeScanned = async () => {
   const status = await poll(
     async () => currentUTXOMerkletreeScanStatus,
     status => status === MerkletreeScanStatus.Complete,
-    50,
-    50000 / 50, // 50 sec.
+    100,
+    60000 / 100, // 60 sec.
   );
   if (status !== MerkletreeScanStatus.Complete) {
     throw new Error(`Merkletree scan should be completed - timed out`);
