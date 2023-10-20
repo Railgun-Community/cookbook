@@ -46,6 +46,7 @@ export const getRPCPort = (networkName: NetworkName) => {
     case NetworkName.Polygon:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli:
+    case NetworkName.EthereumSepolia:
     case NetworkName.PolygonMumbai:
     case NetworkName.ArbitrumGoerli:
     case NetworkName.Hardhat:
@@ -90,6 +91,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
         railgunWallet,
         networkName,
         tokenAddress,
+        false, // onlySpendable not required - POI is not necessary for tests
       );
 
       preRecipeUnshieldMap[tokenAddress] = {
@@ -227,6 +229,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
         railgunWallet,
         networkName,
         tokenAddress,
+        false, // onlySpendable not required - POI is not necessary for tests
       );
       const { originalBalance, unshieldAmount } =
         preRecipeUnshieldMap[tokenAddress];

@@ -48,6 +48,7 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
     case NetworkName.Polygon:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli:
+    case NetworkName.EthereumSepolia:
     case NetworkName.PolygonMumbai:
     case NetworkName.ArbitrumGoerli:
     case NetworkName.Hardhat:

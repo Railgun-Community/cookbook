@@ -118,6 +118,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       railgunWallet,
       networkName,
       LP_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await addLiquidityRecipe.getRecipeOutput(
@@ -164,6 +165,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       railgunWallet,
       networkName,
       LP_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const expectedLPTokenReceived = addLiquidityData.expectedLPAmount.amount;
@@ -259,12 +261,14 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       railgunWallet,
       networkName,
       USDC_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
     const initialPrivateTokenBBalance = await balanceForERC20Token(
       txidVersion,
       railgunWallet,
       networkName,
       WETH_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await removeLiquidityRecipe.getRecipeOutput(
@@ -304,12 +308,14 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       railgunWallet,
       networkName,
       USDC_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
     const privateTokenBBalance = await balanceForERC20Token(
       txidVersion,
       railgunWallet,
       networkName,
       WETH_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const expectedTokenAReceived =

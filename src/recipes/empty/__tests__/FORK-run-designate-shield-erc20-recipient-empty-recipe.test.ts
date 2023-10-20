@@ -76,6 +76,7 @@ describe('FORK-designate-shield-erc20-recipient-empty-recipe', function run() {
       wallet2,
       networkName,
       tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);
@@ -93,6 +94,7 @@ describe('FORK-designate-shield-erc20-recipient-empty-recipe', function run() {
       wallet2,
       networkName,
       tokenAddress,
+      false, // onlySpendable - not required for tests
     );
     const originalAmount = 12000n;
     const unshieldFee =

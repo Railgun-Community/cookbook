@@ -79,7 +79,13 @@ describe.skip('FORK-run-empty-recipe-erc721', function run() {
       tokenSubID,
     );
     expect(
-      balanceForNFT(txidVersion, testRailgunWallet, networkName, nftTokenData),
+      balanceForNFT(
+        txidVersion,
+        testRailgunWallet,
+        networkName,
+        nftTokenData,
+        false, // onlySpendable - not required for tests
+      ),
     ).to.equal(1n);
 
     // 2. Add External Balance expectations.

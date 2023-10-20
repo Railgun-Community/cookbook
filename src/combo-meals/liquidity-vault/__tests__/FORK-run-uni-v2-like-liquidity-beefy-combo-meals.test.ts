@@ -108,6 +108,7 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       railgunWallet,
       networkName,
       VAULT_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await comboMeal.getComboMealOutput(recipeInput);
@@ -129,6 +130,7 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       railgunWallet,
       networkName,
       VAULT_TOKEN.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const expectedLPTokenReceived = addLiquidityData.expectedLPAmount.amount;

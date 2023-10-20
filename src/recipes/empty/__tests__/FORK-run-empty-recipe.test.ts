@@ -19,7 +19,7 @@ chai.use(chaiAsPromised);
 const networkName = NetworkName.Ethereum;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
-describe.only('FORK-run-empty-recipe with ERC20 inputs', function run() {
+describe('FORK-run-empty-recipe with ERC20 inputs', function run() {
   this.timeout(45000);
 
   before(async function run() {

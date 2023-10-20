@@ -85,6 +85,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
       railgunWallet,
       networkName,
       vaultERC20Address,
+      false, // onlySpendable - not required for tests
     );
 
     const provider = getTestProvider();
@@ -112,6 +113,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
       railgunWallet,
       networkName,
       vaultERC20Address,
+      false, // onlySpendable - not required for tests
     );
 
     const unshieldFee =
@@ -189,6 +191,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
       railgunWallet,
       networkName,
       tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const provider = getTestProvider();
@@ -216,6 +219,7 @@ describe('FORK-run-beefy-vault-recipes', function run() {
       railgunWallet,
       networkName,
       tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const unshieldFeeWithdraw =

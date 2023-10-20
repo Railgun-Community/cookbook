@@ -101,6 +101,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);
@@ -129,6 +130,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const minimumBuyAmount = quote.minimumBuyAmount;
@@ -180,6 +182,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);
@@ -208,6 +211,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const expectedPrivateRAILBalance = initialPrivateRAILBalance;
@@ -264,6 +268,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const railgunWallet2 = getTestRailgunWallet2();
@@ -272,6 +277,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet2,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);
@@ -301,6 +307,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
     const expectedPrivateRAILBalance = initialPrivateRAILBalance;
     expect(privateRAILBalance === expectedPrivateRAILBalance).to.equal(
@@ -314,6 +321,7 @@ describe('FORK-run-zero-x-swap-recipe', function run() {
       railgunWallet2,
       networkName,
       buyToken.tokenAddress,
+      false, // onlySpendable - not required for tests
     );
     const minimumBuyAmount = quote.minimumBuyAmount;
     const minimumShieldFee =

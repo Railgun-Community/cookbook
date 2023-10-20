@@ -106,6 +106,7 @@ export class BeefyAPI {
       case NetworkName.Railgun:
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli:
+      case NetworkName.EthereumSepolia:
       case NetworkName.PolygonMumbai:
       case NetworkName.ArbitrumGoerli:
       case NetworkName.Hardhat:

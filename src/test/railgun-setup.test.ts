@@ -321,6 +321,7 @@ export const waitForShieldedTokenBalances = async (
         testRailgunWallet,
         networkName,
         tokenAddress,
+        false, // onlySpendable not required - POI is not necessary for tests
       );
   };
 
@@ -364,7 +365,13 @@ export const waitForShieldedNFTBalance = async (
 
   const balance = await poll(
     () =>
-      balanceForNFT(txidVersion, testRailgunWallet, networkName, nftTokenData),
+      balanceForNFT(
+        txidVersion,
+        testRailgunWallet,
+        networkName,
+        nftTokenData,
+        false, // onlySpendable not required - POI is not necessary for tests
+      ),
     balance => balance === 1n,
     100, // Delay in MS
     300, // Iterations - 30sec total

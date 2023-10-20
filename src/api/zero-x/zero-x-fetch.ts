@@ -26,6 +26,7 @@ export const zeroXApiSubdomain = (networkName: NetworkName): string => {
     case NetworkName.ArbitrumGoerli:
     case NetworkName.Railgun:
     case NetworkName.Hardhat:
+    case NetworkName.EthereumSepolia:
     case NetworkName.EthereumRopsten_DEPRECATED:
       throw new Error(`No 0x API URL for chain ${networkName}`);
   }
