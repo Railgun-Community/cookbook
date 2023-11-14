@@ -6,6 +6,7 @@ import {
   NETWORK_CONFIG,
   NetworkName,
   TXIDVersion,
+  TransactionReceiptLog,
   delay,
   isDefined,
 } from '@railgun-community/shared-models';
@@ -177,7 +178,13 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   }
 
   const relayAdaptTransactionError = getRelayAdaptTransactionError(
-    txReceipt.logs,
+    TXIDVersion.V2_PoseidonMerkle,
+    txReceipt.logs.map(log => {
+      return {
+        topics: log.topics as string[],
+        data: log.data,
+      };
+    }),
   );
   if (isDefined(relayAdaptTransactionError)) {
     throw new Error(
