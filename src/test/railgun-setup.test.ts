@@ -229,6 +229,7 @@ export const shieldAllTokensForTests = async (
 
   const shieldPrivateKey = getRandomShieldPrivateKey();
   const { transaction } = await populateShield(
+    TXIDVersion.V2_PoseidonMerkle,
     networkName,
     shieldPrivateKey,
     erc20Amounts,
@@ -260,6 +261,7 @@ export const mintAndShieldERC721 = async (
 
   const shieldPrivateKey = getRandomShieldPrivateKey();
   const { transaction } = await populateShield(
+    TXIDVersion.V2_PoseidonMerkle,
     networkName,
     shieldPrivateKey,
     [], // erc20Amounts
