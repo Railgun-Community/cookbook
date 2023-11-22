@@ -41,7 +41,7 @@
     "@railgun-community/shared-models": "6.2.x",
     "axios": "^1.4.0",
     "custom-uniswap-v2-sdk": "^3.2.0",
-    "ethers": "github:Railgun-Community/ethers.js#v6.7.9",
+    "ethers": "github:Railgun-Community/ethers.js#v6.7.10",
     "graphql": "^16.6.0"
   },
   "devDependencies": {
