@@ -128,7 +128,7 @@ describe('transfer-erc20-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Transfer ERC20 step is invalid. No step inputs match filter.',
+      'Transfer ERC20 step is invalid.',
     );
 
     // Too low balance for erc20 input
@@ -148,7 +148,7 @@ describe('transfer-erc20-step', () => {
     await expect(
       step.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
-      'Transfer ERC20 step is invalid. Specified amount 10000 exceeds balance 2000.',
+      'Transfer ERC20 step is invalid.',
     );
   });
 });

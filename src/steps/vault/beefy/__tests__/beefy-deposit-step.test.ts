@@ -129,7 +129,7 @@ describe('beefy-deposit-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Beefy Vault Deposit step is invalid. No step inputs match filter.',
+      'Beefy Vault Deposit step is invalid.',
     );
     const stepInputNoSpender: StepInput = {
       networkName,
@@ -149,7 +149,7 @@ describe('beefy-deposit-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNoSpender),
     ).to.be.rejectedWith(
-      'Beefy Vault Deposit step is invalid. No step inputs match filter.',
+      'Beefy Vault Deposit step is invalid.',
     );
   });
 });

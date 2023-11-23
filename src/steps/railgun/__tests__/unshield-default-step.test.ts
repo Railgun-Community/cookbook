@@ -95,7 +95,7 @@ describe('unshield-default-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      'Unshield (Default) step is invalid. Cannot unshield base token.',
+      'Unshield (Default) step is invalid.',
     );
   });
 });

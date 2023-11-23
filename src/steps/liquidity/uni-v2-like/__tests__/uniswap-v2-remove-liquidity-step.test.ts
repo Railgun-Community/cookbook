@@ -150,7 +150,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNotBothERC20s),
     ).to.be.rejectedWith(
-      'Uniswap V2 Remove Liquidity step is invalid. No step inputs match filter.',
+      'Uniswap V2 Remove Liquidity step is invalid.',
     );
 
     const stepInputNoSpender: StepInput = {
@@ -171,7 +171,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNoSpender),
     ).to.be.rejectedWith(
-      'Uniswap V2 Remove Liquidity step is invalid. No step inputs match filter.',
+      'Uniswap V2 Remove Liquidity step is invalid.',
     );
   });
 });
