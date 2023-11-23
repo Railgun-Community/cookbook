@@ -17,12 +17,12 @@ export const queryAllLPPairsForTokenAddressesPerFork = async (
       networkName,
       tokenAddresses,
     );
-  } catch (err) {
-    if (!(err instanceof Error)) {
-      throw err;
+  } catch (cause) {
+    if (!(cause instanceof Error)) {
+      throw new Error('Unexpected non-error thrown', { cause });
     }
-    CookbookDebug.error(err);
-    throw new Error(err.message);
+    CookbookDebug.error(cause);
+    throw new Error('Failed to query LP pairs for token addresses.', { cause });
   }
 };
 
@@ -53,12 +53,14 @@ export const getCachedLPPairsForTokenAddresses = async (
       networkName,
       tokenAddresses,
     );
-  } catch (err) {
-    if (!(err instanceof Error)) {
-      throw err;
+  } catch (cause) {
+    if (!(cause instanceof Error)) {
+      throw new Error('Unexpected non-error thrown', { cause });
     }
-    CookbookDebug.error(err);
-    throw new Error(`Failed to get LP pairs: ${err.message}`);
+    CookbookDebug.error(cause);
+    throw new Error('Failed to get cached LP pairs for token addresses.', {
+      cause,
+    });
   }
 };
 
@@ -73,11 +75,11 @@ export const getLPPairsForTokenAddresses = async (
       networkName,
       tokenAddresses,
     );
-  } catch (err) {
-    if (!(err instanceof Error)) {
-      throw err;
+  } catch (cause) {
+    if (!(cause instanceof Error)) {
+      throw new Error('Unexpected non-error thrown', { cause });
     }
-    CookbookDebug.error(err);
+    CookbookDebug.error(cause);
     return queryAllLPPairsForTokenAddresses(networkName, tokenAddresses);
   }
 };

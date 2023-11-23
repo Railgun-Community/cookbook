@@ -391,7 +391,7 @@ describe('beefy-withdraw-recipe', () => {
       nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'Beefy Vault Withdraw step is invalid. No step inputs match filter.',
+      'Beefy Vault Withdraw step is invalid.',
     );
   });
 });

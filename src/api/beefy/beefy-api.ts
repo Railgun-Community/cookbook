@@ -216,9 +216,9 @@ export class BeefyAPI {
         isActive,
       };
       return vaultInfo;
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (cause) {
+      if (!(cause instanceof Error)) {
+        throw new Error('Unexpected non-error thrown', { cause });
       }
       // CookbookDebug.error(
       //   new Error(
@@ -281,12 +281,12 @@ export class BeefyAPI {
       }
 
       return filtered;
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (cause) {
+      if (!(cause instanceof Error)) {
+        throw new Error('Unexpected non-error thrown', { cause });
       }
-      CookbookDebug.error(err);
-      throw new Error(`Could not get active list of Vaults: ${err.message}`);
+      CookbookDebug.error(cause);
+      throw new Error('Could not get active list of Vaults.', { cause });
     }
   }
 

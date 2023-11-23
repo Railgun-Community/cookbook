@@ -34,11 +34,11 @@ export abstract class Step {
         name: this.config.name,
         description: this.config.description,
       };
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (cause) {
+      if (!(cause instanceof Error)) {
+        throw new Error('Unexpected non-error thrown', { cause });
       }
-      throw new Error(`${this.config.name} step is invalid. ${err.message}`);
+      throw new Error(`${this.config.name} step is invalid.`, { cause });
     }
   }
 

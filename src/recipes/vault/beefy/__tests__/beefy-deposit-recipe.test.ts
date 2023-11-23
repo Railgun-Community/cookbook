@@ -435,7 +435,7 @@ describe('beefy-deposit-recipe', () => {
       nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputNoMatch)).to.be.rejectedWith(
-      'Approve ERC20 Spender step is invalid. No step inputs match filter.',
+      'Approve ERC20 Spender step is invalid.',
     );
   });
 });

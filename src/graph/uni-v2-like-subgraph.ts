@@ -84,9 +84,9 @@ export class UniV2LikeSubgraph {
       });
 
       return pairData;
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (cause) {
+      if (!(cause instanceof Error)) {
+        throw new Error('Unexpected non-error thrown', { cause });
       }
       if (retryCount < 2) {
         return this.queryPairsForTokenAddresses(
@@ -96,9 +96,10 @@ export class UniV2LikeSubgraph {
           retryCount + 1,
         );
       }
-      CookbookDebug.error(err);
+      CookbookDebug.error(cause);
       throw new Error(
-        `Could not get list of LP pairs. GraphQL request error: ${err.message}.`,
+        'Could not get list of LP pairs. GraphQL request error.',
+        { cause },
       );
     }
   };

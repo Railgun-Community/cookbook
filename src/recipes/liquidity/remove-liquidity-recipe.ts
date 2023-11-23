@@ -90,11 +90,11 @@ export abstract class RemoveLiquidityRecipe extends Recipe {
         aShieldFee: shieldFeeA.amount,
         bShieldFee: shieldFeeB.amount,
       };
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (cause) {
+      if (!(cause instanceof Error)) {
+        throw new Error('Unexpected non-error thrown', { cause });
       }
-      CookbookDebug.error(err);
+      CookbookDebug.error(cause);
       return undefined;
     }
   }

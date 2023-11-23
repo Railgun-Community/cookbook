@@ -318,7 +318,7 @@ describe('zero-x-swap-recipe', () => {
       nfts: [],
     };
     await expect(recipe.getRecipeOutput(recipeInputTooLow)).to.be.rejectedWith(
-      '0x Exchange Swap step is invalid. Specified amount 10000 exceeds balance 1995.',
+      '0x Exchange Swap step is invalid.',
     );
   });
 });

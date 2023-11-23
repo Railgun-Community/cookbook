@@ -175,8 +175,10 @@ export class ZeroXQuote {
       };
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const msg = this.formatApiError(err);
-      throw new Error(msg);
+      const errorMessage = this.formatApiError(err);
+      throw new Error('Failed to get swap quote.', {
+        cause: new Error(errorMessage),
+      });
     }
   };
 

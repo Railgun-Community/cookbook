@@ -153,7 +153,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNotBothERC20s),
     ).to.be.rejectedWith(
-      'Uniswap V2 Add Liquidity step is invalid. Step input does not include a balance for each filtered token.',
+      'Uniswap V2 Add Liquidity step is invalid.',
     );
 
     const stepInputNoSpender: StepInput = {
@@ -182,7 +182,7 @@ describe('uniswap-v2-add-liquidity-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNoSpender),
     ).to.be.rejectedWith(
-      'Uniswap V2 Add Liquidity step is invalid. Step input does not include a balance for each filtered token.',
+      'Uniswap V2 Add Liquidity step is invalid.',
     );
   });
 });

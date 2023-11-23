@@ -12,9 +12,9 @@ export const validateStepOutput = (
   try {
     validateStepOutputERC20Amounts(input, output);
     validateStepOutputNFTs(input, output);
-  } catch (err) {
+  } catch (cause) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    throw new Error(`Validation Error: ${err.message}`);
+    throw new Error(`Validation Error`, { cause });
   }
 };
 

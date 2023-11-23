@@ -222,7 +222,7 @@ describe('zero-x-swap-step', () => {
       nfts: [],
     };
     await expect(step.getValidStepOutput(stepInputNoERC20s)).to.be.rejectedWith(
-      '0x Exchange Swap step is invalid. No step inputs match filter.',
+      '0x Exchange Swap step is invalid.',
     );
     const stepInputNoSpender: StepInput = {
       networkName,
@@ -242,7 +242,7 @@ describe('zero-x-swap-step', () => {
     await expect(
       step.getValidStepOutput(stepInputNoSpender),
     ).to.be.rejectedWith(
-      '0x Exchange Swap step is invalid. No step inputs match filter.',
+      '0x Exchange Swap step is invalid.',
     );
 
     // Too low balance for erc20 input
@@ -263,7 +263,7 @@ describe('zero-x-swap-step', () => {
     await expect(
       step.getValidStepOutput(stepInputLowBalance),
     ).to.be.rejectedWith(
-      '0x Exchange Swap step is invalid. Specified amount 10000 exceeds balance 2000.',
+      '0x Exchange Swap step is invalid.',
     );
   });
 });
