@@ -103,7 +103,6 @@ export class BeefyAPI {
         return { network: 'polygon', chain: 'polygon' };
       case NetworkName.Arbitrum:
         return { network: 'arbitrum', chain: 'arbitrum' };
-      case NetworkName.Railgun:
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli:
       case NetworkName.EthereumSepolia:

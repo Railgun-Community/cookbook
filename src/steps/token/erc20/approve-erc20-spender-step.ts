@@ -110,7 +110,6 @@ export class ApproveERC20SpenderStep extends Step {
           return true;
         }
         return false;
-      case NetworkName.Railgun:
       case NetworkName.BNBChain:
       case NetworkName.Polygon:
       case NetworkName.Arbitrum:

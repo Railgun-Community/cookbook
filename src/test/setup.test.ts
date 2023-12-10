@@ -52,7 +52,6 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
     case NetworkName.PolygonMumbai:
     case NetworkName.ArbitrumGoerli:
     case NetworkName.Hardhat:
-    case NetworkName.Railgun:
       return [];
   }
 };

@@ -145,7 +145,6 @@ export class UniV2LikeSubgraph {
           case NetworkName.PolygonMumbai:
           case NetworkName.EthereumGoerli:
           case NetworkName.EthereumSepolia:
-          case NetworkName.Railgun:
           case NetworkName.Hardhat:
             throw new Error(
               'Sushiswap V2 LP Subgraph is not supported on this network',

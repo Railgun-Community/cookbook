@@ -24,7 +24,6 @@ export const zeroXApiSubdomain = (networkName: NetworkName): string => {
     case NetworkName.PolygonMumbai:
       return 'mumbai.api';
     case NetworkName.ArbitrumGoerli:
-    case NetworkName.Railgun:
     case NetworkName.Hardhat:
     case NetworkName.EthereumSepolia:
     case NetworkName.EthereumRopsten_DEPRECATED:

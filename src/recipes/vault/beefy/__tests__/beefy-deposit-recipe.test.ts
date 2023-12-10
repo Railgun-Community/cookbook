@@ -326,8 +326,8 @@ describe('beefy-deposit-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigInt('4489000000000000'),
-          minBalance: BigInt('4489000000000000'),
+          expectedBalance: BigInt('4489'),
+          minBalance: BigInt('4489'),
           tokenAddress: polygonVault.vaultERC20Address,
           decimals: 18n,
         },
@@ -354,7 +354,7 @@ describe('beefy-deposit-recipe', () => {
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigInt('11222500000000'),
+          amount: BigInt('11'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: polygonVault.vaultERC20Address,
           decimals: 18n,
@@ -363,8 +363,8 @@ describe('beefy-deposit-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigInt('4477777500000000'),
-          minBalance: BigInt('4477777500000000'),
+          expectedBalance: BigInt('4478'),
+          minBalance: BigInt('4478'),
           tokenAddress: polygonVault.vaultERC20Address,
           isBaseToken: undefined,
           decimals: 18n,
@@ -406,7 +406,7 @@ describe('beefy-deposit-recipe', () => {
         decimals: 6n,
       },
       {
-        amount: BigInt('11222500000000'),
+        amount: BigInt('11'),
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: polygonVault.vaultERC20Address,
         decimals: 18n,

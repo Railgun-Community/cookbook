@@ -51,7 +51,6 @@ export const getRPCPort = (networkName: NetworkName) => {
     case NetworkName.PolygonMumbai:
     case NetworkName.ArbitrumGoerli:
     case NetworkName.Hardhat:
-    case NetworkName.Railgun:
       throw new Error('No RPC setup for network');
   }
 };

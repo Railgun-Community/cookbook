@@ -274,7 +274,7 @@ describe('beefy-withdraw-recipe', () => {
       feeERC20AmountRecipients: [
         {
           tokenAddress: polygonVault.depositERC20Address,
-          amount: BigInt('1995'),
+          amount: BigInt('1995000000000000'),
           recipient: 'USDC LP Vault Withdraw Fee',
           decimals: 6n,
         },
@@ -282,8 +282,8 @@ describe('beefy-withdraw-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigInt('17955'),
-          minBalance: BigInt('17955'),
+          expectedBalance: BigInt('17955000000000000'),
+          minBalance: BigInt('17955000000000000'),
           tokenAddress: polygonVault.depositERC20Address,
           decimals: 6n,
         },
@@ -310,7 +310,7 @@ describe('beefy-withdraw-recipe', () => {
       description: 'Shield ERC20s and NFTs into private RAILGUN balance.',
       feeERC20AmountRecipients: [
         {
-          amount: BigInt('44'),
+          amount: BigInt('44887500000000'),
           recipient: 'RAILGUN Shield Fee',
           tokenAddress: polygonVault.depositERC20Address,
           decimals: 6n,
@@ -319,8 +319,8 @@ describe('beefy-withdraw-recipe', () => {
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
-          expectedBalance: BigInt('17911'),
-          minBalance: BigInt('17911'),
+          expectedBalance: BigInt('17910112500000000'),
+          minBalance: BigInt('17910112500000000'),
           tokenAddress: polygonVault.depositERC20Address,
           isBaseToken: undefined,
           decimals: 6n,
@@ -356,13 +356,13 @@ describe('beefy-withdraw-recipe', () => {
         decimals: 18n,
       },
       {
-        amount: BigInt('1995'),
+        amount: BigInt('1995000000000000'),
         recipient: 'USDC LP Vault Withdraw Fee',
         tokenAddress: polygonVault.depositERC20Address,
         decimals: 6n,
       },
       {
-        amount: BigInt('44'),
+        amount: BigInt('44887500000000'),
         recipient: 'RAILGUN Shield Fee',
         tokenAddress: polygonVault.depositERC20Address,
         decimals: 6n,

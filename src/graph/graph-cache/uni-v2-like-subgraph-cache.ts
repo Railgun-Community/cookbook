@@ -136,7 +136,6 @@ export class UniV2LikeSubgraphCache {
           SUSHI_V2_ARBITRUM_PAIRS,
           UniswapV2Fork.SushiSwap,
         );
-      case NetworkName.Railgun:
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli:
       case NetworkName.EthereumSepolia:
