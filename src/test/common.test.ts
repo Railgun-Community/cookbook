@@ -56,7 +56,7 @@ export const getRPCPort = (networkName: NetworkName) => {
 };
 
 export const getLocalhostRPC = (port: number) => {
-  return `http://localhost:${port}`;
+  return `http://127.0.0.1:${port}`;
 };
 
 export const executeRecipeStepsAndAssertUnshieldBalances = async (
@@ -250,8 +250,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
           postBalance >= expectedBalance && postBalance <= expectedBalance + 1n,
         ).to.equal(
           true,
-          `${name}: Did not get expected private balance after unshield/reshield - token ${tokenAddress}: expected ${expectedBalance} or ${
-            expectedBalance + 1n
+          `${name}: Did not get expected private balance after unshield/reshield - token ${tokenAddress}: expected ${expectedBalance} or ${expectedBalance + 1n
           }, got ${postBalance}`,
         );
         return;
