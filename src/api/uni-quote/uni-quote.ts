@@ -1,41 +1,7 @@
 import axios from "axios"
-import { ContractTransaction } from "ethers";
-import { RecipeERC20Amount } from "../../models";
 
-export enum UniswapProtocolType {
-  V2 = "V2",
-  V3 = "V3",
-  MIXED = "MIXED"
-}
-export type UniswapSwapQuoteData = {
-  price: bigint;
-  guaranteedPrice: bigint;
-  buyERC20Amount: RecipeERC20Amount;
-  minimumBuyAmount: bigint;
-  spender: Optional<string>;
-  crossContractCall: ContractTransaction;
-  sellTokenAddress: string;
-  sellTokenValue: string;
-};
-export type UniswapQuoteParamConfig = {
-  protocols: UniswapProtocolType[],
-  enableUniversalRouter: boolean,
-  routingType: string, // 'CLASSIC' direct tie to this, and the other?
-  recipient: string,
-  enableFeeOnTransferFeeFetching: boolean,
-}
-
-export type UniswapQuoteParams = {
-  tokenInChainId: number,
-  tokenIn: string,
-  tokenOutChainId: number,
-  tokenOut: string,
-  amount: string,
-  slippage: number,
-  sendPortionEnabled: boolean,
-  type: string,
-  configs: UniswapQuoteParamConfig[]
-}
+import { Chain } from "@railgun-community/shared-models";
+import { UniswapProtocolType, UniswapQuoteInputs, UniswapQuoteParams } from "../../models/uni-quote";
 
 export const getUniswapURL = () => {
   return 'https://api.uniswap.org'
@@ -56,7 +22,43 @@ export const getUniswapHeaders = () => {
   }
 }
 
-// GET QUOTE FUNCTIONS
+export const getUniswapQuoteParams = (
+  chain: Chain,
+  recipientAddress: string,
+  quoteInputs: UniswapQuoteInputs
+): UniswapQuoteParams => {
+
+  const {
+    slippage,
+    tokenInAmount,
+    tokenInAddress: tokenIn,
+    tokenOutAddress: tokenOut,
+  } = quoteInputs;
+
+  return {
+    tokenInChainId: chain.id,
+    tokenIn,
+    tokenOutChainId: chain.id,
+    tokenOut,
+    amount: tokenInAmount,
+    slippage,
+    sendPortionEnabled: true,
+    type: 'EXACT_INPUT',
+    configs: [
+      {
+        protocols: [
+          UniswapProtocolType.V2,
+          UniswapProtocolType.V3,
+          UniswapProtocolType.MIXED
+        ],
+        enableUniversalRouter: true,
+        routingType: 'CLASSIC',
+        recipient: recipientAddress,
+        enableFeeOnTransferFeeFetching: true,
+      },
+    ],
+  }
+}
 
 export const fetchUniswapQuote = async (quoteParams: UniswapQuoteParams) => {
   try {
@@ -65,9 +67,7 @@ export const fetchUniswapQuote = async (quoteParams: UniswapQuoteParams) => {
       quoteParams,
       getUniswapHeaders()
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const { data } = response;
-    return data;
+    return response?.data;
   } catch (error) {
     const uniswapError = new Error(`There was an error getting a quote from Uniswap. ${error.message}`, { cause: error });
     throw uniswapError;

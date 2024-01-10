@@ -4,4 +4,5 @@
 export * as adapt from "./adapt";
 export * as liquidity from "./liquidity";
 export * as token from "./token";
+export * as uniswap from "./uniswap";
 export * as vault from "./vault";

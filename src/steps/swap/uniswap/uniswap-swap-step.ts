@@ -8,7 +8,8 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
 import { Step } from '../../step';
-import { UniswapSwapQuoteData } from '../../../api/uni-quote/uni-quote';
+import { UniswapPermit2Contract, getUniswapPermit2ContractAddressForNetwork } from '../../../contract/uniswap/permit2-contract';
+import { UniswapSwapQuoteData } from '../../../models/uni-quote';
 
 export class UniswapSwapStep extends Step {
   readonly config: StepConfig = {
@@ -34,6 +35,7 @@ export class UniswapSwapStep extends Step {
       minimumBuyAmount,
       crossContractCall,
       sellTokenValue,
+      sellTokenAddress,
       spender,
     } = this.quote;
     const { erc20Amounts } = input;
@@ -62,8 +64,20 @@ export class UniswapSwapStep extends Step {
       approvedSpender: undefined,
     };
 
+    const permit2ContractAddress = getUniswapPermit2ContractAddressForNetwork(input.networkName);
+    const permit2Contract = new UniswapPermit2Contract(permit2ContractAddress)
+    const nowTime = Math.floor(Date.now() / 1000);
+
+    const unit48timeout = nowTime + (10 * 60);
+    const permit2AllowanceContractCall = await permit2Contract.createApproval(
+      crossContractCall.to,
+      sellTokenAddress,
+      BigInt(unit48timeout),
+      sellERC20Amount,
+    );
+
     return {
-      crossContractCalls: [crossContractCall],
+      crossContractCalls: [permit2AllowanceContractCall, crossContractCall],
       spentERC20Amounts: [sellERC20AmountRecipient],
       outputERC20Amounts: [outputBuyERC20Amount, ...unusedERC20Amounts],
       outputNFTs: input.nfts,

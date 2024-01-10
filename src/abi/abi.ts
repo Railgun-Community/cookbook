@@ -5,6 +5,7 @@ import ABI_UNI_V2_LIKE_FACTORY from './liquidity/UniV2LikeFactory.json';
 import ABI_UNI_V2_LIKE_ROUTER from './liquidity/UniV2LikeRouter.json';
 import ABI_UNI_V2_LIKE_PAIR from './liquidity/UniV2LikePair.json';
 import ABI_BEEFY_VAULT_MERGED_V6V7 from './vault/beefy/BeefyVault-MergedV6V7.json';
+import ABI_UNISWAP_PERMIT2 from './uniswap/permit2.json';
 
 export const abi = {
   token: {
@@ -22,4 +23,7 @@ export const abi = {
   vault: {
     beefy: ABI_BEEFY_VAULT_MERGED_V6V7,
   },
+  swap: {
+    uniswap: ABI_UNISWAP_PERMIT2,
+  }
 } as const;
