@@ -2,17 +2,19 @@ import axios from 'axios';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import {
-  getUniswapHeaders,
-  fetchUniswapQuote,
-  getUniswapQuoteURL
+  UniswapQuote
+
 } from '../uni-quote';
 import {
   mockUniswapQuoteParams,
   mockUniswapQuoteResponse
 } from './mocks';
+import { UniswapQuoteParams } from '../../../models/uni-quote';
 
 
 const testWallet = '0x4025ee6512dbbda97049bcf5aa5d38c54af6be8a'
+
+const uniswapQuoteTest = new UniswapQuote();
 
 describe('uni-quote', () => {
   afterEach(() => {
@@ -20,28 +22,28 @@ describe('uni-quote', () => {
   });
 
   it('should return the mock quote data', async () => {
-    const quoteParams = mockUniswapQuoteParams;
+    const quoteParams = mockUniswapQuoteParams as UniswapQuoteParams;
     const responseData = mockUniswapQuoteResponse;
 
     const axiosPostStub = sinon.stub(axios, 'post')
       .resolves({ data: responseData });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await fetchUniswapQuote(quoteParams);
+    const result = await uniswapQuoteTest.fetchUniswapQuote(quoteParams);
 
     expect(
       axiosPostStub.calledOnceWithExactly(
-        getUniswapQuoteURL(),
+        uniswapQuoteTest.getUniswapQuoteURL(),
         quoteParams,
-        getUniswapHeaders()
+        uniswapQuoteTest.getUniswapHeaders()
       )
     ).to.be.true;
     expect(result).to.deep.equal(responseData);
   });
 
   it('should return live quote data', async () => {
-    const quoteParams = mockUniswapQuoteParams;
-    const responseData = mockUniswapQuoteResponse;
+    const quoteParams = mockUniswapQuoteParams as UniswapQuoteParams;
+    // const responseData = mockUniswapQuoteResponse;
 
     // const axiosPostStub = sinon.stub(axios, 'post')
     //   .resolves({ data: responseData });
@@ -49,7 +51,7 @@ describe('uni-quote', () => {
     quoteParams.configs[0].recipient = testWallet;
     // console.log(quoteParams)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await fetchUniswapQuote(quoteParams);
+    const result = await uniswapQuoteTest.fetchUniswapQuote(quoteParams);
     // console.log(result)
 
     expect(result).to.not.be.undefined;
@@ -57,12 +59,12 @@ describe('uni-quote', () => {
   });
 
   it('should handle errors', async () => {
-    const quoteParams = mockUniswapQuoteParams;
+    const quoteParams = mockUniswapQuoteParams as UniswapQuoteParams;
     const errorMessage = 'Some mock error message from api';
 
     const axiosPostStub = sinon.stub(axios, 'post').rejects(new Error(errorMessage));
 
-    const result = fetchUniswapQuote(quoteParams);
+    const result = uniswapQuoteTest.fetchUniswapQuote(quoteParams);
 
     // // eslint-disable-next-line @typescript-eslint/no-floating-promises
     await expect(
@@ -71,9 +73,9 @@ describe('uni-quote', () => {
 
     expect(
       axiosPostStub.calledOnceWithExactly(
-        getUniswapQuoteURL(),
+        uniswapQuoteTest.getUniswapQuoteURL(),
         quoteParams,
-        getUniswapHeaders()
+        uniswapQuoteTest.getUniswapHeaders()
       )
     ).to.be.true;
 
