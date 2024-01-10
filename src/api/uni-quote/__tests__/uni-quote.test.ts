@@ -62,14 +62,12 @@ describe('uni-quote', () => {
 
     const axiosPostStub = sinon.stub(axios, 'post').rejects(new Error(errorMessage));
 
+    const result = fetchUniswapQuote(quoteParams);
 
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    expect(
-      async () => {
-        await fetchUniswapQuote(quoteParams)
-      }
-    ).to.be.rejectedWith('Error: There was an error getting a quote from Uniswap.');
+    // // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    await expect(
+      result
+    ).to.be.rejectedWith(errorMessage);
 
     expect(
       axiosPostStub.calledOnceWithExactly(

@@ -69,9 +69,7 @@ export const fetchUniswapQuote = async (quoteParams: UniswapQuoteParams) => {
     const { data } = response;
     return data;
   } catch (error) {
-    const uniswapError = new Error("There was an error getting a quote from Uniswap.");
-    console.error(uniswapError);
-    return undefined;
-    // throw uniswapError;
+    const uniswapError = new Error(`There was an error getting a quote from Uniswap. ${error.message}`, { cause: error });
+    throw uniswapError;
   }
 }
