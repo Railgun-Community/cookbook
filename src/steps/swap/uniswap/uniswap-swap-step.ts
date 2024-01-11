@@ -76,6 +76,7 @@ export class UniswapSwapStep extends Step {
       BigInt(unit48timeout),
       sellERC20Amount,
     );
+    permit2AllowanceContractCall.value = 0n;
 
     return {
       crossContractCalls: [permit2AllowanceContractCall, crossContractCall],
