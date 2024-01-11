@@ -8,8 +8,9 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
 import { Step } from '../../step';
-import { UniswapPermit2Contract, getUniswapPermit2ContractAddressForNetwork } from '../../../contract/uniswap/permit2-contract';
+import { UniswapPermit2Contract } from '../../../contract/uniswap/permit2-contract';
 import { UniswapSwapQuoteData } from '../../../models/uni-quote';
+import { UniswapQuote } from '../../../api/uni-quote';
 
 export class UniswapSwapStep extends Step {
   readonly config: StepConfig = {
@@ -64,7 +65,7 @@ export class UniswapSwapStep extends Step {
       approvedSpender: undefined,
     };
 
-    const permit2ContractAddress = getUniswapPermit2ContractAddressForNetwork(input.networkName);
+    const permit2ContractAddress = UniswapQuote.getUniswapPermit2ContractAddressForNetwork(input.networkName);
     const permit2Contract = new UniswapPermit2Contract(permit2ContractAddress)
     const nowTime = Math.floor(Date.now() / 1000);
 

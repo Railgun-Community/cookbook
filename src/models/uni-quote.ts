@@ -15,7 +15,9 @@ export type UniswapSwapQuoteData = {
   crossContractCall: ContractTransaction;
   sellTokenAddress: string;
   sellTokenValue: string;
+  slippageBasisPoints: bigint;
 };
+
 export type UniswapQuoteParamConfig = {
   protocols: UniswapProtocolType[],
   enableUniversalRouter: boolean,

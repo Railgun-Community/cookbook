@@ -23,8 +23,9 @@ import {
 import { TransferERC20Step } from '../../steps';
 import { DesignateShieldERC20RecipientStep } from '../../steps/railgun/designate-shield-erc20-recipient-step';
 import { UniswapQuote } from '../../api/uni-quote/uni-quote';
-import { UniswapQuoteInputs } from '../../models/uni-quote';
+import { UniswapQuoteInputs, UniswapSwapQuoteData } from '../../models/uni-quote';
 import { UniswapSwapStep } from '../../steps/swap/uniswap/uniswap-swap-step';
+import { ContractTransaction } from 'ethers';
 
 export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
   readonly config: RecipeConfig = {
@@ -40,7 +41,6 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
 
   protected readonly destinationAddress: Optional<string>;
   protected readonly isRailgunDestinationAddress: Optional<boolean>;
-  protected readonly quoter: UniswapQuote;
   constructor(
     sellERC20Info: RecipeERC20Info,
     buyERC20Info: RecipeERC20Info,
@@ -53,7 +53,6 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
     this.buyERC20Info = buyERC20Info;
 
     this.slippageBasisPoints = slippageBasisPoints;
-    this.quoter = new UniswapQuote();
     this.destinationAddress = destinationAddress;
     if (isDefined(destinationAddress)) {
       this.isRailgunDestinationAddress =
@@ -75,17 +74,53 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
   async getSwapQuote(
     networkName: NetworkName,
     quoteInputs: UniswapQuoteInputs
-  ): Promise<SwapQuoteData> {
+  ): Promise<UniswapSwapQuoteData> {
 
     const chain = NETWORK_CONFIG[networkName].chain;
     const recipientAddress = NETWORK_CONFIG[networkName].relayAdaptContract
-    const quoteParams = this.quoter.getUniswapQuoteParams(
+    const quoteParams = UniswapQuote.getUniswapQuoteParams(
       chain,
       recipientAddress,
       quoteInputs,
     );
 
-    return this.quoter.fetchUniswapQuote(quoteParams);
+    const quoteResponse: {
+      methodParameters: ContractTransaction,
+      quoteDecimals: string,
+      amountDecimals: string,
+      quote: string,
+      amount: string,
+      route: any
+    } = await UniswapQuote.getSwapQuote(quoteParams);
+
+    const { methodParameters, quote, amount, amountDecimals, quoteDecimals } = quoteResponse;
+    // parse the data into quoteDataResponse
+
+    // TODO: Get buyToken decimal count.
+    const buyDecimalHack = quoteResponse.route[0][0].tokenOut.decimals;
+
+    const currentPriceEstimate = BigInt(quote) / BigInt(amount);
+
+    const guaranteedPriceEsimtate = currentPriceEstimate - currentPriceEstimate * BigInt(this.slippageBasisPoints) / 10000n;
+
+    const parsedDataResponse: UniswapSwapQuoteData = {
+      sellTokenValue: '10000',
+      spender: UniswapQuote.getUniswapPermit2ContractAddressForNetwork(networkName),
+      crossContractCall: methodParameters as ContractTransaction,
+      buyERC20Amount: {
+        tokenAddress: quoteParams.tokenOut,
+        decimals: BigInt(buyDecimalHack),
+        amount: BigInt(quote),
+      },
+      minimumBuyAmount: 495n,
+      sellTokenAddress: quoteParams.tokenIn,
+      // Unused
+      price: currentPriceEstimate,
+      guaranteedPrice: 0n,
+      slippageBasisPoints: 500n,
+    };
+
+    return parsedDataResponse;
   }
 
   protected async getInternalSteps(
@@ -98,9 +133,9 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
     );
 
     const quoteInputs: UniswapQuoteInputs = {
-      slippage: 5,
-      tokenInAmount: '0',
-      tokenInAddress: this.sellERC20Info.tokenAddress,
+      slippage: this.slippageBasisPoints,
+      tokenInAmount: sellERC20Amount.amount.toString(10),
+      tokenInAddress: sellERC20Amount.tokenAddress,
       tokenOutAddress: this.buyERC20Info.tokenAddress,
     }
 

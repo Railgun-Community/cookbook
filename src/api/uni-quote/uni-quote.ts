@@ -1,29 +1,43 @@
 import axios from "axios"
 
-import { Chain } from "@railgun-community/shared-models";
+import { Chain, NetworkName } from "@railgun-community/shared-models";
 import { UniswapProtocolType, UniswapQuoteInputs, UniswapQuoteParams } from "../../models/uni-quote";
 
 export class UniswapQuote {
-  getUniswapURL = () => {
+  static getUniswapURL = () => {
     return 'https://api.uniswap.org'
   }
 
-  getUniswapQuoteURL = () => {
-    return `${this.getUniswapURL()}/v2/quote`
+  static getUniswapQuoteURL = () => {
+    return `${UniswapQuote.getUniswapURL()}/v2/quote`
   }
 
-  getUniswapHeaders = () => {
+  static getUniswapHeaders = () => {
     return {
       headers: {
         accept: '*/*',
-        origin: this.getUniswapURL(),
+        origin: UniswapQuote.getUniswapURL(),
         'content-type': 'application/json',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
       }
     }
   }
 
-  getUniswapQuoteParams = (
+  static getUniswapPermit2ContractAddressForNetwork = (networkName: NetworkName) => {
+    switch (networkName) {
+      case NetworkName.Ethereum:
+      case NetworkName.BNBChain:
+      case NetworkName.Polygon:
+      case NetworkName.Arbitrum:
+        {
+          return '0x000000000022d473030f116ddee9f6b43ac78ba3';
+        }
+      default: {
+        throw new Error("Unsupported network for Uniswap Permit2 contract.");
+      }
+    }
+  }
+  static getUniswapQuoteParams = (
     chain: Chain,
     recipientAddress: string,
     quoteInputs: UniswapQuoteInputs
@@ -61,12 +75,12 @@ export class UniswapQuote {
     }
   }
 
-  fetchUniswapQuote = async (quoteParams: UniswapQuoteParams) => {
+  static getSwapQuote = async (quoteParams: UniswapQuoteParams) => {
     try {
       const response = await axios.post(
-        this.getUniswapQuoteURL(),
+        UniswapQuote.getUniswapQuoteURL(),
         quoteParams,
-        this.getUniswapHeaders()
+        UniswapQuote.getUniswapHeaders()
       );
       return response?.data;
     } catch (error) {

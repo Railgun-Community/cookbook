@@ -1,4 +1,4 @@
-import { UniswapProtocolType, UniswapQuoteParams } from "../uni-quote";
+import { UniswapProtocolType, UniswapQuoteParams } from "../../../models/uni-quote";
 
 export const mockUniswapQuoteParams: UniswapQuoteParams = {
   tokenInChainId: 1,

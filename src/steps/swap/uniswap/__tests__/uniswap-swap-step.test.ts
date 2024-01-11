@@ -9,6 +9,7 @@ import {
 } from '../../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { testConfig } from '../../../../test/test-config.test';
+import { UniswapSwapQuoteData } from '../../../../models/uni-quote';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -25,7 +26,7 @@ const sellToken: RecipeERC20Info = {
   isBaseToken: true,
 };
 
-const quote: SwapQuoteData = {
+const quote: UniswapSwapQuoteData = {
   sellTokenValue: '10000',
   spender,
   crossContractCall: {
@@ -46,7 +47,7 @@ const quote: SwapQuoteData = {
   // Unused
   price: 0n,
   guaranteedPrice: 0n,
-  slippageBasisPoints: BigInt(100),
+  slippageBasisPoints: 100n,
 };
 
 describe('uniswap-swap-step', () => {

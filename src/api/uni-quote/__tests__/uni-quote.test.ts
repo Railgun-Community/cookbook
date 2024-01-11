@@ -14,7 +14,6 @@ import { UniswapQuoteParams } from '../../../models/uni-quote';
 
 const testWallet = '0x4025ee6512dbbda97049bcf5aa5d38c54af6be8a'
 
-const uniswapQuoteTest = new UniswapQuote();
 
 describe('uni-quote', () => {
   afterEach(() => {
@@ -29,13 +28,13 @@ describe('uni-quote', () => {
       .resolves({ data: responseData });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await uniswapQuoteTest.fetchUniswapQuote(quoteParams);
+    const result = await UniswapQuote.getSwapQuote(quoteParams);
 
     expect(
       axiosPostStub.calledOnceWithExactly(
-        uniswapQuoteTest.getUniswapQuoteURL(),
+        UniswapQuote.getUniswapQuoteURL(),
         quoteParams,
-        uniswapQuoteTest.getUniswapHeaders()
+        UniswapQuote.getUniswapHeaders()
       )
     ).to.be.true;
     expect(result).to.deep.equal(responseData);
@@ -51,7 +50,7 @@ describe('uni-quote', () => {
     quoteParams.configs[0].recipient = testWallet;
     // console.log(quoteParams)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await uniswapQuoteTest.fetchUniswapQuote(quoteParams);
+    const result = await UniswapQuote.getSwapQuote(quoteParams);
     // console.log(result)
 
     expect(result).to.not.be.undefined;
@@ -64,7 +63,7 @@ describe('uni-quote', () => {
 
     const axiosPostStub = sinon.stub(axios, 'post').rejects(new Error(errorMessage));
 
-    const result = uniswapQuoteTest.fetchUniswapQuote(quoteParams);
+    const result = UniswapQuote.getSwapQuote(quoteParams);
 
     // // eslint-disable-next-line @typescript-eslint/no-floating-promises
     await expect(
@@ -73,9 +72,9 @@ describe('uni-quote', () => {
 
     expect(
       axiosPostStub.calledOnceWithExactly(
-        uniswapQuoteTest.getUniswapQuoteURL(),
+        UniswapQuote.getUniswapQuoteURL(),
         quoteParams,
-        uniswapQuoteTest.getUniswapHeaders()
+        UniswapQuote.getUniswapHeaders()
       )
     ).to.be.true;
 
