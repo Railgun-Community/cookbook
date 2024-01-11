@@ -7,11 +7,11 @@ export class UniswapPermit2Contract {
 
   constructor(address: string, provider?: Provider) {
     if (!validateContractAddress(address)) {
-      throw new Error('Invalid Vault address for Beefy contract');
+      throw new Error('Invalid address for Permit2 contract');
     }
     this.contract = new Contract(
       address,
-      abi.vault.beefy,
+      abi.swap.uniswap,
       provider,
     ) as unknown as Permit2;
   }
@@ -22,6 +22,11 @@ export class UniswapPermit2Contract {
     approvalTimeout: bigint,
     approvalAmount: bigint,
   ): Promise<ContractTransaction> {
+    console.log('approvalTo', approvalTo)
+    console.log('approvalToken', approvalToken)
+    console.log('approvalTimeout', approvalTimeout)
+    console.log('approvalAmount', approvalAmount)
+
     return this.contract.approve.populateTransaction(
       approvalToken,
       approvalTo,

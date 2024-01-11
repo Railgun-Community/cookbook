@@ -1,7 +1,7 @@
 import axios from "axios"
 
 import { Chain, NetworkName } from "@railgun-community/shared-models";
-import { UniswapProtocolType, UniswapQuoteInputs, UniswapQuoteParams } from "../../models/uni-quote";
+import { UniswapProtocolType, UniswapQuoteInputs, UniswapQuoteParams, UniswapSwapQuoteData } from "../../models/uni-quote";
 
 export class UniswapQuote {
   static getUniswapURL = () => {
@@ -75,7 +75,7 @@ export class UniswapQuote {
     }
   }
 
-  static getSwapQuote = async (quoteParams: UniswapQuoteParams) => {
+  static getSwapQuote = async (quoteParams: UniswapQuoteParams): Promise<UniswapSwapQuoteData> => {
     try {
       const response = await axios.post(
         UniswapQuote.getUniswapQuoteURL(),

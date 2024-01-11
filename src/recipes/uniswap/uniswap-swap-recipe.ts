@@ -57,6 +57,7 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
     if (isDefined(destinationAddress)) {
       this.isRailgunDestinationAddress =
         getIsUnvalidatedRailgunAddress(destinationAddress);
+      console.log('isRailgunDestinationAddress', this.isRailgunDestinationAddress)
       if (this.isRailgunDestinationAddress) {
         this.config.name += ' and Shield';
         this.config.minGasLimit = MIN_GAS_LIMIT_0X_SWAP_SHIELD;
@@ -77,50 +78,56 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
   ): Promise<UniswapSwapQuoteData> {
 
     const chain = NETWORK_CONFIG[networkName].chain;
-    const recipientAddress = NETWORK_CONFIG[networkName].relayAdaptContract
+    const recipientAddress = this.destinationAddress ?? NETWORK_CONFIG[networkName].relayAdaptContract
     const quoteParams = UniswapQuote.getUniswapQuoteParams(
       chain,
       recipientAddress,
       quoteInputs,
     );
 
-    const quoteResponse: {
-      methodParameters: ContractTransaction,
-      quoteDecimals: string,
-      amountDecimals: string,
-      quote: string,
-      amount: string,
-      route: any
-    } = await UniswapQuote.getSwapQuote(quoteParams);
+    const response = await UniswapQuote.getSwapQuote(quoteParams);
+    // console.log("quote response")
+    // console.log(response)
+    return response;
+    // const quoteResponse: {
+    //   quote: {
+    //     methodParameters: ContractTransaction,
+    //     quoteDecimals: string,
+    //     amountDecimals: string,
+    //     quote: string,
+    //     amount: string,
+    //     route: any[]
+    //   }
+    // } = response
 
-    const { methodParameters, quote, amount, amountDecimals, quoteDecimals } = quoteResponse;
-    // parse the data into quoteDataResponse
+    // const { methodParameters, quote, amount, amountDecimals, quoteDecimals } = quoteResponse.quote;
+    // // parse the data into quoteDataResponse
 
-    // TODO: Get buyToken decimal count.
-    const buyDecimalHack = quoteResponse.route[0][0].tokenOut.decimals;
+    // // TODO: Get buyToken decimal count.
+    // const buyDecimalHack = quoteResponse.quote.route[0][0].tokenOut.decimals;
 
-    const currentPriceEstimate = BigInt(quote) / BigInt(amount);
+    // const currentPriceEstimate = BigInt(quote) / BigInt(amount);
 
-    const guaranteedPriceEsimtate = currentPriceEstimate - currentPriceEstimate * BigInt(this.slippageBasisPoints) / 10000n;
+    // const guaranteedPriceEsimtate = currentPriceEstimate - currentPriceEstimate * BigInt(this.slippageBasisPoints) / 10000n;
 
-    const parsedDataResponse: UniswapSwapQuoteData = {
-      sellTokenValue: '10000',
-      spender: UniswapQuote.getUniswapPermit2ContractAddressForNetwork(networkName),
-      crossContractCall: methodParameters as ContractTransaction,
-      buyERC20Amount: {
-        tokenAddress: quoteParams.tokenOut,
-        decimals: BigInt(buyDecimalHack),
-        amount: BigInt(quote),
-      },
-      minimumBuyAmount: 495n,
-      sellTokenAddress: quoteParams.tokenIn,
-      // Unused
-      price: currentPriceEstimate,
-      guaranteedPrice: 0n,
-      slippageBasisPoints: 500n,
-    };
+    // const parsedDataResponse: UniswapSwapQuoteData = {
+    //   sellTokenValue: '10000',
+    //   spender: UniswapQuote.getUniswapPermit2ContractAddressForNetwork(networkName),
+    //   crossContractCall: methodParameters as ContractTransaction,
+    //   buyERC20Amount: {
+    //     tokenAddress: quoteParams.tokenOut,
+    //     decimals: BigInt(buyDecimalHack),
+    //     amount: BigInt(quote),
+    //   },
+    //   minimumBuyAmount: 495n,
+    //   sellTokenAddress: quoteParams.tokenIn,
+    //   // Unused
+    //   price: currentPriceEstimate,
+    //   guaranteedPrice: 0n,
+    //   slippageBasisPoints: 500n,
+    // };
 
-    return parsedDataResponse;
+    // return parsedDataResponse;
   }
 
   protected async getInternalSteps(
@@ -133,7 +140,7 @@ export class UniswapSwapRecipe extends UniswapSwapRecipeCore {
     );
 
     const quoteInputs: UniswapQuoteInputs = {
-      slippage: this.slippageBasisPoints,
+      slippage: parseFloat((this.slippageBasisPoints / 10000n).toString(10)),
       tokenInAmount: sellERC20Amount.amount.toString(10),
       tokenInAddress: sellERC20Amount.tokenAddress,
       tokenOutAddress: this.buyERC20Info.tokenAddress,
