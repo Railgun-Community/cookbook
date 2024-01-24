@@ -1,3 +1,5 @@
+import { NetworkName } from "@railgun-community/shared-models";
+
 export let testConfig = {
   // Set env ETHEREUM_RPC to change default fork RPC.
   ethereumForkRPC: process.env.ETHEREUM_RPC ?? 'https://cloudflare-eth.com',
@@ -40,13 +42,27 @@ export let testConfig = {
     // Standard tokens
     dai: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
   },
+  contractsPolygon: {
+    proxy: '0x19b620929f97b7b990801496c3b361ca5def8c71',
+    treasuryProxy: '0xdca05161eE5b5FA6DF170191c88857E70FFB4094',
+    wmatic: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+    relayAdapt: '0xc7FfA542736321A3dd69246d73987566a5486968',
 
+    // Standard tokens
+    dai: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
+    weth: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+    bnb: '0xA649325Aa7C5093d12D6F98EB4378deAe68CE23F',
+    usdt: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+  },
   // OVERRIDES - override using test-config-overrides.ts
 
   // API Domain for a proxy server equipped with 0x nginx config that includes private API key.
   zeroXProxyApiDomain: process.env.ZERO_X_PROXY_API_DOMAIN ?? '',
   // API Key for 0x API.
   zeroXApiKey: process.env.ZERO_X_API_KEY ?? '',
+
+  selectedNetwork: 'contractsEthereum' as ('contractsEthereum' | 'contractsArbitrum' | 'contractsPolygon'),
+  poiNodeURL: process.env.POI_NODE_URL ?? '',
 };
 
 try {

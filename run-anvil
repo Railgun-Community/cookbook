@@ -14,6 +14,10 @@ case $1 in
     PORT=8601
     CHAIN_ID=42161
     ;;
+  Polygon)
+    PORT=8602
+    CHAIN_ID=137
+    ;;
   *)
     echo "ERROR: Unrecognized chain identifier $1" 1>&2
     exit 1

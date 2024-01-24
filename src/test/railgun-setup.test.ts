@@ -1,3 +1,4 @@
+
 import {
   ArtifactStore,
   NFTTokenData,
@@ -92,6 +93,7 @@ export const startRailgunForTests = () => {
     testArtifactStore,
     false, // useNativeArtifacts
     false, // skipMerkletreeScans
+    [testConfig.poiNodeURL]
   );
 
   setLoggers(
@@ -130,8 +132,7 @@ export const utxoMerkletreeHistoryScanCallback = (
   scanData: MerkletreeScanUpdateEvent,
 ): void => {
   dbgRailgunSetup(
-    `UTXO merkletree scan update: ${Math.round(scanData.progress * 100)}% [${
-      scanData.scanStatus
+    `UTXO merkletree scan update: ${Math.round(scanData.progress * 100)}% [${scanData.scanStatus
     }]`,
   );
   currentUTXOMerkletreeScanStatus = scanData.scanStatus;
@@ -184,7 +185,7 @@ export const createRailgunWallet2ForTests = async () => {
 const approveShield = async (wallet: Wallet, tokenAddress: string) => {
   const token = new ERC20Contract(tokenAddress, testRPCProvider);
   const tx = await token.createSpenderApproval(
-    testConfig.contractsEthereum.proxy,
+    testConfig[testConfig.selectedNetwork].proxy,
     10n ** 18n * 10000000n, // 1 MM approved
   );
   return sendTransactionWithRetries(wallet, tx);
@@ -196,7 +197,7 @@ const approveShieldERC721Collection = async (
 ) => {
   const token = new ERC721Contract(nftAddress);
   const tx = await token.createSpenderApprovalForAll(
-    testConfig.contractsEthereum.proxy,
+    testConfig[testConfig.selectedNetwork].proxy,
   );
   return sendTransactionWithRetries(wallet, tx);
 };

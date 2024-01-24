@@ -41,7 +41,7 @@ export const setupTestRPCAndWallets = async (
       logging: {
         logger: {
           log: (msg: string) => {
-            if (!testConfig.showVerboseLogs) {
+            if (testConfig.showVerboseLogs === false) {
               return;
             }
             dbg(msg);
@@ -67,8 +67,8 @@ export const setupTestRPCAndWallets = async (
       forkRPCType === ForkRPCType.Anvil
         ? `Could not connect to test RPC server. Please start anvil fork RPC for ${networkName} (see README).`
         : forkRPCType === ForkRPCType.Hardhat
-        ? `Could not connect to test Hardhat RPC server.`
-        : `Could not connect to test Ganache RPC server.`,
+          ? `Could not connect to test Hardhat RPC server.`
+          : `Could not connect to test Ganache RPC server.`,
     );
   }
   if (forkRPCType === ForkRPCType.Anvil) {

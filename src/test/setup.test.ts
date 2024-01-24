@@ -1,4 +1,5 @@
 import {
+  NETWORK_CONFIG,
   NetworkName,
   TXIDVersion,
   isDefined,
@@ -16,6 +17,10 @@ import {
 import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
 import { getForkTestNetworkName } from './common.test';
+import { refreshBalances } from '@railgun-community/wallet';
+import debug from 'debug';
+
+const dbg = debug('rpc:fork:setup');
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
@@ -44,8 +49,12 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
       ];
     case NetworkName.Arbitrum:
       return [testConfig.contractsArbitrum.dai];
-    case NetworkName.BNBChain:
     case NetworkName.Polygon:
+      return [
+        testConfig.contractsPolygon.dai,
+        testConfig.contractsPolygon.weth
+      ]
+    case NetworkName.BNBChain:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli:
     case NetworkName.EthereumSepolia:
@@ -57,7 +66,7 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
 };
 
 const getSupportedNetworkNamesForTest = (): NetworkName[] => {
-  return [NetworkName.Ethereum, NetworkName.Arbitrum];
+  return [NetworkName.Ethereum, NetworkName.Arbitrum, NetworkName.Polygon];
 };
 
 export const setupForkTests = async () => {
@@ -77,8 +86,8 @@ export const setupForkTests = async () => {
   const forkRPCType = isDefined(process.env.USE_GANACHE)
     ? ForkRPCType.Ganache
     : isDefined(process.env.USE_HARDHAT)
-    ? ForkRPCType.Hardhat
-    : ForkRPCType.Anvil;
+      ? ForkRPCType.Hardhat
+      : ForkRPCType.Anvil;
 
   // Ganache forked Ethereum RPC setup
   await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
@@ -87,7 +96,10 @@ export const setupForkTests = async () => {
   startRailgunForTests();
 
   await loadLocalhostFallbackProviderForTests(networkName);
-
+  const chain = NETWORK_CONFIG[networkName].chain;
+  // refresh balances here. 
+  dbg("Refreshing Core Balances")
+  await refreshBalances(chain, undefined);
   await pollUntilUTXOMerkletreeScanned();
 
   // Set up primary wallet
