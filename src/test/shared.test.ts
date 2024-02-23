@@ -1,7 +1,7 @@
 import {
   gasEstimateForUnprovenCrossContractCalls,
   generateCrossContractCallsProof,
-  mnemonicToPKey,
+  mnemonicTo0xPKey,
   populateProvedCrossContractCalls,
 } from '@railgun-community/wallet';
 import {
@@ -45,7 +45,7 @@ export const getTestProvider = (): JsonRpcProvider => {
 
 export const getTestEthersWallet = (): Wallet => {
   const provider = getTestProvider();
-  const pkey = mnemonicToPKey(testConfig.signerMnemonic);
+  const pkey = mnemonicTo0xPKey(testConfig.signerMnemonic);
   return new Wallet(pkey).connect(provider);
 };
 
