@@ -2349,28 +2349,39 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
+"@railgun-community/circomlibjs@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@railgun-community/circomlibjs/-/circomlibjs-0.0.8.tgz#e3d6c43629bf3428726e44af7845e0cb982bb38e"
+  integrity sha512-ZqDUxS1DkxoZ7Nz6n1awTBjFaunDR64WQSwj2XtGOjx3ZQVpaVoSaIxbp0egsZPzyr70uRm7PQ76ZDeUwLyNkg==
+  dependencies:
+    "@railgun-community/ffjavascript" "0.1.0"
+    blake-hash "^2.0.0"
+    blake2b "^2.1.3"
+    web3 "^1.6.0"
+    web3-utils "^1.6.0"
+
 "@railgun-community/curve25519-scalarmult-wasm@0.1.5":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@railgun-community/curve25519-scalarmult-wasm/-/curve25519-scalarmult-wasm-0.1.5.tgz#edb5e40a8f1fdb7f7e0de1d04e8badabe41cb2a8"
   integrity sha512-Cur8uM/IdNW3WzUwdPloDG1CF0rpSBDWq2yGXJMZ7IMeBGdc4Jj0h9tnNMFRZ35ZuCVVbZ3yClmqSa4PsbpdGQ==
 
-"@railgun-community/engine@7.2.0":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/engine/-/engine-7.2.0.tgz#e861a8d37569ae3fcc3c64346aeeb6ca5653feb7"
-  integrity sha512-h/PhtmWewQ1bt0StHVV27/5bmqSbk1g4kb6wNC0rCrxOQTZK3ZrUq8I1+j3aRP8weMvPdgqu/UsIpab4PQ0w4w==
+"@railgun-community/engine@7.3.1":
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/@railgun-community/engine/-/engine-7.3.1.tgz#9779b1209eb3b8ba9f83e392b544ac9eb27231ed"
+  integrity sha512-7yb2josEAxDKd5RwPmSmEPJkBPZZcXL9q7F4kzuWe+CvQRqvdBzaxZz5OmFykVAbYRe91LxLLgmW6Rj0AgB0wA==
   dependencies:
     "@noble/ciphers" "^0.4.0"
     "@noble/ed25519" "^1.7.1"
     "@noble/hashes" "^1.3.2"
+    "@railgun-community/circomlibjs" "0.0.8"
     "@railgun-community/curve25519-scalarmult-wasm" "0.1.5"
-    "@railgun-community/poseidon-hash-wasm" "1.0.0"
+    "@railgun-community/poseidon-hash-wasm" "1.0.1"
     "@scure/base" "^1.1.1"
     abstract-leveldown "^7.2.0"
     bn.js "^5.2.1"
     browserify-aes "^1.2.0"
     buffer-xor "^2.0.2"
     chai-as-promised "^7.1.1"
-    circomlibjs hsg88/circomlibjs#ffjavascrip.0.1.0
     encoding-down "^7.1.0"
     ethereum-cryptography "^2.0.0"
     ethers "github:Railgun-Community/ethers.js#v6.7.10"
@@ -2378,25 +2389,27 @@
     levelup "^5.1.1"
     msgpack-lite "^0.1.26"
 
-"@railgun-community/poseidon-hash-wasm@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/poseidon-hash-wasm/-/poseidon-hash-wasm-1.0.0.tgz#5b3b77c832055b51b0865f5b5f569ff105dc5a08"
-  integrity sha512-X9qFW6kYKz85eTlzoJBgbv7HjT8+T93yXAVNLUu3wSv7PSoWFef6bS7HRTdWBSSVxFawLaTMtmhoC20T9Zzi5A==
+"@railgun-community/ffjavascript@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@railgun-community/ffjavascript/-/ffjavascript-0.1.0.tgz#e4f37f81a25972225744907efd3c405383b5262c"
+  integrity sha512-wyFr5da1alJzahCKtf8ZF6qegWsIgi+OdSvRBlqXtRyJTY/deRCYrrYJdKNQwivqwR9SHlcqtUm18Ba+oJjTmg==
+  dependencies:
+    big-integer "^1.6.48"
 
-"@railgun-community/shared-models@6.3.1":
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-6.3.1.tgz#a4e2a9606e1dcc205e13560f147c53e4c4f9b89a"
-  integrity sha512-/CVTlS79OF2bz7nonRw5fvmsBq5cfJ7v4QswSgPNw6IZflP6omHI+/hcxW90PIoQ40nfS2HaC2+wUgAkdv4Axw==
+"@railgun-community/poseidon-hash-wasm@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@railgun-community/poseidon-hash-wasm/-/poseidon-hash-wasm-1.0.1.tgz#bfd3b3f915391a59486d8c9d632069f029e152d6"
+  integrity sha512-zDAbMu095ZjMqsKIoyOnuKR4Zofnqqx4eTCtnA6qYglnexX5cadxItvJa3ozhDDTmFkDGAidDssQ7Pzl3wwLDA==
 
-"@railgun-community/shared-models@6.3.x":
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-6.3.0.tgz#c3d87091b9afc880f369b30f63c7df6f0f47829b"
-  integrity sha512-ZesDE7DnLUmjn+2M6UisXPUumImmqWHi854+7q3EkYV5R/Gjsth4yeca1OBNSjCmANpg7nZvDjctkodWFi0xBw==
+"@railgun-community/shared-models@6.4.1", "@railgun-community/shared-models@^6.4.1":
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-6.4.1.tgz#b77bea248634b2f321517b9575bff59f1ac904dd"
+  integrity sha512-hID49qn3/t4O/BlA/HawRstfS/n7FWTpZiLkBAub/80ZLDbqJhP++TYPYwQe+DhY+L0KN1t+evLJULNp+PHXPg==
 
-"@railgun-community/wallet@7.2.x":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-7.2.0.tgz#6cf24acd5d519abb44b2f544b409e3b7dd4325ed"
-  integrity sha512-+LaGl0ob9YQ/kJWZjjtM+gYCGkr4AluNeoeGPW0554H8vXAClE2EQQBU3r+Ij2lLPpSvf0eO1aUqVu470XhOiQ==
+"@railgun-community/wallet@^7.4.4":
+  version "7.4.4"
+  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-7.4.4.tgz#38a3cb41aaec26b9ab26d0bcdcdd9372b5ea32a4"
+  integrity sha512-Y/GXGrgyFUwzjfOGFMMrz6UMwKA4jF8jCNaO+gO5VdjXGt6RicrfV+o0G8fv1DeEik8+jC6CUMIkGUlZZkyluw==
   dependencies:
     "@graphql-mesh/cache-localforage" "^0.7.20"
     "@graphql-mesh/cross-helpers" "^0.3.4"
@@ -2409,8 +2422,8 @@
     "@graphql-mesh/types" "^0.91.14"
     "@graphql-mesh/utils" "^0.43.22"
     "@noble/ed25519" "^1.7.1"
-    "@railgun-community/engine" "7.2.0"
-    "@railgun-community/shared-models" "6.3.1"
+    "@railgun-community/engine" "7.3.1"
+    "@railgun-community/shared-models" "6.4.1"
     "@whatwg-node/fetch" "^0.8.4"
     assert "2.0.0"
     axios "0.27.2"
@@ -4032,16 +4045,6 @@ circom_runtime@0.1.22:
   dependencies:
     ffjavascript "0.2.57"
 
-circomlibjs@hsg88/circomlibjs#ffjavascrip.0.1.0:
-  version "0.0.8"
-  resolved "https://codeload.github.com/hsg88/circomlibjs/tar.gz/fee5b3c479caa3db1e34cbfdedad763d74277844"
-  dependencies:
-    blake-hash "^2.0.0"
-    blake2b "^2.1.3"
-    ffjavascript hsg88/ffjavascript#fix-utils-native
-    web3 "^1.6.0"
-    web3-utils "^1.6.0"
-
 class-is@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/class-is/-/class-is-1.1.0.tgz#9d3c0fba0440d211d843cec3dedfa48055005825"
@@ -5482,12 +5485,6 @@ ffjavascript@0.2.57, ffjavascript@^0.2.48:
     wasmbuilder "0.0.16"
     wasmcurves "0.2.0"
     web-worker "^1.2.0"
-
-ffjavascript@hsg88/ffjavascript#fix-utils-native:
-  version "0.1.0"
-  resolved "https://codeload.github.com/hsg88/ffjavascript/tar.gz/e586e4e36f323acabe1805b01ea10070c413c6ec"
-  dependencies:
-    big-integer "^1.6.48"
 
 file-entry-cache@^6.0.1:
   version "6.0.1"
@@ -8957,7 +8954,16 @@ string-natural-compare@^3.0.1:
   resolved "https://registry.yarnpkg.com/string-natural-compare/-/string-natural-compare-3.0.1.tgz#7a42d58474454963759e8e8b7ae63d71c1e7fdf4"
   integrity sha512-n3sPwynL1nwKi3WJ6AIsClwBMa0zTi54fn2oLU6ndfTSIO05xaznjSf15PcBZU6FNWbmN5Q6cxT4V5hGvB4taw==
 
-"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -9018,7 +9024,14 @@ stringify-object@^3.2.1:
     is-obj "^1.0.1"
     is-regexp "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
+
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -10015,7 +10028,7 @@ workerpool@6.2.1:
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.2.1.tgz#46fc150c17d826b86a008e5a4508656777e9c343"
   integrity sha512-ILEIE97kDZvF9Wb9f6h5aXK4swSlKGUcOEGiIYb2OOu/IrDU9iwj0fD//SsA6E5ibwJxpEvhullJY4Sl4GcpAw==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -10028,6 +10041,15 @@ wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
