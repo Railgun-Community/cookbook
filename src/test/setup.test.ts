@@ -47,7 +47,7 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
     case NetworkName.BNBChain:
     case NetworkName.Polygon:
     case NetworkName.EthereumRopsten_DEPRECATED:
-    case NetworkName.EthereumGoerli:
+    case NetworkName.EthereumGoerli_DEPRECATED:
     case NetworkName.EthereumSepolia:
     case NetworkName.PolygonMumbai:
     case NetworkName.ArbitrumGoerli:
@@ -84,7 +84,7 @@ export const setupForkTests = async () => {
   await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
 
   // Quickstart setup
-  startRailgunForTests();
+  await startRailgunForTests();
 
   await loadLocalhostFallbackProviderForTests(networkName);
 
