@@ -79,13 +79,13 @@ const testArtifactStore = new ArtifactStore(
   fileExists,
 );
 
-export const startRailgunForTests = () => {
+export const startRailgunForTests = async () => {
   const testWalletSource = 'cookbook tests';
   const shouldDebug = true;
 
   dbgRailgunSetup('Starting RAILGUN Engine...');
 
-  startRailgunEngine(
+  await startRailgunEngine(
     testWalletSource,
     db,
     shouldDebug,

@@ -143,7 +143,7 @@ export class UniV2LikeSubgraph {
           case NetworkName.ArbitrumGoerli:
           case NetworkName.EthereumRopsten_DEPRECATED:
           case NetworkName.PolygonMumbai:
-          case NetworkName.EthereumGoerli:
+          case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.EthereumSepolia:
           case NetworkName.Hardhat:
             throw new Error(

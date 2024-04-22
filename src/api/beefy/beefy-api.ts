@@ -104,7 +104,7 @@ export class BeefyAPI {
       case NetworkName.Arbitrum:
         return { network: 'arbitrum', chain: 'arbitrum' };
       case NetworkName.EthereumRopsten_DEPRECATED:
-      case NetworkName.EthereumGoerli:
+      case NetworkName.EthereumGoerli_DEPRECATED:
       case NetworkName.EthereumSepolia:
       case NetworkName.PolygonMumbai:
       case NetworkName.ArbitrumGoerli:

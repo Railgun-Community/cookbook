@@ -38,7 +38,7 @@
     "@graphql-mesh/store": "^0.9.20",
     "@graphql-mesh/types": "^0.91.14",
     "@graphql-mesh/utils": "^0.43.22",
-    "@railgun-community/shared-models": "6.3.x",
+    "@railgun-community/shared-models": "6.4.1",
     "axios": "^1.4.0",
     "custom-uniswap-v2-sdk": "^3.2.0",
     "ethers": "github:Railgun-Community/ethers.js#v6.7.10",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@graphprotocol/client-cli": "^2.2.22",
-    "@railgun-community/wallet": "7.2.x",
+    "@railgun-community/wallet": "7.4.4",
     "@typechain/ethers-v6": "^0.3.3",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
