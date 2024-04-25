@@ -140,12 +140,12 @@ export class UniV2LikeSubgraph {
             return 'sushiswap-v2-bsc';
           case NetworkName.Arbitrum:
             return 'sushiswap-v2-arbitrum';
-          case NetworkName.ArbitrumGoerli:
-          case NetworkName.EthereumRopsten_DEPRECATED:
-          case NetworkName.PolygonMumbai:
-          case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.EthereumSepolia:
           case NetworkName.Hardhat:
+          case NetworkName.EthereumRopsten_DEPRECATED:
+          case NetworkName.EthereumGoerli_DEPRECATED:
+          case NetworkName.ArbitrumGoerli_DEPRECATED:
+          case NetworkName.PolygonMumbai_DEPRECATED:
             throw new Error(
               'Sushiswap V2 LP Subgraph is not supported on this network',
             );
