@@ -35,11 +35,11 @@ describe('zero-x-fetch', () => {
     expect(
       createZeroXUrlAndHeaders(
         ZeroXApiEndpoint.GetSwapQuote,
-        NetworkName.PolygonMumbai,
+        NetworkName.Polygon,
         true,
       ),
     ).to.deep.equal({
-      url: 'https://mumbai.api.0x.org/swap/v1/quote',
+      url: 'https://polygon.api.0x.org/swap/v1/quote',
       headers: { '0x-api-key': 'test-api-key' },
     });
 
@@ -61,11 +61,11 @@ describe('zero-x-fetch', () => {
     expect(
       createZeroXUrlAndHeaders(
         ZeroXApiEndpoint.GetSwapQuote,
-        NetworkName.PolygonMumbai,
+        NetworkName.Polygon,
         false,
       ),
     ).to.deep.equal({
-      url: 'testapi.com/0x/public/mumbai.api/swap/v1/quote',
+      url: 'testapi.com/0x/public/polygon.api/swap/v1/quote',
       headers: {},
     });
   });
