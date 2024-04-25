@@ -105,9 +105,9 @@ export class BeefyAPI {
         return { network: 'arbitrum', chain: 'arbitrum' };
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli_DEPRECATED:
+      case NetworkName.PolygonMumbai_DEPRECATED:
+      case NetworkName.ArbitrumGoerli_DEPRECATED:
       case NetworkName.EthereumSepolia:
-      case NetworkName.PolygonMumbai:
-      case NetworkName.ArbitrumGoerli:
       case NetworkName.Hardhat:
         throw new Error('Chain not supported by Beefy Vaults');
     }

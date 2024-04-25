@@ -67,14 +67,14 @@ export class UniV2LikeSDK {
             factoryAddress = '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac';
             break;
           case NetworkName.Polygon:
-          case NetworkName.PolygonMumbai:
           case NetworkName.BNBChain:
           case NetworkName.Arbitrum:
             factoryAddress = '0xc35DADB65012eC5796536bD9864eD8773aBc74C4';
             break;
-          case NetworkName.ArbitrumGoerli:
-          case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.EthereumRopsten_DEPRECATED:
+          case NetworkName.EthereumGoerli_DEPRECATED:
+          case NetworkName.ArbitrumGoerli_DEPRECATED:
+          case NetworkName.PolygonMumbai_DEPRECATED:
           case NetworkName.EthereumSepolia:
           case NetworkName.Hardhat:
             throw new Error('SushiSwap V2 LP is not supported on this network');
@@ -120,15 +120,14 @@ export class UniV2LikeSDK {
             return '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F';
           case NetworkName.Polygon:
             return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
-          case NetworkName.PolygonMumbai:
-            return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
           case NetworkName.BNBChain:
             return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
           case NetworkName.Arbitrum:
             return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
-          case NetworkName.ArbitrumGoerli:
-          case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.EthereumRopsten_DEPRECATED:
+          case NetworkName.EthereumGoerli_DEPRECATED:
+          case NetworkName.ArbitrumGoerli_DEPRECATED:
+          case NetworkName.PolygonMumbai_DEPRECATED:
           case NetworkName.EthereumSepolia:
           case NetworkName.Hardhat:
             throw new Error('SushiSwap V2 LP is not supported on this network');

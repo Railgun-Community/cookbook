@@ -45,12 +45,12 @@ export const getRPCPort = (networkName: NetworkName) => {
       return 8601;
     case NetworkName.BNBChain:
     case NetworkName.Polygon:
+    case NetworkName.Hardhat:
+    case NetworkName.EthereumSepolia:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli_DEPRECATED:
-    case NetworkName.EthereumSepolia:
-    case NetworkName.PolygonMumbai:
-    case NetworkName.ArbitrumGoerli:
-    case NetworkName.Hardhat:
+    case NetworkName.ArbitrumGoerli_DEPRECATED:
+    case NetworkName.PolygonMumbai_DEPRECATED:
       throw new Error('No RPC setup for network');
   }
 };

@@ -46,12 +46,12 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
       return [testConfig.contractsArbitrum.dai];
     case NetworkName.BNBChain:
     case NetworkName.Polygon:
+    case NetworkName.EthereumSepolia:
+    case NetworkName.Hardhat:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli_DEPRECATED:
-    case NetworkName.EthereumSepolia:
-    case NetworkName.PolygonMumbai:
-    case NetworkName.ArbitrumGoerli:
-    case NetworkName.Hardhat:
+    case NetworkName.ArbitrumGoerli_DEPRECATED:
+    case NetworkName.PolygonMumbai_DEPRECATED:
       return [];
   }
 };

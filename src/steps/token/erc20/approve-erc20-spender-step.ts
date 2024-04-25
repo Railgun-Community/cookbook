@@ -113,12 +113,12 @@ export class ApproveERC20SpenderStep extends Step {
       case NetworkName.BNBChain:
       case NetworkName.Polygon:
       case NetworkName.Arbitrum:
+      case NetworkName.EthereumSepolia:
+      case NetworkName.Hardhat:
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli_DEPRECATED:
-      case NetworkName.EthereumSepolia:
-      case NetworkName.PolygonMumbai:
-      case NetworkName.ArbitrumGoerli:
-      case NetworkName.Hardhat:
+      case NetworkName.PolygonMumbai_DEPRECATED:
+      case NetworkName.ArbitrumGoerli_DEPRECATED:
         return false;
     }
   }
