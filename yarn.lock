@@ -2401,12 +2401,12 @@
   resolved "https://registry.yarnpkg.com/@railgun-community/poseidon-hash-wasm/-/poseidon-hash-wasm-1.0.1.tgz#bfd3b3f915391a59486d8c9d632069f029e152d6"
   integrity sha512-zDAbMu095ZjMqsKIoyOnuKR4Zofnqqx4eTCtnA6qYglnexX5cadxItvJa3ozhDDTmFkDGAidDssQ7Pzl3wwLDA==
 
-"@railgun-community/shared-models@6.4.3":
+"@railgun-community/shared-models@6.4.3", "@railgun-community/shared-models@~6.4.3":
   version "6.4.3"
   resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-6.4.3.tgz#7d9b4e57f0b507f3612f97dba780f638f1954f05"
   integrity sha512-eGC3gDBJKAFOwSuriSfXEdY82xkrT/AAzeuWSOnsC2jwFw7fGPNdWAKA3yPDM3Nrdo/4EgPO8ezqydeweOFUzw==
 
-"@railgun-community/wallet@7.4.7":
+"@railgun-community/wallet@~7.4.7":
   version "7.4.7"
   resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-7.4.7.tgz#dc26d46593063d6471944d4431d8b454eee54d6f"
   integrity sha512-xVNgKnT0VBlGabnPzBcOmAWr1z7oYLXZ/IbedJLKW5MbMhCDv724n+6Bx8goE3wYBSriruxGBL9uLJbTgOwzrQ==
