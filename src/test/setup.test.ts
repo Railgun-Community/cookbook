@@ -38,7 +38,7 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
         testConfig.contractsEthereum.weth9,
         testConfig.contractsEthereum.rail,
         testConfig.contractsEthereum.usdc,
-        testConfig.contractsEthereum.usdcWethSushiSwapV2LPToken,
+        testConfig.contractsEthereum.conicEthLPToken,
         testConfig.contractsEthereum.crvUSDCWBTCWETH,
         testConfig.contractsEthereum.mooConvexTriCryptoUSDC,
       ];

@@ -25,7 +25,7 @@ export let testConfig = {
     rail: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
     usdc: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
     // LP tokens
-    usdcWethSushiSwapV2LPToken: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
+    conicEthLPToken: '0x58649Ec8adD732ea710731b5Cb37c99529A394d3',
     // Vault tokens
     crvUSDCWBTCWETH: '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B',
     mooConvexTriCryptoUSDC: '0xD1BeaD7CadcCC6b6a715A6272c39F1EC54F6EC99',

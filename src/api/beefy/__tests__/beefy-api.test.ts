@@ -34,7 +34,7 @@ describe('beefy-api', () => {
       NetworkName.Ethereum,
       false, // skipCache
       false, // includeInactiveVaults
-      testConfig.contractsEthereum.usdcWethSushiSwapV2LPToken.toUpperCase(),
+      testConfig.contractsEthereum.conicEthLPToken.toUpperCase(),
     );
     expect(vaultsForEthereumToken.length).to.equal(1);
     expect({
@@ -48,21 +48,21 @@ describe('beefy-api', () => {
 
       // Compare the rest of the values:
       chain: 'ethereum',
-      depositERC20Symbol: 'ETH-USDC LP',
-      depositERC20Address: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
+      depositERC20Symbol: 'cncETH',
+      depositERC20Address: '0x58649ec8add732ea710731b5cb37c99529a394d3',
       depositERC20Decimals: 18n,
       depositFeeBasisPoints: 0n,
       network: 'ethereum',
-      vaultContractAddress: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
-      vaultID: 'sushi-mainnet-usdc-weth',
-      vaultName: 'ETH-USDC LP',
-      vaultERC20Symbol: 'mooSushiETH-USDC',
-      vaultERC20Address: '0x61f96ca5c79c9753c93244c73f1d4b4a90c1ac8c',
-      withdrawFeeBasisPoints: 10n,
+      vaultContractAddress: '0xaf5bf2d152e6a16095588d3438b55edc2bb28343',
+      vaultID: 'conic-eth',
+      vaultName: 'ETH LP',
+      vaultERC20Symbol: 'mooConicETH',
+      vaultERC20Address: '0xaf5bf2d152e6a16095588d3438b55edc2bb28343',
+      withdrawFeeBasisPoints: 0n,
       isActive: true,
     });
-    expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.001);
-    expect(vaultsForEthereumToken[0].apy).to.be.lessThan(0.2);
+    expect(vaultsForEthereumToken[0].apy).to.be.greaterThan(0.01);
+    expect(vaultsForEthereumToken[0].apy).to.be.lessThan(0.5);
 
     const vaultsForPolygonToken = await BeefyAPI.getFilteredBeefyVaults(
       NetworkName.Polygon,
@@ -74,7 +74,7 @@ describe('beefy-api', () => {
   }).timeout(7500);
 
   it('Should get specific Beefy vault data', async () => {
-    const vaultID = 'sushi-mainnet-usdc-weth';
+    const vaultID = 'conic-eth';
     const vault = await BeefyAPI.getBeefyVaultForID(
       vaultID,
       NetworkName.Ethereum,
