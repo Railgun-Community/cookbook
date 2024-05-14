@@ -123,19 +123,19 @@ export const createCrossContractCallsForTest = async (
     }),
   );
 
-  // Proof/transaction requires relayer fee in order to parse the relay adapt error for testing.
+  // Proof/transaction requires broadcaster fee in order to parse the relay adapt error for testing.
   // Ie. RelayAdapt transaction must continue after revert, and emit event with error details.
   // NFT-only tests will not have this benefit.
-  const useRelayerFee = unshieldERC20Amounts.length < 1;
-  const mockRelayerFeeRecipient: Optional<RailgunERC20AmountRecipient> =
-    useRelayerFee
+  const useBroadcasterFee = unshieldERC20Amounts.length < 1;
+  const mockBroadcasterFeeRecipient: Optional<RailgunERC20AmountRecipient> =
+    useBroadcasterFee
       ? {
           tokenAddress: unshieldERC20Amounts[0].tokenAddress,
           amount: 0n,
           recipientAddress: MOCK_RAILGUN_ADDRESS,
         }
       : undefined;
-  const sendWithPublicWallet = !useRelayerFee;
+  const sendWithPublicWallet = !useBroadcasterFee;
 
   let gasEstimate: Optional<bigint>;
   try {
@@ -175,14 +175,14 @@ export const createCrossContractCallsForTest = async (
     shieldERC20Recipients,
     shieldNFTRecipients,
     crossContractCalls,
-    mockRelayerFeeRecipient,
+    mockBroadcasterFeeRecipient,
     sendWithPublicWallet,
     undefined, // overallBatchMinGasPrice
     minGasLimit,
     () => {}, // progressCallback
   );
 
-  const transactionGasDetails: TransactionGasDetails = useRelayerFee
+  const transactionGasDetails: TransactionGasDetails = useBroadcasterFee
     ? {
         ...MOCK_TRANSACTION_GAS_DETAILS_SERIALIZED_TYPE_1,
         gasEstimate: gasEstimate ?? minGasLimit,
@@ -200,7 +200,7 @@ export const createCrossContractCallsForTest = async (
     shieldERC20Recipients,
     shieldNFTRecipients,
     crossContractCalls,
-    mockRelayerFeeRecipient,
+    mockBroadcasterFeeRecipient,
     sendWithPublicWallet,
     undefined, // overallBatchMinGasPrice
     transactionGasDetails,
