@@ -75,6 +75,7 @@ export class UniV2LikeSDK {
           case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.ArbitrumGoerli_DEPRECATED:
           case NetworkName.PolygonMumbai_DEPRECATED:
+          case NetworkName.PolygonAmoy:
           case NetworkName.EthereumSepolia:
           case NetworkName.Hardhat:
             throw new Error('SushiSwap V2 LP is not supported on this network');
@@ -129,6 +130,7 @@ export class UniV2LikeSDK {
           case NetworkName.ArbitrumGoerli_DEPRECATED:
           case NetworkName.PolygonMumbai_DEPRECATED:
           case NetworkName.EthereumSepolia:
+          case NetworkName.PolygonAmoy:
           case NetworkName.Hardhat:
             throw new Error('SushiSwap V2 LP is not supported on this network');
         }

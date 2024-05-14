@@ -115,6 +115,7 @@ export class ApproveERC20SpenderStep extends Step {
       case NetworkName.Arbitrum:
       case NetworkName.EthereumSepolia:
       case NetworkName.Hardhat:
+      case NetworkName.PolygonAmoy:
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli_DEPRECATED:
       case NetworkName.PolygonMumbai_DEPRECATED:
