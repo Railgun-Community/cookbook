@@ -2365,10 +2365,10 @@
   resolved "https://registry.yarnpkg.com/@railgun-community/curve25519-scalarmult-wasm/-/curve25519-scalarmult-wasm-0.1.5.tgz#edb5e40a8f1fdb7f7e0de1d04e8badabe41cb2a8"
   integrity sha512-Cur8uM/IdNW3WzUwdPloDG1CF0rpSBDWq2yGXJMZ7IMeBGdc4Jj0h9tnNMFRZ35ZuCVVbZ3yClmqSa4PsbpdGQ==
 
-"@railgun-community/engine@~9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/engine/-/engine-9.0.0.tgz#dca9169d03a05fdd184fc27e555cbf914de8d088"
-  integrity sha512-KSbrZB5UN7WhyK4i1JzctfC2A0OOXdZAhibiMdCxWeCKOqAhQYM9iAvFyeApVrAaL3QIkAd467os068FrHT4zw==
+"@railgun-community/engine@~9.0.1":
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/@railgun-community/engine/-/engine-9.0.1.tgz#29b7eb50a68e7a1ee0764461620b157b2d9dcfac"
+  integrity sha512-/K1ndy3xdi0mSXlHoxckEcl7GfgVu/SJ+qmMCaCQlIlmFA+zkAIFURhS4oG1+9O9RQjIexb0iG0bsta2l5nOxQ==
   dependencies:
     "@noble/ciphers" "^0.4.0"
     "@noble/ed25519" "^1.7.1"
@@ -2400,15 +2400,15 @@
   resolved "https://registry.yarnpkg.com/@railgun-community/poseidon-hash-wasm/-/poseidon-hash-wasm-1.0.1.tgz#bfd3b3f915391a59486d8c9d632069f029e152d6"
   integrity sha512-zDAbMu095ZjMqsKIoyOnuKR4Zofnqqx4eTCtnA6qYglnexX5cadxItvJa3ozhDDTmFkDGAidDssQ7Pzl3wwLDA==
 
-"@railgun-community/shared-models@~7.0.2":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-7.0.2.tgz#ae95be26cdbd9c20c701c8e2f92398bef183a89f"
-  integrity sha512-kDTmhfIRl7cSLlVA6Fa1XObG8WJRQ3jx/+4elscCwJIi6KBnCMFDFKiI+EsP9XNRkvnqIv6mv4+eLQYn3kCqXw==
+"@railgun-community/shared-models@7.0.6":
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-7.0.6.tgz#e148d8caa28982c3c8e17d5175288ed30d7b25e9"
+  integrity sha512-e9VYUXmJPpJySzrmgrXv/ANt9JkA2MP3bBxMRExxYTb5MmQWHlmBUyQ7TnZnEB0dsTQpCk7kOCY6RyCw9SFtjg==
 
-"@railgun-community/wallet@~9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-9.0.0.tgz#6b70a97b8d5f2812f253b5691941fb2094d0c514"
-  integrity sha512-EXY9SvaoVMa4msAjodE3X3Ii0iD48CCECvVY22mjq5ajwJ2jAqHZxyUsYfFgGfkNM29DsiTpKI4U/5CX8BMJGg==
+"@railgun-community/wallet@9.0.3":
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-9.0.3.tgz#80701b31f65ede17bed47546cfb5ab2acae34b51"
+  integrity sha512-2GgeRVO9Ix0sFjR3VsTRyt0zRlZx97hSVwkwPjM6Vw4GiFZElicplLmsOFIfVDZATApddxK8Of+ogIFOoxq8Hw==
   dependencies:
     "@graphql-mesh/cache-localforage" "^0.7.20"
     "@graphql-mesh/cross-helpers" "^0.3.4"
@@ -2421,8 +2421,8 @@
     "@graphql-mesh/types" "^0.91.14"
     "@graphql-mesh/utils" "^0.43.22"
     "@noble/ed25519" "^1.7.1"
-    "@railgun-community/engine" "~9.0.0"
-    "@railgun-community/shared-models" "~7.0.2"
+    "@railgun-community/engine" "~9.0.1"
+    "@railgun-community/shared-models" "7.0.6"
     "@whatwg-node/fetch" "^0.8.4"
     assert "2.0.0"
     axios "0.27.2"
@@ -8953,7 +8953,16 @@ string-natural-compare@^3.0.1:
   resolved "https://registry.yarnpkg.com/string-natural-compare/-/string-natural-compare-3.0.1.tgz#7a42d58474454963759e8e8b7ae63d71c1e7fdf4"
   integrity sha512-n3sPwynL1nwKi3WJ6AIsClwBMa0zTi54fn2oLU6ndfTSIO05xaznjSf15PcBZU6FNWbmN5Q6cxT4V5hGvB4taw==
 
-"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -9014,7 +9023,14 @@ stringify-object@^3.2.1:
     is-obj "^1.0.1"
     is-regexp "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
+
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -10011,7 +10027,7 @@ workerpool@6.2.1:
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.2.1.tgz#46fc150c17d826b86a008e5a4508656777e9c343"
   integrity sha512-ILEIE97kDZvF9Wb9f6h5aXK4swSlKGUcOEGiIYb2OOu/IrDU9iwj0fD//SsA6E5ibwJxpEvhullJY4Sl4GcpAw==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -10024,6 +10040,15 @@ wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
