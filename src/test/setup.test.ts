@@ -1,8 +1,10 @@
 import {
+  Chain,
   NetworkName,
   TXIDVersion,
   isDefined,
 } from '@railgun-community/shared-models';
+import { refreshBalances } from '@railgun-community/wallet';
 import {
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
@@ -19,7 +21,7 @@ import { getForkTestNetworkName } from './common.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
-    this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
+    this.timeout(10 * 60 * 1000); // 3 min timeout for setup.
     removeTestDB();
     await setupForkTests();
   }
@@ -83,20 +85,18 @@ export const setupForkTests = async () => {
 
   // Ganache forked Ethereum RPC setup
   await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
-
   // Quickstart setup
   await startRailgunForTests();
 
   await loadLocalhostFallbackProviderForTests(networkName);
 
+  await refreshBalances({ id: 1, type: 0 } as Chain, undefined);
   await pollUntilUTXOMerkletreeScanned();
-
   // Set up primary wallet
   await createRailgunWalletForTests();
 
   // Set up secondary wallets
   await createRailgunWallet2ForTests();
-
   // Shield tokens for tests
   await shieldAllTokensForTests(networkName, tokenAddresses);
 
