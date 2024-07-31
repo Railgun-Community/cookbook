@@ -92,6 +92,8 @@ export const startRailgunForTests = async () => {
     testArtifactStore,
     false, // useNativeArtifacts
     false, // skipMerkletreeScans
+    [],
+    [],
   );
 
   setLoggers(
