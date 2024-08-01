@@ -9,6 +9,8 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 describe('beefy-api', () => {
+  const beefyVaultId = 'bifi-vault'; // https://app.beefy.finance/vault/bifi-vault
+
   before(() => {});
 
   it('Should get Beefy vaults data for each network', async () => {
@@ -71,10 +73,10 @@ describe('beefy-api', () => {
       '0xEcd5e75AFb02eFa118AF914515D6521aaBd189F1'.toUpperCase(),
     );
     expect(vaultsForPolygonToken.length).to.equal(0);
-  }).timeout(7500);
+  }).timeout(17500);
 
   it('Should get specific Beefy vault data', async () => {
-    const vaultID = 'conic-eth';
+    const vaultID = beefyVaultId;
     const vault = await BeefyAPI.getBeefyVaultForID(
       vaultID,
       NetworkName.Ethereum,
@@ -83,7 +85,7 @@ describe('beefy-api', () => {
   }).timeout(7500);
 
   it('Should get specific Beefy vault APY', async () => {
-    const vaultID = 'gns-poly-gns';
+    const vaultID = beefyVaultId;
     const apy = await BeefyAPI.getBeefyVaultAPY(vaultID);
     expect(apy).to.be.greaterThan(0.001);
   }).timeout(7500);
