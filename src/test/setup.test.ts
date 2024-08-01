@@ -21,7 +21,7 @@ import { getForkTestNetworkName } from './common.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
-    this.timeout(10 * 60 * 1000); // 3 min timeout for setup.
+    this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
     removeTestDB();
     await setupForkTests();
   }
@@ -76,6 +76,7 @@ export const setupForkTests = async () => {
   }
 
   const tokenAddresses: string[] = getTestERC20Addresses(networkName);
+  const testChain: Chain = { id: 1, type: 0 };
 
   const forkRPCType = isDefined(process.env.USE_GANACHE)
     ? ForkRPCType.Ganache
@@ -90,7 +91,7 @@ export const setupForkTests = async () => {
 
   await loadLocalhostFallbackProviderForTests(networkName);
 
-  await refreshBalances({ id: 1, type: 0 } as Chain, undefined);
+  await refreshBalances(testChain, undefined);
   await pollUntilUTXOMerkletreeScanned();
   // Set up primary wallet
   await createRailgunWalletForTests();
