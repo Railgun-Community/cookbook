@@ -6672,7 +6672,7 @@ export async function getMeshOptions(): Promise<GetMeshOptions> {
 
   const theGraphApiKey = process.env.THE_GRAPH_API_KEY;
 
-  if (!theGraphApiKey) {
+  if (!isDefined(theGraphApiKey)) {
     throw new Error('Missing The Graph Api Key');
   }
 
