@@ -24,11 +24,11 @@ sources:
   - name: pancakeswap-v2-bsc
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/ord786/pancakeswap
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/Aj9TDh9SPcn7cz4DXW26ga22VnBzHhPVuKGmE4YBzDFj
   - name: quickswap-v2-polygon
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/shivannguyen/quickswap-matic2
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/CCFSaj7uS128wazXMdxdnbGA3YQnND9yBdHjPtvH7Bc7
 
 documents:
   - ./src/graph/graphql/uni-v2-like-query.graphql

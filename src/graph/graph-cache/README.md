@@ -28,11 +28,11 @@ https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/
 
 <!-- PANCAKESWAP V2 BSC -->
 
-https://api.thegraph.com/subgraphs/name/ord786/pancakeswap
+https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/Aj9TDh9SPcn7cz4DXW26ga22VnBzHhPVuKGmE4YBzDFj
 
 <!-- QUICKSWAP V2 POLYGON -->
 
-https://api.thegraph.com/subgraphs/name/shivannguyen/quickswap-matic2
+https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/CCFSaj7uS128wazXMdxdnbGA3YQnND9yBdHjPtvH7Bc7
 
 ## How to update lists:
 
