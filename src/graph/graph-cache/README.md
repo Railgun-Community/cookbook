@@ -8,23 +8,23 @@ curl -L -H "Content-Type: application/json" -X POST -d '{ "query": "query Pairs 
 
 <!-- UNISWAP V2 ETH -->
 
-https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v2-dev
+https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/EYCKATKGBKLWvSfwvBjzfCBmGwYNdVkduYXVivCsLRFu
 
 <!-- SUSHISWAP V2 ETH -->
 
-https://api.thegraph.com/subgraphs/name/sushiswap/exchange
+https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/6NUtT5mGjZ1tSshKLf5Q3uEEJtjBZJo1TpL5MXsUBqrT
 
 <!-- SUSHISWAP V2 POLYGON -->
 
-https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange
+https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/8NiXkxLRT3R22vpwLB4DXttpEf3X1LrKhe4T1tQ3jjbP
 
 <!-- SUSHISWAP V2 BSC -->
 
-https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
+https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/GPRigpbNuPkxkwpSbDuYXbikodNJfurc1LCENLzboWer
 
 <!-- SUSHISWAP V2 ARBITRUM -->
 
-https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange
+https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/8nFDCAhdnJQEhQF3ZRnfWkJ6FkRsfAiiVabVn4eGoAZH
 
 <!-- PANCAKESWAP V2 BSC -->
 
