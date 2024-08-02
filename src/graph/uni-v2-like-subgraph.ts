@@ -1,4 +1,8 @@
-import { NETWORK_CONFIG, NetworkName, isDefined } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  isDefined,
+} from '@railgun-community/shared-models';
 import { getMeshOptions, getSdk } from './graphql/.graphclient';
 import { MeshInstance, getMesh } from '@graphql-mesh/runtime';
 import { LiquidityV2Pool } from '../models/uni-v2-like';

@@ -111,6 +111,10 @@ await wallet.sendTransaction(transaction);
 
 2. Add an Ethereum RPC for fork: `export ETHEREUM_RPC_URL='your/rpc/url'`
 
+### Environment variables:
+
+Make sure to have required env vars for running several integration tests (check .env.example), otherwise some tests will fail.
+
 ### Run fork tests:
 
 1. Fork tests currently support networks: Ethereum, Arbitrum

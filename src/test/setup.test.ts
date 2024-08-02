@@ -1,8 +1,10 @@
 import {
+  Chain,
   NetworkName,
   TXIDVersion,
   isDefined,
 } from '@railgun-community/shared-models';
+import { refreshBalances } from '@railgun-community/wallet';
 import {
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
@@ -74,6 +76,7 @@ export const setupForkTests = async () => {
   }
 
   const tokenAddresses: string[] = getTestERC20Addresses(networkName);
+  const testChain: Chain = { id: 1, type: 0 };
 
   const forkRPCType = isDefined(process.env.USE_GANACHE)
     ? ForkRPCType.Ganache
@@ -83,20 +86,18 @@ export const setupForkTests = async () => {
 
   // Ganache forked Ethereum RPC setup
   await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
-
   // Quickstart setup
   await startRailgunForTests();
 
   await loadLocalhostFallbackProviderForTests(networkName);
 
+  await refreshBalances(testChain, undefined);
   await pollUntilUTXOMerkletreeScanned();
-
   // Set up primary wallet
   await createRailgunWalletForTests();
 
   // Set up secondary wallets
   await createRailgunWallet2ForTests();
-
   // Shield tokens for tests
   await shieldAllTokensForTests(networkName, tokenAddresses);
 

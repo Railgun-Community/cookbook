@@ -4,31 +4,31 @@ sources:
       graphql:
         # The core Uniswap V2 subgraph is experiencing problems with indexing.
         # endpoint: https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2
-        endpoint: https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v2-dev
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/EYCKATKGBKLWvSfwvBjzfCBmGwYNdVkduYXVivCsLRFu
   - name: sushiswap-v2-ethereum
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/exchange
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/6NUtT5mGjZ1tSshKLf5Q3uEEJtjBZJo1TpL5MXsUBqrT
   - name: sushiswap-v2-polygon
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/8NiXkxLRT3R22vpwLB4DXttpEf3X1LrKhe4T1tQ3jjbP
   - name: sushiswap-v2-bsc
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/bsc-exchange
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/GPRigpbNuPkxkwpSbDuYXbikodNJfurc1LCENLzboWer
   - name: sushiswap-v2-arbitrum
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/8nFDCAhdnJQEhQF3ZRnfWkJ6FkRsfAiiVabVn4eGoAZH
   - name: pancakeswap-v2-bsc
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/ord786/pancakeswap
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/Aj9TDh9SPcn7cz4DXW26ga22VnBzHhPVuKGmE4YBzDFj
   - name: quickswap-v2-polygon
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/subgraphs/name/shivannguyen/quickswap-matic2
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/CCFSaj7uS128wazXMdxdnbGA3YQnND9yBdHjPtvH7Bc7
 
 documents:
   - ./src/graph/graphql/uni-v2-like-query.graphql
