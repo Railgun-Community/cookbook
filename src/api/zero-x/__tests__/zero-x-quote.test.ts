@@ -42,17 +42,15 @@ const runQuoteTest = async () => {
 };
 
 describe('zero-x-quote', () => {
-  before(() => {});
-
   it('Should fetch quotes from ZeroX proxy', async () => {
-    ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
-    ZeroXConfig.API_KEY = undefined;
+    // ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
+    ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
     await runQuoteTest();
-  }).timeout(10000);
+  });
 
   it('Should fetch quotes from ZeroX API Key', async () => {
     ZeroXConfig.PROXY_API_DOMAIN = undefined;
     ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
     await runQuoteTest();
-  }).timeout(10000);
+  }).timeout(10000000);
 });

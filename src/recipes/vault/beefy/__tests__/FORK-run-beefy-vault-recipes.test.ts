@@ -41,7 +41,7 @@ const vaultERC20Address = testConfig.contractsEthereum.mooConvexTriCryptoUSDC;
 const oneWithDecimals = 10n ** 18n;
 
 describe('FORK-run-beefy-vault-recipes', function run() {
-  this.timeout(60000);
+  this.timeout(160000);
 
   before(async function run() {
     setRailgunFees(

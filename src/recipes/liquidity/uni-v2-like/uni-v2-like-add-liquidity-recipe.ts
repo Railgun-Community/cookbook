@@ -43,6 +43,7 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
     slippageBasisPoints: bigint,
     provider: Provider,
   ) {
+    console.log('UniV2LikeAddLiquidityRecipe');
     super();
     this.uniswapV2Fork = uniswapV2Fork;
 

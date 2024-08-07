@@ -109,7 +109,7 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
     recipeOutput,
   );
 
-  // console.log(`gas estimate for ${recipeOutput.name}: ${gasEstimate}`);
+  console.log(`gas estimate for ${recipeOutput.name}: ${gasEstimate}`);
 
   if (isDefined(gasEstimate)) {
     expect(gasEstimate >= minGasLimit - 200_000n).to.equal(
@@ -132,9 +132,12 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
   let txReceipt;
 
   try {
+    console.log('to send tx');
     const txResponse = await wallet.sendTransaction(transaction);
     txReceipt = await txResponse.wait();
   } catch (err) {
+
+    console.log('executeRecipeStepsAndAssert  Unshield BAlances Error: ', err);
     // eslint-disable-next-line no-console
     console.error(err);
 
@@ -144,6 +147,8 @@ export const executeRecipeStepsAndAssertUnshieldBalances = async (
       to: transaction.to,
       data: transaction.data,
     };
+
+    console.log('call : ', call);
 
     // NOTE: This fails as output is too large for JS runtime.
     // const trace = await provider.send('debug_traceCall', [call, 'latest']);

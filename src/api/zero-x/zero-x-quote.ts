@@ -174,6 +174,7 @@ export class ZeroXQuote {
         sellTokenValue: sellTokenValueResponse,
       };
     } catch (err) {
+      console.log('getSwapQuoteError: ', err);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const errorMessage = this.formatApiError(err);
       throw new Error('Failed to get swap quote.', {

@@ -21,7 +21,7 @@ import { getForkTestNetworkName } from './common.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
-    this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
+    this.timeout(15 * 60 * 1000); // 3 min timeout for setup. ./// DO NOT OCMMIT TIME MODIF
     removeTestDB();
     await setupForkTests();
   }

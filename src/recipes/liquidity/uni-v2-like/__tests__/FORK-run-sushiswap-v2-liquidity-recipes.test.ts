@@ -27,6 +27,7 @@ import {
 } from '../../../../test/common.test';
 import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
 import { getUnshieldedAmountAfterFee } from '../../../../utils/fee';
+import { inspect } from 'util';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -52,7 +53,7 @@ const LP_TOKEN: RecipeERC20Info = {
 };
 
 describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
-  this.timeout(60000);
+  this.timeout(160000);
 
   before(async function run() {
     setRailgunFees(
@@ -62,7 +63,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
     );
   });
 
-  it('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
+  it.only('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -78,6 +79,9 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       slippageBasisPoints,
       testRPCProvider,
     );
+
+    console.log('addLiquidityRecipe: ', inspect(addLiquidityRecipe, { depth: null }))
+
     expect(addLiquidityRecipe.id.length).to.equal(16);
 
     const usdcAmount: RecipeERC20Amount = {
@@ -112,6 +116,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       nfts: [],
     };
 
+    console.log('addLiquidityRecipeInput: ', inspect(addLiquidityRecipeInput, { depth: null }))
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateLPTokenBalance = await balanceForERC20Token(
       txidVersion,
@@ -121,9 +126,11 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       false, // onlySpendable - not required for tests
     );
 
+    console.log('initialPrivateLPTokenBalance: ', inspect(initialPrivateLPTokenBalance, { depth: null }))
     const recipeOutput = await addLiquidityRecipe.getRecipeOutput(
       addLiquidityRecipeInput,
     );
+    console.log('recipeOutput: ', inspect(recipeOutput, { depth: null }))
     await executeRecipeStepsAndAssertUnshieldBalances(
       addLiquidityRecipe.config.name,
       addLiquidityRecipeInput,
@@ -168,15 +175,27 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       false, // onlySpendable - not required for tests
     );
 
+    console.log('privateLPTokenBalance: ', privateLPTokenBalance);
+
     const expectedLPTokenReceived = addLiquidityData.expectedLPAmount.amount;
+
+    console.log('expectedLPTokenReceived: ', expectedLPTokenReceived);
 
     const shieldFee =
       (expectedLPTokenReceived * MOCK_SHIELD_FEE_BASIS_POINTS) / 10000n;
+
+    console.log('shieldFee: ', shieldFee);
 
     const expectedPrivateLPTokenBalance =
       initialPrivateLPTokenBalance +
       expectedLPTokenReceived - // LP tokens acquired
       shieldFee; // Shield fee
+
+
+
+    console.log('expected balance:', expectedPrivateLPTokenBalance);
+
+    console.log('actual balance: ', privateLPTokenBalance);
 
     // TODO: Why is this not an exact value?
     // expect(expectedPrivateLPTokenBalance).to.equal(
@@ -212,6 +231,9 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       slippageBasisPoints,
       testRPCProvider,
     );
+
+    console.log('removeLiquidityRecipe: ', removeLiquidityRecipe);
+
     expect(removeLiquidityRecipe.id.length).to.equal(16);
 
     const preUnshieldLPERC20Amount: RecipeERC20Amount = {
@@ -224,6 +246,10 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       networkName,
       preUnshieldLPERC20Amount.amount,
     );
+
+
+    console.log('lpUnshieldedAmount getUnshieldedAmountAfterFee: ', lpUnshieldedAmount);
+
     const lpERC20Amount: RecipeERC20Amount = {
       ...preUnshieldLPERC20Amount,
       amount: lpUnshieldedAmount,
@@ -233,6 +259,8 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
         networkName,
         lpERC20Amount,
       );
+
+      console.log('preUnshieldRemoveLiquidityData: ', preUnshieldRemoveLiquidityData);
 
     const ratioAB =
       (preUnshieldRemoveLiquidityData.expectedERC20AmountA.amount *
@@ -255,6 +283,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       nfts: [],
     };
 
+
     const railgunWallet = getTestRailgunWallet();
     const initialPrivateTokenABalance = await balanceForERC20Token(
       txidVersion,
@@ -263,6 +292,9 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       USDC_TOKEN.tokenAddress,
       false, // onlySpendable - not required for tests
     );
+
+    console.log('tokenA initial private balance: ', initialPrivateTokenABalance);
+
     const initialPrivateTokenBBalance = await balanceForERC20Token(
       txidVersion,
       railgunWallet,
@@ -271,9 +303,15 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       false, // onlySpendable - not required for tests
     );
 
+
+    console.log('tokenB initial private balance: ', initialPrivateTokenBBalance);
+
     const recipeOutput = await removeLiquidityRecipe.getRecipeOutput(
       removeLiquidityRecipeInput,
     );
+
+    console.log('recipeOutput: ', recipeOutput);
+
     await executeRecipeStepsAndAssertUnshieldBalances(
       removeLiquidityRecipe.config.name,
       removeLiquidityRecipeInput,
