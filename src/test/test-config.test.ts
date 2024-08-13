@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 export let testConfig = {
   // Set env ETHEREUM_RPC to change default fork RPC.
   ethereumForkRPC: process.env.ETHEREUM_RPC ?? 'https://cloudflare-eth.com',
