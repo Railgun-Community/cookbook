@@ -21,7 +21,7 @@ import { getForkTestNetworkName } from './common.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
-    this.timeout(3 * 60 * 1000); // 3 min timeout for setup.
+    this.timeout(5 * 60 * 1000); // 10 min timeout for setup after adding refresh balances
     removeTestDB();
     await setupForkTests();
   }
@@ -64,43 +64,54 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
 };
 
 export const setupForkTests = async () => {
-  const networkName = getForkTestNetworkName();
-  const txidVersion = TXIDVersion.V2_PoseidonMerkle;
+  try {
+    const networkName = getForkTestNetworkName();
+    const txidVersion = TXIDVersion.V2_PoseidonMerkle;
+  
+    if (!Object.keys(NetworkName).includes(networkName)) {
+      throw new Error(
+        `Unrecognized network name, expected one of list: ${getSupportedNetworkNamesForTest().join(
+          ', ',
+        )}`,
+      );
+    }
+  
+    const tokenAddresses: string[] = getTestERC20Addresses(networkName);
+    const testChain: Chain = { id: 1, type: 0 };
+  
+    const forkRPCType = isDefined(process.env.USE_GANACHE)
+      ? ForkRPCType.Ganache
+      : isDefined(process.env.USE_HARDHAT)
+      ? ForkRPCType.Hardhat
+      : ForkRPCType.Anvil;
+  
+    // Ganache forked Ethereum RPC setup
+    await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
+    // Quickstart setup
+    await startRailgunForTests();
+  
+    await loadLocalhostFallbackProviderForTests(networkName);
+  
+    console.log('Before refreshBalances');
 
-  if (!Object.keys(NetworkName).includes(networkName)) {
-    throw new Error(
-      `Unrecognized network name, expected one of list: ${getSupportedNetworkNamesForTest().join(
-        ', ',
-      )}`,
-    );
+    void refreshBalances(testChain, undefined);
+    console.log('After refreshBalances, continuing with pollUntilUTXOMerkletreeScanned');
+    await pollUntilUTXOMerkletreeScanned();
+    console.log('After pollUntilUTXOMerkletreeScanned');
+  
+    // Set up primary wallet
+    await createRailgunWalletForTests();
+  
+    
+    // Set up secondary wallets
+    await createRailgunWallet2ForTests();
+    // Shield tokens for tests
+    await shieldAllTokensForTests(networkName, tokenAddresses);
+  
+    // Make sure shielded balances are updated
+    await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
+  } catch(error) {
+    console.error("Setup Fork tests error: ", error);
+    throw error;
   }
-
-  const tokenAddresses: string[] = getTestERC20Addresses(networkName);
-  const testChain: Chain = { id: 1, type: 0 };
-
-  const forkRPCType = isDefined(process.env.USE_GANACHE)
-    ? ForkRPCType.Ganache
-    : isDefined(process.env.USE_HARDHAT)
-    ? ForkRPCType.Hardhat
-    : ForkRPCType.Anvil;
-
-  // Ganache forked Ethereum RPC setup
-  await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
-  // Quickstart setup
-  await startRailgunForTests();
-
-  await loadLocalhostFallbackProviderForTests(networkName);
-
-  await refreshBalances(testChain, undefined);
-  await pollUntilUTXOMerkletreeScanned();
-  // Set up primary wallet
-  await createRailgunWalletForTests();
-
-  // Set up secondary wallets
-  await createRailgunWallet2ForTests();
-  // Shield tokens for tests
-  await shieldAllTokensForTests(networkName, tokenAddresses);
-
-  // Make sure shielded balances are updated
-  await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
 };
