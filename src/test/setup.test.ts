@@ -91,18 +91,12 @@ export const setupForkTests = async () => {
     await startRailgunForTests();
   
     await loadLocalhostFallbackProviderForTests(networkName);
-  
-    console.log('Before refreshBalances');
 
     void refreshBalances(testChain, undefined);
-    console.log('After refreshBalances, continuing with pollUntilUTXOMerkletreeScanned');
+
     await pollUntilUTXOMerkletreeScanned();
-    console.log('After pollUntilUTXOMerkletreeScanned');
-  
     // Set up primary wallet
     await createRailgunWalletForTests();
-  
-    
     // Set up secondary wallets
     await createRailgunWallet2ForTests();
     // Shield tokens for tests

@@ -137,25 +137,18 @@ export const utxoMerkletreeHistoryScanCallback = (
     }]`,
   );
   currentUTXOMerkletreeScanStatus = scanData.scanStatus;
-  console.log('currentUTXOMerkletreeScanStatus: ', currentUTXOMerkletreeScanStatus);
 };
 
 export const pollUntilUTXOMerkletreeScanned = async () => {
-  console.log('pollUntilUTXOMerkletreeScanned');
   dbgRailgunSetup('Polling for UTXO merkletree scan to complete...');
-  console.log('Initial status:', currentUTXOMerkletreeScanStatus);
-
   const status = await poll(
     async () => {
-      // console.log('Polling, current status:', currentUTXOMerkletreeScanStatus);
       return currentUTXOMerkletreeScanStatus;
     },
     status => status === MerkletreeScanStatus.Complete,
     100,
     180000 / 100, // 180 sec.
   );
-
-  console.log('Final status:', status);
   if (status !== MerkletreeScanStatus.Complete) {
     throw new Error(`Merkletree scan should be completed - timed out`);
   }
