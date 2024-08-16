@@ -18,11 +18,16 @@ import {
 import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
 import { getForkTestNetworkName } from './common.test';
+import { createOrLoadSnapshot, restoreSnapshot } from './snapshot-setup.test';
+
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
     this.timeout(5 * 60 * 1000); // 10 min timeout for setup after adding refresh balances
     removeTestDB();
+        const networkName = getForkTestNetworkName();
+        const snapshotId = await createOrLoadSnapshot(networkName);
+        await restoreSnapshot(snapshotId);
     await setupForkTests();
   }
 });
@@ -30,6 +35,8 @@ before(async function run() {
 after(() => {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
     removeTestDB();
+    // const snapshot: Snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_FILE, 'utf-8'));
+    // await restoreSnapshot(snapshot.id);
   }
 });
 
@@ -92,12 +99,8 @@ export const setupForkTests = async () => {
   
     await loadLocalhostFallbackProviderForTests(networkName);
   
-    console.log('Before refreshBalances');
-
     void refreshBalances(testChain, undefined);
-    console.log('After refreshBalances, continuing with pollUntilUTXOMerkletreeScanned');
     await pollUntilUTXOMerkletreeScanned();
-    console.log('After pollUntilUTXOMerkletreeScanned');
   
     // Set up primary wallet
     await createRailgunWalletForTests();

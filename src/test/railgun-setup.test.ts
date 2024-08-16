@@ -137,13 +137,10 @@ export const utxoMerkletreeHistoryScanCallback = (
     }]`,
   );
   currentUTXOMerkletreeScanStatus = scanData.scanStatus;
-  console.log('currentUTXOMerkletreeScanStatus: ', currentUTXOMerkletreeScanStatus);
 };
 
 export const pollUntilUTXOMerkletreeScanned = async () => {
-  console.log('pollUntilUTXOMerkletreeScanned');
   dbgRailgunSetup('Polling for UTXO merkletree scan to complete...');
-  console.log('Initial status:', currentUTXOMerkletreeScanStatus);
 
   const status = await poll(
     async () => {
