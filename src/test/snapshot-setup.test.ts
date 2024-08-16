@@ -12,6 +12,7 @@ interface Snapshot {
   networkName: NetworkName;
 }
 
+// TODO: Use getTestProvider function from ./shared-tests
 const getProvider = (networkName: NetworkName): JsonRpcProvider => {
   const port = getRPCPort(networkName);
   const localhost = getLocalhostRPC(port);
