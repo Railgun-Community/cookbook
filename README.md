@@ -124,3 +124,7 @@ Make sure to have required env vars for running several integration tests (check
 - See [Chainlist](https://chainlist.org/) or [Pokt](https://docs.pokt.network/use/public-rpc/) for public RPC endpoints (however paid RPCs are recommended for stability).
 
 3. Run tests (in another terminal): `env NETWORK_NAME=Ethereum yarn test-fork`.
+
+### Fork tests snapshot
+
+A snapshot from the fork is taken after all the test setup, in order to save time and not having to do the same setup all over again for the need of running a few tests (which if done frequently, might save some time). Snapshot is saved over a `snapshot.json` file. 

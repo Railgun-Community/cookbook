@@ -18,16 +18,13 @@ import {
 import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
 import { getForkTestNetworkName } from './common.test';
-import { createOrLoadSnapshot, restoreSnapshot } from './snapshot-setup.test';
+import { createSnapshot, loadSnapshot } from './snapshot-setup.test';
 
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
     this.timeout(5 * 60 * 1000); // 10 min timeout for setup after adding refresh balances
     removeTestDB();
-        const networkName = getForkTestNetworkName();
-        const snapshotId = await createOrLoadSnapshot(networkName);
-        await restoreSnapshot(snapshotId);
     await setupForkTests();
   }
 });
@@ -70,7 +67,7 @@ const getSupportedNetworkNamesForTest = (): NetworkName[] => {
   return [NetworkName.Ethereum, NetworkName.Arbitrum];
 };
 
-export const setupForkTests = async () => {
+export const setupForkTests = async (): Promise <void> => {
   try {
     const networkName = getForkTestNetworkName();
     const txidVersion = TXIDVersion.V2_PoseidonMerkle;
@@ -92,6 +89,13 @@ export const setupForkTests = async () => {
       ? ForkRPCType.Hardhat
       : ForkRPCType.Anvil;
   
+    // Check if Snapshot exists
+    const snapshot = loadSnapshot(networkName); 
+    if (isDefined(snapshot)) {
+      console.info('Snapshot detected, returning');
+      return;
+    };
+
     // Ganache forked Ethereum RPC setup
     await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
     // Quickstart setup
@@ -113,6 +117,10 @@ export const setupForkTests = async () => {
   
     // Make sure shielded balances are updated
     await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
+
+    // create snapshot after all test setup
+    await createSnapshot(networkName);
+
   } catch(error) {
     console.error("Setup Fork tests error: ", error);
     throw error;

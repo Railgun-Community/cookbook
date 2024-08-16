@@ -17,3 +17,6 @@ src/test/test-config-overrides.test.ts
 # Quickstart assets
 test.db
 artifacts-*
+
+# snapshot metadata
+snapshot.json
