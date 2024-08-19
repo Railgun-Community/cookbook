@@ -28,7 +28,7 @@
     "gen-typechain": "typechain --target ethers-v6 --out-dir ./src/typechain ./src/abi/**/*.json ./src/abi/**/**/*.json"
   },
   "dependencies": {
-    "@0x/contract-addresses": "^8.5.0",
+    "@0x/contract-addresses": "^8.13.0",
     "@graphql-mesh/cache-localforage": "^0.7.20",
     "@graphql-mesh/cross-helpers": "^0.3.4",
     "@graphql-mesh/graphql": "^0.34.16",
