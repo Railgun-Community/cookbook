@@ -8,31 +8,31 @@ curl -L -H "Content-Type: application/json" -X POST -d '{ "query": "query Pairs 
 
 <!-- UNISWAP V2 ETH -->
 
-https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/EYCKATKGBKLWvSfwvBjzfCBmGwYNdVkduYXVivCsLRFu
+https://gateway.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/EYCKATKGBKLWvSfwvBjzfCBmGwYNdVkduYXVivCsLRFu
 
 <!-- SUSHISWAP V2 ETH -->
 
-https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/6NUtT5mGjZ1tSshKLf5Q3uEEJtjBZJo1TpL5MXsUBqrT
+https://gateway.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/6NUtT5mGjZ1tSshKLf5Q3uEEJtjBZJo1TpL5MXsUBqrT
 
 <!-- SUSHISWAP V2 POLYGON -->
 
-https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/8NiXkxLRT3R22vpwLB4DXttpEf3X1LrKhe4T1tQ3jjbP
+https://gateway.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/8NiXkxLRT3R22vpwLB4DXttpEf3X1LrKhe4T1tQ3jjbP
 
 <!-- SUSHISWAP V2 BSC -->
 
-https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/GPRigpbNuPkxkwpSbDuYXbikodNJfurc1LCENLzboWer
+https://gateway.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/GPRigpbNuPkxkwpSbDuYXbikodNJfurc1LCENLzboWer
 
 <!-- SUSHISWAP V2 ARBITRUM -->
 
-https://gateway-arbitrum.network.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/8nFDCAhdnJQEhQF3ZRnfWkJ6FkRsfAiiVabVn4eGoAZH
+https://gateway.thegraph.com/api/{THE_GRAPH_API_KEY}/subgraphs/id/8nFDCAhdnJQEhQF3ZRnfWkJ6FkRsfAiiVabVn4eGoAZH
 
 <!-- PANCAKESWAP V2 BSC -->
 
-https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/Aj9TDh9SPcn7cz4DXW26ga22VnBzHhPVuKGmE4YBzDFj
+https://gateway.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/Aj9TDh9SPcn7cz4DXW26ga22VnBzHhPVuKGmE4YBzDFj
 
 <!-- QUICKSWAP V2 POLYGON -->
 
-https://gateway-arbitrum.network.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/CCFSaj7uS128wazXMdxdnbGA3YQnND9yBdHjPtvH7Bc7
+https://gateway.thegraph.com/api/${THE_GRAPH_API_KEY}/subgraphs/id/CCFSaj7uS128wazXMdxdnbGA3YQnND9yBdHjPtvH7Bc7
 
 ## How to update lists:
 
