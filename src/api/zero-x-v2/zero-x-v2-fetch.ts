@@ -16,21 +16,21 @@ type QuoteParams = PriceParams & {
 
 type SearchParams = PriceParams | QuoteParams;
 
-enum ZeroXV2ApiEndpoint {
+export enum ZeroXV2ApiEndpoint {
   GetSwapQuote = 'swap/allowance-holder/quote',
   GetSwapPrice = 'swap/allowance-holder/price',
 }
 
 const ZERO_X_V2_BASE_URL = 'https://api.0x.org/';
 
-const getSearchV2Params = (params: SearchParams) => {
+const getSearchV2Params = (params?: SearchParams) => {
   const searchParams = new URLSearchParams(params);
   return searchParams.toString() ? `?${searchParams.toString()}` : '';
 };
 
 const createZeroXV2Url = (
   endpoint: ZeroXV2ApiEndpoint,
-  params: SearchParams,
+  params?: SearchParams,
 ) => {
   return `${ZERO_X_V2_BASE_URL}${endpoint}${getSearchV2Params(params)}`;
 };
@@ -50,13 +50,13 @@ const createV2Headers = () => {
 
 export const createZeroXV2UrlAndHeaders = (
   endpoint: ZeroXV2ApiEndpoint,
-  params: SearchParams,
   isRailgun: boolean,
+  params?: SearchParams,
 ) => {
   const proxyDomain = ZeroXConfig.PROXY_API_DOMAIN;
   if (isDefined(proxyDomain) && proxyDomain.length > 0) {
     return {
-      url: createZeroXV2ProxyAPIUrl(proxyDomain, endpoint, params, isRailgun),
+      url: createZeroXV2ProxyAPIUrl(proxyDomain, endpoint, isRailgun, params),
       headers: {},
     };
   }
@@ -71,8 +71,8 @@ export const createZeroXV2UrlAndHeaders = (
 export const createZeroXV2ProxyAPIUrl = (
   proxyDomain: string,
   endpoint: ZeroXV2ApiEndpoint,
-  params: SearchParams,
   isRailgun: boolean,
+  params?: SearchParams,
 ) => {
   // this is unused for now, need to check 0x proxy code.
   const route = isRailgun ? 'railgun' : 'public';
@@ -84,13 +84,13 @@ export const createZeroXV2ProxyAPIUrl = (
 
 export const getZeroXV2Data = async (
   endpoint: ZeroXV2ApiEndpoint,
-  params: SearchParams,
   isRailgun: boolean,
+  params?: SearchParams,
 ) => {
   const { url, headers } = createZeroXV2UrlAndHeaders(
     endpoint,
-    params,
     isRailgun,
+    params,
   );
   const response = await axios.get(url, { headers });
   // handle errors here.?
