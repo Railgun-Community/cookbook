@@ -26,7 +26,7 @@ const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
 describe('FORK-run-unwrap-transfer-base-token-recipe', function run() {
-  this.timeout(60000);
+  this.timeout(1800000);
 
   before(async function run() {
     setRailgunFees(

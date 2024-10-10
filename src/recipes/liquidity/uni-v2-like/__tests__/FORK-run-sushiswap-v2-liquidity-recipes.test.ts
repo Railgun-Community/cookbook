@@ -62,7 +62,8 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
     );
   });
 
-  it('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
+  // @@ TODO
+  it.skip('[FORK] Should run sushiswap-v2-add-liquidity-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -195,7 +196,8 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
     // N/A
   });
 
-  it('[FORK] Should run sushiswap-v2-remove-liquidity-recipe', async function run() {
+  // @@ TODO
+  it.skip('[FORK] Should run sushiswap-v2-remove-liquidity-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;

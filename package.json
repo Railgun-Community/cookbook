@@ -61,6 +61,7 @@
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "debug": "^4.3.4",
+    "dotenv": "^16.4.5",
     "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-flowtype": "^8.0.3",

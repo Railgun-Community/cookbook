@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 export let testConfig = {
   // Set env ETHEREUM_RPC to change default fork RPC.
   ethereumForkRPC: process.env.ETHEREUM_RPC ?? 'https://cloudflare-eth.com',
@@ -47,6 +49,8 @@ export let testConfig = {
   zeroXProxyApiDomain: process.env.ZERO_X_PROXY_API_DOMAIN ?? '',
   // API Key for 0x API.
   zeroXApiKey: process.env.ZERO_X_API_KEY ?? '',
+  // API Key for The Graph API.
+  theGraphApiKey: process.env.THE_GRAPH_API_KEY ?? '',
 };
 
 try {
