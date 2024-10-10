@@ -2,19 +2,7 @@ import { isDefined } from '@railgun-community/shared-models';
 import { ZeroXConfig } from '../../models';
 import axios from 'axios';
 
-type PriceParams = {
-  chainId: string;
-  sellToken: string;
-  buyToken: string;
-  sellAmount: string;
-};
-
-type QuoteParams = PriceParams & {
-  taker: string;
-  txOrigin: string; // The contract address of the external account that started the transaction. This is only needed if taker is a smart contract.
-};
-
-type SearchParams = PriceParams | QuoteParams;
+type SearchParams = Record<string, any>;
 
 export enum ZeroXV2ApiEndpoint {
   GetSwapQuote = 'swap/allowance-holder/quote',
