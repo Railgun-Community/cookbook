@@ -19,8 +19,9 @@ export const zeroXApiSubdomain = (networkName: NetworkName): string => {
       return 'polygon.api';
     case NetworkName.Arbitrum:
       return 'arbitrum.api';
-    case NetworkName.Hardhat:
     case NetworkName.EthereumSepolia:
+      return 'sepolia.api';
+    case NetworkName.Hardhat:
     case NetworkName.PolygonAmoy:
     case NetworkName.EthereumRopsten_DEPRECATED:
     case NetworkName.EthereumGoerli_DEPRECATED:
