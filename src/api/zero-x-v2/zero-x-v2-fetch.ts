@@ -1,5 +1,6 @@
 import { isDefined } from '@railgun-community/shared-models';
 import { ZeroXConfig } from '../../models';
+import axios from 'axios';
 
 type PriceParams = {
   chainId: string;
@@ -79,4 +80,19 @@ export const createZeroXV2ProxyAPIUrl = (
     params,
   )}`;
   return url;
+};
+
+export const getZeroXV2Data = async (
+  endpoint: ZeroXV2ApiEndpoint,
+  params: SearchParams,
+  isRailgun: boolean,
+) => {
+  const { url, headers } = createZeroXV2UrlAndHeaders(
+    endpoint,
+    params,
+    isRailgun,
+  );
+  const response = await axios.get(url, { headers });
+  // handle errors here.?
+  return response.data;
 };
