@@ -1,7 +1,4 @@
-import {
-  NETWORK_CONFIG,
-  type NetworkName,
-} from '@railgun-community/shared-models';
+import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import type { RecipeERC20Amount, RecipeERC20Info } from '../../models';
 
 export type V2BaseAPIParams = {
@@ -60,6 +57,36 @@ const ZERO_X_PROXY_BASE_TOKEN_ADDRESS =
   '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export class ZeroXV2Quote {
+  private static getZeroXTokenAddress = (erc20: RecipeERC20Info) => {
+    if (erc20.isBaseToken ?? false) {
+      return ZERO_X_PROXY_BASE_TOKEN_ADDRESS;
+    }
+  };
+
+  static zeroXExchangeAllowanceHolderAddress = (networkName: NetworkName) => {
+    switch (networkName) {
+      case NetworkName.Ethereum:
+      case NetworkName.BNBChain:
+      case NetworkName.Polygon:
+      case NetworkName.Arbitrum: {
+        return '0x0000000000001fF3684f28c67538d4D072C22734';
+      }
+      default: {
+        throw new Error(
+          `No 0x V2 Exchange Proxy contract address for chain ${networkName}`,
+        );
+      }
+    }
+  };
+
+  static supportsNetwork = (networkName: NetworkName) => {
+    try {
+      this.zeroXExchangeAllowanceHolderAddress(networkName);
+      return true;
+    } catch {
+      return false;
+    }
+  };
   static getQuoteParams = (
     networkName: NetworkName,
     sellERC20Amount: RecipeERC20Amount,
