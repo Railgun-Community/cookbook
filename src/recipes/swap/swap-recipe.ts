@@ -57,7 +57,10 @@ export abstract class SwapRecipe extends Recipe {
       }
 
       const swapStepOutput = recipeOutput.stepOutputs[2];
-      if (swapStepOutput.name !== '0x Exchange Swap') {
+      if (
+        swapStepOutput.name !== '0x Exchange Swap' &&
+        swapStepOutput.name !== '0x V2 Exchange Swap'
+      ) {
         throw new Error('Expected step output 3 to be 0x Exchange Swap.');
       }
 
