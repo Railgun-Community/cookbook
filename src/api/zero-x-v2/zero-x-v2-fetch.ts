@@ -70,11 +70,11 @@ export const createZeroXV2ProxyAPIUrl = (
   return url;
 };
 
-export const getZeroXV2Data = async (
+export const getZeroXV2Data = async <T>(
   endpoint: ZeroXV2ApiEndpoint,
   isRailgun: boolean,
   params?: SearchParams,
-) => {
+): Promise<T> => {
   const { url, headers } = createZeroXV2UrlAndHeaders(
     endpoint,
     isRailgun,

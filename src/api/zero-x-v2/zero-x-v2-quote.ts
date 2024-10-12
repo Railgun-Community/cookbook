@@ -1,5 +1,12 @@
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import {
+  isDefined,
+  NETWORK_CONFIG,
+  NetworkName,
+} from '@railgun-community/shared-models';
 import type { RecipeERC20Amount, RecipeERC20Info } from '../../models';
+import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
+import { minBalanceAfterSlippage } from '../../utils/number';
+import type { ContractTransaction } from 'ethers';
 
 export type V2BaseAPIParams = {
   chainId: string;
@@ -114,5 +121,115 @@ export class ZeroXV2Quote {
       slippageBps: slippageBasisPoints,
     };
     return params;
+  };
+
+  private static getZeroXV2QuoteInvalidError = (
+    networkName: NetworkName,
+    to: string,
+    sellTokenAddress: string,
+    buyTokenAddress: string,
+  ): undefined | unknown => {
+    try {
+      const exchangeAllowanceHolderAddress =
+        // this is not correct, this is the spender that needs to have allowance set to.
+        // need to write a new function out or get the updated addresses from 0x sdk?
+        this.zeroXExchangeAllowanceHolderAddress(networkName);
+      if (
+        ![
+          exchangeAllowanceHolderAddress.toLowerCase(),
+          sellTokenAddress.toLowerCase(),
+          buyTokenAddress.toLowerCase(),
+        ].includes(to.toLowerCase())
+      ) {
+        throw new Error(
+          `Invalid 0x V2 Exchange contract address: ${to} vs ${exchangeAllowanceHolderAddress}`,
+        );
+      }
+      return undefined;
+    } catch (error: unknown) {
+      return error;
+    }
+  };
+
+  private static formatV2ApiError = (error: unknown) => {
+    return 'Error fetching 0x V2 swap quote: PROPERLY FORMAT THIS';
+  };
+
+  static getSwapQuote = async ({
+    networkName,
+    sellERC20Amount,
+    buyERC20Info,
+    slippageBasisPoints,
+    isRailgun,
+  }: {
+    networkName: NetworkName;
+    sellERC20Amount: RecipeERC20Amount;
+    buyERC20Info: RecipeERC20Info;
+    slippageBasisPoints: number;
+    isRailgun: boolean;
+  }) => {
+    const params = ZeroXV2Quote.getQuoteParams(
+      networkName,
+      sellERC20Amount,
+      buyERC20Info,
+      slippageBasisPoints,
+    );
+    try {
+      const response = await getZeroXV2Data<ZeroXV2PriceData>(
+        ZeroXV2ApiEndpoint.GetSwapQuote,
+        isRailgun,
+        params,
+      );
+
+      console.log(response);
+
+      const invalidError = this.getZeroXV2QuoteInvalidError(
+        networkName,
+        response.transaction.to,
+        params.sellToken,
+        params.buyToken,
+      );
+      if (isDefined(invalidError)) {
+        throw invalidError;
+      }
+
+      // auto set slippage of 100 bps if none is found.
+      const minimumBuyAmount = minBalanceAfterSlippage(
+        BigInt(response.buyAmount),
+        BigInt(params?.slippageBps ?? 100),
+      );
+      const buyAmount = response.buyAmount;
+
+      const crossContractCall: ContractTransaction = {
+        to: response.transaction.to,
+        data: response.transaction.data,
+        value: BigInt(response.transaction.value),
+      };
+
+      // get allowance from the issues
+      const issues = response.issues;
+      const { spender } = issues.allowance; // check this against this.zeroXExchangeAllowanceHolderAddress(networkName);
+
+      return {
+        price: undefined, // non existent in the response
+        guaranteedPrice: undefined, // non existent in the response
+        buyERC20Amount: {
+          ...buyERC20Info,
+          amount: BigInt(buyAmount),
+        },
+        minimumBuyAmount,
+        spender,
+        crossContractCall,
+        slippageBasisPoints,
+        sellTokenAddress: response.sellToken,
+        sellTokenValue: response.sellAmount,
+      };
+    } catch (error: unknown) {
+      const errorMessage = this.formatV2ApiError(error); // need to format this error message
+
+      throw new Error(`Error fetching 0x V2 swap quote:`, {
+        cause: new Error(errorMessage),
+      });
+    }
   };
 }
