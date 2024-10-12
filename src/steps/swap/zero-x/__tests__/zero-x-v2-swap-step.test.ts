@@ -50,7 +50,7 @@ const quote: SwapQuoteData = {
   slippageBasisPoints: BigInt(100),
 };
 
-describe.only('zero-x-v2-swap-step', () => {
+describe('zero-x-v2-swap-step', () => {
   before(() => {
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
   });

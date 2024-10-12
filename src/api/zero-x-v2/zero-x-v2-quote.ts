@@ -3,7 +3,11 @@ import {
   NETWORK_CONFIG,
   NetworkName,
 } from '@railgun-community/shared-models';
-import type { RecipeERC20Amount, RecipeERC20Info } from '../../models';
+import type {
+  RecipeERC20Amount,
+  RecipeERC20Info,
+  SwapQuoteData,
+} from '../../models';
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
 import type { ContractTransaction } from 'ethers';
@@ -19,6 +23,14 @@ export type V2QuoteParams = V2BaseAPIParams & {
   taker: string;
   txOrigin: string; // The contract address of the external account that started the transaction. This is only needed if taker is a smart contract.
   slippageBps?: number; //Default: 100 - The maximum acceptable slippage of the buyToken in Bps. If this parameter is set to 0, no slippage will be tolerated. If not provided, the default slippage tolerance is 100Bps
+};
+
+export type V2SwapQuoteParams = {
+  networkName: NetworkName;
+  sellERC20Amount: RecipeERC20Amount;
+  buyERC20Info: RecipeERC20Info;
+  slippageBasisPoints: number;
+  isRailgun: boolean;
 };
 
 type ZeroXV2Transaction = {
@@ -162,13 +174,7 @@ export class ZeroXV2Quote {
     buyERC20Info,
     slippageBasisPoints,
     isRailgun,
-  }: {
-    networkName: NetworkName;
-    sellERC20Amount: RecipeERC20Amount;
-    buyERC20Info: RecipeERC20Info;
-    slippageBasisPoints: number;
-    isRailgun: boolean;
-  }) => {
+  }: V2SwapQuoteParams) => {
     const params = ZeroXV2Quote.getQuoteParams(
       networkName,
       sellERC20Amount,
@@ -211,16 +217,16 @@ export class ZeroXV2Quote {
       const { spender } = issues.allowance; // check this against this.zeroXExchangeAllowanceHolderAddress(networkName);
 
       return {
-        price: undefined, // non existent in the response
-        guaranteedPrice: undefined, // non existent in the response
+        price: BigInt(0), // non existent in the response
+        guaranteedPrice: BigInt(0), // non existent in the response
         buyERC20Amount: {
           ...buyERC20Info,
           amount: BigInt(buyAmount),
         },
         minimumBuyAmount,
-        spender,
+        spender: spender as Optional<string>,
         crossContractCall,
-        slippageBasisPoints,
+        slippageBasisPoints: BigInt(slippageBasisPoints),
         sellTokenAddress: response.sellToken,
         sellTokenValue: response.sellAmount,
         zid: response.zid,
@@ -234,3 +240,7 @@ export class ZeroXV2Quote {
     }
   };
 }
+
+export type SwapQuoteDataV2 = SwapQuoteData & {
+  zid: string;
+};
