@@ -1,3 +1,9 @@
+import {
+  NETWORK_CONFIG,
+  type NetworkName,
+} from '@railgun-community/shared-models';
+import type { RecipeERC20Amount, RecipeERC20Info } from '../../models';
+
 export type V2BaseAPIParams = {
   chainId: string;
   sellToken: string;
@@ -47,3 +53,39 @@ type ZeroXV2PriceData = {
   zid: string; // The unique ZeroEx identifier of the request
   issues: ZeroXV2Issues;
 };
+
+const NULL_SPENDER_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+const ZERO_X_PROXY_BASE_TOKEN_ADDRESS =
+  '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+export class ZeroXV2Quote {
+  static getQuoteParams = (
+    networkName: NetworkName,
+    sellERC20Amount: RecipeERC20Amount,
+    buyERC20Info: RecipeERC20Info,
+    slippageBasisPoints: number,
+  ): V2QuoteParams => {
+    if (sellERC20Amount.amount === 0n) {
+      throw new Error('Swap sell amount is 0.');
+    }
+
+    const { relayAdaptContract, chain } = NETWORK_CONFIG[networkName];
+    const sellTokenAddress = sellERC20Amount.tokenAddress;
+    const buyTokenAddress = buyERC20Info.tokenAddress;
+
+    if (sellTokenAddress === buyTokenAddress) {
+      throw new Error('Swap sell and buy tokens are the same.');
+    }
+    const params: V2QuoteParams = {
+      chainId: chain.id.toString(),
+      sellToken: sellTokenAddress,
+      buyToken: buyTokenAddress,
+      sellAmount: sellERC20Amount.amount.toString(),
+      taker: relayAdaptContract,
+      txOrigin: relayAdaptContract,
+      slippageBps: slippageBasisPoints,
+    };
+    return params;
+  };
+}
