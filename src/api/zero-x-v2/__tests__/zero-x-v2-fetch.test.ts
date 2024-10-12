@@ -11,7 +11,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 const NULL_SPENDER_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-describe.only('zero-x-v2-fetch', () => {
+describe('zero-x-v2-fetch', () => {
   before(() => {
     ZeroXConfig.API_KEY = 'test-api-key';
   });

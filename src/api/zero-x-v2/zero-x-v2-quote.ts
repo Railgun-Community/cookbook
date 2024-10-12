@@ -68,6 +68,7 @@ export class ZeroXV2Quote {
     if (erc20.isBaseToken ?? false) {
       return ZERO_X_PROXY_BASE_TOKEN_ADDRESS;
     }
+    return erc20.tokenAddress;
   };
 
   static zeroXExchangeAllowanceHolderAddress = (networkName: NetworkName) => {
@@ -105,8 +106,8 @@ export class ZeroXV2Quote {
     }
 
     const { relayAdaptContract, chain } = NETWORK_CONFIG[networkName];
-    const sellTokenAddress = sellERC20Amount.tokenAddress;
-    const buyTokenAddress = buyERC20Info.tokenAddress;
+    const sellTokenAddress = this.getZeroXTokenAddress(sellERC20Amount);
+    const buyTokenAddress = this.getZeroXTokenAddress(buyERC20Info);
 
     if (sellTokenAddress === buyTokenAddress) {
       throw new Error('Swap sell and buy tokens are the same.');
@@ -175,13 +176,12 @@ export class ZeroXV2Quote {
       slippageBasisPoints,
     );
     try {
+      //   console.log('params', params);
       const response = await getZeroXV2Data<ZeroXV2PriceData>(
         ZeroXV2ApiEndpoint.GetSwapQuote,
         isRailgun,
         params,
       );
-
-      console.log(response);
 
       const invalidError = this.getZeroXV2QuoteInvalidError(
         networkName,
@@ -223,6 +223,7 @@ export class ZeroXV2Quote {
         slippageBasisPoints,
         sellTokenAddress: response.sellToken,
         sellTokenValue: response.sellAmount,
+        zid: response.zid,
       };
     } catch (error: unknown) {
       const errorMessage = this.formatV2ApiError(error); // need to format this error message

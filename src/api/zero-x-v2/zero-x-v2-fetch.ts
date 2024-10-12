@@ -80,7 +80,16 @@ export const getZeroXV2Data = async <T>(
     isRailgun,
     params,
   );
-  const response = await axios.get(url, { headers });
+  //   console.log('url', url);
+  //   console.log('headers', headers);
+  const response = await axios.get(url, { headers }).catch(error => {
+    console.log('error', JSON.stringify(error.response.data.data.details[0]));
+    return undefined;
+  });
   // handle errors here.?
-  return response.data;
+  //   console.log('response', response);
+  return response?.data;
 };
+
+// handle errors
+const handleZeroXV2Error = (error: unknown) => {};
