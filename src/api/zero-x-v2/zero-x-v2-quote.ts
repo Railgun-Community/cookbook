@@ -164,8 +164,8 @@ export class ZeroXV2Quote {
     }
   };
 
-  private static formatV2ApiError = (error: unknown) => {
-    return 'Error fetching 0x V2 swap quote: PROPERLY FORMAT THIS';
+  private static formatV2ApiError = (error: any) => {
+    return `${error.message}`;
   };
 
   static getSwapQuote = async ({
@@ -181,13 +181,16 @@ export class ZeroXV2Quote {
       buyERC20Info,
       slippageBasisPoints,
     );
+
     try {
-      //   console.log('params', params);
+      console.log('params', params);
       const response = await getZeroXV2Data<ZeroXV2PriceData>(
         ZeroXV2ApiEndpoint.GetSwapQuote,
         isRailgun,
         params,
       );
+
+      console.log('response', response);
 
       const invalidError = this.getZeroXV2QuoteInvalidError(
         networkName,
@@ -213,8 +216,14 @@ export class ZeroXV2Quote {
       };
 
       // get allowance from the issues
-      const issues = response.issues;
-      const { spender } = issues.allowance; // check this against this.zeroXExchangeAllowanceHolderAddress(networkName);
+      //   const issues = response.issues;
+
+      // spender seems to not always come back
+      // according to the api, this is standard across the chains we support.
+      const spender = this.zeroXExchangeAllowanceHolderAddress(networkName);
+      // check this against this.zeroXExchangeAllowanceHolderAddress(networkName);
+      // issues.allowance.spender ??
+      // this.zeroXExchangeAllowanceHolderAddress(networkName);
 
       return {
         price: BigInt(0), // non existent in the response
