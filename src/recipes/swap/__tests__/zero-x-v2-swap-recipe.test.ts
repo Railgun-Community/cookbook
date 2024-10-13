@@ -66,7 +66,7 @@ const quote: SwapQuoteDataV2 = {
 
 let stub0xQuote: SinonStub;
 
-describe.only('zero-x-v2-swap-recipe', () => {
+describe('zero-x-v2-swap-recipe', () => {
   before(() => {
     setRailgunFees(
       networkName,
