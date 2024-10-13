@@ -10,7 +10,7 @@ import type {
 } from '../../models';
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
-import type { ContractTransaction } from 'ethers';
+import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
 
 export type V2BaseAPIParams = {
   chainId: string;
@@ -174,7 +174,7 @@ export class ZeroXV2Quote {
     buyERC20Info,
     slippageBasisPoints,
     isRailgun,
-  }: V2SwapQuoteParams) => {
+  }: V2SwapQuoteParams): Promise<SwapQuoteDataV2> => {
     const params = ZeroXV2Quote.getQuoteParams(
       networkName,
       sellERC20Amount,
@@ -201,13 +201,13 @@ export class ZeroXV2Quote {
       if (isDefined(invalidError)) {
         throw invalidError;
       }
+      const { issues, buyAmount } = response;
 
       // auto set slippage of 100 bps if none is found.
       const minimumBuyAmount = minBalanceAfterSlippage(
         BigInt(response.buyAmount),
         BigInt(params?.slippageBps ?? 100),
       );
-      const buyAmount = response.buyAmount;
 
       const crossContractCall: ContractTransaction = {
         to: response.transaction.to,
@@ -215,19 +215,38 @@ export class ZeroXV2Quote {
         value: BigInt(response.transaction.value),
       };
 
-      // get allowance from the issues
-      //   const issues = response.issues;
+      const spender =
+        // allowance is null sometimes coming back from api, need to check this.
+        // if it comes back; use its value. if not use the hardcoded value.
+        issues.allowance !== null
+          ? issues.allowance.spender
+          : // according to the api, this is standard across the chains we support.
+            this.zeroXExchangeAllowanceHolderAddress(networkName);
 
-      // spender seems to not always come back
-      // according to the api, this is standard across the chains we support.
-      const spender = this.zeroXExchangeAllowanceHolderAddress(networkName);
-      // check this against this.zeroXExchangeAllowanceHolderAddress(networkName);
-      // issues.allowance.spender ??
-      // this.zeroXExchangeAllowanceHolderAddress(networkName);
+      // calculate a price based on the current buy amount and sell amount.
+
+      const priceBuyAmount = parseFloat(
+        formatUnits(buyAmount, buyERC20Info.decimals),
+      );
+      const minPriceBuyAmount = parseFloat(
+        formatUnits(minimumBuyAmount, buyERC20Info.decimals),
+      );
+      const priceSellAmount = parseFloat(
+        formatUnits(sellERC20Amount.amount, sellERC20Amount.decimals),
+      );
+
+      const price = parseUnits(
+        (priceBuyAmount / priceSellAmount).toFixed(8),
+        sellERC20Amount.decimals,
+      );
+      const guaranteedPrice = parseUnits(
+        (minPriceBuyAmount / priceSellAmount).toFixed(8),
+        sellERC20Amount.decimals,
+      );
 
       return {
-        price: BigInt(0), // non existent in the response
-        guaranteedPrice: BigInt(0), // non existent in the response
+        price, // manually calculated
+        guaranteedPrice, // manually calculated
         buyERC20Amount: {
           ...buyERC20Info,
           amount: BigInt(buyAmount),
