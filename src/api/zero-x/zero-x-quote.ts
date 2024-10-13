@@ -176,6 +176,7 @@ export class ZeroXQuote {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const errorMessage = this.formatApiError(err);
+      console.error(err);
       throw new Error('Failed to get swap quote.', {
         cause: new Error(errorMessage),
       });
