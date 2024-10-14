@@ -74,30 +74,28 @@ export class ZeroXV2Quote {
     return params;
   };
 
-  private static getZeroXV2QuoteInvalidError = (
+  private static isValidQuote = (
     networkName: NetworkName,
     to: string,
     sellTokenAddress: string,
     buyTokenAddress: string,
-  ): undefined | unknown => {
-    try {
+  ): void => {
+
       const exchangeAllowanceHolderAddress =
         // this is not correct, this is the spender that needs to have allowance set to.
         // need to write a new function out or get the updated addresses from 0x sdk?
         this.zeroXExchangeAllowanceHolderAddress(networkName);
-      if (
-        ![
-          exchangeAllowanceHolderAddress.toLowerCase(),
-          sellTokenAddress.toLowerCase(),
-          buyTokenAddress.toLowerCase(),
-        ].includes(to.toLowerCase())
-      ) {
-        throw new InvalidExchangeContractError(to, exchangeAllowanceHolderAddress); // @@TODO: Doublecheck this is correct?
-      }
-      return undefined;
-    } catch (error: unknown) {
-      return error;
-    }
+
+      const validAddresses = [
+          exchangeAllowanceHolderAddress,
+          sellTokenAddress,
+          buyTokenAddress
+        ].map(addr => addr.toLowerCase());
+
+        if (!validAddresses.includes(to.toLowerCase())) {
+          throw new InvalidExchangeContractError(to, exchangeAllowanceHolderAddress);
+        }
+
   };
 
   static getSwapQuote = async ({
@@ -121,15 +119,13 @@ export class ZeroXV2Quote {
         params,
       );
 
-      const invalidError = this.getZeroXV2QuoteInvalidError(
+      this.isValidQuote(
         networkName,
         response.transaction.to,
         params.sellToken,
         params.buyToken,
       );
-      if (isDefined(invalidError)) {
-        throw invalidError;
-      }
+      
       const { issues, buyAmount } = response;
 
       // auto set slippage of 100 bps if none is found.

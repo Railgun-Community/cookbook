@@ -6,25 +6,52 @@ export abstract class ZeroXAPIError extends Error {
   readonly cause: string;
 
   constructor({ name, cause }: { name: string; cause: string }) {
-      super(cause);
-      this.name = name;
-      this.cause = cause;
-      Object.setPrototypeOf(this, ZeroXAPIError.prototype);
+    super(cause);
+    this.name = name;
+    this.cause = cause;
+    Object.setPrototypeOf(this, ZeroXAPIError.prototype);
   }
 
   public getCause(): string {
-      return this.cause;
+    return this.cause;
   }
-};
+}
 
 export class MissingHeadersError extends ZeroXAPIError {
   constructor() {
-      super({
-          name: 'MissingHeaders',
-          cause: 'No 0x API Key is configured. Set ZeroXConfig.API_KEY. For tests, modify test-config-overrides.test.ts.',
-      });
+    super({
+      name: 'MissingHeadersError',
+      cause: 'No 0x API Key is configured. Set ZeroXConfig.API_KEY. For tests, modify test-config-overrides.test.ts.',
+    });
   }
-};
+}
+
+export class QuoteParamsError extends ZeroXAPIError {
+  constructor(description: string) {
+    super({
+      name: 'QuoteParamsError',
+      cause: description,
+    });
+  }
+}
+
+export class InvalidExchangeContractError extends ZeroXAPIError {
+  constructor(to: string, exchangeAllowanceHolderAddress: string) {
+    super({
+      name: 'InvalidExchangeContractError',
+      cause: `Invalid 0x V2 Exchange contract address: ${to} vs ${exchangeAllowanceHolderAddress}`,
+    });
+  }
+}
+
+export class InvalidProxyContractChainError extends ZeroXAPIError {
+  constructor(chain: string) {
+    super({
+      name: 'InvalidProxyContractChainError',
+      cause: `No 0x V2 Exchange Proxy contract address for chain ${chain}`,
+    });
+  }
+}
 
 export class SwapQuoteError extends ZeroXAPIError {
   constructor(cause: string) {
@@ -60,36 +87,11 @@ export class SwapQuoteError extends ZeroXAPIError {
 
   static from(error: unknown): SwapQuoteError {
     if (error instanceof AxiosError) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return SwapQuoteError.fromAxiosError(error);
+    }
+    if (error instanceof ZeroXAPIError) {
+      return new SwapQuoteError(error.cause);
     }
     return new SwapQuoteError(error instanceof Error ? error.message : String(error));
   }
 }
-
-export class QuoteParamsError  extends ZeroXAPIError {
-  constructor(description: string) {
-    super({
-        name: 'QuoteParamsError',
-        cause: description,
-    });
-  }
-};
-
-export class InvalidExchangeContractError  extends ZeroXAPIError {
-  constructor(to: string, exchangeAllowanceHolderAddress: string) {
-    super({
-        name: 'Invalid0xExchangeContractError',
-        cause: `Invalid 0x V2 Exchange contract address: ${to} vs ${exchangeAllowanceHolderAddress}`,
-    });
-  }
-};
-
-export class InvalidProxyContractChainError extends ZeroXAPIError {
-  constructor(chain: string) {
-    super({
-      name: 'InvalidProxyContractChainError',
-      cause: `No 0x V2 Exchange Proxy contract address for chain ${chain}`,
-    });
-  }
-};
