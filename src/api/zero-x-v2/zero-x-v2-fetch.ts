@@ -1,5 +1,6 @@
 import { isDefined } from '@railgun-community/shared-models';
 import { ZeroXConfig } from '../../models';
+import { ZERO_X_V2_BASE_URL } from './constants';
 import axios from 'axios';
 
 type SearchParams = Record<string, any>;
@@ -8,8 +9,6 @@ export enum ZeroXV2ApiEndpoint {
   GetSwapQuote = 'swap/allowance-holder/quote',
   GetSwapPrice = 'swap/allowance-holder/price',
 }
-
-const ZERO_X_V2_BASE_URL = 'https://api.0x.org/';
 
 const getSearchV2Params = (params?: SearchParams) => {
   const searchParams = new URLSearchParams(params);
