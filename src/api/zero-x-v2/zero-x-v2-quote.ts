@@ -11,7 +11,7 @@ import { V2QuoteParams, V2SwapQuoteParams, ZeroXV2PriceData, SwapQuoteDataV2} fr
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
 import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
-import { AxiosError } from 'axios';
+import { QuoteError } from './errors';
 
 const ZERO_X_PROXY_BASE_TOKEN_ADDRESS =
   '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
@@ -105,39 +105,6 @@ export class ZeroXV2Quote {
     }
   };
 
-  private static formatV2ApiError = (error: AxiosError<any> | Error) => {
-    try {
-      if (!(error instanceof AxiosError)) {
-        return error.message;
-      }
-      const { response } = error as AxiosError<any>;
-      if (!response) {
-        return `0x V2 API request failed: ${error.message}.`;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { data } = response;
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { name: firstDetailsErrorReason } = data;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-
-      if (firstDetailsErrorReason === 'TOKEN_NOT_SUPPORTED') {
-        return 'One of the selected tokens is not supported by the 0x Exchange.';
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (isDefined(data.data.details)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        const firstDetailsError = data.data.details[0];
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return `0x V2 Exchange: ${firstDetailsError.field}:${firstDetailsError.reason}. ${firstDetailsErrorReason}.`;
-      }
-      return `0x V2 API request failed: ${firstDetailsErrorReason}`;
-    } catch {
-      return `0x V2 API request failed: ${error.message}.`;
-    }
-  };
-
   static getSwapQuote = async ({
     networkName,
     sellERC20Amount,
@@ -227,12 +194,7 @@ export class ZeroXV2Quote {
         zid: response.zid,
       };
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const errorMessage = this.formatV2ApiError(error); // need to format this error message
-      console.log(errorMessage);
-      throw new Error(`Error fetching 0x V2 swap quote:`, {
-        cause: new Error(errorMessage),
-      });
+      throw QuoteError.from(error);
     }
   };
 }
