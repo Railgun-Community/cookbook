@@ -1,15 +1,5 @@
 import { AxiosError } from 'axios';
-
-interface ZeroXAPIErrorData {
-  name: string;
-  message: string;
-  data?: {
-    details?: Array<{
-      field: string;
-      reason: string;
-    }>;
-  };
-}
+import { ZeroXAPIErrorData } from './types';
 
 export abstract class ZeroXAPIError extends Error {
   override readonly name: string;
@@ -103,7 +93,3 @@ export class InvalidProxyContractChainError extends ZeroXAPIError {
     });
   }
 };
-
-export class CustomQuoteError extends ZeroXAPIError {
-
-}

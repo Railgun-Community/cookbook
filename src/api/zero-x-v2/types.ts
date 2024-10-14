@@ -69,3 +69,14 @@ export type ZeroXV2PriceData = {
   zid: string; // The unique ZeroEx identifier of the request
   issues: ZeroXV2Issues;
 };
+
+export type ZeroXAPIErrorData = {
+  name: string;
+  message: string;
+  data?: {
+    details?: Array<{
+      field: string;
+      reason: string;
+    }>;
+  };
+}
