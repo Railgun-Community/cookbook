@@ -1,6 +1,7 @@
 import { isDefined } from '@railgun-community/shared-models';
 import { ZeroXConfig } from '../../models';
 import { ZERO_X_V2_BASE_URL } from './constants';
+import { MissingHeadersError } from './errors';
 import axios from 'axios';
 
 type SearchParams = Record<string, any>;
@@ -30,9 +31,7 @@ const createV2Headers = () => {
       '0x-version': 'v2',
     };
   }
-  throw new Error(
-    'No 0x API Key is configured. Set ZeroXConfig.API_KEY. For tests, modify test-config-overrides.test.ts.',
-  );
+  throw new MissingHeadersError();
 };
 
 export const createZeroXV2UrlAndHeaders = (

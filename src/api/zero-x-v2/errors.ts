@@ -12,4 +12,13 @@ export abstract class ZeroXAPIError extends Error {
   public getDescription(): string {
       return this.description;
   }
-}
+};
+
+export class MissingHeadersError extends ZeroXAPIError {
+  constructor() {
+      super({
+          name: 'MissingHeaders',
+          description: 'No 0x API Key is configured. Set ZeroXConfig.API_KEY. For tests, modify test-config-overrides.test.ts.',
+      });
+  }
+};
