@@ -87,6 +87,7 @@ export class SwapQuoteError extends ZeroXAPIError {
 
   static from(error: unknown): SwapQuoteError {
     if (error instanceof AxiosError) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return SwapQuoteError.fromAxiosError(error);
     }
     if (error instanceof ZeroXAPIError) {
