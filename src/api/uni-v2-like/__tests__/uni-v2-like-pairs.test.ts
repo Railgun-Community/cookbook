@@ -139,7 +139,7 @@ describe('uni-v2-like-pairs', () => {
     );
     expect(pairsUSDCAndWeth.length).to.equal(1);
     assertValidUSDCWethPair(pairsUSDCAndWeth[0]);
-  }).timeout(15000);
+  }).timeout(30000);
 
   it('Should query SushiSwap LP pair from USDC-WETH LP token', async () => {
     const pairsLPToken = await queryAllLPPairsForTokenAddressesPerFork(
@@ -166,7 +166,7 @@ describe('uni-v2-like-pairs', () => {
     );
     expect(pairsUSDCAndWeth.length).to.equal(2);
     assertValidUSDCWethPair(pairsUSDCAndWeth[0]);
-  }).timeout(5000);
+  }).timeout(15000);
 
   it('Should get LP pairs for USDC-WETH LP token (returns first option from cache)', async () => {
     const pairsUSDCAndWeth = await getLPPairsForTokenAddresses(

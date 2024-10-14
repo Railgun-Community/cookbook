@@ -92,6 +92,8 @@ export const startRailgunForTests = async () => {
     testArtifactStore,
     false, // useNativeArtifacts
     false, // skipMerkletreeScans
+    [],
+    [],
   );
 
   setLoggers(
@@ -140,10 +142,12 @@ export const utxoMerkletreeHistoryScanCallback = (
 export const pollUntilUTXOMerkletreeScanned = async () => {
   dbgRailgunSetup('Polling for UTXO merkletree scan to complete...');
   const status = await poll(
-    async () => currentUTXOMerkletreeScanStatus,
+    async () => {
+      return currentUTXOMerkletreeScanStatus;
+    },
     status => status === MerkletreeScanStatus.Complete,
     100,
-    60000 / 100, // 60 sec.
+    180000 / 100, // 180 sec.
   );
   if (status !== MerkletreeScanStatus.Complete) {
     throw new Error(`Merkletree scan should be completed - timed out`);

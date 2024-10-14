@@ -63,7 +63,9 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
     );
   });
 
-  it('[FORK] Should run uni-v2-like-add-liquidity-beefy-deposit-combo-meal', async function run() {
+  // Vault is inactive and there are no longer any SUSHI vaults active on beefy. 
+  // TODO: Implement CRV / Balancer
+  it.skip('[FORK] Should run uni-v2-like-add-liquidity-beefy-deposit-combo-meal', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
