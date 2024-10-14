@@ -23,11 +23,12 @@ import {
   ZeroXV2SwapStep,
 } from '../../steps';
 import { DesignateShieldERC20RecipientStep } from '../../steps/railgun/designate-shield-erc20-recipient-step';
+import { 
+  ZeroXV2Quote } from '../../api/zero-x-v2';
 import {
-  ZeroXV2Quote,
   type SwapQuoteDataV2,
   type V2SwapQuoteParams,
-} from '../../api/zero-x-v2';
+} from '../../api/zero-x-v2/types';
 
 export class ZeroXV2SwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
