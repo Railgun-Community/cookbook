@@ -11,10 +11,8 @@ import { V2QuoteParams, V2SwapQuoteParams, ZeroXV2PriceData, SwapQuoteDataV2} fr
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
 import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
-import { QuoteError } from './errors';
-
-const ZERO_X_PROXY_BASE_TOKEN_ADDRESS =
-  '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+import { InvalidExchangeContractError, SwapQuoteError, InvalidProxyContractChainError, QuoteParamsError } from './errors';
+import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from './constants';
 
 export class ZeroXV2Quote {
   private static getZeroXTokenAddress = (erc20: RecipeERC20Info) => {
@@ -30,12 +28,10 @@ export class ZeroXV2Quote {
       case NetworkName.BNBChain:
       case NetworkName.Polygon:
       case NetworkName.Arbitrum: {
-        return '0x0000000000001fF3684f28c67538d4D072C22734';
+        return ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS;
       }
       default: {
-        throw new Error(
-          `No 0x V2 Exchange Proxy contract address for chain ${networkName}`,
-        );
+        throw new InvalidProxyContractChainError(networkName);
       }
     }
   };
@@ -48,6 +44,7 @@ export class ZeroXV2Quote {
       return false;
     }
   };
+
   static getQuoteParams = (
     networkName: NetworkName,
     sellERC20Amount: RecipeERC20Amount,
@@ -55,7 +52,7 @@ export class ZeroXV2Quote {
     slippageBasisPoints: number,
   ): V2QuoteParams => {
     if (sellERC20Amount.amount === 0n) {
-      throw new Error('Swap sell amount is 0.');
+      throw new QuoteParamsError('Swap sell amount is 0.');
     }
 
     const { relayAdaptContract, chain } = NETWORK_CONFIG[networkName];
@@ -63,7 +60,7 @@ export class ZeroXV2Quote {
     const buyTokenAddress = this.getZeroXTokenAddress(buyERC20Info);
 
     if (sellTokenAddress === buyTokenAddress) {
-      throw new Error('Swap sell and buy tokens are the same.');
+      throw new QuoteParamsError('Swap sell and buy tokens are the same');
     }
     const params: V2QuoteParams = {
       chainId: chain.id.toString(),
@@ -95,9 +92,7 @@ export class ZeroXV2Quote {
           buyTokenAddress.toLowerCase(),
         ].includes(to.toLowerCase())
       ) {
-        throw new Error(
-          `Invalid 0x V2 Exchange contract address: ${to} vs ${exchangeAllowanceHolderAddress}`,
-        );
+        throw new InvalidExchangeContractError(to, exchangeAllowanceHolderAddress); // @@TODO: Doublecheck this is correct?
       }
       return undefined;
     } catch (error: unknown) {
@@ -194,7 +189,7 @@ export class ZeroXV2Quote {
         zid: response.zid,
       };
     } catch (error) {
-      throw QuoteError.from(error);
+      throw SwapQuoteError.from(error);
     }
   };
 }
