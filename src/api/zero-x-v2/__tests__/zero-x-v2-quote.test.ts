@@ -40,7 +40,7 @@ const runV2QuoteTest = async (amount = '1000000000000000000') => {
   expect(quote).to.haveOwnProperty('sellTokenValue');
 };
 
-describe.only('zero-x-v2-quote', () => {
+describe('zero-x-v2-quote', () => {
   before(() => {});
 
   it('Should fetch quotes from ZeroX proxy', async () => {
