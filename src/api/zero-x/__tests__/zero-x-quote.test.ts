@@ -44,8 +44,7 @@ const runQuoteTest = async () => {
 describe('zero-x-quote', () => {
   before(() => {});
 
-  // @@ TODO
-  it.skip('Should fetch quotes from ZeroX proxy', async () => {
+  it('Should fetch quotes from ZeroX proxy', async () => {
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
     ZeroXConfig.API_KEY = undefined;
     await runQuoteTest();
