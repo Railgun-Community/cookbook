@@ -4,7 +4,7 @@ export const validateContractAddress = (address: string) => {
   return isAddress(address);
 };
 
-export const isRailgunAddress = (address: string): boolean => {
+export const isPrefixedRailgunAddress = (address: string): boolean => {
   if (address.startsWith('0zk')) {
     return true;
   }
