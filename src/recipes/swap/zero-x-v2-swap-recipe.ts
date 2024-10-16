@@ -52,7 +52,6 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
     destinationAddress?: string,
   ) {
     super();
-    console.log('LOADED V2 SWAP RECIPE');
     this.sellERC20Info = sellERC20Info;
     this.buyERC20Info = buyERC20Info;
 
