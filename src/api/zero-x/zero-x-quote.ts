@@ -17,7 +17,7 @@ import { ContractTransaction, parseUnits } from 'ethers';
 
 export const ZERO_X_PRICE_DECIMALS = 18;
 
-type ZeroXAPIPriceData = {
+export type ZeroXAPIPriceData = {
   price: string;
   guaranteedPrice: string;
   buyAmount: string;
@@ -29,7 +29,7 @@ type ZeroXAPIPriceData = {
   sellAmount: string;
 };
 
-type ZeroXAPIQuoteParams = {
+export type ZeroXAPIQuoteParams = {
   sellToken: string;
   buyToken: string;
   sellAmount: string;
