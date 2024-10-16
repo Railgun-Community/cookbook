@@ -1,5 +1,5 @@
 import { NetworkName } from '@railgun-community/shared-models';
-import { ZeroXQuote } from '../zero-x-quote';
+import { ZeroXV2Quote } from '../zero-x-v2-quote';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import {
@@ -13,25 +13,24 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
-
-const runQuoteTest = async () => {
+const runV2QuoteTest = async (amount = '1000000000000000000') => {
   const sellERC20Amount: RecipeERC20Amount = {
+    tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
+    decimals: 18n,
+    isBaseToken: false,
+    amount: BigInt(amount),
+  };
+  const buyERC20Info: RecipeERC20Info = {
     tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     decimals: 18n,
     isBaseToken: false,
-    amount: BigInt('0x1000000000000000000'),
-  };
-  const buyERC20Info: RecipeERC20Info = {
-    tokenAddress: 'DAI',
-    decimals: 18n,
-    isBaseToken: false,
   };
 
-  const quote = await ZeroXQuote.getSwapQuote({
+  const quote = await ZeroXV2Quote.getSwapQuote({
     networkName,
     sellERC20Amount,
     buyERC20Info,
-    slippageBasisPoints: BigInt(100),
+    slippageBasisPoints: 100,
     isRailgun: true,
   });
 
@@ -41,18 +40,33 @@ const runQuoteTest = async () => {
   expect(quote).to.haveOwnProperty('sellTokenValue');
 };
 
-describe('zero-x-quote', () => {
+describe('zero-x-v2-quote', () => {
   before(() => {});
 
   it('Should fetch quotes from ZeroX proxy', async () => {
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
     ZeroXConfig.API_KEY = undefined;
-    await runQuoteTest();
+    await runV2QuoteTest();
   }).timeout(10000);
 
   it('Should fetch quotes from ZeroX API Key', async () => {
     ZeroXConfig.PROXY_API_DOMAIN = undefined;
     ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
-    await runQuoteTest();
+    await runV2QuoteTest();
+  }).timeout(10000);
+
+  it('Should fetch quotes from ZeroX API Key with large volume request', async () => {
+    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+    ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
+
+    await runV2QuoteTest('0x1000000000000000000000');
+  }).timeout(10000);
+
+  it('Should fetch quotes from ZeroX API Key with large volume request and fail', async () => {
+    ZeroXConfig.PROXY_API_DOMAIN = undefined;
+    ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
+
+    await expect(runV2QuoteTest('0x10000000000000000000000000000000000000000'))
+      .to.be.rejected;
   }).timeout(10000);
 });

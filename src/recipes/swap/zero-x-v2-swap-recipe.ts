@@ -1,14 +1,10 @@
 import { ApproveERC20SpenderStep } from '../../steps/token/erc20/approve-erc20-spender-step';
 import { Step } from '../../steps/step';
-import { ZeroXQuote } from '../../api/zero-x/zero-x-quote';
-import { ZeroXSwapStep } from '../../steps/swap/zero-x/zero-x-swap-step';
 import {
   RecipeConfig,
   RecipeERC20Amount,
   RecipeERC20Info,
   StepInput,
-  SwapQuoteData,
-  SwapQuoteParams,
 } from '../../models/export-models';
 import { SwapRecipe } from './swap-recipe';
 import { NetworkName, isDefined } from '@railgun-community/shared-models';
@@ -21,20 +17,30 @@ import {
   MIN_GAS_LIMIT_0X_SWAP_SHIELD,
   MIN_GAS_LIMIT_0X_SWAP_TRANSFER,
 } from '../../models/min-gas-limits';
-import { TransferBaseTokenStep, TransferERC20Step } from '../../steps';
+import {
+  TransferBaseTokenStep,
+  TransferERC20Step,
+  ZeroXV2SwapStep,
+} from '../../steps';
 import { DesignateShieldERC20RecipientStep } from '../../steps/railgun/designate-shield-erc20-recipient-step';
+import { 
+  ZeroXV2Quote } from '../../api/zero-x-v2';
+import {
+  type SwapQuoteDataV2,
+  type V2SwapQuoteParams,
+} from '../../api/zero-x-v2/types';
 
-export class ZeroXSwapRecipe extends SwapRecipe {
+export class ZeroXV2SwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
-    name: '0x Exchange Swap',
-    description: 'Swaps two ERC20 tokens using 0x Exchange DEX Aggregator.',
+    name: '0x V2 Exchange Swap',
+    description: 'Swaps two ERC20 tokens using 0x V2 Exchange DEX Aggregator.',
     minGasLimit: MIN_GAS_LIMIT_0X_SWAP,
   };
 
   protected readonly sellERC20Info: RecipeERC20Info;
   protected readonly buyERC20Info: RecipeERC20Info;
 
-  private readonly slippageBasisPoints: bigint;
+  private readonly slippageBasisPoints: number;
 
   protected readonly destinationAddress: Optional<string>;
   protected readonly isRailgunDestinationAddress: Optional<boolean>;
@@ -42,11 +48,10 @@ export class ZeroXSwapRecipe extends SwapRecipe {
   constructor(
     sellERC20Info: RecipeERC20Info,
     buyERC20Info: RecipeERC20Info,
-    slippageBasisPoints: bigint,
+    slippageBasisPoints: number,
     destinationAddress?: string,
   ) {
     super();
-
     this.sellERC20Info = sellERC20Info;
     this.buyERC20Info = buyERC20Info;
 
@@ -67,21 +72,21 @@ export class ZeroXSwapRecipe extends SwapRecipe {
   }
 
   protected supportsNetwork(networkName: NetworkName): boolean {
-    return ZeroXQuote.supportsNetwork(networkName);
+    return ZeroXV2Quote.supportsNetwork(networkName);
   }
 
   async getSwapQuote(
     networkName: NetworkName,
     sellERC20Amount: RecipeERC20Amount,
-  ): Promise<SwapQuoteData> {
-    const quoteParams: SwapQuoteParams = {
+  ): Promise<SwapQuoteDataV2> {
+    const quoteParams: V2SwapQuoteParams = {
       networkName,
       sellERC20Amount,
       buyERC20Info: this.buyERC20Info,
       slippageBasisPoints: this.slippageBasisPoints,
       isRailgun: true,
     };
-    return ZeroXQuote.getSwapQuote(quoteParams);
+    return ZeroXV2Quote.getSwapQuote(quoteParams);
   }
 
   protected async getInternalSteps(
@@ -99,7 +104,7 @@ export class ZeroXSwapRecipe extends SwapRecipe {
         this.quote.spender,
         sellERC20Amount,
       ),
-      new ZeroXSwapStep(this.quote, this.sellERC20Info),
+      new ZeroXV2SwapStep(this.quote, this.sellERC20Info),
     ];
     if (isDefined(this.destinationAddress)) {
       steps.push(
