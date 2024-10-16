@@ -75,8 +75,6 @@ describe('zero-x-v2-swap-recipe', () => {
     stub0xQuote = Sinon.stub(ZeroXV2Quote, 'getSwapQuote').resolves(quote);
 
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
-    // ZeroXConfig.PROXY_API_DOMAIN = undefined;
-    ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
   });
 
   after(() => {
