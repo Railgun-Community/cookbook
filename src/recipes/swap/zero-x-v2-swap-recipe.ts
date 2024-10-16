@@ -103,7 +103,6 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
       new ApproveERC20SpenderStep(
         this.quote.spender,
         sellERC20Amount,
-        // sellERC20Amount.amount,
       ),
       new ZeroXV2SwapStep(this.quote, this.sellERC20Info),
     ];
