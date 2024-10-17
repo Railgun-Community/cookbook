@@ -4,6 +4,7 @@ import { ZeroXV2SwapRecipe } from '../zero-x-v2-swap-recipe';
 import {
   RecipeERC20Info,
   RecipeInput,
+  type SwapQuoteDataV2,
 } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
@@ -16,7 +17,7 @@ import {
 } from '../../../test/mocks.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 import { testConfig } from '../../../test/test-config.test';
-import { ZeroXV2Quote, type SwapQuoteDataV2 } from '../../../api/zero-x-v2';
+import { ZeroXV2Quote } from '../../../api/zero-x-v2';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

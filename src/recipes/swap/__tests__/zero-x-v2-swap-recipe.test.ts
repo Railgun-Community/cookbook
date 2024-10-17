@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXV2SwapRecipe } from '../zero-x-v2-swap-recipe';
-import { RecipeERC20Info, RecipeInput } from '../../../models/export-models';
+import { RecipeERC20Info, RecipeInput, type SwapQuoteDataV2 } from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import Sinon, { SinonStub } from 'sinon';
@@ -12,9 +12,6 @@ import {
 } from '../../../test/mocks.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 import { testConfig } from '../../../test/test-config.test';
-import {
-  type SwapQuoteDataV2,
-} from '../../../api/zero-x-v2/types';
 import { ZeroXV2Quote } from '../../../api/zero-x-v2/zero-x-v2-quote';
 
 chai.use(chaiAsPromised);

@@ -5,6 +5,8 @@ import {
   RecipeERC20Amount,
   RecipeERC20Info,
   StepInput,
+  type SwapQuoteDataV2,
+  type SwapQuoteParamsV2,
 } from '../../models/export-models';
 import { SwapRecipe } from './swap-recipe';
 import { NetworkName, isDefined } from '@railgun-community/shared-models';
@@ -25,10 +27,6 @@ import {
 import { DesignateShieldERC20RecipientStep } from '../../steps/railgun/designate-shield-erc20-recipient-step';
 import { 
   ZeroXV2Quote } from '../../api/zero-x-v2';
-import {
-  type SwapQuoteDataV2,
-  type V2SwapQuoteParams,
-} from '../../api/zero-x-v2/types';
 
 export class ZeroXV2SwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
@@ -79,7 +77,7 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
     networkName: NetworkName,
     sellERC20Amount: RecipeERC20Amount,
   ): Promise<SwapQuoteDataV2> {
-    const quoteParams: V2SwapQuoteParams = {
+    const quoteParams: SwapQuoteParamsV2 = {
       networkName,
       sellERC20Amount,
       buyERC20Info: this.buyERC20Info,
