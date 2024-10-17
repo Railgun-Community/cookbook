@@ -1,6 +1,6 @@
 {
   "name": "@railgun-community/cookbook",
-  "version": "2.8.6",
+  "version": "2.8.7",
   "license": "MIT",
   "main": "dist/index.js",
   "files": [
