@@ -1,18 +1,20 @@
 import {
-  isDefined,
   NETWORK_CONFIG,
   NetworkName,
 } from '@railgun-community/shared-models';
 import type {
+  QuoteParamsV2,
   RecipeERC20Amount,
   RecipeERC20Info,
+  SwapQuoteDataV2,
+  SwapQuoteParamsV2,
+  ZeroXV2PriceData,
 } from '../../models';
-import { V2QuoteParams, V2SwapQuoteParams, ZeroXV2PriceData, SwapQuoteDataV2} from './types';
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
 import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
 import { InvalidExchangeContractError, SwapQuoteError, InvalidProxyContractChainError, QuoteParamsError } from './errors';
-import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from './constants';
+import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from '../../models/constants';
 
 export class ZeroXV2Quote {
   private static getZeroXTokenAddress = (erc20: RecipeERC20Info) => {
@@ -50,7 +52,7 @@ export class ZeroXV2Quote {
     sellERC20Amount: RecipeERC20Amount,
     buyERC20Info: RecipeERC20Info,
     slippageBasisPoints: number,
-  ): V2QuoteParams => {
+  ): QuoteParamsV2 => {
     if (sellERC20Amount.amount === 0n) {
       throw new QuoteParamsError('Swap sell amount is 0.');
     }
@@ -62,7 +64,7 @@ export class ZeroXV2Quote {
     if (sellTokenAddress === buyTokenAddress) {
       throw new QuoteParamsError('Swap sell and buy tokens are the same');
     }
-    const params: V2QuoteParams = {
+    const params: QuoteParamsV2 = {
       chainId: chain.id.toString(),
       sellToken: sellTokenAddress,
       buyToken: buyTokenAddress,
@@ -104,7 +106,7 @@ export class ZeroXV2Quote {
     buyERC20Info,
     slippageBasisPoints,
     isRailgun,
-  }: V2SwapQuoteParams): Promise<SwapQuoteDataV2> => {
+  }: SwapQuoteParamsV2): Promise<SwapQuoteDataV2> => {
     const params = ZeroXV2Quote.getQuoteParams(
       networkName,
       sellERC20Amount,
