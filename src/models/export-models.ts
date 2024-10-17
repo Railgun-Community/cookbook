@@ -107,6 +107,10 @@ export type SwapQuoteData = {
   sellTokenValue: string;
 };
 
+export type SwapQuoteDataV2 = SwapQuoteData & {
+  zid: string;
+};
+
 export type SwapQuoteParams = {
   networkName: NetworkName;
   sellERC20Amount: RecipeERC20Amount;
@@ -115,9 +119,21 @@ export type SwapQuoteParams = {
   isRailgun: boolean;
 };
 
+export type SwapQuoteParamsV2 = {
+  networkName: NetworkName;
+  sellERC20Amount: RecipeERC20Amount;
+  buyERC20Info: RecipeERC20Info;
+  slippageBasisPoints: number;
+  isRailgun: boolean;
+};
+
 export type GetSwapQuote = (
   swapQuoteParams: SwapQuoteParams,
 ) => Promise<SwapQuoteData>;
+
+export type GetSwapQuoteV2 = (
+  swapQuoteParams: SwapQuoteParamsV2,
+) => Promise<SwapQuoteDataV2>;
 
 export type RecipeAddLiquidityData = {
   erc20AmountA: RecipeERC20Amount;

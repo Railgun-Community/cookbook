@@ -1,36 +1,15 @@
-import {
-  NetworkName,
-} from '@railgun-community/shared-models';
-import type {
-  RecipeERC20Amount,
-  RecipeERC20Info,
-  SwapQuoteData,
-} from '../../models';
 
-
-export type SwapQuoteDataV2 = SwapQuoteData & {
-  zid: string;
-};
-
-export type V2BaseAPIParams = {
+export type BaseAPIParamsV2 = {
   chainId: string;
   sellToken: string;
   buyToken: string;
   sellAmount: string;
 };
 
-export type V2QuoteParams = V2BaseAPIParams & {
+export type QuoteParamsV2 = BaseAPIParamsV2 & {
   taker: string;
   txOrigin: string; // The contract address of the external account that started the transaction. This is only needed if taker is a smart contract.
   slippageBps?: number; //Default: 100 - The maximum acceptable slippage of the buyToken in Bps. If this parameter is set to 0, no slippage will be tolerated. If not provided, the default slippage tolerance is 100Bps
-};
-
-export type V2SwapQuoteParams = {
-  networkName: NetworkName;
-  sellERC20Amount: RecipeERC20Amount;
-  buyERC20Info: RecipeERC20Info;
-  slippageBasisPoints: number;
-  isRailgun: boolean;
 };
 
 export type ZeroXV2Transaction = {
