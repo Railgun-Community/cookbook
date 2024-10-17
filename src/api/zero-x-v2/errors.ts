@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { ZeroXAPIErrorData } from './types';
+import type { ZeroXAPIErrorData } from '../../models';
 
 export abstract class ZeroXAPIError extends Error {
   override readonly name: string;

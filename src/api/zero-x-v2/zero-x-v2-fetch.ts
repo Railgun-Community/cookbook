@@ -1,8 +1,8 @@
 import { isDefined } from '@railgun-community/shared-models';
 import { ZeroXConfig } from '../../models';
-import { ZERO_X_V2_BASE_URL } from './constants';
 import { MissingHeadersError } from './errors';
 import axios from 'axios';
+import { ZERO_X_V2_BASE_URL } from '../../models/constants';
 
 type SearchParams = Record<string, any>;
 

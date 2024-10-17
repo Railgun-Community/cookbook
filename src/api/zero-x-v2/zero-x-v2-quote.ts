@@ -3,17 +3,18 @@ import {
   NetworkName,
 } from '@railgun-community/shared-models';
 import type {
+  QuoteParamsV2,
   RecipeERC20Amount,
   RecipeERC20Info,
   SwapQuoteDataV2,
   SwapQuoteParamsV2,
+  ZeroXV2PriceData,
 } from '../../models';
-import { QuoteParamsV2, ZeroXV2PriceData } from './types';
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
 import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
 import { InvalidExchangeContractError, SwapQuoteError, InvalidProxyContractChainError, QuoteParamsError } from './errors';
-import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from './constants';
+import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from '../../models/constants';
 
 export class ZeroXV2Quote {
   private static getZeroXTokenAddress = (erc20: RecipeERC20Info) => {
