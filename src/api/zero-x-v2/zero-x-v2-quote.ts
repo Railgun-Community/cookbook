@@ -72,6 +72,7 @@ export class ZeroXV2Quote {
       taker: relayAdaptContract,
       txOrigin: relayAdaptContract,
       slippageBps: slippageBasisPoints,
+      excludedSources: "0x_RFQ"
     };
     return params;
   };
