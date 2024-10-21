@@ -121,6 +121,12 @@ export class ZeroXV2Quote {
         params,
       );
 
+      const { liquidityAvailable } = response;
+
+      if (!liquidityAvailable) {
+        throw new SwapQuoteError('No liquidity available for this trade');
+      }
+
       this.isValidQuote(
         networkName,
         response.transaction.to,
