@@ -173,7 +173,7 @@ export type QuoteParamsV2 = BaseAPIParamsV2 & {
   taker: string;
   txOrigin: string; // The contract address of the external account that started the transaction. This is only needed if taker is a smart contract.
   slippageBps?: number; //Default: 100 - The maximum acceptable slippage of the buyToken in Bps. If this parameter is set to 0, no slippage will be tolerated. If not provided, the default slippage tolerance is 100Bps
-  excludedSources: "0x_RFQ"
+  excludedSources: "0x_RFQ,Uniswap_V3"
 };
 
 export type ZeroXV2Transaction = {
