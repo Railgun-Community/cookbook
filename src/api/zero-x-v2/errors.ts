@@ -53,6 +53,15 @@ export class InvalidProxyContractChainError extends ZeroXAPIError {
   }
 }
 
+export class NoLiquidityError extends ZeroXAPIError {
+  constructor() {
+    super({
+      name: 'NoLiquidityError',
+      cause: 'No liquidity available for this trade',
+    });
+  }
+}
+
 export class SwapQuoteError extends ZeroXAPIError {
   constructor(cause: string) {
     super({

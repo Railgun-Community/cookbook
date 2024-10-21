@@ -13,7 +13,7 @@ import type {
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
 import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
-import { InvalidExchangeContractError, SwapQuoteError, InvalidProxyContractChainError, QuoteParamsError } from './errors';
+import { InvalidExchangeContractError, SwapQuoteError, InvalidProxyContractChainError, QuoteParamsError, NoLiquidityError } from './errors';
 import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from '../../models/constants';
 
 export class ZeroXV2Quote {
@@ -120,6 +120,12 @@ export class ZeroXV2Quote {
         isRailgun,
         params,
       );
+
+      const { liquidityAvailable } = response;
+
+      if (!liquidityAvailable) {
+        throw new NoLiquidityError();
+      }
 
       this.isValidQuote(
         networkName,
