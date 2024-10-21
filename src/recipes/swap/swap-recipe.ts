@@ -7,7 +7,7 @@ import {
   StepOutputERC20Amount,
   SwapQuoteData,
 } from '../../models/export-models';
-import { compareERC20Info, getIsUnvalidatedRailgunAddress } from '../../utils';
+import { compareERC20Info, isPrefixedRailgunAddress } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
 
@@ -57,7 +57,10 @@ export abstract class SwapRecipe extends Recipe {
       }
 
       const swapStepOutput = recipeOutput.stepOutputs[2];
-      if (swapStepOutput.name !== '0x Exchange Swap') {
+      if (
+        swapStepOutput.name !== '0x Exchange Swap' &&
+        swapStepOutput.name !== '0x V2 Exchange Swap'
+      ) {
         throw new Error('Expected step output 3 to be 0x Exchange Swap.');
       }
 
@@ -66,7 +69,7 @@ export abstract class SwapRecipe extends Recipe {
 
       if (
         isDefined(this.destinationAddress) &&
-        !getIsUnvalidatedRailgunAddress(this.destinationAddress)
+        !isPrefixedRailgunAddress(this.destinationAddress)
       ) {
         // If there's a public destination address:
         // Buy output is from swap value, which is transferred out before it's shielded.
