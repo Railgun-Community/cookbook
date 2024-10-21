@@ -1,4 +1,5 @@
 import {
+  isDefined,
   NETWORK_CONFIG,
   NetworkName,
 } from '@railgun-community/shared-models';
@@ -72,17 +73,26 @@ export class ZeroXV2Quote {
       taker: relayAdaptContract,
       txOrigin: relayAdaptContract,
       slippageBps: slippageBasisPoints,
+      excludedSources: "0x_RFQ,Uniswap_V3"
     };
     return params;
   };
+  
 
   private static isValidQuote = (
     networkName: NetworkName,
-    to: string,
+    response: ZeroXV2PriceData,
     sellTokenAddress: string,
     buyTokenAddress: string,
   ): void => {
-
+  
+    if(!response.liquidityAvailable){
+      throw new Error('No liquidity available for this trade');
+    }
+    const { to } = response.transaction;
+    if( !isDefined(to) ){
+      throw new InvalidExchangeContractError(to, this.zeroXExchangeAllowanceHolderAddress(networkName));
+    }
       const exchangeAllowanceHolderAddress =
         // this is not correct, this is the spender that needs to have allowance set to.
         // need to write a new function out or get the updated addresses from 0x sdk?
@@ -129,7 +139,7 @@ export class ZeroXV2Quote {
 
       this.isValidQuote(
         networkName,
-        response.transaction.to,
+        response,
         params.sellToken,
         params.buyToken,
       );
