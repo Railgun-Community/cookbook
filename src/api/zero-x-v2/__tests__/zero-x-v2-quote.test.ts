@@ -47,18 +47,10 @@ describe('zero-x-v2-quote', () => {
   let getZeroXV2DataStub: sinon.SinonStub;
   before(() => {});
   
-  
   beforeEach(() => {
     ZeroXConfig.PROXY_API_DOMAIN = undefined;
     ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
-
-    getZeroXV2DataStub = sinon.stub(zeroXV2Api, 'getZeroXV2Data');
   });
-
-  afterEach(() => {
-    getZeroXV2DataStub.restore();
-  });
-
 
   it('Should fetch quotes from ZeroXV2 proxy', async () => {
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
@@ -82,6 +74,11 @@ describe('zero-x-v2-quote', () => {
 
   it('Should error with no liquidity error when theres no liquidity for trade on ZeroXV2 API', async () => {
   
+    const getZeroXV2DataStub = sinon.stub(zeroXV2Api, 'getZeroXV2Data').resolves({
+      liquidityAvailable: false,
+      // Add other necessary properties to match the expected response structure
+    });
+
     const noLiquidityErrMessage = new NoLiquidityError().getCause();
 
     const sellERC20Amount: RecipeERC20Amount = {
@@ -97,10 +94,6 @@ describe('zero-x-v2-quote', () => {
       isBaseToken: false,
     };
 
-    getZeroXV2DataStub.resolves({
-      liquidityAvailable: false,
-    });
-
     try {
       await ZeroXV2Quote.getSwapQuote({
         networkName,
@@ -112,6 +105,8 @@ describe('zero-x-v2-quote', () => {
     } catch(err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.cause).to.contain(noLiquidityErrMessage);
+    } finally {
+      getZeroXV2DataStub.restore();
     }
   });
 })
