@@ -178,12 +178,13 @@ export class ZeroXV2Quote {
         formatUnits(sellERC20Amount.amount, sellERC20Amount.decimals),
       );
 
+      const minDecimalFixedInt = parseInt(sellERC20Amount.decimals.toString());
       const price = parseUnits(
-        (priceBuyAmount / priceSellAmount).toFixed(8),
+        (priceBuyAmount / priceSellAmount).toFixed(minDecimalFixedInt),
         sellERC20Amount.decimals,
       );
       const guaranteedPrice = parseUnits(
-        (minPriceBuyAmount / priceSellAmount).toFixed(8),
+        (minPriceBuyAmount / priceSellAmount).toFixed(minDecimalFixedInt),
         sellERC20Amount.decimals,
       );
 
