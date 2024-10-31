@@ -53,6 +53,7 @@ export class ZeroXV2Quote {
     sellERC20Amount: RecipeERC20Amount,
     buyERC20Info: RecipeERC20Info,
     slippageBasisPoints: number,
+    activeWalletAddress: Optional<string>,
   ): QuoteParamsV2 => {
     if (sellERC20Amount.amount === 0n) {
       throw new QuoteParamsError('Swap sell amount is 0.');
@@ -65,13 +66,14 @@ export class ZeroXV2Quote {
     if (sellTokenAddress === buyTokenAddress) {
       throw new QuoteParamsError('Swap sell and buy tokens are the same');
     }
+
     const params: QuoteParamsV2 = {
       chainId: chain.id.toString(),
       sellToken: sellTokenAddress,
       buyToken: buyTokenAddress,
       sellAmount: sellERC20Amount.amount.toString(),
-      taker: relayAdaptContract,
-      txOrigin: relayAdaptContract,
+      taker: activeWalletAddress ?? relayAdaptContract,
+      txOrigin: activeWalletAddress ?? relayAdaptContract,
       slippageBps: slippageBasisPoints,
       excludedSources: "0x_RFQ,Uniswap_V3"
     };
@@ -116,12 +118,14 @@ export class ZeroXV2Quote {
     buyERC20Info,
     slippageBasisPoints,
     isRailgun,
+    activeWalletAddress,
   }: SwapQuoteParamsV2): Promise<SwapQuoteDataV2> => {
     const params = ZeroXV2Quote.getQuoteParams(
       networkName,
       sellERC20Amount,
       buyERC20Info,
       slippageBasisPoints,
+      isRailgun ? undefined : activeWalletAddress
     );
 
     try {

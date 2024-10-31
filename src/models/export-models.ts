@@ -125,6 +125,7 @@ export type SwapQuoteParamsV2 = {
   buyERC20Info: RecipeERC20Info;
   slippageBasisPoints: number;
   isRailgun: boolean;
+  activeWalletAddress?: string;
 };
 
 export type GetSwapQuote = (

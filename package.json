@@ -1,6 +1,6 @@
 {
   "name": "@railgun-community/cookbook",
-  "version": "2.8.10",
+  "version": "2.8.11",
   "license": "MIT",
   "main": "dist/index.js",
   "files": [
@@ -38,7 +38,7 @@
     "@graphql-mesh/store": "^0.9.20",
     "@graphql-mesh/types": "^0.91.14",
     "@graphql-mesh/utils": "^0.43.22",
-    "@railgun-community/shared-models": "7.4.4",
+    "@railgun-community/shared-models": "7.5.0",
     "axios": "1.7.2",
     "custom-uniswap-v2-sdk": "^3.2.0",
     "ethers": "6.13.1",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@graphprotocol/client-cli": "^2.2.22",
-    "@railgun-community/wallet": "10.2.5",
+    "@railgun-community/wallet": "10.3.0",
     "@typechain/ethers-v6": "^0.3.3",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
@@ -80,8 +80,5 @@
     "typechain": "^8.2.0",
     "typescript": "^4.8.3"
   },
-  "packageManager": "yarn@1.22.22",
-  "resolutions": {
-    "ethers": "6.13.1"
-  }
+  "packageManager": "yarn@1.22.22"
 }
