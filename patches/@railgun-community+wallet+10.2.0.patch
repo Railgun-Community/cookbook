@@ -1,0 +1,14 @@
+diff --git a/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js b/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js
+index 57c69b2..7ded6c7 100644
+--- a/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js
++++ b/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js
+@@ -43,9 +43,6 @@ const loadProviderForNetwork = async (chain, networkName, fallbackProviderJsonCo
+         throw new Error(`Could not find Relay Adapt contract for network: ${publicName}`);
+     }
+     const engine = (0, engine_1.getEngine)();
+-    if (!engine.isPOINode && (0, shared_models_1.isDefined)(poi) && !wallet_poi_1.WalletPOI.started) {
+-        throw new Error('This network requires Proof Of Innocence. Pass "poiNodeURL" to startRailgunEngine to initialize POI before loading this provider.');
+-    }
+     const deploymentBlocks = {
+         [shared_models_1.TXIDVersion.V2_PoseidonMerkle]: deploymentBlock ?? 0,
+         [shared_models_1.TXIDVersion.V3_PoseidonMerkle]: deploymentBlockPoseidonMerkleAccumulatorV3 ?? 0,
