@@ -1,8 +1,8 @@
 diff --git a/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js b/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js
-index 57c69b2..7ded6c7 100644
+index 9fd5143..8ae2e53 100644
 --- a/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js
 +++ b/node_modules/@railgun-community/wallet/dist/services/railgun/core/load-provider.js
-@@ -43,9 +43,6 @@ const loadProviderForNetwork = async (chain, networkName, fallbackProviderJsonCo
+@@ -44,9 +44,6 @@ const loadProviderForNetwork = async (chain, networkName, fallbackProviderJsonCo
          throw new Error(`Could not find Relay Adapt contract for network: ${publicName}`);
      }
      const engine = (0, engine_1.getEngine)();
