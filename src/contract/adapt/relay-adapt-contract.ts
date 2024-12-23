@@ -75,4 +75,13 @@ export class RelayAdaptContract {
     };
     return this.contract.transfer.populateTransaction([erc20Transfer]);
   }
+
+  multicall(
+    requireSuccess: boolean,
+    calls: Array<{ to: string; data: string, value: bigint }>,
+  ): Promise<ContractTransaction> {
+    return this.contract.multicall.populateTransaction(requireSuccess, calls);
+  }
 }
+
+
