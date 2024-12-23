@@ -1,4 +1,4 @@
-import { Addressable, Contract, ContractRunner, Provider, ZeroAddress } from "ethers";
+import { Addressable, Contract, ContractRunner } from "ethers";
 import { LidoWSTETH } from "typechain";
 import lidoWSTETHAbi from "../../abi/lido/LidoWSTETH.json"
 

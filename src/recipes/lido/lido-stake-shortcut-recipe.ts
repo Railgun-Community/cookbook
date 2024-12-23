@@ -6,7 +6,7 @@ import { LidoStakeShortcutStep } from "../../steps/lido";
 import { LidoWSTETHContract } from "../../contract/lido";
 import { getTestProvider } from "../../test/shared.test";
 
-const MIN_GAS_LIMIT_LIDO_STAKING: bigint = 2_400_000n; // @TODO
+const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;
 
 export class LidoStakeShortcutRecipe extends Recipe {
 
@@ -37,8 +37,9 @@ export class LidoStakeShortcutRecipe extends Recipe {
             case NetworkName.Ethereum:
             case NetworkName.EthereumSepolia:
                 return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     protected async getInternalSteps(firstInternalStepInput: StepInput): Promise<Step[]> {

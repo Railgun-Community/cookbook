@@ -28,7 +28,7 @@ export class LidoStakeShortcutStep extends Step {
         const { networkName, erc20Amounts } = input;
 
         const baseToken = getBaseToken(networkName);
-        const { erc20AmountForStep, unusedERC20Amounts } =
+        const { unusedERC20Amounts } =
             this.getValidInputERC20Amount(
                 erc20Amounts,
                 erc20Amount => compareERC20Info(erc20Amount, baseToken),

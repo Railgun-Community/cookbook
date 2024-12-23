@@ -6,7 +6,7 @@ import { LidoStakeStep, LidoWrapSTETHStep } from "../../steps/lido";
 import { LidoWSTETHContract } from "../../contract/lido";
 import { getTestProvider } from "../../test/shared.test";
 
-const MIN_GAS_LIMIT_LIDO_STAKING: bigint = 2_400_000n;
+const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;
 
 export class LidoStakeRecipe extends Recipe {
 
@@ -32,13 +32,14 @@ export class LidoStakeRecipe extends Recipe {
             case NetworkName.Ethereum:
             case NetworkName.EthereumSepolia:
                 return true;
+            default:
+                return false;
         }
-        return false;
-    }
+     }
 
     private async getWrapQuote(): Promise<LidoWrapQuote> {
         const wrapAmount = this.stakeAmount;
-        const provider = getTestProvider(); 
+        const provider = getTestProvider();
         const wstETHContract = new LidoWSTETHContract(this.wstETHTokenInfo.tokenAddress, provider);
         const wrappedAmount = await wstETHContract.getWstETHByStETH(this.stakeAmount);
 

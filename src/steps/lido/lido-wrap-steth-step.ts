@@ -22,7 +22,7 @@ export class LidoWrapSTETHStep extends Step {
 
         const { inputTokenInfo: stETHTokenInfo, inputAmount: wrapAmount, outputTokenInfo: wstETHTokenInfo, outputAmount: wrappedAmount } = this.wrapQuote;
 
-        const { erc20AmountForStep, unusedERC20Amounts } =
+        const { unusedERC20Amounts } =
             this.getValidInputERC20Amount(
                 erc20Amounts,
                 erc20Amount => compareERC20Info(erc20Amount, stETHTokenInfo),

@@ -44,7 +44,7 @@ export class LidoStakeStep extends Step {
         };
 
         const stEthContract = new LidoSTETHContract(stETHTokenAmount.tokenAddress);
-        const crossContractCall = await stEthContract.stake(amount, ZeroAddress);
+        const crossContractCall = await stEthContract.submit(amount, ZeroAddress);
 
         return {
             crossContractCalls: [crossContractCall],
