@@ -1,17 +1,12 @@
 import { ZeroAddress } from "ethers";
-import { RecipeERC20AmountRecipient, RecipeERC20Info, StepConfig, StepInput, StepOutputERC20Amount, UnvalidatedStepOutput } from "models";
+import { RecipeERC20AmountRecipient, RecipeLidoStakeData, StepConfig, StepInput, StepOutputERC20Amount, UnvalidatedStepOutput } from "models";
 import { Step } from "../../steps/step";
 import { compareERC20Info, getBaseToken } from "../../utils";
 import { LidoSTETHContract } from "../../contract/lido";
 
-export interface RecipeLidoStakeData {
-    amount: bigint;
-    stETHTokenInfo: RecipeERC20Info,
-};
-
 export class LidoStakeStep extends Step {
     readonly config: StepConfig = {
-        name: "Lido Liquid Staking",
+        name: "Lido Staking [stETH]",
         description: "Stake ETH to get stETH",
         hasNonDeterministicOutput: false
     };

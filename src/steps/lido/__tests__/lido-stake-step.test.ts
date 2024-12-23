@@ -1,6 +1,6 @@
 import { NetworkName } from "@railgun-community/shared-models";
-import { LidoStakeStep, RecipeLidoStakeData } from '../lido-stake-step'
-import { RecipeERC20Info, StepInput } from "../../../models";
+import { LidoStakeStep } from '../lido-stake-step'
+import { RecipeERC20Info, StepInput, RecipeLidoStakeData } from "../../../models";
 import { expect } from "chai";
 import { NETWORK_CONFIG } from "@railgun-community/shared-models";
 
@@ -29,7 +29,7 @@ const stepInput: StepInput = {
 };
 
 describe("lido staking step", () => {
-    it.only('Should stake ETH and get stETH', async () => {
+    it('Should stake ETH and get stETH', async () => {
         const liquidStakeData: RecipeLidoStakeData = {
             amount,
             stETHTokenInfo: STETH_TOKEN,
