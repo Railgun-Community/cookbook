@@ -1,10 +1,9 @@
 import { NetworkName } from "@railgun-community/shared-models";
-import { RecipeConfig, RecipeERC20Info, StepInput, LidoWrapQuote, RecipeLidoStakeData } from "models";
+import { RecipeConfig, RecipeERC20Info, StepInput } from "models";
 import { Recipe } from '../recipe'
 import { ApproveERC20SpenderStep, Step, UnwrapBaseTokenStep } from "../../steps";
 import { LidoStakeStep, LidoWrapSTETHStep } from "../../steps/lido";
-import { LidoWSTETHContract } from "../../contract/lido";
-import { getTestProvider } from "../../test/shared.test";
+import { Provider } from "ethers";
 
 const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;
 
@@ -18,13 +17,13 @@ export class LidoStakeRecipe extends Recipe {
 
     private stETHTokenInfo: RecipeERC20Info;
     private wstETHTokenInfo: RecipeERC20Info;
-    private stakeAmount: bigint;
+    private provider: Provider;
 
-    constructor(stETHTokenInfo: RecipeERC20Info, wstETHTokenInfo: RecipeERC20Info, stakeAmount: bigint) {
+    constructor(stETHTokenInfo: RecipeERC20Info, wstETHTokenInfo: RecipeERC20Info, provider: Provider) {
         super();
         this.stETHTokenInfo = stETHTokenInfo;
         this.wstETHTokenInfo = wstETHTokenInfo;
-        this.stakeAmount = stakeAmount;
+        this.provider = provider;
     }
 
     protected supportsNetwork(networkName: NetworkName): boolean {
@@ -35,35 +34,14 @@ export class LidoStakeRecipe extends Recipe {
             default:
                 return false;
         }
-     }
-
-    private async getWrapQuote(): Promise<LidoWrapQuote> {
-        const wrapAmount = this.stakeAmount;
-        const provider = getTestProvider();
-        const wstETHContract = new LidoWSTETHContract(this.wstETHTokenInfo.tokenAddress, provider);
-        const wrappedAmount = await wstETHContract.getWstETHByStETH(this.stakeAmount);
-
-        return {
-            inputTokenInfo: this.stETHTokenInfo,
-            inputAmount: wrapAmount,
-            outputTokenInfo: this.wstETHTokenInfo,
-            outputAmount: wrappedAmount
-        };
     }
 
     protected async getInternalSteps(firstInternalStepInput: StepInput): Promise<Step[]> {
-        const liquidStakeData: RecipeLidoStakeData = {
-            amount: this.stakeAmount,
-            stETHTokenInfo: this.stETHTokenInfo,
-        };
-
-        const wrapQuote = await this.getWrapQuote();
-
         const steps: Step[] = [
-            new UnwrapBaseTokenStep(this.stakeAmount), // WETH => ETH
-            new LidoStakeStep(liquidStakeData), // ETH => stETH
-            new ApproveERC20SpenderStep(this.wstETHTokenInfo.tokenAddress, this.stETHTokenInfo, this.stakeAmount), // approve wstETH to wrap stETH
-            new LidoWrapSTETHStep(wrapQuote) // wrap stETH to wstETH
+            new UnwrapBaseTokenStep(), // WETH => ETH
+            new LidoStakeStep(this.stETHTokenInfo), // ETH => stETH
+            new ApproveERC20SpenderStep(this.wstETHTokenInfo.tokenAddress, this.stETHTokenInfo), // approve wstETH to wrap stETH
+            new LidoWrapSTETHStep(this.wstETHTokenInfo, this.stETHTokenInfo, this.provider) // wrap stETH to wstETH
         ]
 
         return steps;

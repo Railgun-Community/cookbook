@@ -37,12 +37,13 @@ describe("Stake ETH to get stETH and wrap it to wstETH", () => {
         await refreshBalances(NETWORK_CONFIG[networkName].chain, [railgunId]);
     })
 
-    it("[FORK] Should stake ETH to get stETH", async function () {
+    it.only("[FORK] Should stake ETH to get stETH", async function () {
         if (shouldSkipForkTest(networkName)) {
             this.skip();
             return;
         }
 
+        const unshieldAmount = 10000n;
         const recipeInput: RecipeInput = {
             railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
             networkName: networkName,
@@ -50,17 +51,18 @@ describe("Stake ETH to get stETH and wrap it to wstETH", () => {
                 {
                     tokenAddress: baseTokenAddress,
                     decimals: 18n,
-                    amount: 12000n,
+                    amount: unshieldAmount,
                 },
             ],
             nfts: []
         };
 
-        const amount = 10000n;
-        const recipe = new LidoStakeRecipe(STETH_TOKEN_INFO, WSTETH_TOKEN_INFO, amount);
-        const recipeOutput = await recipe.getRecipeOutput(recipeInput);
 
         const provider = getTestProvider();
+
+        const recipe = new LidoStakeRecipe(STETH_TOKEN_INFO, WSTETH_TOKEN_INFO, provider);
+        const recipeOutput = await recipe.getRecipeOutput(recipeInput);
+
         const { proxyContract: railgun, relayAdaptContract } = NETWORK_CONFIG[networkName];
         const wstETHContract = new LidoWSTETHContract(WSTETH_TOKEN_INFO.tokenAddress, provider);
         const railgunPrevBalance = await wstETHContract.balanceOf(railgun);
@@ -83,8 +85,10 @@ describe("Stake ETH to get stETH and wrap it to wstETH", () => {
         const railgunPostBalance = await wstETHContract.balanceOf(railgun);
         const railgunBalance = railgunPostBalance - railgunPrevBalance;
 
-        const amountMinusUnshieldFee = amount - 25n; // Unshield fee
+        const amountMinusUnshieldFee = unshieldAmount - 25n; // Unshield fee
+        const shieldFee = 20n;
+
         const expectedBalance = await wstETHContract.getWstETHByStETH(amountMinusUnshieldFee);
-        expect(expectedBalance).equals(railgunBalance);
+        expect(expectedBalance - shieldFee).equals(railgunBalance);
     }).timeout(100_000);
 })

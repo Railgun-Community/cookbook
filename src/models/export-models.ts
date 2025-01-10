@@ -224,19 +224,3 @@ export type ZeroXAPIErrorData = {
     }>;
   };
 }
-
-export interface RecipeLidoStakeData {
-  amount: bigint;
-  stETHTokenInfo: RecipeERC20Info,
-};
-
-export interface LidoWrapQuote {
-  // Can be ETH or stETH
-  inputTokenInfo: RecipeERC20Info,
-  inputAmount: bigint,
-
-  outputTokenInfo: RecipeERC20Info,
-  outputAmount: bigint
-}
-
-

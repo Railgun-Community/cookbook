@@ -38,6 +38,7 @@ describe("Lido Liquid Staking", () => {
             return;
         }
 
+        const unshieldAmount = 10000n;
         const recipeInput: RecipeInput = {
             railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
             networkName: networkName,
@@ -45,17 +46,16 @@ describe("Lido Liquid Staking", () => {
                 {
                     tokenAddress,
                     decimals: 18n,
-                    amount: 12000n,
+                    amount: unshieldAmount,
                     isBaseToken: false
                 },
             ],
             nfts: []
         };
 
-        const amount = 10000n;
-        const recipe = new LidoStakeShortcutRecipe(WSTETH_TOKEN_INFO, amount);
-
         const provider = getTestProvider();
+        const recipe = new LidoStakeShortcutRecipe(WSTETH_TOKEN_INFO, provider);
+
         const { proxyContract: railgun } = NETWORK_CONFIG[networkName];
         const wstETHContract = new LidoWSTETHContract(WSTETH_TOKEN_INFO.tokenAddress, provider);
         const railgunPrevBalance = await wstETHContract.balanceOf(railgun);
@@ -71,8 +71,9 @@ describe("Lido Liquid Staking", () => {
         const railgunPostBalance = await wstETHContract.balanceOf(railgun);
         const railgunBalance = railgunPostBalance - railgunPrevBalance;
 
-        const amountMinusUnshieldFee = amount - 25n; // Unshield fee
-        const expectedBalance = await wstETHContract.getWstETHByStETH(amountMinusUnshieldFee);
-        expect(expectedBalance).equals(railgunBalance);
+        const amountMinusFee = unshieldAmount - 25n; // Unshield Fee
+        const expectedBalance = await wstETHContract.getWstETHByStETH(amountMinusFee);
+        const shieldFee = 20n;
+        expect(expectedBalance - shieldFee).equals(railgunBalance);
     }).timeout(1_000_000);
 })

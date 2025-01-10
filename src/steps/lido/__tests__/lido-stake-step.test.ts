@@ -1,6 +1,6 @@
 import { NetworkName } from "@railgun-community/shared-models";
 import { LidoStakeStep } from '../lido-stake-step'
-import { RecipeERC20Info, StepInput, RecipeLidoStakeData } from "../../../models";
+import { RecipeERC20Info, StepInput } from "../../../models";
 import { expect } from "chai";
 import { NETWORK_CONFIG } from "@railgun-community/shared-models";
 
@@ -20,8 +20,8 @@ const stepInput: StepInput = {
             tokenAddress,
             decimals: 18n,
             isBaseToken: true,
-            expectedBalance: 12000n,
-            minBalance: 12000n,
+            expectedBalance: 10000n,
+            minBalance: 10000n,
             approvedSpender: undefined,
         },
     ],
@@ -30,12 +30,7 @@ const stepInput: StepInput = {
 
 describe("lido staking step", () => {
     it('Should stake ETH and get stETH', async () => {
-        const liquidStakeData: RecipeLidoStakeData = {
-            amount,
-            stETHTokenInfo: STETH_TOKEN,
-        }
-
-        const step = new LidoStakeStep(liquidStakeData);
+        const step = new LidoStakeStep(STETH_TOKEN);
         const output = await step.getValidStepOutput(stepInput);
 
         expect(output.spentERC20Amounts).to.deep.equals([

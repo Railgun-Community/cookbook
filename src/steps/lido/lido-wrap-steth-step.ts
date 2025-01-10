@@ -1,7 +1,8 @@
-import { RecipeERC20AmountRecipient, LidoWrapQuote, StepConfig, StepInput, StepOutputERC20Amount, UnvalidatedStepOutput } from "../../models";
+import { RecipeERC20AmountRecipient, StepConfig, StepInput, StepOutputERC20Amount, UnvalidatedStepOutput, RecipeERC20Info } from "../../models";
 import { Step } from "../../steps/step";
 import { compareERC20Info } from "../../utils";
 import { LidoWSTETHContract } from "../../contract/lido";
+import { Provider } from "ethers";
 
 export class LidoWrapSTETHStep extends Step {
     readonly config: StepConfig = {
@@ -10,39 +11,49 @@ export class LidoWrapSTETHStep extends Step {
         hasNonDeterministicOutput: false
     };
 
-    readonly wrapQuote: LidoWrapQuote;
+    readonly wstETHTokenInfo: RecipeERC20Info;
+    readonly stETHTokenInfo: RecipeERC20Info;
+    private provider: Provider;
 
-    constructor(wrapQuote: LidoWrapQuote) {
+    constructor(wstETHTokenInfo: RecipeERC20Info, stETHTokenInfo: RecipeERC20Info, provider: Provider) {
         super();
-        this.wrapQuote = wrapQuote;
+        this.wstETHTokenInfo = wstETHTokenInfo;
+        this.stETHTokenInfo = stETHTokenInfo;
+        this.provider = provider;
+    }
+
+    private async getWrapAmount(stakeAmount: bigint): Promise<bigint> {
+        const wstETHContract = new LidoWSTETHContract(this.wstETHTokenInfo.tokenAddress, this.provider);
+        const wrappedAmount = await wstETHContract.getWstETHByStETH(stakeAmount);
+        return wrappedAmount;
     }
 
     protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
         const { erc20Amounts } = input;
-
-        const { inputTokenInfo: stETHTokenInfo, inputAmount: wrapAmount, outputTokenInfo: wstETHTokenInfo, outputAmount: wrappedAmount } = this.wrapQuote;
-
-        const { unusedERC20Amounts } =
+        const { erc20AmountForStep, unusedERC20Amounts } =
             this.getValidInputERC20Amount(
                 erc20Amounts,
-                erc20Amount => compareERC20Info(erc20Amount, stETHTokenInfo),
-                wrapAmount,
+                erc20Amount => compareERC20Info(erc20Amount, this.stETHTokenInfo),
+                undefined,
             );
 
+        const wrapAmount = erc20AmountForStep.minBalance;
+
         const spentTokenAmount: RecipeERC20AmountRecipient = {
-            ...stETHTokenInfo,
+            ...this.stETHTokenInfo,
             amount: wrapAmount,
-            recipient: wstETHTokenInfo.tokenAddress
+            recipient: this.wstETHTokenInfo.tokenAddress
         };
 
+        const wrappedAmount = await this.getWrapAmount(wrapAmount);
         const wrappedTokenAmount: StepOutputERC20Amount = {
-            ...wstETHTokenInfo,
+            ...this.wstETHTokenInfo,
             expectedBalance: wrappedAmount,
             minBalance: wrappedAmount,
             approvedSpender: undefined
         };
 
-        const wstethContract = new LidoWSTETHContract(wstETHTokenInfo.tokenAddress);
+        const wstethContract = new LidoWSTETHContract(this.wstETHTokenInfo.tokenAddress);
         const crossContractCall = await wstethContract.wrap(wrapAmount);
 
         return {

@@ -11,6 +11,8 @@ import { compareERC20Info } from '../../utils/token';
 import { Step } from '../step';
 import { getBaseToken } from '../../utils/wrap-util';
 import { ContractTransaction } from 'ethers';
+import { LidoWSTETHContract } from '../../contract/lido';
+import { Provider } from 'ethers';
 
 export class LidoStakeShortcutStep extends Step {
     readonly config: StepConfig = {
@@ -18,8 +20,17 @@ export class LidoStakeShortcutStep extends Step {
         description: 'Stake ETH to get wstETH',
     };
 
-    constructor(private wstETHTokenInfo: RecipeERC20Info, private amount: bigint, private wrappedAmount: bigint) {
+    private provider: Provider;
+
+    constructor(private wstETHTokenInfo: RecipeERC20Info, provider: Provider) {
         super();
+        this.provider = provider;
+    }
+
+    private async getWrappedAmount(stakeAmount: bigint): Promise<bigint> {
+        const wstETHContract = new LidoWSTETHContract(this.wstETHTokenInfo.tokenAddress, this.provider);
+        const wrappedAmount = await wstETHContract.getWstETHByStETH(stakeAmount);
+        return wrappedAmount;
     }
 
     protected async getStepOutput(
@@ -28,35 +39,36 @@ export class LidoStakeShortcutStep extends Step {
         const { networkName, erc20Amounts } = input;
 
         const baseToken = getBaseToken(networkName);
-        const { unusedERC20Amounts } =
+        const { erc20AmountForStep, unusedERC20Amounts } =
             this.getValidInputERC20Amount(
                 erc20Amounts,
                 erc20Amount => compareERC20Info(erc20Amount, baseToken),
-                this.amount
+                undefined
             );
 
+        const amount = erc20AmountForStep.expectedBalance;
         const contract = new RelayAdaptContract(input.networkName);
         const crossContractCalls: ContractTransaction[] = [
             await contract.multicall(false, [{
                 to: this.wstETHTokenInfo.tokenAddress,
                 data: '0x',
-                value: this.amount
+                value: amount,
             }]),
         ];
 
         const transferredBaseToken: RecipeERC20AmountRecipient = {
             ...baseToken,
-            amount: this.amount,
+            amount,
             recipient: this.wstETHTokenInfo.tokenAddress,
         };
 
+        const wrappedAmount = await this.getWrappedAmount(amount);
         const outputWSTETHToken: StepOutputERC20Amount = {
             ...this.wstETHTokenInfo,
-            expectedBalance: this.wrappedAmount,
-            minBalance: this.wrappedAmount,
+            expectedBalance: wrappedAmount,
+            minBalance: wrappedAmount,
             approvedSpender: undefined
         };
-
 
         return {
             crossContractCalls,

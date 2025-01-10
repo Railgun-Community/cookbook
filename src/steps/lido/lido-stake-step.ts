@@ -1,5 +1,5 @@
 import { ZeroAddress } from "ethers";
-import { RecipeERC20AmountRecipient, RecipeLidoStakeData, StepConfig, StepInput, StepOutputERC20Amount, UnvalidatedStepOutput } from "models";
+import { RecipeERC20AmountRecipient, RecipeERC20Info, StepConfig, StepInput, StepOutputERC20Amount, UnvalidatedStepOutput } from "models";
 import { Step } from "../../steps/step";
 import { compareERC20Info, getBaseToken } from "../../utils";
 import { LidoSTETHContract } from "../../contract/lido";
@@ -11,35 +11,34 @@ export class LidoStakeStep extends Step {
         hasNonDeterministicOutput: false
     };
 
-    readonly liquidStakeData: RecipeLidoStakeData;
+    readonly stETHTokenInfo: RecipeERC20Info;
 
-    constructor(liquidStakeData: RecipeLidoStakeData) {
+    constructor(stETHTokenInfo: RecipeERC20Info) {
         super();
-        this.liquidStakeData = liquidStakeData;
+        this.stETHTokenInfo = stETHTokenInfo;
     }
 
     protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
-        const { amount, stETHTokenInfo } = this.liquidStakeData;
         const { erc20Amounts, networkName } = input;
-
         const baseToken = getBaseToken(networkName);
         const { erc20AmountForStep, unusedERC20Amounts } =
             this.getValidInputERC20Amount(
                 erc20Amounts,
                 erc20Amount => compareERC20Info(erc20Amount, baseToken),
-                amount,
+                undefined,
             );
 
+        const amount = erc20AmountForStep.minBalance;
         const stakedBaseToken: RecipeERC20AmountRecipient = {
             ...baseToken,
-            amount: amount ?? erc20AmountForStep.expectedBalance,
+            amount,
             recipient: 'Lido'
         };
 
         const stETHTokenAmount: StepOutputERC20Amount = {
-            ...stETHTokenInfo,
-            expectedBalance: amount ?? erc20AmountForStep.expectedBalance,
-            minBalance: amount ?? erc20AmountForStep.expectedBalance,
+            ...this.stETHTokenInfo,
+            expectedBalance: amount,
+            minBalance: amount,
             approvedSpender: undefined
         };
 
