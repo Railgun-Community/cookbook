@@ -1,23 +1,26 @@
-import { Addressable, Contract, ContractRunner } from "ethers";
-import { LidoWSTETH } from "typechain";
-import lidoWSTETHAbi from "../../abi/lido/LidoWSTETH.json"
+import { Addressable, Contract, ContractRunner } from 'ethers';
+import { LidoWSTETH } from 'typechain';
+import lidoWSTETHAbi from '../../abi/lido/LidoWSTETH.json';
 
 export class LidoWSTETHContract {
+  private readonly contract: LidoWSTETH;
+  constructor(contractAddress: string, provider?: ContractRunner) {
+    this.contract = new Contract(
+      contractAddress,
+      lidoWSTETHAbi,
+      provider,
+    ) as unknown as LidoWSTETH;
+  }
 
-    private readonly contract: LidoWSTETH;
-    constructor(contractAddress: string, provider?: ContractRunner) {
-        this.contract = new Contract(contractAddress, lidoWSTETHAbi, provider) as unknown as LidoWSTETH;
-    }
+  wrap(amount: bigint) {
+    return this.contract.wrap.populateTransaction(amount);
+  }
 
-    async wrap(amount: bigint) {
-        return this.contract.wrap.populateTransaction(amount);
-    }
+  getWstETHByStETH(amount: bigint): Promise<bigint> {
+    return this.contract.getWstETHByStETH(amount);
+  }
 
-    async getWstETHByStETH(amount: bigint): Promise<bigint> {
-        return this.contract.getWstETHByStETH(amount);
-    }
-
-    async balanceOf(address: Addressable | string): Promise<bigint> {
-        return this.contract.balanceOf(address);
-    }
+  balanceOf(address: Addressable | string): Promise<bigint> {
+    return this.contract.balanceOf(address);
+  }
 }

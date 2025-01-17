@@ -78,10 +78,8 @@ export class RelayAdaptContract {
 
   multicall(
     requireSuccess: boolean,
-    calls: Array<{ to: string; data: string, value: bigint }>,
+    calls: Array<{ to: string; data: string; value: bigint }>,
   ): Promise<ContractTransaction> {
     return this.contract.multicall.populateTransaction(requireSuccess, calls);
   }
 }
-
-

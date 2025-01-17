@@ -28,7 +28,10 @@ export class LidoStakeShortcutStep extends Step {
     }
 
     private async getWrappedAmount(stakeAmount: bigint): Promise<bigint> {
-        const wstETHContract = new LidoWSTETHContract(this.wstETHTokenInfo.tokenAddress, this.provider);
+        const wstETHContract = new LidoWSTETHContract(
+            this.wstETHTokenInfo.tokenAddress,
+            this.provider,
+        );
         const wrappedAmount = await wstETHContract.getWstETHByStETH(stakeAmount);
         return wrappedAmount;
     }
@@ -43,17 +46,19 @@ export class LidoStakeShortcutStep extends Step {
             this.getValidInputERC20Amount(
                 erc20Amounts,
                 erc20Amount => compareERC20Info(erc20Amount, baseToken),
-                undefined
+                undefined,
             );
 
         const amount = erc20AmountForStep.expectedBalance;
         const contract = new RelayAdaptContract(input.networkName);
         const crossContractCalls: ContractTransaction[] = [
-            await contract.multicall(false, [{
-                to: this.wstETHTokenInfo.tokenAddress,
-                data: '0x',
-                value: amount,
-            }]),
+            await contract.multicall(false, [
+                {
+                    to: this.wstETHTokenInfo.tokenAddress,
+                    data: '0x',
+                    value: amount,
+                },
+            ]),
         ];
 
         const transferredBaseToken: RecipeERC20AmountRecipient = {
@@ -67,7 +72,7 @@ export class LidoStakeShortcutStep extends Step {
             ...this.wstETHTokenInfo,
             expectedBalance: wrappedAmount,
             minBalance: wrappedAmount,
-            approvedSpender: undefined
+            approvedSpender: undefined,
         };
 
         return {
