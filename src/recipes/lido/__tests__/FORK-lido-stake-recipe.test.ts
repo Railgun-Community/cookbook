@@ -47,7 +47,7 @@ describe('Stake ETH to get stETH and wrap it to wstETH', () => {
     await refreshBalances(NETWORK_CONFIG[networkName].chain, [railgunId]);
   });
 
-  it.only('[FORK] Should stake ETH to get stETH', async function () {
+  it('[FORK] Should stake ETH to get stETH', async function () {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
