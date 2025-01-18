@@ -1,8 +1,8 @@
 import { NetworkName } from '@railgun-community/shared-models';
 import { RecipeConfig, RecipeERC20Info, StepInput } from 'models';
 import { Recipe } from '../recipe';
-import { Step, UnwrapBaseTokenStep } from '../../steps';
-import { LidoStakeShortcutStep } from '../../steps/lido';
+import { Step, WrapBaseTokenStep } from '../../steps';
+import { LidoUnstakeShortcutStep } from '../../steps/lido';
 import { Provider } from 'ethers';
 
 const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;
@@ -17,6 +17,7 @@ export class LidoUnstakeShortcutRecipe extends Recipe {
 
   private wstETHTokenInfo: RecipeERC20Info;
   private provider: Provider;
+  // TODO: remove wstethinput, use local constant API for getting addresses.
   constructor(wstETHTokenInfo: RecipeERC20Info, provider: Provider) {
     super();
     this.wstETHTokenInfo = wstETHTokenInfo;
@@ -37,8 +38,8 @@ export class LidoUnstakeShortcutRecipe extends Recipe {
     firstInternalStepInput: StepInput,
   ): Promise<Step[]> {
     const steps: Step[] = [
-      new UnwrapBaseTokenStep(), // WETH => ETH
-      new LidoStakeShortcutStep(this.wstETHTokenInfo, this.provider), // ETH => wstETH
+      new LidoUnstakeShortcutStep(this.wstETHTokenInfo, this.provider), // wstETH => ETH
+      new WrapBaseTokenStep(), // ETH => WETH
     ];
 
     return steps;

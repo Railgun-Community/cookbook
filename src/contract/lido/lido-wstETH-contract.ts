@@ -24,6 +24,10 @@ export class LidoWSTETHContract {
     return this.contract.getWstETHByStETH(amount);
   }
 
+  getStETHByWstETH(amount: bigint): Promise<bigint> {
+    return this.contract.getStETHByWstETH(amount);
+  }
+
   balanceOf(address: Addressable | string): Promise<bigint> {
     return this.contract.balanceOf(address);
   }

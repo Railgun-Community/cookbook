@@ -17,6 +17,7 @@ export class LidoStakeShortcutRecipe extends Recipe {
 
   private wstETHTokenInfo: RecipeERC20Info;
   private provider: Provider;
+  // TODO: remove wstethinput, use local constant API for getting addresses.
   constructor(wstETHTokenInfo: RecipeERC20Info, provider: Provider) {
     super();
     this.wstETHTokenInfo = wstETHTokenInfo;
