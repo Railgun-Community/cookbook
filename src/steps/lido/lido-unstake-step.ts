@@ -14,9 +14,10 @@ import { ContractTransaction } from 'ethers';
 import { LidoWSTETHContract } from '../../contract/lido';
 import { Provider } from 'ethers';
 
-export class LidoStakeShortcutStep extends Step {
+// TODO: remove shortcut from name
+export class LidoUnstakeShortcutStep extends Step {
   readonly config: StepConfig = {
-    name: 'Lido Staking [wstETH]',
+    name: 'Lido UnStaking [wstETH]',
     description: 'Stake ETH to get wstETH',
   };
 

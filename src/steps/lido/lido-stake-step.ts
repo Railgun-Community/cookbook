@@ -14,6 +14,7 @@ import { ContractTransaction } from 'ethers';
 import { LidoWSTETHContract } from '../../contract/lido';
 import { Provider } from 'ethers';
 
+// TODO: remove shortcut from name
 export class LidoStakeShortcutStep extends Step {
   readonly config: StepConfig = {
     name: 'Lido Staking [wstETH]',

@@ -1,2 +1,3 @@
-export * from './lido-stake-shortcut-step';
+export * from './lido-stake-step';
+export * from './lido-unstake-step';
 

@@ -7,10 +7,11 @@ import { Provider } from 'ethers';
 
 const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;
 
-export class LidoStakeShortcutRecipe extends Recipe {
+// TODO: remove shortcut from name
+export class LidoUnstakeShortcutRecipe extends Recipe {
   readonly config: RecipeConfig = {
-    name: 'Lido Staking Shortcut Recipe',
-    description: 'Stake Eth to Get wstETH',
+    name: 'Lido Unstaking Shortcut Recipe',
+    description: 'Unstake Eth to Get wstETH',
     minGasLimit: MIN_GAS_LIMIT_LIDO_STAKING,
   };
 
