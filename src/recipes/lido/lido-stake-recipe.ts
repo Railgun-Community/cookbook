@@ -11,6 +11,7 @@ import { Provider } from 'ethers';
 
 const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;
 
+// NOTE: Do not use. POC.
 export class LidoStakeRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'Lido Staking Recipe',

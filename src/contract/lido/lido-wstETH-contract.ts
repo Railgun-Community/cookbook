@@ -16,6 +16,10 @@ export class LidoWSTETHContract {
     return this.contract.wrap.populateTransaction(amount);
   }
 
+  unwrap(amount: bigint) {
+    return this.contract.unwrap.populateTransaction(amount);
+  }
+
   getWstETHByStETH(amount: bigint): Promise<bigint> {
     return this.contract.getWstETHByStETH(amount);
   }

@@ -11,6 +11,7 @@ import { compareERC20Info } from '../../utils';
 import { LidoWSTETHContract } from '../../contract/lido';
 import { Provider } from 'ethers';
 
+// NOTE: This step is not used. Gas consumption is high with this usecase. POC
 export class LidoWrapSTETHStep extends Step {
   readonly config: StepConfig = {
     name: 'Lido Wrap stETH',

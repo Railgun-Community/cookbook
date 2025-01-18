@@ -11,6 +11,7 @@ import { Step } from '../../steps/step';
 import { compareERC20Info, getBaseToken } from '../../utils';
 import { LidoSTETHContract } from '../../contract/lido';
 
+// NOTE: This step is not used. Gas consumption is high with this usecase. POC
 export class LidoStakeStep extends Step {
   readonly config: StepConfig = {
     name: 'Lido Staking [stETH]',

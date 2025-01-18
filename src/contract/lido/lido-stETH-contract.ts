@@ -3,6 +3,8 @@ import { Contract, ContractRunner } from 'ethers';
 import { LidoSTETH } from 'typechain';
 import lidoSTETHAbi from '../../abi/lido/LidoSTETH.json';
 
+// NOTE: This contract is not used. Gas consumption is high with this usecase. POC
+// USE WSTETH SHORTCUT INSTEAD
 export class LidoSTETHContract {
   private readonly contract: LidoSTETH;
   constructor(contractAddress: string, provider?: ContractRunner) {
