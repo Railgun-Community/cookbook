@@ -1,5 +1,5 @@
 import { NetworkName } from '@railgun-community/shared-models';
-import { LidoStakeStep } from '../lido-stake-step';
+import { LidoStakeStep } from '../lido-stake-step-deprecated';
 import { RecipeERC20Info, StepInput } from '../../../models';
 import { expect } from 'chai';
 import { NETWORK_CONFIG } from '@railgun-community/shared-models';

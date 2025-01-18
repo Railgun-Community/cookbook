@@ -6,7 +6,8 @@ import {
   Step,
   UnwrapBaseTokenStep,
 } from '../../steps';
-import { LidoStakeStep, LidoWrapSTETHStep } from '../../steps/lido';
+import { LidoStakeStep } from '../../steps/lido/lido-stake-step-deprecated';
+import { LidoWrapSTETHStep } from '../../steps/lido/lido-wrap-steth-step-deprecated';
 import { Provider } from 'ethers';
 
 const MIN_GAS_LIMIT_LIDO_STAKING = 2_400_000n;

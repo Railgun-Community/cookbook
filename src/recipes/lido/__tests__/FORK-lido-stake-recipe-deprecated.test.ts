@@ -1,4 +1,4 @@
-import { LidoStakeRecipe } from '../lido-stake-recipe';
+import { LidoStakeRecipe } from '../lido-stake-recipe-deprecated';
 import { RecipeERC20Info, RecipeInput } from '../../../models';
 import {
   MOCK_RAILGUN_WALLET_ADDRESS,

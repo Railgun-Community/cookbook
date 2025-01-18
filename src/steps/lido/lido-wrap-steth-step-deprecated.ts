@@ -6,7 +6,7 @@ import {
   UnvalidatedStepOutput,
   RecipeERC20Info,
 } from '../../models';
-import { Step } from '../../steps/step';
+import { Step } from '../step';
 import { compareERC20Info } from '../../utils';
 import { LidoWSTETHContract } from '../../contract/lido';
 import { Provider } from 'ethers';

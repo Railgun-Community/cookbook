@@ -7,7 +7,7 @@ import {
   StepOutputERC20Amount,
   UnvalidatedStepOutput,
 } from 'models';
-import { Step } from '../../steps/step';
+import { Step } from '../step';
 import { compareERC20Info, getBaseToken } from '../../utils';
 import { LidoSTETHContract } from '../../contract/lido';
 
