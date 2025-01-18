@@ -15,7 +15,7 @@ import {
   getTestRailgunWallet,
 } from '../../../test/shared.test';
 import { refreshBalances } from '@railgun-community/wallet';
-import { LidoStakeShortcutRecipe } from '../lido-stake-shortcut-recipe';
+import { LidoStakeShortcutRecipe } from '../lido-stake-recipe';
 import { LidoWSTETHContract } from '../../../contract/lido';
 import { expect } from 'chai';
 
