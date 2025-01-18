@@ -3,3 +3,4 @@
 /* eslint-disable */
 export type { LidoSTETH } from "./LidoSTETH";
 export type { LidoWSTETH } from "./LidoWSTETH";
+export type { LidoWithdrawalQueue } from "./LidoWithdrawalQueue";

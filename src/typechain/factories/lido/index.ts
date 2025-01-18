@@ -3,3 +3,4 @@
 /* eslint-disable */
 export { LidoSTETH__factory } from "./LidoSTETH__factory";
 export { LidoWSTETH__factory } from "./LidoWSTETH__factory";
+export { LidoWithdrawalQueue__factory } from "./LidoWithdrawalQueue__factory";

@@ -18,6 +18,8 @@ export type { LidoSTETH } from "./lido/LidoSTETH";
 export { LidoSTETH__factory } from "./factories/lido/LidoSTETH__factory";
 export type { LidoWSTETH } from "./lido/LidoWSTETH";
 export { LidoWSTETH__factory } from "./factories/lido/LidoWSTETH__factory";
+export type { LidoWithdrawalQueue } from "./lido/LidoWithdrawalQueue";
+export { LidoWithdrawalQueue__factory } from "./factories/lido/LidoWithdrawalQueue__factory";
 export type { UniV2LikeFactory } from "./liquidity/UniV2LikeFactory";
 export { UniV2LikeFactory__factory } from "./factories/liquidity/UniV2LikeFactory__factory";
 export type { UniV2LikePair } from "./liquidity/UniV2LikePair";
