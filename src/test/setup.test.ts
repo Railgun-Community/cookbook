@@ -46,6 +46,7 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
       ];
     case NetworkName.Arbitrum:
       return [testConfig.contractsArbitrum.dai];
+    case NetworkName.Ink: // TODO-INK: Check if this is correct
     case NetworkName.BNBChain:
     case NetworkName.Polygon:
     case NetworkName.EthereumSepolia:
@@ -67,7 +68,7 @@ export const setupForkTests = async () => {
   try {
     const networkName = getForkTestNetworkName();
     const txidVersion = TXIDVersion.V2_PoseidonMerkle;
-  
+
     if (!Object.keys(NetworkName).includes(networkName)) {
       throw new Error(
         `Unrecognized network name, expected one of list: ${getSupportedNetworkNamesForTest().join(
@@ -75,21 +76,21 @@ export const setupForkTests = async () => {
         )}`,
       );
     }
-  
+
     const tokenAddresses: string[] = getTestERC20Addresses(networkName);
     const testChain: Chain = { id: 1, type: 0 };
-  
+
     const forkRPCType = isDefined(process.env.USE_GANACHE)
       ? ForkRPCType.Ganache
       : isDefined(process.env.USE_HARDHAT)
       ? ForkRPCType.Hardhat
       : ForkRPCType.Anvil;
-  
+
     // Ganache forked Ethereum RPC setup
     await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
     // Quickstart setup
     await startRailgunForTests();
-  
+
     await loadLocalhostFallbackProviderForTests(networkName);
 
     void refreshBalances(testChain, undefined);
@@ -101,11 +102,15 @@ export const setupForkTests = async () => {
     await createRailgunWallet2ForTests();
     // Shield tokens for tests
     await shieldAllTokensForTests(networkName, tokenAddresses);
-  
+
     // Make sure shielded balances are updated
-    await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
-  } catch(error) {
-    console.error("Setup Fork tests error: ", error);
+    await waitForShieldedTokenBalances(
+      txidVersion,
+      networkName,
+      tokenAddresses,
+    );
+  } catch (error) {
+    console.error('Setup Fork tests error: ', error);
     throw error;
   }
 };

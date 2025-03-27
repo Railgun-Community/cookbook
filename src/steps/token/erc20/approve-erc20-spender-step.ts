@@ -113,6 +113,7 @@ export class ApproveERC20SpenderStep extends Step {
       case NetworkName.BNBChain:
       case NetworkName.Polygon:
       case NetworkName.Arbitrum:
+      case NetworkName.Ink: // TODO-INK: Check if this is correct
       case NetworkName.EthereumSepolia:
       case NetworkName.Hardhat:
       case NetworkName.PolygonAmoy:

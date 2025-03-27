@@ -136,6 +136,7 @@ export class UniV2LikeSubgraphCache {
           SUSHI_V2_ARBITRUM_PAIRS,
           UniswapV2Fork.SushiSwap,
         );
+      case NetworkName.Ink: // TODO-INK: Check if this is ok
       case NetworkName.EthereumSepolia:
       case NetworkName.Hardhat:
       case NetworkName.PolygonAmoy:

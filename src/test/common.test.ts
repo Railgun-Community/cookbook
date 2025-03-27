@@ -6,7 +6,6 @@ import {
   NETWORK_CONFIG,
   NetworkName,
   TXIDVersion,
-  TransactionReceiptLog,
   delay,
   isDefined,
 } from '@railgun-community/shared-models';
@@ -43,6 +42,7 @@ export const getRPCPort = (networkName: NetworkName) => {
       return 8600;
     case NetworkName.Arbitrum:
       return 8601;
+    case NetworkName.Ink: // TODO-INK: Check if this is correct
     case NetworkName.BNBChain:
     case NetworkName.Polygon:
     case NetworkName.Hardhat:

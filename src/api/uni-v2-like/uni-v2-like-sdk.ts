@@ -71,6 +71,7 @@ export class UniV2LikeSDK {
           case NetworkName.Arbitrum:
             factoryAddress = '0xc35DADB65012eC5796536bD9864eD8773aBc74C4';
             break;
+          case NetworkName.Ink: // TODO-INK: Check if this is correct
           case NetworkName.EthereumRopsten_DEPRECATED:
           case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.ArbitrumGoerli_DEPRECATED:
@@ -125,6 +126,7 @@ export class UniV2LikeSDK {
             return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
           case NetworkName.Arbitrum:
             return '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
+          case NetworkName.Ink: // TODO-INK: Check if this is correct
           case NetworkName.EthereumRopsten_DEPRECATED:
           case NetworkName.EthereumGoerli_DEPRECATED:
           case NetworkName.ArbitrumGoerli_DEPRECATED:
