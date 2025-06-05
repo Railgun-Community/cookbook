@@ -72,7 +72,7 @@ let uniswapV2PairTotalSupply: SinonStub;
 let beefyVaultForIDStub: SinonStub;
 let uniswapV2FactoryFeeToStub: SinonStub;
 
-const provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
+const provider = new JsonRpcProvider('https://eth.llamarpc.com');
 
 describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
   before(() => {

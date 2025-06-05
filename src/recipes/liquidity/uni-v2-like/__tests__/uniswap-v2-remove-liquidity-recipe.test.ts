@@ -46,7 +46,7 @@ let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
 
-const provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
+const provider = new JsonRpcProvider('https://eth.llamarpc.com');
 
 describe('uniswap-v2-remove-liquidity-recipe', () => {
   before(() => {
