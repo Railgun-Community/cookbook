@@ -1,8 +1,4 @@
-import {
-  NETWORK_CONFIG,
-  NetworkName,
-  isDefined,
-} from '@railgun-community/shared-models';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { getMeshOptions, getSdk } from './graphql/.graphclient';
 import { MeshInstance, getMesh } from '@graphql-mesh/runtime';
 import { LiquidityV2Pool } from '../models/uni-v2-like';
@@ -146,6 +142,7 @@ export class UniV2LikeSubgraph {
             return 'sushiswap-v2-arbitrum';
           case NetworkName.EthereumSepolia:
           case NetworkName.Hardhat:
+          case NetworkName.Ink: // TODO-INK: Check if this is correct
           case NetworkName.PolygonAmoy:
           case NetworkName.EthereumRopsten_DEPRECATED:
           case NetworkName.EthereumGoerli_DEPRECATED:

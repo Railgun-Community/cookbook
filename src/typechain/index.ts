@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as adapt from "./adapt";
 export type { adapt };
+import type * as lido from "./lido";
+export type { lido };
 import type * as liquidity from "./liquidity";
 export type { liquidity };
 import type * as token from "./token";
@@ -12,6 +14,10 @@ export type { vault };
 export * as factories from "./factories";
 export type { RelayAdapt } from "./adapt/RelayAdapt";
 export { RelayAdapt__factory } from "./factories/adapt/RelayAdapt__factory";
+export type { LidoSTETH } from "./lido/LidoSTETH";
+export { LidoSTETH__factory } from "./factories/lido/LidoSTETH__factory";
+export type { LidoWSTETH } from "./lido/LidoWSTETH";
+export { LidoWSTETH__factory } from "./factories/lido/LidoWSTETH__factory";
 export type { UniV2LikeFactory } from "./liquidity/UniV2LikeFactory";
 export { UniV2LikeFactory__factory } from "./factories/liquidity/UniV2LikeFactory__factory";
 export type { UniV2LikePair } from "./liquidity/UniV2LikePair";

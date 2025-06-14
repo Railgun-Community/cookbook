@@ -103,6 +103,7 @@ export class BeefyAPI {
         return { network: 'polygon', chain: 'polygon' };
       case NetworkName.Arbitrum:
         return { network: 'arbitrum', chain: 'arbitrum' };
+      case NetworkName.Ink: // TODO-INK: Check if this is correct
       case NetworkName.EthereumRopsten_DEPRECATED:
       case NetworkName.EthereumGoerli_DEPRECATED:
       case NetworkName.PolygonMumbai_DEPRECATED:

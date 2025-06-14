@@ -2402,15 +2402,13 @@
   resolved "https://registry.yarnpkg.com/@railgun-community/poseidon-hash-wasm/-/poseidon-hash-wasm-1.0.1.tgz#bfd3b3f915391a59486d8c9d632069f029e152d6"
   integrity sha512-zDAbMu095ZjMqsKIoyOnuKR4Zofnqqx4eTCtnA6qYglnexX5cadxItvJa3ozhDDTmFkDGAidDssQ7Pzl3wwLDA==
 
-"@railgun-community/shared-models@7.5.0", "@railgun-community/shared-models@^7.5.0":
-  version "7.5.0"
-  resolved "https://registry.yarnpkg.com/@railgun-community/shared-models/-/shared-models-7.5.0.tgz#d36d73740e32dbd5c21b2864e8c3db96e1241cb3"
-  integrity sha512-npSFFzSq2nSCLseEBZmLwJlZ4hMJArzEeM/DpqAAyxaTfznSHvpPIKmvEWorXVGjG+6xB7AY01TPGOq+3XHdcA==
+"@railgun-community/shared-models@git+https://github.com/Railgun-Community/shared-models.git#mattgle/ink-integration":
+  version "7.5.2"
+  resolved "git+https://github.com/Railgun-Community/shared-models.git#3c8547562e1d6ccc2c0fbb9dd0c93ef807de0964"
 
-"@railgun-community/wallet@10.3.3":
+"@railgun-community/wallet@git+https://github.com/Railgun-Community/wallet.git#mattgle/ink-integration":
   version "10.3.3"
-  resolved "https://registry.yarnpkg.com/@railgun-community/wallet/-/wallet-10.3.3.tgz#cef885628b76b3c547a0016f298a2e5752fb7bbe"
-  integrity sha512-dsQV7sjso7mhE15HvJliLEMLsuvUMN5wDt6hSP7nm8S+n6hsBx6tSzc5JAI7nPsi1UVDIW/f96pqMRRPRPgYxw==
+  resolved "git+https://github.com/Railgun-Community/wallet.git#6b68a73c2be39fed2984e303c92d096b6e5aa222"
   dependencies:
     "@graphql-mesh/cache-localforage" "^0.7.20"
     "@graphql-mesh/cross-helpers" "^0.3.4"
@@ -2424,7 +2422,7 @@
     "@graphql-mesh/utils" "^0.43.22"
     "@noble/ed25519" "^1.7.1"
     "@railgun-community/engine" "9.3.1"
-    "@railgun-community/shared-models" "7.5.0"
+    "@railgun-community/shared-models" "git+https://github.com/Railgun-Community/shared-models.git#mattgle/ink-integration"
     "@whatwg-node/fetch" "^0.8.4"
     assert "2.0.0"
     axios "1.7.2"

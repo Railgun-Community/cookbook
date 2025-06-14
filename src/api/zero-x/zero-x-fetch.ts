@@ -21,6 +21,7 @@ export const zeroXApiSubdomain = (networkName: NetworkName): string => {
       return 'arbitrum.api';
     case NetworkName.EthereumSepolia:
       return 'sepolia.api';
+    case NetworkName.Ink: // TODO-INK: Check if this is correct
     case NetworkName.Hardhat:
     case NetworkName.PolygonAmoy:
     case NetworkName.EthereumRopsten_DEPRECATED:
