@@ -23,7 +23,7 @@ let provider: JsonRpcProvider;
 
 describe('uni-v2-like-pairs', () => {
   before(() => {
-    provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
+    provider = new JsonRpcProvider('https://eth.llamarpc.com');
   });
 
   it('Should get Uniswap LP address for USDC-WETH pair', async () => {

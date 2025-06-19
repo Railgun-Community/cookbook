@@ -30,4 +30,4 @@ jobs:
           NETWORK_NAME: Ethereum
         with:
           command: yarn test-fork
-          start: ./run-anvil Ethereum https://uber.us.proxy.railwayapi.xyz/rpc/alchemy/eth-mainnet --silent
+          start: ./run-anvil Ethereum https://api.fdi.network/rpc/alchemy/eth-mainnet --silent
