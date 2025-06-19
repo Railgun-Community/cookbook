@@ -7,7 +7,8 @@ import { ZeroXConfig } from '../../../models/zero-x-config';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-describe('zero-x-fetch', () => {
+// V1 api deprecated
+describe.skip('zero-x-fetch', () => {
   before(() => {
     ZeroXConfig.API_KEY = 'test-api-key';
   });

@@ -41,8 +41,9 @@ const runQuoteTest = async () => {
   expect(quote).to.haveOwnProperty('sellTokenValue');
 };
 
-describe('zero-x-quote', () => {
-  before(() => {});
+// V1 api deprecated
+describe.skip('zero-x-quote', () => {
+  before(() => { });
 
   it('Should fetch quotes from ZeroX proxy', async () => {
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
