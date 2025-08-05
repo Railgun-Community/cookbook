@@ -77,7 +77,7 @@ describe('wrap-base-token-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xe9a059a30000000000000000000000000000000000000000000000000000000000002710',
-        to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
+        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
       },
     ]);
     expect(output.crossContractCalls[0].to).to.equal(
@@ -135,7 +135,7 @@ describe('wrap-base-token-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xe9a059a30000000000000000000000000000000000000000000000000000000000000000',
-        to: '0x4025ee6512DBbda97049Bcf5AA5D38C54aF6bE8a',
+        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
       },
     ]);
   });
