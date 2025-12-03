@@ -67,6 +67,7 @@ const quote: SwapQuoteData = {
 
 let stub0xQuote: SinonStub;
 
+// v1 DEPRECATED
 describe('zero-x-swap-recipe-public-destination', () => {
   before(() => {
     setRailgunFees(
