@@ -1,14 +1,13 @@
 diff --git a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/V2/railgun-smart-wallet.js b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/V2/railgun-smart-wallet.js
-index 62590aa..cbe3ba8 100644
+index 62590aa..09eb89e 100644
 --- a/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/V2/railgun-smart-wallet.js
 +++ b/node_modules/@railgun-community/engine/dist/contracts/railgun-smart-wallet/V2/railgun-smart-wallet.js
-@@ -264,6 +264,9 @@ class RailgunSmartWalletContract extends events_1.default {
+@@ -264,6 +264,8 @@ class RailgunSmartWalletContract extends events_1.default {
       * @param latestBlock - block to scan to
       */
      async getHistoricalEvents(initialStartBlock, latestBlock, getNextStartBlockFromValidMerkletree, eventsCommitmentListener, eventsNullifierListener, eventsUnshieldListener, setLastSyncedBlock) {
 +        // Cookbook does not need event scanning.
 +        return;
-+
          const engineV3StartBlockNumber = RailgunSmartWalletContract.getEngineV2StartBlockNumber(this.chain);
          const engineV3ShieldEventUpdate030923BlockNumber = RailgunSmartWalletContract.getEngineV2ShieldEventUpdate030923BlockNumber(this.chain);
          // TODO: Possible data integrity issue in using commitment block numbers.
