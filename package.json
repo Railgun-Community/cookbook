@@ -27,6 +27,14 @@
     "build-graphql": "graphclient build && rm -rf src/graph/graphql/.graphclient && mv .graphclient src/graph/graphql",
     "gen-typechain": "typechain --target ethers-v6 --out-dir ./src/typechain ./src/abi/**/*.json ./src/abi/**/**/*.json"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Railgun-Community/cookbook.git"
+  },
+  "homepage": "https://github.com/Railgun-Community/cookbook#readme",
+  "bugs": {
+    "url": "https://github.com/Railgun-Community/cookbook/issues"
+  },
   "dependencies": {
     "@0x/contract-addresses": "^8.13.0",
     "@graphql-mesh/cache-localforage": "^0.7.20",
