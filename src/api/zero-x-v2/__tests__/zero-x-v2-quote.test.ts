@@ -43,31 +43,45 @@ const runV2QuoteTest = async (amount = '1000000000000000000') => {
   expect(quote).to.haveOwnProperty('sellTokenValue');
 };
 
+const hasZeroXApiKey = () => testConfig.zeroXApiKey !== '' && testConfig.zeroXApiKey !== 'REPLACE_ME';
+const hasZeroXProxy = () => testConfig.zeroXProxyApiDomain !== '' && testConfig.zeroXProxyApiDomain !== 'REPLACE_ME';
+
 describe('zero-x-v2-quote', () => {
   let getZeroXV2DataStub: sinon.SinonStub;
   before(() => {});
-  
+
   beforeEach(() => {
     ZeroXConfig.PROXY_API_DOMAIN = undefined;
     ZeroXConfig.API_KEY = testConfig.zeroXApiKey;
   });
 
-  it('Should fetch quotes from ZeroXV2 proxy', async () => {
+  it('Should fetch quotes from ZeroXV2 proxy', async function () {
+    if (!hasZeroXProxy()) {
+      this.skip();
+    }
     ZeroXConfig.PROXY_API_DOMAIN = testConfig.zeroXProxyApiDomain;
     ZeroXConfig.API_KEY = undefined;
     await runV2QuoteTest();
   }).timeout(10000);
 
-  it('Should fetch quotes from ZeroXV2 API Key', async () => {
+  it('Should fetch quotes from ZeroXV2 API Key', async function () {
+    if (!hasZeroXApiKey()) {
+      this.skip();
+    }
     await runV2QuoteTest();
   }).timeout(10000);
 
-  it('Should fetch quotes from ZeroXV2 API Key with large volume request', async () => {
+  it('Should fetch quotes from ZeroXV2 API Key with large volume request', async function () {
+    if (!hasZeroXApiKey()) {
+      this.skip();
+    }
     await runV2QuoteTest('0x1000000000000000000000');
   }).timeout(10000);
 
-  it('Should fetch quotes from ZeroXV2 API Key with large volume request and fail', async () => {
-
+  it('Should fetch quotes from ZeroXV2 API Key with large volume request and fail', async function () {
+    if (!hasZeroXApiKey()) {
+      this.skip();
+    }
     await expect(runV2QuoteTest('0x10000000000000000000000000000000000000000'))
       .to.be.rejected;
   }).timeout(10000);
