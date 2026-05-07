@@ -1,3 +1,2 @@
-// f(x) Protocol recipes (borrow category).
-// fxMINT (collateralized fxUSD borrowing) — exports added in subsequent commits.
-export {};
+export * from './fx/fx-mint-open-recipe';
+export * from './fx/fx-mint-close-recipe';
