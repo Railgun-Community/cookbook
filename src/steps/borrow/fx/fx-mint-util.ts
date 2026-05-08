@@ -10,7 +10,9 @@ export const FX_ADDRESSES = {
   wstETH: getAddress('0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0'),
   fxUSD: getAddress('0x085780639CC2cACd35E474e71f4d000e2405d8f6'),
   fxPoolManager: getAddress('0x250893CA4Ba5d05626C785e8da758026928FCD24'),
-  fxPositionNFT: getAddress('0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'),
+  // Note: there is no single "position NFT" address — each pool IS its own
+  // ERC-721 NFT contract (Pool inherits the ERC-721 interface). Use
+  // `pool.address` from KNOWN_POOLS / resolvePool for outputNFTs.nftAddress.
   fxPoolConfiguration: getAddress('0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d'),
 } as const satisfies Record<string, Address>;
 
@@ -312,14 +314,27 @@ export const FX_POOL_CONFIGURATION_ABI = [
 
 export type FxMintPoolName = 'wstETH-Long' | 'WBTC-Long';
 
+// FxMintPoolRef accepts either a registered pool name or a fully-specified
+// custom-pool object. The custom-pool branch carries collateralDecimals
+// because cookbook's amount accounting needs the right native-decimals
+// value (WBTC = 8, wstETH = 18). For named pools the value is supplied
+// from KNOWN_POOLS internally.
 export type FxMintPoolRef =
   | FxMintPoolName
-  | { address: Address; collateralToken: Address };
+  | {
+      address: Address;
+      collateralToken: Address;
+      collateralDecimals: bigint;
+    };
 
 type FxPoolEntry = {
   name: FxMintPoolName;
   address: Address;
   collateralToken: Address;
+  // Native-units decimals for the collateral token. f(x)'s `operate()`
+  // takes raw amounts in this native scale; cookbook's amount metadata
+  // must match or its accounting will be off by 10^(18-decimals).
+  collateralDecimals: bigint;
 };
 
 export const KNOWN_POOLS: readonly FxPoolEntry[] = [
@@ -327,23 +342,41 @@ export const KNOWN_POOLS: readonly FxPoolEntry[] = [
     name: 'wstETH-Long',
     address: getAddress('0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'),
     collateralToken: FX_ADDRESSES.wstETH,
+    collateralDecimals: 18n,
   },
   {
     name: 'WBTC-Long',
     address: getAddress('0xAB709e26Fa6B0A30c119D8c55B887DeD24952473'),
     collateralToken: getAddress('0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'),
+    collateralDecimals: 8n,
   },
 ] as const;
 
-export function resolvePool(ref: FxMintPoolRef): { address: Address; collateralToken: Address } {
+export type ResolvedFxPool = {
+  address: Address;
+  collateralToken: Address;
+  collateralDecimals: bigint;
+};
+
+export function resolvePool(ref: FxMintPoolRef): ResolvedFxPool {
   if (typeof ref === 'string') {
     const found = KNOWN_POOLS.find((p) => p.name === ref);
     if (!found) {
-      throw new Error(`Unknown fxMINT pool name: ${ref}. Known pools: ${KNOWN_POOLS.map((p) => p.name).join(', ')}`);
+      throw new Error(
+        `Unknown fxMINT pool name: ${ref}. Known pools: ${KNOWN_POOLS.map((p) => p.name).join(', ')}`,
+      );
     }
-    return { address: found.address, collateralToken: found.collateralToken };
+    return {
+      address: found.address,
+      collateralToken: found.collateralToken,
+      collateralDecimals: found.collateralDecimals,
+    };
   }
-  return { address: getAddress(ref.address), collateralToken: getAddress(ref.collateralToken) };
+  return {
+    address: getAddress(ref.address),
+    collateralToken: getAddress(ref.collateralToken),
+    collateralDecimals: ref.collateralDecimals,
+  };
 }
 
 // =============================================================================
