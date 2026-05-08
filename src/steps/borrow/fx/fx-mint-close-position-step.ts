@@ -18,13 +18,8 @@ export type FxMintClosePositionStepData = {
    * Note: f(x) has NO withdraw fee, so this value affects bookkeeping only —
    * it does not change the on-chain math (the operate() args use raw
    * collateral wei regardless).
-   *
-   * TEMPORARILY OPTIONAL — defaults to 18n (the wstETH-Long value) so that
-   * the existing FxMintCloseRecipe continues to compile while Task 8
-   * tightens the recipe to plumb this through. After Task 8 lands this
-   * field becomes required.
    */
-  collateralDecimals?: bigint;
+  collateralDecimals: bigint;
   positionId: bigint;
   /** fxUSD debt to repay. PoolManager pulls `repayAmount × (1 + fee)` from msg.sender. */
   repayAmount: bigint;
@@ -58,11 +53,7 @@ export class FxMintClosePositionStep extends Step {
   }
 
   protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
-    const { pool, collateralToken, positionId, repayAmount, withdrawColl, partialClose } = this.data;
-    // Default to 18n (the wstETH-Long value) until Task 8 makes
-    // FxMintCloseRecipe plumb this explicitly. See FxMintClosePositionStepData
-    // doc comments for the rationale (mirrors Task 4's pattern in the open step).
-    const collateralDecimals = this.data.collateralDecimals ?? 18n;
+    const { pool, collateralToken, collateralDecimals, positionId, repayAmount, withdrawColl, partialClose } = this.data;
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 

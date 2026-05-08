@@ -22,7 +22,11 @@ describe('FxMintClosePositionStep', () => {
   // self-consistent for the test — actual close-side fee comes from
   // `computeFxClose` at the recipe layer.
   const repayAmount = 5_000_000_000_000_000_000n; // 5 fxUSD
-  const repayFee = 25_000_000_000_000_000n; // 0.025 fxUSD (toy 0.5% in 1e18 terms)
+  // 0.025 fxUSD = 0.5% of repayAmount. The on-chain f(x) repay fee is a
+  // 1e9-denominated ratio (see FEE_DENOM in fx-mint-util); this test just
+  // needs `approveAmount > repayAmount` so the close step's accounting
+  // (input == spent + fee + outputs) has a non-zero fee leg to declare.
+  const repayFee = 25_000_000_000_000_000n;
   const approveAmount = repayAmount + repayFee;
   const withdrawColl = 100_000n; // 0.001 WBTC at 8 decimals
   const positionId = 1903n;
@@ -92,6 +96,14 @@ describe('FxMintClosePositionStep', () => {
     for (const line of fxUSDLines) {
       expect(line.decimals).to.equal(18n);
     }
+
+    // Partial close: NFT survives operate() and shields back. Tightened
+    // from a `length > 0` smoke check (Task 5) to the exact contract:
+    // outputNFTs has the position NFT; spentNFTs is empty.
+    expect(output.outputNFTs).to.have.length(1);
+    expect(output.outputNFTs[0]?.nftAddress).to.equal(wbtcPool.address);
+    expect(output.outputNFTs[0]?.tokenSubID).to.equal('0x' + positionId.toString(16));
+    expect(output.spentNFTs ?? []).to.have.length(0);
   });
 
   it('full-close (partialClose=false) still produces valid output for WBTC-Long', async () => {
@@ -120,5 +132,14 @@ describe('FxMintClosePositionStep', () => {
     for (const line of collateralLines) {
       expect(line.decimals).to.equal(8n);
     }
+
+    // Full close: PoolManager.operate burns the NFT inside the call, so
+    // the step must declare the NFT as spent (consumed) and outputNFTs is
+    // empty. Tightened from Task 5's `length > 0` smoke check.
+    expect(output.outputNFTs ?? []).to.have.length(0);
+    const spentNFTs = output.spentNFTs ?? [];
+    expect(spentNFTs).to.have.length(1);
+    expect(spentNFTs[0]?.nftAddress).to.equal(wbtcPool.address);
+    expect(spentNFTs[0]?.tokenSubID).to.equal('0x' + positionId.toString(16));
   });
 });
