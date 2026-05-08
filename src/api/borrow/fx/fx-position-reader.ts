@@ -147,3 +147,126 @@ export async function getFxPool(
     repayFeeRatio,
   };
 }
+
+// =============================================================================
+// FxPosition — per-position state, native-decimals collateral.
+// =============================================================================
+
+export type FxPosition = {
+  positionId: bigint;
+  pool: { address: Address; name?: FxMintPoolName };
+  collateralToken: Address;
+  collateralDecimals: bigint;
+
+  /**
+   * Native-decimals collateral amount: what 0x quotes and price feeds
+   * multiply directly. WBTC: 8 decimals; wstETH: 18 decimals. Computed
+   * via the same rawColls × collateralBalance / totalRawColls formula
+   * computeFxClose uses internally.
+   */
+  collateralAmount: bigint;
+
+  /**
+   * f(x)-internal raw representation, exposed for callers that need to
+   * reconstruct close-math themselves. rawColls is internal-units (scaled
+   * by collateralBalance/totalRawColls); rawDebts is fxUSD wei.
+   */
+  rawColls: bigint;
+  rawDebts: bigint;
+
+  /**
+   * Alias for rawDebts; kept under a friendlier name for wallet display
+   * code that doesn't care about the rawColls/totalRawColls scaling.
+   */
+  debt: bigint;
+
+  /**
+   * Position's current debt ratio in f(x)'s 1e18-scaled representation
+   * (1e18 = 100%, higher = closer to liquidation). Compare against
+   * FxPool.liquidationDebtRatio to compute liquidation distance.
+   */
+  debtRatio: bigint;
+};
+
+/**
+ * Reads a single position's state. Caller obtains positionId from their
+ * own NFT enumeration (wallet-side, since only the wallet's keys can
+ * decrypt shielded NFT ownership). All shielded fxmint positions on-chain
+ * are owned-of-record by the Railgun relay-adapter, so list-by-owner is
+ * not meaningful at this layer — wallets enumerate the user's shielded
+ * NFTs, then call this once per id.
+ *
+ * Performs four sequential on-chain reads (Pool.getPosition,
+ * Pool.getPositionDebtRatio, Pool.getTotalRawCollaterals,
+ * PoolManager.getPoolInfo) and computes collateralAmount inline.
+ * Integrators wanting batched reads should compose with viem's multicall.
+ */
+export async function getFxPosition(
+  positionId: bigint,
+  poolRef: FxMintPoolRef,
+  provider: PublicClient,
+): Promise<FxPosition> {
+  const resolved = resolvePool(poolRef);
+
+  // Pool.getPosition returns (rawColls, rawDebts).
+  const positionTuple = await provider.readContract({
+    address: resolved.address,
+    abi: FX_POOL_ABI,
+    functionName: 'getPosition',
+    args: [positionId],
+  }) as readonly [bigint, bigint];
+  const [rawColls, rawDebts] = positionTuple;
+
+  // Pool.getPositionDebtRatio returns the 1e18-scaled debt ratio.
+  // Note: this is a single-uint256 return per the existing FX_POOL_ABI;
+  // viem's readContract returns the raw bigint (not wrapped in a tuple).
+  const debtRatio = await provider.readContract({
+    address: resolved.address,
+    abi: FX_POOL_ABI,
+    functionName: 'getPositionDebtRatio',
+    args: [positionId],
+  }) as bigint;
+
+  // Convert rawColls → native-decimals collateralAmount via the same
+  // ratio computeFxClose uses: collateralAmount = rawColls × collateralBalance / totalRawColls.
+  // Need totalRawColls + collateralBalance — fetch them; v0.1 prefers
+  // clarity over a shared multicall.
+  const totalRawColls = await provider.readContract({
+    address: resolved.address,
+    abi: FX_POOL_ABI,
+    functionName: 'getTotalRawCollaterals',
+    args: [],
+  }) as bigint;
+
+  // PoolManager.getPoolInfo returns (collateralCapacity, collateralBalance,
+  // rawCollateral, debtCapacity, debtBalance) — 5 fields per the existing
+  // FX_POOL_MANAGER_ABI in fx-mint-util.ts. Confirmed in Task 13.
+  const poolInfo = await provider.readContract({
+    address: FX_ADDRESSES.fxPoolManager,
+    abi: FX_POOL_MANAGER_ABI,
+    functionName: 'getPoolInfo',
+    args: [resolved.address],
+  }) as readonly [bigint, bigint, bigint, bigint, bigint];
+  const [/* collCap */, collateralBalance] = poolInfo;
+
+  // collateralAmount = (rawColls × collateralBalance) / totalRawColls.
+  // Guard against div-by-zero in the empty-pool case (no positions yet —
+  // shouldn't happen for production pools but worth being safe).
+  const collateralAmount = totalRawColls === 0n
+    ? 0n
+    : (rawColls * collateralBalance) / totalRawColls;
+
+  const name = typeof poolRef === 'string' ? poolRef : undefined;
+
+  return {
+    positionId,
+    pool: { address: resolved.address, name },
+    collateralToken: resolved.collateralToken,
+    collateralDecimals: resolved.collateralDecimals,
+    collateralAmount,
+    rawColls,
+    rawDebts,
+    debt: rawDebts,
+    debtRatio,
+  };
+}

@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
-import { getFxPool } from '../fx-position-reader';
+import { getFxPool, getFxPosition } from '../fx-position-reader';
 
 const { expect } = chai;
 
@@ -51,5 +51,37 @@ describe('fx-position-reader — getFxPool [requires RUN_FORK_TESTS=1]', functio
     }, provider);
     expect(pool.name).to.equal(undefined);
     expect(pool.address.toLowerCase()).to.equal('0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'.toLowerCase());
+  });
+});
+
+describe('fx-position-reader — getFxPosition [requires RUN_FORK_TESTS=1]', function () {
+  this.timeout(30_000);
+
+  if (!process.env.RUN_FORK_TESTS) {
+    it.skip('skipped — set RUN_FORK_TESTS=1 to run', () => {});
+    return;
+  }
+
+  const rpcUrl = process.env.MAINNET_RPC_URL ?? 'https://ethereum-rpc.publicnode.com';
+  const provider = createPublicClient({ chain: mainnet, transport: http(rpcUrl) });
+
+  it('reads a known wstETH-Long position', async () => {
+    // Use a conservative positionId. If 1 doesn't exist on-chain, the
+    // call returns zeros — that's still valid (just no position state).
+    // For a stronger smoke check, replace with a real positionId from
+    // the v0 calibration tx 0x3f7c7c42... once known.
+    const knownPositionId = 1n;
+
+    const position = await getFxPosition(knownPositionId, 'wstETH-Long', provider);
+    expect(position.positionId).to.equal(knownPositionId);
+    expect(position.collateralDecimals).to.equal(18n);
+    expect(position.pool.address.toLowerCase()).to.equal(
+      '0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'.toLowerCase(),
+    );
+    // rawColls, rawDebts, debtRatio could be 0n if positionId 1 doesn't
+    // exist; we just check the shape is right.
+    expect(position).to.have.property('rawColls');
+    expect(position).to.have.property('debt');
+    expect(position).to.have.property('collateralAmount');
   });
 });
