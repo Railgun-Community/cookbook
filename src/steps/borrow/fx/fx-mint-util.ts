@@ -407,19 +407,100 @@ export type FxCloseAmounts = {
 };
 
 export function computeFxClose(input: FxCloseInputs): FxCloseAmounts {
-  const { rawColls, rawDebts, collateralBalance, totalRawColls, shieldedFxUSD, repayFeeRatio, railgunUnshieldFeeBps } = input;
+  const { rawColls, rawDebts, collateralBalance, totalRawColls } = input;
+
+  // Repay-side math: factored out so FxMintRepayDebtRecipe shares it.
+  // For close, the user's "desired repay amount" is the entire debt — they
+  // want to close as much as they can given fxUSD availability + fees.
+  const repay = computeFxRepay({
+    rawDebts,
+    shieldedFxUSD: input.shieldedFxUSD,
+    desiredRepayAmount: rawDebts,
+    repayFeeRatio: input.repayFeeRatio,
+    railgunUnshieldFeeBps: input.railgunUnshieldFeeBps,
+  });
+
+  // Collateral-side math: proportional withdraw at the repaid fraction.
+  // f(x) has no withdraw fee, so this is a clean ratio. Note the variable
+  // name is wstETH-Long-era — it's the native-collateral conversion
+  // regardless of which pool (WBTC-Long uses 8-decimal WBTC). Renaming
+  // would touch downstream callers, so out-of-scope here.
+  const positionWstETH = (rawColls * collateralBalance) / totalRawColls;
+  const withdrawColl = (positionWstETH * repay.repayAmount) / rawDebts;
+  const partialClose = repay.repayAmount < rawDebts;
+
+  return {
+    positionWstETH,
+    fxUSDAfterUnshield: repay.fxUSDAfterUnshield,
+    maxRepayUnderFee: repay.maxRepayUnderFee,
+    repayAmount: repay.repayAmount,
+    approveAmount: repay.approveAmount,
+    withdrawColl,
+    partialClose,
+  };
+}
+
+// =============================================================================
+// Repay-side amount math, factored out so FxMintRepayDebtRecipe (which has
+// no collateral side) can reuse the same fee accounting that computeFxClose
+// uses for its repay leg. computeFxClose above delegates to this.
+// =============================================================================
+
+export type FxRepayInputs = {
+  // Position's current debt in fxUSD wei (Pool.getPosition(positionId)[1]).
+  rawDebts: bigint;
+  // Caller's available shielded fxUSD; the recipe input balance.
+  shieldedFxUSD: bigint;
+  // What the user wants to repay (in fxUSD wei). The function caps this
+  // against the rawDebts ceiling and the post-fee available ceiling.
+  desiredRepayAmount: bigint;
+  // PoolConfiguration.getPoolFeeRatio(pool, operator)[3] for repay fee
+  // (CONFIRMED in discovery-notes.md as index [3]; tuple is
+  // [supplyFeeRatio, withdrawFeeRatio, borrowFeeRatio, repayFeeRatio]).
+  // 1e9-denominated.
+  repayFeeRatio: bigint;
+  // Railgun's unshield fee in basis points (mainnet = 25).
+  railgunUnshieldFeeBps: bigint;
+};
+
+export type FxRepayAmounts = {
+  // shieldedFxUSD × (10000 - 25) / 10000 — what lands in the relay-adapter
+  // after Railgun's unshield haircut.
+  fxUSDAfterUnshield: bigint;
+  // The largest repayAmount that can be supported by fxUSDAfterUnshield
+  // given the f(x) repay fee uplift on PoolManager.transferFrom.
+  maxRepayUnderFee: bigint;
+  // The actual debt reduction f(x)'s operate() will perform. Capped at
+  // min(maxRepayUnderFee, rawDebts, desiredRepayAmount).
+  repayAmount: bigint;
+  // What PoolManager will pull from the relay-adapter, including the
+  // f(x) repay fee uplift: repayAmount × (1e9 + repayFeeRatio) / 1e9.
+  // The recipe's ApproveERC20SpenderStep needs this exact value.
+  approveAmount: bigint;
+};
+
+export function computeFxRepay(input: FxRepayInputs): FxRepayAmounts {
+  const {
+    rawDebts,
+    shieldedFxUSD,
+    desiredRepayAmount,
+    repayFeeRatio,
+    railgunUnshieldFeeBps,
+  } = input;
 
   if (railgunUnshieldFeeBps > BPS_DENOM) {
     throw new Error(`railgunUnshieldFeeBps must be <= ${BPS_DENOM}, got ${railgunUnshieldFeeBps}`);
   }
 
-  const positionWstETH = (rawColls * collateralBalance) / totalRawColls;
   const fxUSDAfterUnshield = (shieldedFxUSD * (BPS_DENOM - railgunUnshieldFeeBps)) / BPS_DENOM;
   const maxRepayUnderFee = (fxUSDAfterUnshield * FEE_DENOM) / (FEE_DENOM + repayFeeRatio);
-  const repayAmount = maxRepayUnderFee < rawDebts ? maxRepayUnderFee : rawDebts;
-  const approveAmount = (repayAmount * (FEE_DENOM + repayFeeRatio)) / FEE_DENOM;
-  const withdrawColl = (positionWstETH * repayAmount) / rawDebts;
-  const partialClose = repayAmount < rawDebts;
 
-  return { positionWstETH, fxUSDAfterUnshield, maxRepayUnderFee, repayAmount, approveAmount, withdrawColl, partialClose };
+  // Three-way min: fee ceiling, debt ceiling, user's intent.
+  let repayAmount = maxRepayUnderFee;
+  if (rawDebts < repayAmount) repayAmount = rawDebts;
+  if (desiredRepayAmount < repayAmount) repayAmount = desiredRepayAmount;
+
+  const approveAmount = (repayAmount * (FEE_DENOM + repayFeeRatio)) / FEE_DENOM;
+
+  return { fxUSDAfterUnshield, maxRepayUnderFee, repayAmount, approveAmount };
 }
