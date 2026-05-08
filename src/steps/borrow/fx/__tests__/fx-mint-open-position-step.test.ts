@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { FxMintOpenPositionStep } from '../fx-mint-open-position-step';
-import { FX_ADDRESSES, resolvePool } from '../fx-mint-util';
-import { NetworkName } from '@railgun-community/shared-models';
+import { FEE_DENOM, FX_ADDRESSES, resolvePool } from '../fx-mint-util';
+import { NetworkName, NFTTokenType } from '@railgun-community/shared-models';
 import type { StepInput } from '../../../../models/export-models';
 
 const { expect } = chai;
@@ -51,20 +51,31 @@ describe('FxMintOpenPositionStep', () => {
       .to.equal(FX_ADDRESSES.fxPoolManager.toLowerCase());
 
     // outputERC20Amounts: fxUSD post-borrow-fee net.
-    const expectedFxUSDNet = targetDebt - (targetDebt * 5_000_000n) / 1_000_000_000n;
+    const expectedFxUSDNet = targetDebt - (targetDebt * 5_000_000n) / FEE_DENOM;
     expect(output.outputERC20Amounts).to.have.length(1);
     expect(output.outputERC20Amounts[0].tokenAddress.toLowerCase())
       .to.equal(FX_ADDRESSES.fxUSD.toLowerCase());
     expect(output.outputERC20Amounts[0].expectedBalance).to.equal(expectedFxUSDNet);
 
     // outputNFTs: position NFT at the pool address.
-    expect(output.outputNFTs).to.have.length(1);
-    expect(output.outputNFTs![0].nftAddress.toLowerCase())
-      .to.equal(wstETHPool.address.toLowerCase());
+    expect(output.outputNFTs).to.deep.equal([
+      {
+        nftAddress: wstETHPool.address,
+        tokenSubID: '0x' + predictedPositionId.toString(16),
+        nftTokenType: NFTTokenType.ERC721,
+        amount: 1n,
+      },
+    ]);
 
     // spentERC20Amounts: collateral with the right decimals (18 here).
-    expect(output.spentERC20Amounts).to.have.length(1);
-    expect(output.spentERC20Amounts![0].decimals).to.equal(18n);
+    expect(output.spentERC20Amounts).to.deep.equal([
+      {
+        tokenAddress: wstETHPool.collateralToken,
+        decimals: 18n,
+        amount: collateralAmount,
+        recipient: FX_ADDRESSES.fxPoolManager,
+      },
+    ]);
   });
 
   it('encodes correctly with WBTC-Long collateralDecimals=8 and a different borrow fee', async () => {
@@ -87,6 +98,13 @@ describe('FxMintOpenPositionStep', () => {
       .to.equal(4_962_500_000_000_000_000n);
 
     // Collateral-side decimals plumbed through correctly.
-    expect(output.spentERC20Amounts![0].decimals).to.equal(8n);
+    expect(output.spentERC20Amounts).to.deep.equal([
+      {
+        tokenAddress: wbtcPool.collateralToken,
+        decimals: 8n,
+        amount: collateralAmount,
+        recipient: FX_ADDRESSES.fxPoolManager,
+      },
+    ]);
   });
 });

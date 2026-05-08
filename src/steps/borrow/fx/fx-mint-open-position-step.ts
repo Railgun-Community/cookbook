@@ -14,13 +14,8 @@ export type FxMintOpenPositionStepData = {
    * Cookbook's amount accounting must match the on-chain token's decimals;
    * this field is plumbed from the pool registry by the recipe (see
    * `resolvePool().collateralDecimals` in fx-mint-util.ts).
-   *
-   * TEMPORARILY OPTIONAL — defaults to 18n (the wstETH-Long value) so that
-   * the existing FxMintOpenRecipe continues to compile while Task 7
-   * tightens the recipe to plumb this through. After Task 7 lands this
-   * field becomes required.
    */
-  collateralDecimals?: bigint;
+  collateralDecimals: bigint;
   /** Absolute fxUSD debt to mint. operate() mints exactly this amount. */
   targetDebt: bigint;
   /**
@@ -39,13 +34,8 @@ export type FxMintOpenPositionStepData = {
    * (tuple confirmed in discovery-notes.md). Previously hardcoded to
    * `5n / 1000n` (= 0.5% in /1000 denom — wrong denom AND wrong value if
    * f(x) governance moves the rate). Now dynamic and using FEE_DENOM (1e9).
-   *
-   * TEMPORARILY OPTIONAL — defaults to 5_000_000n (the current mainnet
-   * value, 0.5% in 1e9 denom) so that FxMintOpenRecipe still compiles
-   * while Task 7 tightens the recipe to plumb this through. After Task 7
-   * lands this field becomes required.
    */
-  borrowFeeRatio?: bigint;
+  borrowFeeRatio: bigint;
 };
 
 /**
@@ -74,13 +64,14 @@ export class FxMintOpenPositionStep extends Step {
   }
 
   protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
-    const { pool, collateralToken, targetDebt, predictedPositionId } = this.data;
-    // Defaults track the current mainnet wstETH-Long values. Task 7 will
-    // require these from the recipe layer; until then, defaults keep the
-    // existing FxMintOpenRecipe compilable. See FxMintOpenPositionStepData
-    // doc comments for the rationale.
-    const collateralDecimals = this.data.collateralDecimals ?? 18n;
-    const borrowFeeRatio = this.data.borrowFeeRatio ?? 5_000_000n;
+    const {
+      pool,
+      collateralToken,
+      collateralDecimals,
+      targetDebt,
+      predictedPositionId,
+      borrowFeeRatio,
+    } = this.data;
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
