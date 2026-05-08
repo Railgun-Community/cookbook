@@ -2,13 +2,25 @@ import { encodeFunctionData, type Address } from "viem";
 import { NFTTokenType } from "@railgun-community/shared-models";
 import { Step } from '../../step';
 import type { StepConfig, StepInput, UnvalidatedStepOutput } from '../../../models/export-models';
-import { FX_ADDRESSES, FX_POOL_MANAGER_ABI } from './fx-mint-util';
+import { FX_ADDRESSES, FX_POOL_MANAGER_ABI, FEE_DENOM } from './fx-mint-util';
 
 export type FxMintOpenPositionStepData = {
   /** f(x) Pool address. The position NFT is minted by this contract. */
   pool: Address;
   /** Collateral token address (wstETH for wstETH-Long, WBTC for WBTC-Long). */
   collateralToken: Address;
+  /**
+   * Native-units decimals for the collateral token (wstETH = 18, WBTC = 8).
+   * Cookbook's amount accounting must match the on-chain token's decimals;
+   * this field is plumbed from the pool registry by the recipe (see
+   * `resolvePool().collateralDecimals` in fx-mint-util.ts).
+   *
+   * TEMPORARILY OPTIONAL — defaults to 18n (the wstETH-Long value) so that
+   * the existing FxMintOpenRecipe continues to compile while Task 7
+   * tightens the recipe to plumb this through. After Task 7 lands this
+   * field becomes required.
+   */
+  collateralDecimals?: bigint;
   /** Absolute fxUSD debt to mint. operate() mints exactly this amount. */
   targetDebt: bigint;
   /**
@@ -21,6 +33,19 @@ export type FxMintOpenPositionStepData = {
    * surfaces the race cleanly before any real ETH is spent.
    */
   predictedPositionId: bigint;
+  /**
+   * f(x)'s borrow fee for this (pool, operator) pair, 1e9-denominated.
+   * Caller fetches via PoolConfiguration.getPoolFeeRatio(pool, operator)[2]
+   * (tuple confirmed in discovery-notes.md). Previously hardcoded to
+   * `5n / 1000n` (= 0.5% in /1000 denom — wrong denom AND wrong value if
+   * f(x) governance moves the rate). Now dynamic and using FEE_DENOM (1e9).
+   *
+   * TEMPORARILY OPTIONAL — defaults to 5_000_000n (the current mainnet
+   * value, 0.5% in 1e9 denom) so that FxMintOpenRecipe still compiles
+   * while Task 7 tightens the recipe to plumb this through. After Task 7
+   * lands this field becomes required.
+   */
+  borrowFeeRatio?: bigint;
 };
 
 /**
@@ -31,6 +56,10 @@ export type FxMintOpenPositionStepData = {
  *
  * Consumes collateralToken from the relay adapter; produces fxUSD + an
  * ERC-721 position NFT (owner = msg.sender = relay adapter).
+ *
+ * The post-fee fxUSD output `expectedBalance` accounts for f(x)'s borrow
+ * fee (now driven by `borrowFeeRatio` from opts; was previously a
+ * hardcoded 0.5%).
  */
 export class FxMintOpenPositionStep extends Step {
   readonly config: StepConfig = {
@@ -46,6 +75,12 @@ export class FxMintOpenPositionStep extends Step {
 
   protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
     const { pool, collateralToken, targetDebt, predictedPositionId } = this.data;
+    // Defaults track the current mainnet wstETH-Long values. Task 7 will
+    // require these from the recipe layer; until then, defaults keep the
+    // existing FxMintOpenRecipe compilable. See FxMintOpenPositionStepData
+    // doc comments for the rationale.
+    const collateralDecimals = this.data.collateralDecimals ?? 18n;
+    const borrowFeeRatio = this.data.borrowFeeRatio ?? 5_000_000n;
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
@@ -71,6 +106,13 @@ export class FxMintOpenPositionStep extends Step {
       args: [pool, 0n, collateralAmount, targetDebt],
     });
 
+    // Borrow fee deduction: f(x) emits (targetDebt - fee) of fxUSD to
+    // msg.sender (the relay-adapter). Cookbook's StepOutputERC20Amount
+    // expects the post-fee net; the recipe layer doesn't fold this in.
+    // Using FEE_DENOM (1e9) — matches PoolConfiguration.getPoolFeeRatio's
+    // denominator and the existing computeFxClose convention.
+    const fxUSDNet = targetDebt - (targetDebt * borrowFeeRatio) / FEE_DENOM;
+
     return {
       crossContractCalls: [
         { to: poolManager, data: callData, value: 0n } as never,
@@ -78,7 +120,7 @@ export class FxMintOpenPositionStep extends Step {
       spentERC20Amounts: [
         {
           tokenAddress: collateralToken,
-          decimals: 18n,
+          decimals: collateralDecimals,
           amount: collateralAmount,
           recipient: poolManager,
         },
@@ -87,11 +129,7 @@ export class FxMintOpenPositionStep extends Step {
         {
           tokenAddress: fxUSD,
           decimals: 18n,
-          // Cookbook 2.x StepOutputERC20Amount: amount accounted at *exactly*
-          // the value emitted; f(x)'s 0.5% borrow fee is already deducted
-          // by the time it lands in the relay-adapter, so caller passes the
-          // post-fee net here. We delegate that calc to the recipe.
-          expectedBalance: targetDebt - (targetDebt * 5n) / 1000n, // 0.5% borrow fee
+          expectedBalance: fxUSDNet,
           minBalance: 0n,
           isBaseToken: false,
           approvedSpender: undefined,
