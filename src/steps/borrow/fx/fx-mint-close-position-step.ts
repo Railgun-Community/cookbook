@@ -7,6 +7,24 @@ import { FX_ADDRESSES, FX_POOL_MANAGER_ABI } from './fx-mint-util';
 export type FxMintClosePositionStepData = {
   pool: Address;
   collateralToken: Address;
+  /**
+   * Native-units decimals for the collateral token (wstETH = 18, WBTC = 8).
+   * Cookbook's amount accounting must match the on-chain token's decimals;
+   * pre-Task-5 this was hardcoded to 18n on the close-side output, which
+   * mis-accounted WBTC-Long by a factor of 10^10. Plumbed from the pool
+   * registry by the recipe (see `resolvePool().collateralDecimals` in
+   * fx-mint-util.ts).
+   *
+   * Note: f(x) has NO withdraw fee, so this value affects bookkeeping only —
+   * it does not change the on-chain math (the operate() args use raw
+   * collateral wei regardless).
+   *
+   * TEMPORARILY OPTIONAL — defaults to 18n (the wstETH-Long value) so that
+   * the existing FxMintCloseRecipe continues to compile while Task 8
+   * tightens the recipe to plumb this through. After Task 8 lands this
+   * field becomes required.
+   */
+  collateralDecimals?: bigint;
   positionId: bigint;
   /** fxUSD debt to repay. PoolManager pulls `repayAmount × (1 + fee)` from msg.sender. */
   repayAmount: bigint;
@@ -41,6 +59,10 @@ export class FxMintClosePositionStep extends Step {
 
   protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
     const { pool, collateralToken, positionId, repayAmount, withdrawColl, partialClose } = this.data;
+    // Default to 18n (the wstETH-Long value) until Task 8 makes
+    // FxMintCloseRecipe plumb this explicitly. See FxMintClosePositionStepData
+    // doc comments for the rationale (mirrors Task 4's pattern in the open step).
+    const collateralDecimals = this.data.collateralDecimals ?? 18n;
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
@@ -125,7 +147,9 @@ export class FxMintClosePositionStep extends Step {
       outputERC20Amounts: [
         {
           tokenAddress: collateralToken,
-          decimals: 18n,
+          // Plumbed from the pool registry via constructor arg. Was hardcoded
+          // 18n, which broke WBTC-Long (8-decimal) bookkeeping by 10^10.
+          decimals: collateralDecimals,
           // PoolManager.operate withdraws exactly `withdrawColl` wstETH or
           // reverts. Treating it as deterministic (min == expected) lets
           // the downstream Approve(0x, withdrawColl) pass cookbook's
