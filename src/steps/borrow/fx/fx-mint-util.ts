@@ -249,6 +249,22 @@ export const FX_POOL_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+
+  // getLiquidateRatios — returns (debtRatio, bonusRatio). debtRatio is the
+  // 1e18-scaled liquidation threshold (matches getPositionDebtRatio's
+  // scale); bonusRatio is the 1e9-scaled liquidator bonus. Stored on Pool
+  // directly, not in PoolConfiguration. Confirmed via cast call:
+  // (0.95e18, 4e7) for both wstETH-Long and WBTC-Long.
+  {
+    inputs: [],
+    name: 'getLiquidateRatios',
+    outputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'uint256', name: '', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
 ] as const;
 
 // PoolManager — the user-facing router. The Pool's operate function
