@@ -183,4 +183,44 @@ describe('FxMintAdjustPositionStep', () => {
       debtDelta: -1n,
     })).to.throw(/repayFeeRatio/);
   });
+
+  it('throws at getStepOutput when collDelta > 0 but no matching input', async () => {
+    // Runtime guard inside getStepOutput: even if the construction-time
+    // checks pass, if the upstream RecipeInput.erc20Amounts is missing
+    // the collateral token (e.g., caller wired the wrong token), the
+    // step refuses to fabricate a spentERC20Amounts entry. Mirrors the
+    // FxMintTopupRecipe direct-path guard but covers the case where the
+    // recipe layer didn't catch the mistake.
+    const step = new FxMintAdjustPositionStep({
+      ...baseData,
+      collDelta: 1n,
+      debtDelta: 0n,
+    });
+    const emptyInput: StepInput = {
+      networkName: NetworkName.Ethereum,
+      erc20Amounts: [],
+      nfts: [
+        {
+          nftAddress: pool.address,
+          tokenSubID: '0x' + positionId.toString(16),
+          nftTokenType: NFTTokenType.ERC721,
+          amount: 1n,
+        },
+      ],
+    };
+    // Step base class wraps thrown errors with "step is invalid." and
+    // preserves the original message via `cause`. Match the wrapped
+    // message at the outer layer and assert on the cause's message
+    // separately so we know the right branch fired.
+    let caught: Error | undefined;
+    try {
+      await step.getValidStepOutput(emptyInput);
+    } catch (e) {
+      caught = e as Error;
+    }
+    expect(caught).to.exist;
+    expect(caught!.message).to.match(/step is invalid/);
+    const cause = (caught as Error & { cause?: Error }).cause;
+    expect(cause?.message ?? '').to.match(/no input balance/);
+  });
 });

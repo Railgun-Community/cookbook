@@ -4,10 +4,16 @@ import {
   FX_POOL_ABI,
   FX_POOL_MANAGER_ABI,
   FX_POOL_CONFIGURATION_ABI,
+  DEFAULT_FXMINT_OPERATOR,
   resolvePool,
   type FxMintPoolRef,
   type FxMintPoolName,
 } from '../../../steps/borrow/fx/fx-mint-util';
+
+// DEFAULT_FXMINT_OPERATOR moved to fx-mint-util.ts (alongside FX_ADDRESSES)
+// as the single source of truth — package consumers continue to import it
+// from `@railgun-community/cookbook` unchanged, since fx-mint-util is also
+// re-exported at the package root.
 
 // =============================================================================
 // FxPool — pool-level state + per-(pool, operator) fee ratios.
@@ -58,16 +64,6 @@ export type FxPool = {
   borrowFeeRatio: bigint;
   repayFeeRatio: bigint;
 };
-
-/**
- * Default operator for fee queries: the Railgun relay-adapter.
- * Source: railgun-fxmint-cli/src/cliConstants.ts. Hardcoded here so the
- * cookbook reader has a sensible default without depending on the CLI.
- * If Railgun rotates the relay-adapter address on a future engine
- * version, update this and the CLI's cliConstants in lockstep.
- */
-export const DEFAULT_FXMINT_OPERATOR: Address =
-  '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405';
 
 /**
  * Reads pool-level state and per-operator fee ratios from f(x) contracts.
@@ -130,7 +126,9 @@ export async function getFxPool(
   // Tuple positions confirmed in Task 1: [supply, withdraw, borrow, repay].
   const [/* supplyFeeRatio */, /* withdrawFeeRatio */, borrowFeeRatio, repayFeeRatio] = fees;
 
-  const name = typeof poolRef === 'string' ? (poolRef as FxMintPoolName) : undefined;
+  // typeof narrowing: FxMintPoolRef = FxMintPoolName | {address;...}, so
+  // the string branch is already FxMintPoolName — no cast needed.
+  const name = typeof poolRef === 'string' ? poolRef : undefined;
 
   return {
     name,
@@ -200,6 +198,12 @@ export type FxPosition = {
  * Pool.getPositionDebtRatio, Pool.getTotalRawCollaterals,
  * PoolManager.getPoolInfo) and computes collateralAmount inline.
  * Integrators wanting batched reads should compose with viem's multicall.
+ *
+ * v0.2 may bake in a multicall variant (one roundtrip instead of four)
+ * once the wallet integrator patterns settle — deferred from v0.1 to
+ * keep the surface small for the upstream PR. Until then, viem's
+ * `publicClient.multicall({ contracts: [...] })` against these same
+ * function selectors composes cleanly.
  */
 export async function getFxPosition(
   positionId: bigint,

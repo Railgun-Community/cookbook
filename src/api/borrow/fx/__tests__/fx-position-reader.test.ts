@@ -66,11 +66,14 @@ describe('fx-position-reader — getFxPosition [requires RUN_FORK_TESTS=1]', fun
   const provider = createPublicClient({ chain: mainnet, transport: http(rpcUrl) });
 
   it('reads a known wstETH-Long position', async () => {
-    // Use a conservative positionId. If 1 doesn't exist on-chain, the
-    // call returns zeros — that's still valid (just no position state).
-    // For a stronger smoke check, replace with a real positionId from
-    // the v0 calibration tx 0x3f7c7c42... once known.
-    const knownPositionId = 1n;
+    // positionId 1903 is the v0 calibration mint (tx 0x3f7c7c42... from
+    // README's calibration table). Verified on mainnet via
+    // `cast call <pool> 'getPosition(uint256)' 1903`: rawColls ≈ 5.86e13,
+    // rawDebts ≈ 3.58e16 — both > 0, so we can assert actual values
+    // rather than just shape. If this position is ever closed/burned the
+    // assertions degrade gracefully (call returns zeros, the > 0n
+    // assertions fail informatively).
+    const knownPositionId = 1903n;
 
     const position = await getFxPosition(knownPositionId, 'wstETH-Long', provider);
     expect(position.positionId).to.equal(knownPositionId);
@@ -78,10 +81,14 @@ describe('fx-position-reader — getFxPosition [requires RUN_FORK_TESTS=1]', fun
     expect(position.pool.address.toLowerCase()).to.equal(
       '0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'.toLowerCase(),
     );
-    // rawColls, rawDebts, debtRatio could be 0n if positionId 1 doesn't
-    // exist; we just check the shape is right.
-    expect(position).to.have.property('rawColls');
-    expect(position).to.have.property('debt');
-    expect(position).to.have.property('collateralAmount');
+    // Real value assertions — position 1903 was minted with nonzero
+    // collateral and debt and (as of Task 13) hasn't been closed.
+    // chai 4.x's .greaterThan typings don't accept bigint; compare-then-assert.
+    expect(position.rawColls > 0n).to.equal(true);
+    expect(position.rawDebts > 0n).to.equal(true);
+    expect(position.debt > 0n).to.equal(true);
+    expect(position.debt).to.equal(position.rawDebts); // debt is an alias for rawDebts
+    expect(position.debtRatio > 0n).to.equal(true);
+    expect(position.collateralAmount > 0n).to.equal(true);
   });
 });

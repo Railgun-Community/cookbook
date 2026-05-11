@@ -76,4 +76,16 @@ describe('FxMintTopupAndBorrowRecipe', () => {
       additionalDebt: -1n,
     })).to.throw(/additionalDebt/i);
   });
+
+  it('throws if swapQuote provided without slippageBasisPoints', () => {
+    // The constructor's slippage-pair guard: any time a swapQuote is
+    // supplied, slippageBasisPoints must accompany it — otherwise the
+    // ZeroXV2SwapStep ends up with no slippage bound at recipe time.
+    // Mirrors the same guard on FxMintTopupRecipe / FxMintOpenRecipe.
+    expect(() => new FxMintTopupAndBorrowRecipe({
+      ...baseOpts,
+      pool: 'wstETH-Long',
+      swapQuote: fakeSwapQuote,
+    } as never)).to.throw(/slippageBasisPoints/);
+  });
 });

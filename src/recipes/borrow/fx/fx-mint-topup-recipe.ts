@@ -82,9 +82,11 @@ export class FxMintTopupRecipe extends Recipe {
     //   swap path: encode from the 0x quote's promised buy amount.
     //     The actual collateral arriving at the adjust step is
     //     non-deterministic (slippage) — but FxMintAdjustPositionStep
-    //     declares spentERC20Amounts using inputColl.expectedBalance, so
-    //     accounting tracks the true amount even though `collDelta` here
-    //     is the optimistic quoted amount. Mirrors FxMintOpenPositionStep.
+    //     declares spentERC20Amounts using inputColl.expectedBalance,
+    //     which is the QUOTED (not on-chain-actual) amount — cookbook's
+    //     amount-accounting uses expected/min balance pairs precisely
+    //     because the step layer can't know on-chain actual delivery.
+    //     Mirrors FxMintOpenPositionStep.
     //
     //   direct path: read from RecipeInput.erc20Amounts — the caller's
     //     input collateral is what gets deposited as-is. `first` is the

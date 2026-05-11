@@ -100,6 +100,20 @@ describe('fx-mint-util — computeFxRepay', () => {
 
 describe('fx-mint-util — computeFxClose still passes after refactor', () => {
   it('produces same output as before the refactor (golden value)', () => {
+    // Pin every field to a hand-computed literal so a subtle math
+    // regression (e.g., wrong precision constant, swapped operands)
+    // surfaces here. Derivation, with shieldedFxUSD=4.975e18,
+    // repayFee=5e6/1e9 (0.5%), unshieldFee=25bps:
+    //   fxUSDAfterUnshield = 4.975e18 × 9975/10000 = 4_962_562_500_000_000_000
+    //   maxRepayUnderFee   = 4_962_562_500_000_000_000 × 1e9 / (1e9 + 5e6)
+    //                      = 4_937_873_134_328_358_208
+    //   repayAmount        = min(maxRepayUnderFee, rawDebts, desired=rawDebts)
+    //                      = 4_937_873_134_328_358_208  (capped by fee ceiling)
+    //   approveAmount      = repayAmount × (1e9 + 5e6) / 1e9
+    //                      = 4_962_562_499_999_999_999  (off-by-1 from integer div)
+    //   positionWstETH     = rawColls × collBal / totalRaw = 8e15
+    //   withdrawColl       = positionWstETH × repayAmount / rawDebts
+    //                      = 7_900_597_014_925_373
     const result = computeFxClose({
       rawColls: 8_000_000_000_000_000n,
       rawDebts: 5_000_000_000_000_000_000n,
@@ -111,9 +125,11 @@ describe('fx-mint-util — computeFxClose still passes after refactor', () => {
     });
 
     expect(result.partialClose).to.equal(true);
-    // FxCloseAmounts doesn't include rawDebts; compare against the literal input.
-    // chai 4.x .lessThanOrEqual/.greaterThan don't accept bigint, so compare directly.
-    expect(result.repayAmount <= 5_000_000_000_000_000_000n).to.equal(true);
-    expect(result.approveAmount > result.repayAmount).to.equal(true);
+    expect(result.positionWstETH).to.equal(8_000_000_000_000_000n);
+    expect(result.fxUSDAfterUnshield).to.equal(4_962_562_500_000_000_000n);
+    expect(result.maxRepayUnderFee).to.equal(4_937_873_134_328_358_208n);
+    expect(result.repayAmount).to.equal(4_937_873_134_328_358_208n);
+    expect(result.approveAmount).to.equal(4_962_562_499_999_999_999n);
+    expect(result.withdrawColl).to.equal(7_900_597_014_925_373n);
   });
 });

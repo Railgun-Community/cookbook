@@ -16,6 +16,22 @@ export const FX_ADDRESSES = {
   fxPoolConfiguration: getAddress('0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d'),
 } as const satisfies Record<string, Address>;
 
+/**
+ * Default operator for f(x) fee queries: the Railgun relay-adapter.
+ *
+ * Lives alongside FX_ADDRESSES so cookbook readers (getFxPool) and the
+ * CLI's cliConstants.relayAdapter point at the same constant — preventing
+ * the cookbook/CLI drift risk a separate declaration would invite.
+ * Third-party wallet integrators consuming the cookbook re-export this
+ * directly; the CLI imports it for its own scripts.
+ *
+ * If Railgun rotates the relay-adapter address on a future engine
+ * version, update this once here and the CLI's cliConstants in lockstep.
+ */
+export const DEFAULT_FXMINT_OPERATOR: Address = getAddress(
+  '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+);
+
 // =============================================================================
 // ABI fragments (verbatim from @aladdindao/fx-sdk@1.0.5 dist/index.js).
 // =============================================================================
@@ -343,7 +359,13 @@ export type FxMintPoolRef =
       collateralDecimals: bigint;
     };
 
-type FxPoolEntry = {
+/**
+ * Registry-entry shape for a known f(x) pool. Exported so downstream
+ * code that wants to type a "known pool" parameter (e.g., wallet UIs
+ * that bind pool metadata to a typed dropdown) can do so without
+ * redeclaring the shape.
+ */
+export type FxPoolEntry = {
   name: FxMintPoolName;
   address: Address;
   collateralToken: Address;
@@ -445,15 +467,11 @@ export function computeFxClose(input: FxCloseInputs): FxCloseAmounts {
   const withdrawColl = (positionWstETH * repay.repayAmount) / rawDebts;
   const partialClose = repay.repayAmount < rawDebts;
 
-  return {
-    positionWstETH,
-    fxUSDAfterUnshield: repay.fxUSDAfterUnshield,
-    maxRepayUnderFee: repay.maxRepayUnderFee,
-    repayAmount: repay.repayAmount,
-    approveAmount: repay.approveAmount,
-    withdrawColl,
-    partialClose,
-  };
+  // FxRepayAmounts is a strict subset of FxCloseAmounts's repay-side
+  // fields (fxUSDAfterUnshield, maxRepayUnderFee, repayAmount,
+  // approveAmount), so spreading is type-safe and avoids the verbose
+  // per-field re-listing this used to do.
+  return { ...repay, positionWstETH, withdrawColl, partialClose };
 }
 
 // =============================================================================
