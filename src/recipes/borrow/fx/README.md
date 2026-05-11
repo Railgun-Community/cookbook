@@ -368,9 +368,19 @@ real-mainnet broadcasts during bring-up:
 
 ### v0.1 (May 2026)
 
-Receipts for the new WBTC-Long support, the dynamic-borrow-fee fix on the
-existing open path, and the four new risk-management / lever-up recipes
-will land here once their mainnet calibration broadcasts complete.
+| Op | Pool | Path | Tx |
+|---|---|---|---|
+| Open (re-cal, dynamic borrow fee) | wstETH-Long | swap (WETH→wstETH) | [`<FILL B.1>`](https://etherscan.io/tx/<FILL B.1>) |
+| Open | WBTC-Long | direct (WBTC) | [`<FILL B.2>`](https://etherscan.io/tx/<FILL B.2>) |
+| Close | WBTC-Long | direct (WBTC out) | [`<FILL B.3>`](https://etherscan.io/tx/<FILL B.3>) |
+| Topup | wstETH-Long | swap | [`<FILL B.4>`](https://etherscan.io/tx/<FILL B.4>) |
+| Topup | WBTC-Long | direct | [`<FILL B.5>`](https://etherscan.io/tx/<FILL B.5>) |
+| Borrow-more | wstETH-Long | n/a (debt-only) | [`<FILL B.6>`](https://etherscan.io/tx/<FILL B.6>) |
+| Repay-debt | wstETH-Long | n/a (debt-only) | [`<FILL B.7>`](https://etherscan.io/tx/<FILL B.7>) |
+
+After each Phase B broadcast (see calibration runbook), replace the
+corresponding `<FILL B.x>` placeholder with the tx hash. The labels match
+the runbook step IDs to make this mechanical.
 
 ## File layout
 
