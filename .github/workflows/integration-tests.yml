@@ -19,10 +19,12 @@ jobs:
       - run: corepack enable
       - run: yarn install --frozen-lockfile
       - name: Install Foundry
+        env:
+          FOUNDRY_DIR: ${{ runner.temp }}/foundry
         run: |
           curl -L https://foundry.paradigm.xyz | bash
-          echo "$HOME/.foundry/bin" >> "$GITHUB_PATH"
-          "$HOME/.foundry/bin/foundryup"
+          echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+          "$FOUNDRY_DIR/bin/foundryup"
       - name: Start Anvil (background)
         run: |
           ./run-anvil Ethereum https://api.fdi.network/rpc/alchemy/eth-mainnet --silent > anvil.log 2>&1 &
