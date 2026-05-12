@@ -16,18 +16,40 @@ jobs:
         with:
           node-version: '16'
           cache: 'yarn'
-      - name: Install yarn
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: Run Anvil and fork test
-        uses: BerniWittmann/background-server-action@v1
+        env:
+          FOUNDRY_DIR: ${{ runner.temp }}/foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+          "$FOUNDRY_DIR/bin/foundryup"
+      - name: Start Anvil (background)
+        run: |
+          ./run-anvil Ethereum https://ethereum-rpc.publicnode.com --silent > anvil.log 2>&1 &
+          echo $! > anvil.pid
+          for i in {1..60}; do
+            if curl -s -o /dev/null -X POST -H "Content-Type: application/json" \
+                 --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
+                 http://localhost:8600; then
+              echo "Anvil is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Anvil did not become ready in 60s"
+          cat anvil.log
+          exit 1
+      - name: Run fork tests
         env:
           ZERO_X_PROXY_API_DOMAIN: ${{ secrets.ZERO_X_PROXY_API_DOMAIN }}
           ZERO_X_API_KEY: ${{ secrets.ZERO_X_API_KEY }}
           NETWORK_NAME: Ethereum
-        with:
-          command: yarn test-fork
-          start: ./run-anvil Ethereum https://api.fdi.network/rpc/alchemy/eth-mainnet --silent
+        run: yarn test-fork
+      - name: Stop Anvil
+        if: always()
+        run: |
+          if [ -f anvil.pid ]; then
+            kill "$(cat anvil.pid)" 2>/dev/null || true
+          fi
