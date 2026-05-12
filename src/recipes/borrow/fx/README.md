@@ -370,17 +370,18 @@ real-mainnet broadcasts during bring-up:
 
 | Op | Pool | Path | Tx |
 |---|---|---|---|
-| Open (re-cal, dynamic borrow fee) | wstETH-Long | swap (WETH→wstETH) | [`<FILL B.1>`](https://etherscan.io/tx/<FILL B.1>) |
-| Open | WBTC-Long | direct (WBTC) | [`<FILL B.2>`](https://etherscan.io/tx/<FILL B.2>) |
-| Close | WBTC-Long | direct (WBTC out) | [`<FILL B.3>`](https://etherscan.io/tx/<FILL B.3>) |
-| Topup | wstETH-Long | swap | [`<FILL B.4>`](https://etherscan.io/tx/<FILL B.4>) |
-| Topup | WBTC-Long | direct | [`<FILL B.5>`](https://etherscan.io/tx/<FILL B.5>) |
-| Borrow-more | wstETH-Long | n/a (debt-only) | [`<FILL B.6>`](https://etherscan.io/tx/<FILL B.6>) |
-| Repay-debt | wstETH-Long | n/a (debt-only) | [`<FILL B.7>`](https://etherscan.io/tx/<FILL B.7>) |
+| Open (re-cal, dynamic borrow fee) | wstETH-Long | swap (WETH→wstETH) | [`0x71439e52`](https://etherscan.io/tx/0x71439e529690fd1a3d412d2d5a9461d94cd5d95a4e3e4966336d138d17e4ab32) |
+| Topup | wstETH-Long | swap | [`0xac787ca8`](https://etherscan.io/tx/0xac787ca87e8b24418010994579ec79399b28c1d6144ba394f048257998e35613) |
+| Borrow-more | wstETH-Long | n/a (debt-only) | [`0x09a3bd9d`](https://etherscan.io/tx/0x09a3bd9db0d3ffdb1860d3f35df774f7632c5b1fd8e5a118dc88fa4986f1e40c) |
+| Repay-debt (partial) | wstETH-Long | n/a (debt-only) | [`0x4c8967b3`](https://etherscan.io/tx/0x4c8967b38d5d0728154f19fe69fb9a06d0baa8189a2219111f5767cfe458760c) |
+| Open | WBTC-Long | direct (WBTC) | [`0x08b555df`](https://etherscan.io/tx/0x08b555df37b16c44a0bcb9b5a802e60726f1413f1572431deae2ac597d3fd1cd) |
+| Close (partial) | WBTC-Long | direct (WBTC out) | [`0x92315478`](https://etherscan.io/tx/0x92315478123142346db24e1d9eda8d6767467e261bc86139492d296ddc581b65) |
 
-After each Phase B broadcast (see calibration runbook), replace the
-corresponding `<FILL B.x>` placeholder with the tx hash. The labels match
-the runbook step IDs to make this mechanical.
+WBTC-Long topup is structurally identical to wstETH-Long topup at the
+step-graph level (same `FxMintAdjustPositionStep` with `collDelta > 0,
+debtDelta = 0`; only the leading approve target differs); the WBTC
+direct input path is exercised by the WBTC-Long open above, so the topup
+calibration was skipped for v0.1.
 
 ## File layout
 
