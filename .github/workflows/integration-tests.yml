@@ -27,7 +27,7 @@ jobs:
           "$FOUNDRY_DIR/bin/foundryup"
       - name: Start Anvil (background)
         run: |
-          ./run-anvil Ethereum https://api.fdi.network/rpc/alchemy/eth-mainnet --silent > anvil.log 2>&1 &
+          ./run-anvil Ethereum https://ethereum-rpc.publicnode.com --silent > anvil.log 2>&1 &
           echo $! > anvil.pid
           for i in {1..60}; do
             if curl -s -o /dev/null -X POST -H "Content-Type: application/json" \
