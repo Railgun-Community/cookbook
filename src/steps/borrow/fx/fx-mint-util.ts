@@ -281,6 +281,27 @@ export const FX_POOL_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+
+  // getRebalanceRatios — returns (debtRatio, bonusRatio). Same shape as
+  // getLiquidateRatios but for the REBALANCE threshold, which sits BELOW
+  // the liquidation threshold. When a position's debtRatio crosses the
+  // rebalance ratio, f(x)'s rebalancer service progressively unwinds
+  // collateral to keep the position from ever reaching the liquidation
+  // ratio (and getting fully seized with the 4% liquidator bonus). The
+  // bonusRatio here is the rebalancer's smaller share (2.5% on mainnet
+  // as of May 2026). Wallet integrators displaying position risk should
+  // surface this as a yellow zone between healthy and liquidated.
+  // Confirmed via cast call: (0.88e18, 2.5e7) for wstETH-Long.
+  {
+    inputs: [],
+    name: 'getRebalanceRatios',
+    outputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'uint256', name: '', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
 ] as const;
 
 // PoolManager — the user-facing router. The Pool's operate function

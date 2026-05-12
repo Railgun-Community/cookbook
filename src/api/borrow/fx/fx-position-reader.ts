@@ -51,6 +51,27 @@ export type FxPool = {
   liquidationBonusRatio: bigint;
 
   /**
+   * Rebalance threshold in 1e18-scaled debt-ratio form. Read via
+   * Pool.getRebalanceRatios()[0]. Sits BELOW the liquidation threshold:
+   * when a position crosses this ratio, f(x)'s rebalancer service
+   * progressively unwinds collateral to keep the position from ever
+   * reaching the liquidation ratio (and getting fully seized). Wallet
+   * integrators displaying position risk should treat the band
+   * [rebalanceDebtRatio, liquidationDebtRatio) as a yellow zone — the
+   * position is alive but the protocol is actively reducing exposure
+   * on the user's behalf. Mainnet (May 2026): 0.88e18 (88%) on
+   * wstETH-Long.
+   */
+  rebalanceDebtRatio: bigint;
+
+  /**
+   * Rebalancer bonus in 1e9-scaled form. Pool.getRebalanceRatios()[1].
+   * Smaller than liquidationBonusRatio because rebalancing is the
+   * less-punitive intervention. Mainnet: 2.5e7 (2.5%) on wstETH-Long.
+   */
+  rebalanceBonusRatio: bigint;
+
+  /**
    * Per-(pool, operator) fee ratios from
    * PoolConfiguration.getPoolFeeRatio(pool, operator), 1e9-denominated.
    * Operator defaults to the Railgun relay-adapter (the canonical
@@ -107,7 +128,7 @@ export async function getFxPool(
     args: [],
   }) as bigint;
 
-  // Pool.getLiquidateRatios() — added to FX_POOL_ABI in this task.
+  // Pool.getLiquidateRatios() — added to FX_POOL_ABI in v0.1 Task 13.
   const liquidateRatios = await provider.readContract({
     address: resolved.address,
     abi: FX_POOL_ABI,
@@ -115,6 +136,18 @@ export async function getFxPool(
     args: [],
   }) as readonly [bigint, bigint];
   const [liquidationDebtRatio, liquidationBonusRatio] = liquidateRatios;
+
+  // Pool.getRebalanceRatios() — added to FX_POOL_ABI after launch when
+  // wallet integrators flagged the gap. Same tuple shape as liquidate.
+  // The rebalance threshold sits below liquidation; see FxPool type doc
+  // for the yellow-zone display recommendation.
+  const rebalanceRatios = await provider.readContract({
+    address: resolved.address,
+    abi: FX_POOL_ABI,
+    functionName: 'getRebalanceRatios',
+    args: [],
+  }) as readonly [bigint, bigint];
+  const [rebalanceDebtRatio, rebalanceBonusRatio] = rebalanceRatios;
 
   // Per-(pool, operator) fee ratios.
   const fees = await provider.readContract({
@@ -141,6 +174,8 @@ export async function getFxPool(
     collateralBalance,
     liquidationDebtRatio,
     liquidationBonusRatio,
+    rebalanceDebtRatio,
+    rebalanceBonusRatio,
     borrowFeeRatio,
     repayFeeRatio,
   };
