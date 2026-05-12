@@ -42,6 +42,13 @@ describe('FxMintAdjustPositionStep', () => {
   }
 
   function inputWithFxUSD(amount: bigint): StepInput {
+    // Simulates the post-ApproveERC20SpenderStep state for the repay path:
+    // the approve step splits the raw input into (approvedSpender=PoolManager
+    // for the amount granted to operate's transferFrom) + (any remaining
+    // change with approvedSpender=undefined). For the repay unit test we
+    // pass exactly approveAmount with approvedSpender=PoolManager, no
+    // orphan — the post-fix orphan-pass-through logic in
+    // FxMintAdjustPositionStep correctly emits no orphan output here.
     return {
       networkName: NetworkName.Ethereum,
       erc20Amounts: [
@@ -51,7 +58,7 @@ describe('FxMintAdjustPositionStep', () => {
           isBaseToken: false,
           expectedBalance: amount,
           minBalance: amount,
-          approvedSpender: undefined,
+          approvedSpender: FX_ADDRESSES.fxPoolManager,
         },
       ],
       nfts: [

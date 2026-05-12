@@ -193,6 +193,34 @@ export class FxMintAdjustPositionStep extends Step {
       });
     }
 
+    if (debtDelta < 0n) {
+      // Orphan fxUSD pass-through — mirrors FxMintClosePositionStep's
+      // pattern. The repay path receives the user's full shielded fxUSD
+      // (so the wallet doesn't have to know approveAmount when unshielding);
+      // ApproveERC20SpenderStep marks only `approveAmount` as
+      // approvedSpender=PoolManager, leaving the rest as orphan change.
+      // Cookbook's step-validator (validators/step-validator.ts) demands
+      // input == spent + outputs + fees per token at THIS step (recipe-
+      // engine epilogue shield-back happens AFTER all steps and isn't
+      // accounted for inside the step-level check). Pass the orphan
+      // through as an output so the balance closes to the wei.
+      const orphanFxUSD = input.erc20Amounts
+        .filter(
+          (a) =>
+            a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
+            a.approvedSpender?.toLowerCase() !== poolManager.toLowerCase(),
+        )
+        .map((a) => ({
+          tokenAddress: fxUSD,
+          decimals: a.decimals,
+          expectedBalance: a.expectedBalance,
+          minBalance: a.minBalance,
+          isBaseToken: false,
+          approvedSpender: a.approvedSpender,
+        }));
+      outputERC20Amounts.push(...orphanFxUSD);
+    }
+
     // ---- outputNFTs ----
     // Position NFT survives every adjust op (only full close burns), so
     // it's re-declared in `outputNFTs` with the same tokenSubID — the
