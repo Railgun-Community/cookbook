@@ -1,7 +1,7 @@
 # f(x) Protocol — fxMINT recipes
 
 Cookbook recipes for opening, closing, and managing [f(x) Protocol](https://fx.aladdin.club)
-Long positions privately, by routing each operation through a Railgun
+debt positions privately, by routing each operation through a Railgun
 relay-adapter cross-contract call.
 
 The recipes plug into any wallet that already consumes
@@ -10,11 +10,15 @@ recipe (`new FxMintOpenRecipe(...).getRecipeOutput(input)`).
 
 ## What this is for
 
-f(x) Protocol lets a user mint fxUSD against yield-bearing collateral
-(wstETH, WBTC). These recipes wrap that flow as a Railgun cross-contract
+f(x) Protocol lets a user mint fxUSD against tier one collaterals
+(wstETH, WBTC) without recurring costs (one time fee) and with a unique liquidation design that prevents any hard liquidation.
+
+Ecery position is wrapped into an NFT while the collateral is pooled at protocol level to make progressive liquidations possible. It unlocks the possibility of borrowing privately through Railgun while having a liquidatable debt position.
+
+These recipes wrap that flow as a Railgun cross-contract
 call so a user can:
 
-- **Open** a Long position: deposit shielded WETH (or shielded WBTC for
+- **Open** a debt position: deposit shielded WETH (or shielded WBTC for
   WBTC-Long), mint fxUSD against an f(x) Long position; shield the fxUSD
   and the position NFT back to the user's `0zk` address.
 - **Close** (or partially close): unshield fxUSD, repay debt against the
