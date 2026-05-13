@@ -13,7 +13,7 @@ recipe (`new FxMintOpenRecipe(...).getRecipeOutput(input)`).
 f(x) Protocol lets a user mint fxUSD against tier one collaterals
 (wstETH, WBTC) without recurring costs (one time fee) and with a unique liquidation design that prevents any hard liquidation.
 
-Ecery position is wrapped into an NFT while the collateral is pooled at protocol level to make progressive liquidations possible. It unlocks the possibility of borrowing privately through Railgun while having a liquidatable debt position.
+Every position is wrapped into an NFT while the collateral is pooled at protocol level to make progressive liquidations possible. It unlocks the possibility of borrowing privately through Railgun while having a liquidatable debt position.
 
 These recipes wrap that flow as a Railgun cross-contract
 call so a user can:
