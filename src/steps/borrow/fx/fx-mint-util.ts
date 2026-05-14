@@ -1,14 +1,22 @@
-import { getAddress } from 'ethers';
+import { getAddress as ethersGetAddress } from 'ethers';
 
 /**
- * Type alias for an EVM address. Ethers v6 doesn't ship a dedicated
- * `Address` brand — `string` is the canonical type — but keeping a named
- * alias improves call-site readability and gives a single rename point if
- * we ever want to switch to a branded type. All cookbook fxmint files
- * import `Address` from here (not from viem; the dep was dropped during
- * the v0.1 upstream-PR prep so the cookbook stays pure-ethers).
+ * Type alias for an EVM address. Structurally identical to viem's
+ * `Address` (a `\`0x${string}\`` template-literal brand) so cookbook
+ * consumers that ALSO use viem can pass these addresses straight into
+ * viem's strict-typed APIs without a cast. We don't pull in viem to get
+ * this — the brand is just a type-level convention. ethers itself
+ * accepts any string for addresses, so this is a pure type-system aid.
  */
-export type Address = string;
+export type Address = `0x${string}`;
+
+/**
+ * Ethers' `getAddress` checksums and validates, then returns plain
+ * `string`. We wrap it to cast the result back to the branded `Address`
+ * type so call sites (FX_ADDRESSES, KNOWN_POOLS, DEFAULT_FXMINT_OPERATOR)
+ * can stay tidy.
+ */
+const getAddress = (a: string): Address => ethersGetAddress(a) as Address;
 
 // =============================================================================
 // f(x) Protocol mainnet addresses (immutable contracts, sourced from
