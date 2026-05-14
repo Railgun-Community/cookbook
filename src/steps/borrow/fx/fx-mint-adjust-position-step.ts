@@ -1,8 +1,17 @@
-import { encodeFunctionData, type Address } from "viem";
-import { NFTTokenType } from "@railgun-community/shared-models";
+import { Interface, type ContractTransaction } from 'ethers';
+import { NFTTokenType } from '@railgun-community/shared-models';
 import { Step } from '../../step';
-import type { StepConfig, StepInput, UnvalidatedStepOutput } from '../../../models/export-models';
-import { FX_ADDRESSES, FX_POOL_MANAGER_ABI, FEE_DENOM } from './fx-mint-util';
+import type {
+  StepConfig,
+  StepInput,
+  UnvalidatedStepOutput,
+} from '../../../models/export-models';
+import {
+  FX_ADDRESSES,
+  FX_POOL_MANAGER_ABI,
+  FEE_DENOM,
+  type Address,
+} from './fx-mint-util';
 
 export type FxMintAdjustPositionStepData = {
   /** f(x) Pool address (also the position-NFT contract). */
@@ -84,9 +93,9 @@ export type FxMintAdjustPositionStepData = {
  */
 export class FxMintAdjustPositionStep extends Step {
   readonly config: StepConfig = {
-    name: "f(x) Adjust Position",
+    name: 'f(x) Adjust Position',
     description:
-      "Calls PoolManager.operate(pool, positionId, collDelta, debtDelta). Signed deltas; same NFT in/out.",
+      'Calls PoolManager.operate(pool, positionId, collDelta, debtDelta). Signed deltas; same NFT in/out.',
     hasNonDeterministicOutput: false,
   };
 
@@ -114,7 +123,9 @@ export class FxMintAdjustPositionStep extends Step {
     this.data = data;
   }
 
-  protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
+  protected async getStepOutput(
+    input: StepInput,
+  ): Promise<UnvalidatedStepOutput> {
     const {
       pool,
       collateralToken,
@@ -129,15 +140,21 @@ export class FxMintAdjustPositionStep extends Step {
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
     // Encoded operate() — passes signed deltas straight through. The Pool
-    // contract handles the rawColls/rawDebts internal conversion.
-    const callData = encodeFunctionData({
-      abi: FX_POOL_MANAGER_ABI,
-      functionName: "operate",
-      args: [pool, positionId, collDelta, debtDelta],
-    });
+    // contract handles the rawColls/rawDebts internal conversion. Using
+    // ethers' Interface (matches cookbook house style; we don't ship a
+    // typechain binding for the f(x) PoolManager).
+    const iface = new Interface(FX_POOL_MANAGER_ABI);
+    const callData = iface.encodeFunctionData('operate', [
+      pool,
+      positionId,
+      collDelta,
+      debtDelta,
+    ]);
 
     // ---- spentERC20Amounts ----
-    const spentERC20Amounts: NonNullable<UnvalidatedStepOutput['spentERC20Amounts']> = [];
+    const spentERC20Amounts: NonNullable<
+      UnvalidatedStepOutput['spentERC20Amounts']
+    > = [];
 
     if (collDelta > 0n) {
       // Caller (recipe) ensures the input collateral matches collDelta.
@@ -146,7 +163,7 @@ export class FxMintAdjustPositionStep extends Step {
       // collDelta from the swap quote's promised buy amount but the
       // step still consumes inputColl.expectedBalance for accounting.
       const inputColl = input.erc20Amounts.find(
-        (a) => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
+        a => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
       );
       if (!inputColl) {
         throw new Error(
@@ -177,7 +194,9 @@ export class FxMintAdjustPositionStep extends Step {
     }
 
     // ---- outputERC20Amounts ----
-    const outputERC20Amounts: NonNullable<UnvalidatedStepOutput['outputERC20Amounts']> = [];
+    const outputERC20Amounts: NonNullable<
+      UnvalidatedStepOutput['outputERC20Amounts']
+    > = [];
 
     if (debtDelta > 0n) {
       // Post-borrow-fee net fxUSD lands in the relay-adapter and shields
@@ -187,7 +206,11 @@ export class FxMintAdjustPositionStep extends Step {
         tokenAddress: fxUSD,
         decimals: 18n,
         expectedBalance: fxUSDNet,
-        minBalance: 0n,
+        // Deterministic: debtDelta and borrowFeeRatio are both known at
+        // construction time. minBalance = expectedBalance keeps the
+        // output spendable by future fixed-amount steps without hitting
+        // step.ts:71-83's non-deterministic-input gate.
+        minBalance: fxUSDNet,
         isBaseToken: false,
         approvedSpender: undefined,
       });
@@ -206,11 +229,11 @@ export class FxMintAdjustPositionStep extends Step {
       // through as an output so the balance closes to the wei.
       const orphanFxUSD = input.erc20Amounts
         .filter(
-          (a) =>
+          a =>
             a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
             a.approvedSpender?.toLowerCase() !== poolManager.toLowerCase(),
         )
-        .map((a) => ({
+        .map(a => ({
           tokenAddress: fxUSD,
           decimals: a.decimals,
           expectedBalance: a.expectedBalance,
@@ -233,16 +256,20 @@ export class FxMintAdjustPositionStep extends Step {
     const outputNFTs: NonNullable<UnvalidatedStepOutput['outputNFTs']> = [
       {
         nftAddress: pool,
-        tokenSubID: "0x" + positionId.toString(16),
+        tokenSubID: '0x' + positionId.toString(16),
         nftTokenType: NFTTokenType.ERC721,
         amount: 1n,
       },
     ];
 
+    const tx: ContractTransaction = {
+      to: poolManager,
+      data: callData,
+      value: 0n,
+    };
+
     return {
-      crossContractCalls: [
-        { to: poolManager, data: callData, value: 0n } as never,
-      ],
+      crossContractCalls: [tx],
       spentERC20Amounts,
       outputERC20Amounts,
       outputNFTs,

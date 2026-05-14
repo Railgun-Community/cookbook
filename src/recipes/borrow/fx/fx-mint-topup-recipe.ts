@@ -1,9 +1,17 @@
 import { Recipe } from '../../recipe';
 import { ApproveERC20SpenderStep, ZeroXV2SwapStep, Step } from '../../../steps';
-import type { RecipeConfig, StepInput, SwapQuoteData } from '../../../models/export-models';
+import type {
+  RecipeConfig,
+  StepInput,
+  SwapQuoteData,
+} from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
-import type { Address } from 'viem';
-import { FX_ADDRESSES, resolvePool, type FxMintPoolRef } from '../../../steps/borrow/fx/fx-mint-util';
+import {
+  FX_ADDRESSES,
+  resolvePool,
+  type Address,
+  type FxMintPoolRef,
+} from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
 import { validatePoolFlow } from './fx-mint-open-recipe';
 
@@ -50,10 +58,10 @@ export type FxMintTopupRecipeOpts = {
  * repayFeeRatio (those are debt-axis only — see step-level guard).
  */
 export class FxMintTopupRecipe extends Recipe {
-  readonly id = "fxmint-topup-v1";
+  readonly id = 'fxmint-topup-v1';
   readonly config: RecipeConfig = {
-    name: "fxMINT Topup",
-    description: "Add collateral to an f(x) Long position; debt unchanged.",
+    name: 'fxMINT Topup',
+    description: 'Add collateral to an f(x) Long position; debt unchanged.',
     minGasLimit: 1_500_000n,
   };
 
@@ -98,7 +106,8 @@ export class FxMintTopupRecipe extends Recipe {
       collDelta = this.opts.swapQuote.buyERC20Amount.amount;
     } else {
       const collInput = first.erc20Amounts.find(
-        (a) => a.tokenAddress.toLowerCase() === pool.collateralToken.toLowerCase(),
+        a =>
+          a.tokenAddress.toLowerCase() === pool.collateralToken.toLowerCase(),
       );
       if (!collInput) {
         // Direct path needs the pool collateral in RecipeInput. Throwing
@@ -129,22 +138,22 @@ export class FxMintTopupRecipe extends Recipe {
       // ZeroXV2SwapStep (which verifies but does not grant the approval).
       const inputToken = FX_ADDRESSES.WETH as Address;
       return [
-        new ApproveERC20SpenderStep(
-          this.opts.swapQuote.spender,
-          { tokenAddress: inputToken, decimals: 18n },
-        ),
-        new ZeroXV2SwapStep(
-          this.opts.swapQuote,
-          { tokenAddress: inputToken, decimals: 18n },
-        ),
+        new ApproveERC20SpenderStep(this.opts.swapQuote.spender, {
+          tokenAddress: inputToken,
+          decimals: 18n,
+        }),
+        new ZeroXV2SwapStep(this.opts.swapQuote, {
+          tokenAddress: inputToken,
+          decimals: 18n,
+        }),
         // Post-swap approve + operate consume whatever the swap produced
         // (non-deterministic by slippage); cookbook rejects fixed amounts
         // on steps following a non-deterministic step, so we omit the
         // explicit amount on the approve and let it use expectedBalance.
-        new ApproveERC20SpenderStep(
-          poolManager,
-          { tokenAddress: pool.collateralToken, decimals: pool.collateralDecimals },
-        ),
+        new ApproveERC20SpenderStep(poolManager, {
+          tokenAddress: pool.collateralToken,
+          decimals: pool.collateralDecimals,
+        }),
         adjustStep,
       ];
     }
@@ -152,10 +161,10 @@ export class FxMintTopupRecipe extends Recipe {
     // Direct path: input asset already matches pool collateral; no swap
     // leg. Approve PoolManager and call operate().
     return [
-      new ApproveERC20SpenderStep(
-        poolManager,
-        { tokenAddress: pool.collateralToken, decimals: pool.collateralDecimals },
-      ),
+      new ApproveERC20SpenderStep(poolManager, {
+        tokenAddress: pool.collateralToken,
+        decimals: pool.collateralDecimals,
+      }),
       adjustStep,
     ];
   }

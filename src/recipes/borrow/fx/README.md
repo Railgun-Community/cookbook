@@ -346,10 +346,19 @@ per-(pool, operator) fee table is queried. Defaults to the Railgun
 relay-adapter (`DEFAULT_FXMINT_OPERATOR`) — exported as a constant from
 the package root for non-Railgun consumers that want to override.
 
+> **Integrator note: `DEFAULT_FXMINT_OPERATOR` is pinned to today's
+> Railgun relay-adapter address.** If the Railgun engine rotates that
+> address in a future release, this constant has to be updated in
+> lockstep — apps that import the cookbook will silently query the wrong
+> fee table until they upgrade. Wallet integrators that care about
+> long-lived correctness should pass `operator` explicitly to `getFxPool`
+> (read it from their own Railgun engine version), rather than relying
+> on the default.
+
 Both functions perform sequential on-chain reads (no batching baked in).
-Integrators wanting a single-roundtrip read should compose with viem's
-multicall externally. A v0.2 batched reader is on the roadmap if
-integrators ask.
+Integrators wanting a single-roundtrip read can compose with ethers'
+Multicall3 helper (or any external batcher) against the same function
+selectors. A v0.2 batched reader is on the roadmap if integrators ask.
 
 All shielded fxmint positions on-chain are owned-of-record by the
 Railgun relay-adapter, so a "list positions by owner" call at this layer

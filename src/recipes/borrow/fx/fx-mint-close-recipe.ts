@@ -1,9 +1,17 @@
 import { Recipe } from '../../recipe';
 import { ApproveERC20SpenderStep, ZeroXV2SwapStep, Step } from '../../../steps';
-import type { RecipeConfig, StepInput, SwapQuoteData } from '../../../models/export-models';
+import type {
+  RecipeConfig,
+  StepInput,
+  SwapQuoteData,
+} from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
-import type { Address } from 'viem';
-import { FX_ADDRESSES, resolvePool, type FxMintPoolRef } from '../../../steps/borrow/fx/fx-mint-util';
+import {
+  FX_ADDRESSES,
+  resolvePool,
+  type Address,
+  type FxMintPoolRef,
+} from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintClosePositionStep } from '../../../steps/borrow/fx/fx-mint-close-position-step';
 import { validatePoolFlow } from './fx-mint-open-recipe';
 
@@ -54,10 +62,11 @@ export type FxMintCloseRecipeOpts = {
  * withdraw fee, so `withdrawColl` stays a clean ratio.
  */
 export class FxMintCloseRecipe extends Recipe {
-  readonly id = "fxmint-close-v1";
+  readonly id = 'fxmint-close-v1';
   readonly config: RecipeConfig = {
-    name: "fxMINT Close",
-    description: "Close f(x) Long position; swap-path or direct-path based on pool.",
+    name: 'fxMINT Close',
+    description:
+      'Close f(x) Long position; swap-path or direct-path based on pool.',
     minGasLimit: 2_500_000n,
   };
 
@@ -107,13 +116,16 @@ export class FxMintCloseRecipe extends Recipe {
         closeStep,
         new ApproveERC20SpenderStep(
           this.opts.swapQuote.spender,
-          { tokenAddress: pool.collateralToken, decimals: pool.collateralDecimals },
+          {
+            tokenAddress: pool.collateralToken,
+            decimals: pool.collateralDecimals,
+          },
           this.opts.withdrawColl,
         ),
-        new ZeroXV2SwapStep(
-          this.opts.swapQuote,
-          { tokenAddress: pool.collateralToken, decimals: pool.collateralDecimals },
-        ),
+        new ZeroXV2SwapStep(this.opts.swapQuote, {
+          tokenAddress: pool.collateralToken,
+          decimals: pool.collateralDecimals,
+        }),
       ];
     }
 

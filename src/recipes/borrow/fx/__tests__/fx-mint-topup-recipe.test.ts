@@ -21,42 +21,57 @@ const fakeSwapQuote = {
 
 describe('FxMintTopupRecipe', () => {
   it('wstETH-Long: throws if swapQuote is missing', () => {
-    expect(() => new FxMintTopupRecipe({
-      pool: 'wstETH-Long',
-      positionId: 1903n,
-    })).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
+    expect(
+      () =>
+        new FxMintTopupRecipe({
+          pool: 'wstETH-Long',
+          positionId: 1903n,
+        }),
+    ).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
   });
 
   it('WBTC-Long: throws if swapQuote is provided', () => {
-    expect(() => new FxMintTopupRecipe({
-      pool: 'WBTC-Long',
-      positionId: 1903n,
-      swapQuote: fakeSwapQuote,
-      slippageBasisPoints: 5,
-    })).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
+    expect(
+      () =>
+        new FxMintTopupRecipe({
+          pool: 'WBTC-Long',
+          positionId: 1903n,
+          swapQuote: fakeSwapQuote,
+          slippageBasisPoints: 5,
+        }),
+    ).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
   });
 
   it('wstETH-Long with swapQuote: constructs', () => {
-    expect(() => new FxMintTopupRecipe({
-      pool: 'wstETH-Long',
-      positionId: 1903n,
-      swapQuote: fakeSwapQuote,
-      slippageBasisPoints: 5,
-    })).not.to.throw();
+    expect(
+      () =>
+        new FxMintTopupRecipe({
+          pool: 'wstETH-Long',
+          positionId: 1903n,
+          swapQuote: fakeSwapQuote,
+          slippageBasisPoints: 5,
+        }),
+    ).not.to.throw();
   });
 
   it('WBTC-Long without swapQuote: constructs', () => {
-    expect(() => new FxMintTopupRecipe({
-      pool: 'WBTC-Long',
-      positionId: 1903n,
-    })).not.to.throw();
+    expect(
+      () =>
+        new FxMintTopupRecipe({
+          pool: 'WBTC-Long',
+          positionId: 1903n,
+        }),
+    ).not.to.throw();
   });
 
   it('throws if swapQuote provided without slippageBasisPoints', () => {
-    expect(() => new FxMintTopupRecipe({
-      pool: 'wstETH-Long',
-      positionId: 1903n,
-      swapQuote: fakeSwapQuote,
-    } as never)).to.throw(/slippageBasisPoints/);
+    expect(
+      () =>
+        new FxMintTopupRecipe({
+          pool: 'wstETH-Long',
+          positionId: 1903n,
+          swapQuote: fakeSwapQuote,
+        } as never),
+    ).to.throw(/slippageBasisPoints/);
   });
 });

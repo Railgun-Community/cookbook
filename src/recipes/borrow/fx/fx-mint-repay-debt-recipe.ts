@@ -2,8 +2,13 @@ import { Recipe } from '../../recipe';
 import { ApproveERC20SpenderStep, Step } from '../../../steps';
 import type { RecipeConfig, StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
-import type { Address } from 'viem';
-import { FX_ADDRESSES, resolvePool, type FxMintPoolRef } from '../../../steps/borrow/fx/fx-mint-util';
+import {
+  FX_ADDRESSES,
+  FEE_DENOM,
+  resolvePool,
+  type Address,
+  type FxMintPoolRef,
+} from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
 
 export type FxMintRepayDebtRecipeOpts = {
@@ -50,10 +55,11 @@ export type FxMintRepayDebtRecipeOpts = {
  * { repayAmount, approveAmount } and passes both here.
  */
 export class FxMintRepayDebtRecipe extends Recipe {
-  readonly id = "fxmint-repay-debt-v1";
+  readonly id = 'fxmint-repay-debt-v1';
   readonly config: RecipeConfig = {
-    name: "fxMINT Repay Debt",
-    description: "Burn fxUSD to reduce debt on an f(x) Long position; collateral unchanged.",
+    name: 'fxMINT Repay Debt',
+    description:
+      'Burn fxUSD to reduce debt on an f(x) Long position; collateral unchanged.',
     minGasLimit: 1_500_000n,
   };
 
@@ -68,18 +74,24 @@ export class FxMintRepayDebtRecipe extends Recipe {
     //      negative debtDelta as a repay; we want this recipe to refuse
     //      anything but a strictly positive repay magnitude.
     //
-    //   2. approveAmount < repayAmount — caller skipped the fee uplift.
-    //      PoolManager pulls (repayAmount × (1 + repayFeeRatio/1e9)) via
-    //      transferFrom, so an under-approve guarantees an ERC20 revert.
-    //      Reject with a fee-uplift hint pointing to computeFxRepay.
+    //   2. approveAmount != repayAmount × (FEE_DENOM + repayFeeRatio) /
+    //      FEE_DENOM — caller hand-rolled the fee uplift and got it wrong.
+    //      PoolManager.operate() will pull exactly this amount via
+    //      transferFrom; a mismatch lands the recipe-engine's step-validator
+    //      with a generic "input != spent+outputs+fees" error far from the
+    //      cause. Enforce strict equality here so the error names the
+    //      actual problem and points at computeFxRepay.
     if (opts.repayAmount <= 0n) {
       throw new Error(
         'fxmint: FxMintRepayDebtRecipe — repayAmount must be > 0',
       );
     }
-    if (opts.approveAmount < opts.repayAmount) {
+    const expectedApprove =
+      (opts.repayAmount * (FEE_DENOM + opts.repayFeeRatio)) / FEE_DENOM;
+    if (opts.approveAmount !== expectedApprove) {
       throw new Error(
-        'fxmint: FxMintRepayDebtRecipe — approveAmount must be >= repayAmount (fee uplift). Use computeFxRepay to derive both.',
+        `fxmint: FxMintRepayDebtRecipe — approveAmount must equal repayAmount × (FEE_DENOM + repayFeeRatio) / FEE_DENOM ` +
+          `(expected ${expectedApprove}, got ${opts.approveAmount}). Use computeFxRepay to derive both fields.`,
       );
     }
   }

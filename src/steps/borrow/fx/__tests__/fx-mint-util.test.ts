@@ -13,7 +13,9 @@ describe('fx-mint-util — pool registry', () => {
   it('resolvePool("wstETH-Long") returns collateralDecimals = 18n', () => {
     const pool = resolvePool('wstETH-Long');
     expect(pool.collateralDecimals).to.equal(18n);
-    expect(pool.collateralToken.toLowerCase()).to.equal(FX_ADDRESSES.wstETH.toLowerCase());
+    expect(pool.collateralToken.toLowerCase()).to.equal(
+      FX_ADDRESSES.wstETH.toLowerCase(),
+    );
   });
 
   it('resolvePool("WBTC-Long") returns collateralDecimals = 8n', () => {
@@ -42,21 +44,25 @@ describe('fx-mint-util — pool registry', () => {
   });
 
   it('resolvePool throws on unknown pool name', () => {
-    expect(() => resolvePool('UNKNOWN' as never)).to.throw(/Unknown fxMINT pool/);
+    expect(() => resolvePool('UNKNOWN' as never)).to.throw(
+      /Unknown fxMINT pool/,
+    );
   });
 
   it('FX_ADDRESSES no longer exposes the misleading fxPositionNFT constant', () => {
-    expect((FX_ADDRESSES as Record<string, unknown>).fxPositionNFT).to.equal(undefined);
+    expect((FX_ADDRESSES as Record<string, unknown>).fxPositionNFT).to.equal(
+      undefined,
+    );
   });
 });
 
 describe('fx-mint-util — computeFxRepay', () => {
   it('caps repayAmount at min(maxRepayUnderFee, rawDebts, desiredRepayAmount)', () => {
     const result = computeFxRepay({
-      rawDebts: 100_000_000_000_000_000_000n,             // 100 fxUSD debt
-      shieldedFxUSD: 50_000_000_000_000_000_000n,         // 50 fxUSD shielded
-      desiredRepayAmount: 30_000_000_000_000_000_000n,    // wants to repay 30
-      repayFeeRatio: 5_000_000n,                          // 0.5% (test value, not mainnet's 0.2%)
+      rawDebts: 100_000_000_000_000_000_000n, // 100 fxUSD debt
+      shieldedFxUSD: 50_000_000_000_000_000_000n, // 50 fxUSD shielded
+      desiredRepayAmount: 30_000_000_000_000_000_000n, // wants to repay 30
+      repayFeeRatio: 5_000_000n, // 0.5% (test value, not mainnet's 0.2%)
       railgunUnshieldFeeBps: 25n,
     });
 
@@ -69,8 +75,8 @@ describe('fx-mint-util — computeFxRepay', () => {
 
   it('caps repayAmount at maxRepayUnderFee when shieldedFxUSD is the binding constraint', () => {
     const result = computeFxRepay({
-      rawDebts: 1_000_000_000_000_000_000_000n,           // 1000 fxUSD
-      shieldedFxUSD: 10_000_000_000_000_000_000n,         // 10 fxUSD
+      rawDebts: 1_000_000_000_000_000_000_000n, // 1000 fxUSD
+      shieldedFxUSD: 10_000_000_000_000_000_000n, // 10 fxUSD
       desiredRepayAmount: 1_000_000_000_000_000_000_000n, // wants to repay all 1000
       repayFeeRatio: 5_000_000n,
       railgunUnshieldFeeBps: 25n,
@@ -87,9 +93,9 @@ describe('fx-mint-util — computeFxRepay', () => {
 
   it('caps repayAmount at rawDebts when desiredRepayAmount > rawDebts', () => {
     const result = computeFxRepay({
-      rawDebts: 50_000_000_000_000_000_000n,              // 50 fxUSD
-      shieldedFxUSD: 1_000_000_000_000_000_000_000n,      // way more than enough
-      desiredRepayAmount: 100_000_000_000_000_000_000n,   // wants to over-repay
+      rawDebts: 50_000_000_000_000_000_000n, // 50 fxUSD
+      shieldedFxUSD: 1_000_000_000_000_000_000_000n, // way more than enough
+      desiredRepayAmount: 100_000_000_000_000_000_000n, // wants to over-repay
       repayFeeRatio: 5_000_000n,
       railgunUnshieldFeeBps: 25n,
     });
@@ -119,7 +125,7 @@ describe('fx-mint-util — computeFxClose still passes after refactor', () => {
       rawDebts: 5_000_000_000_000_000_000n,
       collateralBalance: 8_000_000_000_000_000n,
       totalRawColls: 8_000_000_000_000_000n,
-      shieldedFxUSD: 4_975_000_000_000_000_000n,         // = 5 fxUSD - 0.5% borrow fee
+      shieldedFxUSD: 4_975_000_000_000_000_000n, // = 5 fxUSD - 0.5% borrow fee
       repayFeeRatio: 5_000_000n,
       railgunUnshieldFeeBps: 25n,
     });

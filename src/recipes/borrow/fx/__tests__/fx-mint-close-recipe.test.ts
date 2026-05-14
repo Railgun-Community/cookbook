@@ -33,43 +33,58 @@ describe('FxMintCloseRecipe — auto-branch + per-pool validation', () => {
   };
 
   it('wstETH-Long: throws if swapQuote is missing', () => {
-    expect(() => new FxMintCloseRecipe({
-      ...baseOpts,
-      pool: 'wstETH-Long',
-    })).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
+    expect(
+      () =>
+        new FxMintCloseRecipe({
+          ...baseOpts,
+          pool: 'wstETH-Long',
+        }),
+    ).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
   });
 
   it('WBTC-Long: throws if swapQuote is provided', () => {
-    expect(() => new FxMintCloseRecipe({
-      ...baseOpts,
-      pool: 'WBTC-Long',
-      swapQuote: fakeSwapQuote,
-      slippageBasisPoints: 5,
-    })).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
+    expect(
+      () =>
+        new FxMintCloseRecipe({
+          ...baseOpts,
+          pool: 'WBTC-Long',
+          swapQuote: fakeSwapQuote,
+          slippageBasisPoints: 5,
+        }),
+    ).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
   });
 
   it('wstETH-Long with swapQuote: constructs', () => {
-    expect(() => new FxMintCloseRecipe({
-      ...baseOpts,
-      pool: 'wstETH-Long',
-      swapQuote: fakeSwapQuote,
-      slippageBasisPoints: 5,
-    })).not.to.throw();
+    expect(
+      () =>
+        new FxMintCloseRecipe({
+          ...baseOpts,
+          pool: 'wstETH-Long',
+          swapQuote: fakeSwapQuote,
+          slippageBasisPoints: 5,
+        }),
+    ).not.to.throw();
   });
 
   it('WBTC-Long without swapQuote: constructs', () => {
-    expect(() => new FxMintCloseRecipe({
-      ...baseOpts,
-      pool: 'WBTC-Long',
-    })).not.to.throw();
+    expect(
+      () =>
+        new FxMintCloseRecipe({
+          ...baseOpts,
+          pool: 'WBTC-Long',
+        }),
+    ).not.to.throw();
   });
 
   it('throws if swapQuote provided without slippageBasisPoints', () => {
-    expect(() => new FxMintCloseRecipe({
-      ...baseOpts,
-      pool: 'wstETH-Long',
-      swapQuote: fakeSwapQuote,
-      // slippageBasisPoints intentionally omitted
-    } as never)).to.throw(/slippageBasisPoints/);
+    expect(
+      () =>
+        new FxMintCloseRecipe({
+          ...baseOpts,
+          pool: 'wstETH-Long',
+          swapQuote: fakeSwapQuote,
+          // slippageBasisPoints intentionally omitted
+        } as never),
+    ).to.throw(/slippageBasisPoints/);
   });
 });

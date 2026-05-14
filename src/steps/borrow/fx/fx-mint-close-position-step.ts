@@ -1,8 +1,16 @@
-import { encodeFunctionData, type Address } from "viem";
-import { NFTTokenType } from "@railgun-community/shared-models";
+import { Interface, type ContractTransaction } from 'ethers';
+import { NFTTokenType } from '@railgun-community/shared-models';
 import { Step } from '../../step';
-import type { StepConfig, StepInput, UnvalidatedStepOutput } from '../../../models/export-models';
-import { FX_ADDRESSES, FX_POOL_MANAGER_ABI } from './fx-mint-util';
+import type {
+  StepConfig,
+  StepInput,
+  UnvalidatedStepOutput,
+} from '../../../models/export-models';
+import {
+  FX_ADDRESSES,
+  FX_POOL_MANAGER_ABI,
+  type Address,
+} from './fx-mint-util';
 
 export type FxMintClosePositionStepData = {
   pool: Address;
@@ -42,9 +50,9 @@ export type FxMintClosePositionStepData = {
  */
 export class FxMintClosePositionStep extends Step {
   readonly config: StepConfig = {
-    name: "f(x) Close Position",
+    name: 'f(x) Close Position',
     description:
-      "Calls PoolManager.operate(pool, positionId, -coll, -debt). Burns fxUSD; releases collateral and (for full close) the position NFT.",
+      'Calls PoolManager.operate(pool, positionId, -coll, -debt). Burns fxUSD; releases collateral and (for full close) the position NFT.',
     hasNonDeterministicOutput: false,
   };
 
@@ -52,8 +60,18 @@ export class FxMintClosePositionStep extends Step {
     super();
   }
 
-  protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
-    const { pool, collateralToken, collateralDecimals, positionId, repayAmount, withdrawColl, partialClose } = this.data;
+  protected async getStepOutput(
+    input: StepInput,
+  ): Promise<UnvalidatedStepOutput> {
+    const {
+      pool,
+      collateralToken,
+      collateralDecimals,
+      positionId,
+      repayAmount,
+      withdrawColl,
+      partialClose,
+    } = this.data;
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
@@ -65,7 +83,7 @@ export class FxMintClosePositionStep extends Step {
     // (treasury). Read the actual approved input amount so we can
     // declare the fee correctly.
     const approvedFxUSDInput = input.erc20Amounts.find(
-      (a) =>
+      a =>
         a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
         a.approvedSpender?.toLowerCase() === poolManager.toLowerCase(),
     );
@@ -84,11 +102,11 @@ export class FxMintClosePositionStep extends Step {
     // spent + fees + outputs balances to the wei.
     const orphanFxUSD = input.erc20Amounts
       .filter(
-        (a) =>
+        a =>
           a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
           a.approvedSpender?.toLowerCase() !== poolManager.toLowerCase(),
       )
-      .map((a) => ({
+      .map(a => ({
         tokenAddress: fxUSD,
         decimals: a.decimals,
         expectedBalance: a.expectedBalance,
@@ -97,16 +115,26 @@ export class FxMintClosePositionStep extends Step {
         approvedSpender: a.approvedSpender,
       }));
 
-    const callData = encodeFunctionData({
-      abi: FX_POOL_MANAGER_ABI,
-      functionName: "operate",
-      args: [pool, positionId, -withdrawColl, -repayAmount],
-    });
+    // Ethers' Interface for ABI encoding (cookbook house style: other
+    // steps use Contract.populateTransaction via typechain bindings; we
+    // use Interface directly since we don't ship a typechain binding for
+    // the f(x) PoolManager — just the ABI fragment in fx-mint-util).
+    const iface = new Interface(FX_POOL_MANAGER_ABI);
+    const callData = iface.encodeFunctionData('operate', [
+      pool,
+      positionId,
+      -withdrawColl,
+      -repayAmount,
+    ]);
+
+    const tx: ContractTransaction = {
+      to: poolManager,
+      data: callData,
+      value: 0n,
+    };
 
     return {
-      crossContractCalls: [
-        { to: poolManager, data: callData, value: 0n } as never,
-      ],
+      crossContractCalls: [tx],
       spentERC20Amounts: [
         {
           tokenAddress: fxUSD,
@@ -130,7 +158,7 @@ export class FxMintClosePositionStep extends Step {
         : [
             {
               nftAddress: pool,
-              tokenSubID: "0x" + positionId.toString(16),
+              tokenSubID: '0x' + positionId.toString(16),
               nftTokenType: NFTTokenType.ERC721,
               amount: 1n,
             },
@@ -156,7 +184,7 @@ export class FxMintClosePositionStep extends Step {
         ? [
             {
               nftAddress: pool,
-              tokenSubID: "0x" + positionId.toString(16),
+              tokenSubID: '0x' + positionId.toString(16),
               nftTokenType: NFTTokenType.ERC721,
               amount: 1n,
             },

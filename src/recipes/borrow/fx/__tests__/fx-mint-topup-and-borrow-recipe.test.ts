@@ -30,51 +30,71 @@ describe('FxMintTopupAndBorrowRecipe', () => {
   };
 
   it('wstETH-Long: throws if swapQuote is missing', () => {
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'wstETH-Long',
-    })).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'wstETH-Long',
+        }),
+    ).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
   });
 
   it('WBTC-Long: throws if swapQuote is provided', () => {
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'WBTC-Long',
-      swapQuote: fakeSwapQuote,
-      slippageBasisPoints: 5,
-    })).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'WBTC-Long',
+          swapQuote: fakeSwapQuote,
+          slippageBasisPoints: 5,
+        }),
+    ).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
   });
 
   it('wstETH-Long with swapQuote: constructs', () => {
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'wstETH-Long',
-      swapQuote: fakeSwapQuote,
-      slippageBasisPoints: 5,
-    })).not.to.throw();
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'wstETH-Long',
+          swapQuote: fakeSwapQuote,
+          slippageBasisPoints: 5,
+        }),
+    ).not.to.throw();
   });
 
   it('WBTC-Long without swapQuote: constructs', () => {
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'WBTC-Long',
-    })).not.to.throw();
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'WBTC-Long',
+        }),
+    ).not.to.throw();
   });
 
   it('throws if additionalDebt is 0n (use FxMintTopupRecipe instead)', () => {
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'WBTC-Long',
-      additionalDebt: 0n,
-    })).to.throw(/additionalDebt.*positive|use FxMintTopupRecipe|additionalDebt.*> 0/i);
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'WBTC-Long',
+          additionalDebt: 0n,
+        }),
+    ).to.throw(
+      /additionalDebt.*positive|use FxMintTopupRecipe|additionalDebt.*> 0/i,
+    );
   });
 
   it('throws if additionalDebt is negative', () => {
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'WBTC-Long',
-      additionalDebt: -1n,
-    })).to.throw(/additionalDebt/i);
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'WBTC-Long',
+          additionalDebt: -1n,
+        }),
+    ).to.throw(/additionalDebt/i);
   });
 
   it('throws if swapQuote provided without slippageBasisPoints', () => {
@@ -82,10 +102,13 @@ describe('FxMintTopupAndBorrowRecipe', () => {
     // supplied, slippageBasisPoints must accompany it — otherwise the
     // ZeroXV2SwapStep ends up with no slippage bound at recipe time.
     // Mirrors the same guard on FxMintTopupRecipe / FxMintOpenRecipe.
-    expect(() => new FxMintTopupAndBorrowRecipe({
-      ...baseOpts,
-      pool: 'wstETH-Long',
-      swapQuote: fakeSwapQuote,
-    } as never)).to.throw(/slippageBasisPoints/);
+    expect(
+      () =>
+        new FxMintTopupAndBorrowRecipe({
+          ...baseOpts,
+          pool: 'wstETH-Long',
+          swapQuote: fakeSwapQuote,
+        } as never),
+    ).to.throw(/slippageBasisPoints/);
   });
 });

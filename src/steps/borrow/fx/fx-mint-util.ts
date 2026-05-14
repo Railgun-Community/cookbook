@@ -1,4 +1,14 @@
-import { getAddress, type Address } from 'viem';
+import { getAddress } from 'ethers';
+
+/**
+ * Type alias for an EVM address. Ethers v6 doesn't ship a dedicated
+ * `Address` brand — `string` is the canonical type — but keeping a named
+ * alias improves call-site readability and gives a single rename point if
+ * we ever want to switch to a branded type. All cookbook fxmint files
+ * import `Address` from here (not from viem; the dep was dropped during
+ * the v0.1 upstream-PR prep so the cookbook stays pure-ethers).
+ */
+export type Address = string;
 
 // =============================================================================
 // f(x) Protocol mainnet addresses (immutable contracts, sourced from
@@ -419,10 +429,12 @@ export type ResolvedFxPool = {
 
 export function resolvePool(ref: FxMintPoolRef): ResolvedFxPool {
   if (typeof ref === 'string') {
-    const found = KNOWN_POOLS.find((p) => p.name === ref);
+    const found = KNOWN_POOLS.find(p => p.name === ref);
     if (!found) {
       throw new Error(
-        `Unknown fxMINT pool name: ${ref}. Known pools: ${KNOWN_POOLS.map((p) => p.name).join(', ')}`,
+        `Unknown fxMINT pool name: ${ref}. Known pools: ${KNOWN_POOLS.map(
+          p => p.name,
+        ).join(', ')}`,
       );
     }
     return {
@@ -446,13 +458,13 @@ export const FEE_DENOM = 1_000_000_000n;
 export const BPS_DENOM = 10_000n;
 
 export type FxCloseInputs = {
-  rawColls: bigint;                   // Pool.getPosition()[0]
-  rawDebts: bigint;                   // Pool.getPosition()[1]
-  collateralBalance: bigint;          // PoolManager.getPoolInfo(pool)[1]
-  totalRawColls: bigint;              // Pool.getTotalRawCollaterals()
-  shieldedFxUSD: bigint;              // wallet.balanceForERC20Token(fxUSD)
-  repayFeeRatio: bigint;              // PoolConfiguration.getPoolFeeRatio(...)[3], 1e9-denominated
-  railgunUnshieldFeeBps: bigint;      // 25 on mainnet
+  rawColls: bigint; // Pool.getPosition()[0]
+  rawDebts: bigint; // Pool.getPosition()[1]
+  collateralBalance: bigint; // PoolManager.getPoolInfo(pool)[1]
+  totalRawColls: bigint; // Pool.getTotalRawCollaterals()
+  shieldedFxUSD: bigint; // wallet.balanceForERC20Token(fxUSD)
+  repayFeeRatio: bigint; // PoolConfiguration.getPoolFeeRatio(...)[3], 1e9-denominated
+  railgunUnshieldFeeBps: bigint; // 25 on mainnet
 };
 
 export type FxCloseAmounts = {
@@ -544,11 +556,15 @@ export function computeFxRepay(input: FxRepayInputs): FxRepayAmounts {
   } = input;
 
   if (railgunUnshieldFeeBps > BPS_DENOM) {
-    throw new Error(`railgunUnshieldFeeBps must be <= ${BPS_DENOM}, got ${railgunUnshieldFeeBps}`);
+    throw new Error(
+      `railgunUnshieldFeeBps must be <= ${BPS_DENOM}, got ${railgunUnshieldFeeBps}`,
+    );
   }
 
-  const fxUSDAfterUnshield = (shieldedFxUSD * (BPS_DENOM - railgunUnshieldFeeBps)) / BPS_DENOM;
-  const maxRepayUnderFee = (fxUSDAfterUnshield * FEE_DENOM) / (FEE_DENOM + repayFeeRatio);
+  const fxUSDAfterUnshield =
+    (shieldedFxUSD * (BPS_DENOM - railgunUnshieldFeeBps)) / BPS_DENOM;
+  const maxRepayUnderFee =
+    (fxUSDAfterUnshield * FEE_DENOM) / (FEE_DENOM + repayFeeRatio);
 
   // Three-way min: fee ceiling, debt ceiling, user's intent.
   let repayAmount = maxRepayUnderFee;

@@ -2,7 +2,10 @@ import { Recipe } from '../../recipe';
 import { Step } from '../../../steps';
 import type { RecipeConfig, StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
-import { resolvePool, type FxMintPoolRef } from '../../../steps/borrow/fx/fx-mint-util';
+import {
+  resolvePool,
+  type FxMintPoolRef,
+} from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
 
 export type FxMintBorrowMoreRecipeOpts = {
@@ -56,10 +59,11 @@ export type FxMintBorrowMoreRecipeOpts = {
  * the liquidation threshold, but failing client-side is friendlier.
  */
 export class FxMintBorrowMoreRecipe extends Recipe {
-  readonly id = "fxmint-borrow-more-v1";
+  readonly id = 'fxmint-borrow-more-v1';
   readonly config: RecipeConfig = {
-    name: "fxMINT Borrow More",
-    description: "Mint additional fxUSD against an existing f(x) Long position.",
+    name: 'fxMINT Borrow More',
+    description:
+      'Mint additional fxUSD against an existing f(x) Long position.',
     // Single-step recipe — operate() with debt-only delta is the lightest
     // adjust op, but we keep a 1M floor so wstETH oracle calls + price
     // fallback paths fit comfortably under the relay-adapter gas cap.

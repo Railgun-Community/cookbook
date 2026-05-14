@@ -80,14 +80,18 @@ describe('FxMintAdjustPositionStep', () => {
       debtDelta: 0n,
     });
 
-    const output = await step.getValidStepOutput(inputWithCollateral(collDelta));
+    const output = await step.getValidStepOutput(
+      inputWithCollateral(collDelta),
+    );
 
     expect(output.crossContractCalls).to.have.length(1);
     expect(output.spentERC20Amounts).to.have.length(1);
     expect(output.spentERC20Amounts![0].amount).to.equal(collDelta);
     expect(output.outputERC20Amounts ?? []).to.have.length(0);
     expect(output.outputNFTs).to.have.length(1);
-    expect(output.outputNFTs![0].tokenSubID).to.equal('0x' + positionId.toString(16));
+    expect(output.outputNFTs![0].tokenSubID).to.equal(
+      '0x' + positionId.toString(16),
+    );
   });
 
   it('borrow-more (collDelta=0, debtDelta>0): no collateral spend, fxUSD output post-borrow-fee', async () => {
@@ -117,8 +121,9 @@ describe('FxMintAdjustPositionStep', () => {
 
     expect(output.spentERC20Amounts ?? []).to.have.length(0);
     expect(output.outputERC20Amounts).to.have.length(1);
-    expect(output.outputERC20Amounts![0].tokenAddress.toLowerCase())
-      .to.equal(FX_ADDRESSES.fxUSD.toLowerCase());
+    expect(output.outputERC20Amounts![0].tokenAddress.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxUSD.toLowerCase(),
+    );
     const expectedNet = debtDelta - (debtDelta * 5_000_000n) / 1_000_000_000n;
     expect(output.outputERC20Amounts![0].expectedBalance).to.equal(expectedNet);
     expect(output.outputNFTs).to.have.length(1);
@@ -134,7 +139,9 @@ describe('FxMintAdjustPositionStep', () => {
       borrowFeeRatio: 5_000_000n,
     });
 
-    const output = await step.getValidStepOutput(inputWithCollateral(collDelta));
+    const output = await step.getValidStepOutput(
+      inputWithCollateral(collDelta),
+    );
 
     expect(output.spentERC20Amounts).to.have.length(1);
     expect(output.outputERC20Amounts).to.have.length(1);
@@ -159,36 +166,48 @@ describe('FxMintAdjustPositionStep', () => {
 
     // fxUSD spend = |debtDelta| × (1e9 + 5e6) / 1e9 = 3.015e18
     expect(output.spentERC20Amounts).to.have.length(1);
-    expect(output.spentERC20Amounts![0].tokenAddress.toLowerCase())
-      .to.equal(FX_ADDRESSES.fxUSD.toLowerCase());
-    expect(output.spentERC20Amounts![0].amount).to.equal(3_015_000_000_000_000_000n);
+    expect(output.spentERC20Amounts![0].tokenAddress.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxUSD.toLowerCase(),
+    );
+    expect(output.spentERC20Amounts![0].amount).to.equal(
+      3_015_000_000_000_000_000n,
+    );
 
     expect(output.outputERC20Amounts ?? []).to.have.length(0);
     expect(output.outputNFTs).to.have.length(1);
   });
 
   it('throws when both deltas are zero', () => {
-    expect(() => new FxMintAdjustPositionStep({
-      ...baseData,
-      collDelta: 0n,
-      debtDelta: 0n,
-    })).to.throw(/at least one of/);
+    expect(
+      () =>
+        new FxMintAdjustPositionStep({
+          ...baseData,
+          collDelta: 0n,
+          debtDelta: 0n,
+        }),
+    ).to.throw(/at least one of/);
   });
 
   it('throws when debtDelta>0 and borrowFeeRatio missing', () => {
-    expect(() => new FxMintAdjustPositionStep({
-      ...baseData,
-      collDelta: 0n,
-      debtDelta: 1n,
-    })).to.throw(/borrowFeeRatio/);
+    expect(
+      () =>
+        new FxMintAdjustPositionStep({
+          ...baseData,
+          collDelta: 0n,
+          debtDelta: 1n,
+        }),
+    ).to.throw(/borrowFeeRatio/);
   });
 
   it('throws when debtDelta<0 and repayFeeRatio missing', () => {
-    expect(() => new FxMintAdjustPositionStep({
-      ...baseData,
-      collDelta: 0n,
-      debtDelta: -1n,
-    })).to.throw(/repayFeeRatio/);
+    expect(
+      () =>
+        new FxMintAdjustPositionStep({
+          ...baseData,
+          collDelta: 0n,
+          debtDelta: -1n,
+        }),
+    ).to.throw(/repayFeeRatio/);
   });
 
   it('throws at getStepOutput when collDelta > 0 but no matching input', async () => {

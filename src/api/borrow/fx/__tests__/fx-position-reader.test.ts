@@ -1,6 +1,5 @@
 import chai from 'chai';
-import { createPublicClient, http } from 'viem';
-import { mainnet } from 'viem/chains';
+import { JsonRpcProvider } from 'ethers';
 import { getFxPool, getFxPosition } from '../fx-position-reader';
 
 const { expect } = chai;
@@ -16,11 +15,9 @@ describe('fx-position-reader — getFxPool [requires RUN_FORK_TESTS=1]', functio
   // Use a public RPC if MAINNET_RPC_URL isn't set — publicnode worked
   // in Task 1's discovery. Fork tests are read-only so any reliable
   // public RPC works.
-  const rpcUrl = process.env.MAINNET_RPC_URL ?? 'https://ethereum-rpc.publicnode.com';
-  const provider = createPublicClient({
-    chain: mainnet,
-    transport: http(rpcUrl),
-  });
+  const rpcUrl =
+    process.env.MAINNET_RPC_URL ?? 'https://ethereum-rpc.publicnode.com';
+  const provider = new JsonRpcProvider(rpcUrl);
 
   it('reads wstETH-Long pool state', async () => {
     const pool = await getFxPool('wstETH-Long', provider);
@@ -44,13 +41,18 @@ describe('fx-position-reader — getFxPool [requires RUN_FORK_TESTS=1]', functio
   });
 
   it('returns name=undefined for custom pool refs', async () => {
-    const pool = await getFxPool({
-      address: '0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8', // wstETH-Long
-      collateralToken: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
-      collateralDecimals: 18n,
-    }, provider);
+    const pool = await getFxPool(
+      {
+        address: '0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8', // wstETH-Long
+        collateralToken: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+        collateralDecimals: 18n,
+      },
+      provider,
+    );
     expect(pool.name).to.equal(undefined);
-    expect(pool.address.toLowerCase()).to.equal('0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'.toLowerCase());
+    expect(pool.address.toLowerCase()).to.equal(
+      '0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8'.toLowerCase(),
+    );
   });
 });
 
@@ -62,8 +64,9 @@ describe('fx-position-reader — getFxPosition [requires RUN_FORK_TESTS=1]', fun
     return;
   }
 
-  const rpcUrl = process.env.MAINNET_RPC_URL ?? 'https://ethereum-rpc.publicnode.com';
-  const provider = createPublicClient({ chain: mainnet, transport: http(rpcUrl) });
+  const rpcUrl =
+    process.env.MAINNET_RPC_URL ?? 'https://ethereum-rpc.publicnode.com';
+  const provider = new JsonRpcProvider(rpcUrl);
 
   it('reads a known wstETH-Long position', async () => {
     // positionId 1903 is the v0 calibration mint (tx 0x3f7c7c42... from
@@ -75,7 +78,11 @@ describe('fx-position-reader — getFxPosition [requires RUN_FORK_TESTS=1]', fun
     // assertions fail informatively).
     const knownPositionId = 1903n;
 
-    const position = await getFxPosition(knownPositionId, 'wstETH-Long', provider);
+    const position = await getFxPosition(
+      knownPositionId,
+      'wstETH-Long',
+      provider,
+    );
     expect(position.positionId).to.equal(knownPositionId);
     expect(position.collateralDecimals).to.equal(18n);
     expect(position.pool.address.toLowerCase()).to.equal(

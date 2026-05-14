@@ -1,4 +1,4 @@
-import type { Address, PublicClient } from 'viem';
+import { Contract, type Provider } from 'ethers';
 import {
   FX_ADDRESSES,
   FX_POOL_ABI,
@@ -6,6 +6,7 @@ import {
   FX_POOL_CONFIGURATION_ABI,
   DEFAULT_FXMINT_OPERATOR,
   resolvePool,
+  type Address,
   type FxMintPoolRef,
   type FxMintPoolName,
 } from '../../../steps/borrow/fx/fx-mint-util';
@@ -91,73 +92,85 @@ export type FxPool = {
  *
  * Performs four sequential on-chain reads (PoolManager.getPoolInfo,
  * Pool.getTotalRawCollaterals, Pool.getLiquidateRatios,
- * PoolConfiguration.getPoolFeeRatio). Cookbook v0.1 doesn't bake in
- * batching; integrators wanting a single-roundtrip read should compose
- * with viem's multicall externally.
+ * Pool.getRebalanceRatios, PoolConfiguration.getPoolFeeRatio). Cookbook
+ * v0.1 doesn't bake in batching; integrators wanting a single-roundtrip
+ * read can compose with ethers' Multicall3 helper (or any external
+ * batcher) against these same function selectors.
  *
  * Default operator is the Railgun relay-adapter. Pass `operator`
  * explicitly to query fees from a different operator's perspective.
  */
 export async function getFxPool(
   poolRef: FxMintPoolRef,
-  provider: PublicClient,
+  provider: Provider,
   operator: Address = DEFAULT_FXMINT_OPERATOR,
 ): Promise<FxPool> {
   const resolved = resolvePool(poolRef);
 
   // PoolManager.getPoolInfo returns 5 fields per FX_POOL_MANAGER_ABI:
   // [collateralCapacity, collateralBalance, rawCollateral, debtCapacity, debtBalance].
-  const poolInfo = await provider.readContract({
-    address: FX_ADDRESSES.fxPoolManager,
-    abi: FX_POOL_MANAGER_ABI,
-    functionName: 'getPoolInfo',
-    args: [resolved.address],
-  }) as readonly [bigint, bigint, bigint, bigint, bigint];
+  // ethers v6 Contract returns a Result (array-like + named accessors)
+  // for tuple returns; array-style destructuring is the canonical idiom.
+  const poolManagerContract = new Contract(
+    FX_ADDRESSES.fxPoolManager,
+    FX_POOL_MANAGER_ABI,
+    provider,
+  );
+  const poolInfo = (await poolManagerContract.getPoolInfo(
+    resolved.address,
+  )) as readonly [bigint, bigint, bigint, bigint, bigint];
   const [
-    /* collateralCapacity */,
-    collateralBalance,
-    /* rawCollateral */,
-    debtCapacity,
+    ,
+    /* collateralCapacity */ collateralBalance,
+    ,
+    /* rawCollateral */ debtCapacity,
     debtBalance,
   ] = poolInfo;
 
-  const totalRawColls = await provider.readContract({
-    address: resolved.address,
-    abi: FX_POOL_ABI,
-    functionName: 'getTotalRawCollaterals',
-    args: [],
-  }) as bigint;
+  // Pool contract — used for the next three reads
+  // (getTotalRawCollaterals, getLiquidateRatios, getRebalanceRatios).
+  const poolContract = new Contract(
+    resolved.address,
+    FX_POOL_ABI,
+    provider,
+  );
+
+  const totalRawColls = (await poolContract.getTotalRawCollaterals()) as bigint;
 
   // Pool.getLiquidateRatios() — added to FX_POOL_ABI in v0.1 Task 13.
-  const liquidateRatios = await provider.readContract({
-    address: resolved.address,
-    abi: FX_POOL_ABI,
-    functionName: 'getLiquidateRatios',
-    args: [],
-  }) as readonly [bigint, bigint];
+  const liquidateRatios = (await poolContract.getLiquidateRatios()) as readonly [
+    bigint,
+    bigint,
+  ];
   const [liquidationDebtRatio, liquidationBonusRatio] = liquidateRatios;
 
   // Pool.getRebalanceRatios() — added to FX_POOL_ABI after launch when
   // wallet integrators flagged the gap. Same tuple shape as liquidate.
   // The rebalance threshold sits below liquidation; see FxPool type doc
   // for the yellow-zone display recommendation.
-  const rebalanceRatios = await provider.readContract({
-    address: resolved.address,
-    abi: FX_POOL_ABI,
-    functionName: 'getRebalanceRatios',
-    args: [],
-  }) as readonly [bigint, bigint];
+  const rebalanceRatios = (await poolContract.getRebalanceRatios()) as readonly [
+    bigint,
+    bigint,
+  ];
   const [rebalanceDebtRatio, rebalanceBonusRatio] = rebalanceRatios;
 
   // Per-(pool, operator) fee ratios.
-  const fees = await provider.readContract({
-    address: FX_ADDRESSES.fxPoolConfiguration,
-    abi: FX_POOL_CONFIGURATION_ABI,
-    functionName: 'getPoolFeeRatio',
-    args: [resolved.address, operator],
-  }) as readonly [bigint, bigint, bigint, bigint];
+  const poolConfigContract = new Contract(
+    FX_ADDRESSES.fxPoolConfiguration,
+    FX_POOL_CONFIGURATION_ABI,
+    provider,
+  );
+  const fees = (await poolConfigContract.getPoolFeeRatio(
+    resolved.address,
+    operator,
+  )) as readonly [bigint, bigint, bigint, bigint];
   // Tuple positions confirmed in Task 1: [supply, withdraw, borrow, repay].
-  const [/* supplyFeeRatio */, /* withdrawFeeRatio */, borrowFeeRatio, repayFeeRatio] = fees;
+  const [
+    ,
+    ,
+    /* supplyFeeRatio */ /* withdrawFeeRatio */ borrowFeeRatio,
+    repayFeeRatio,
+  ] = fees;
 
   // typeof narrowing: FxMintPoolRef = FxMintPoolName | {address;...}, so
   // the string branch is already FxMintPoolName — no cast needed.
@@ -232,68 +245,66 @@ export type FxPosition = {
  * Performs four sequential on-chain reads (Pool.getPosition,
  * Pool.getPositionDebtRatio, Pool.getTotalRawCollaterals,
  * PoolManager.getPoolInfo) and computes collateralAmount inline.
- * Integrators wanting batched reads should compose with viem's multicall.
+ * Integrators wanting batched reads can compose with ethers' Multicall3
+ * helper (or any external batcher) against these same function selectors.
  *
  * v0.2 may bake in a multicall variant (one roundtrip instead of four)
  * once the wallet integrator patterns settle — deferred from v0.1 to
- * keep the surface small for the upstream PR. Until then, viem's
- * `publicClient.multicall({ contracts: [...] })` against these same
- * function selectors composes cleanly.
+ * keep the surface small for the upstream PR.
  */
 export async function getFxPosition(
   positionId: bigint,
   poolRef: FxMintPoolRef,
-  provider: PublicClient,
+  provider: Provider,
 ): Promise<FxPosition> {
   const resolved = resolvePool(poolRef);
 
+  // Pool contract — three of the four reads come from it.
+  const poolContract = new Contract(
+    resolved.address,
+    FX_POOL_ABI,
+    provider,
+  );
+
   // Pool.getPosition returns (rawColls, rawDebts).
-  const positionTuple = await provider.readContract({
-    address: resolved.address,
-    abi: FX_POOL_ABI,
-    functionName: 'getPosition',
-    args: [positionId],
-  }) as readonly [bigint, bigint];
+  const positionTuple = (await poolContract.getPosition(positionId)) as readonly [
+    bigint,
+    bigint,
+  ];
   const [rawColls, rawDebts] = positionTuple;
 
   // Pool.getPositionDebtRatio returns the 1e18-scaled debt ratio.
-  // Note: this is a single-uint256 return per the existing FX_POOL_ABI;
-  // viem's readContract returns the raw bigint (not wrapped in a tuple).
-  const debtRatio = await provider.readContract({
-    address: resolved.address,
-    abi: FX_POOL_ABI,
-    functionName: 'getPositionDebtRatio',
-    args: [positionId],
-  }) as bigint;
+  // Note: this is a single-uint256 return per the existing FX_POOL_ABI.
+  // ethers' Contract returns the raw bigint (not wrapped in a tuple) for
+  // single-return-value functions.
+  const debtRatio = (await poolContract.getPositionDebtRatio(
+    positionId,
+  )) as bigint;
 
   // Convert rawColls → native-decimals collateralAmount via the same
   // ratio computeFxClose uses: collateralAmount = rawColls × collateralBalance / totalRawColls.
   // Need totalRawColls + collateralBalance — fetch them; v0.1 prefers
   // clarity over a shared multicall.
-  const totalRawColls = await provider.readContract({
-    address: resolved.address,
-    abi: FX_POOL_ABI,
-    functionName: 'getTotalRawCollaterals',
-    args: [],
-  }) as bigint;
+  const totalRawColls = (await poolContract.getTotalRawCollaterals()) as bigint;
 
   // PoolManager.getPoolInfo returns (collateralCapacity, collateralBalance,
   // rawCollateral, debtCapacity, debtBalance) — 5 fields per the existing
   // FX_POOL_MANAGER_ABI in fx-mint-util.ts. Confirmed in Task 13.
-  const poolInfo = await provider.readContract({
-    address: FX_ADDRESSES.fxPoolManager,
-    abi: FX_POOL_MANAGER_ABI,
-    functionName: 'getPoolInfo',
-    args: [resolved.address],
-  }) as readonly [bigint, bigint, bigint, bigint, bigint];
-  const [/* collCap */, collateralBalance] = poolInfo;
+  const poolManagerContract = new Contract(
+    FX_ADDRESSES.fxPoolManager,
+    FX_POOL_MANAGER_ABI,
+    provider,
+  );
+  const poolInfo = (await poolManagerContract.getPoolInfo(
+    resolved.address,
+  )) as readonly [bigint, bigint, bigint, bigint, bigint];
+  const [, /* collCap */ collateralBalance] = poolInfo;
 
   // collateralAmount = (rawColls × collateralBalance) / totalRawColls.
   // Guard against div-by-zero in the empty-pool case (no positions yet —
   // shouldn't happen for production pools but worth being safe).
-  const collateralAmount = totalRawColls === 0n
-    ? 0n
-    : (rawColls * collateralBalance) / totalRawColls;
+  const collateralAmount =
+    totalRawColls === 0n ? 0n : (rawColls * collateralBalance) / totalRawColls;
 
   const name = typeof poolRef === 'string' ? poolRef : undefined;
 

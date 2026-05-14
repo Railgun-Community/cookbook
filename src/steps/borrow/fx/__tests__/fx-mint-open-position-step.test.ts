@@ -13,7 +13,11 @@ describe('FxMintOpenPositionStep', () => {
   const targetDebt = 5_000_000_000_000_000_000n; // 5 fxUSD
   const predictedPositionId = 1903n;
 
-  function makeStepInput(collateralAmount: bigint, decimals: bigint, collateralToken: string): StepInput {
+  function makeStepInput(
+    collateralAmount: bigint,
+    decimals: bigint,
+    collateralToken: string,
+  ): StepInput {
     return {
       networkName: NetworkName.Ethereum,
       erc20Amounts: [
@@ -47,15 +51,19 @@ describe('FxMintOpenPositionStep', () => {
 
     // Single cross-contract call to PoolManager.
     expect(output.crossContractCalls).to.have.length(1);
-    expect(output.crossContractCalls[0].to.toLowerCase())
-      .to.equal(FX_ADDRESSES.fxPoolManager.toLowerCase());
+    expect(output.crossContractCalls[0].to.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxPoolManager.toLowerCase(),
+    );
 
     // outputERC20Amounts: fxUSD post-borrow-fee net.
     const expectedFxUSDNet = targetDebt - (targetDebt * 5_000_000n) / FEE_DENOM;
     expect(output.outputERC20Amounts).to.have.length(1);
-    expect(output.outputERC20Amounts[0].tokenAddress.toLowerCase())
-      .to.equal(FX_ADDRESSES.fxUSD.toLowerCase());
-    expect(output.outputERC20Amounts[0].expectedBalance).to.equal(expectedFxUSDNet);
+    expect(output.outputERC20Amounts[0].tokenAddress.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxUSD.toLowerCase(),
+    );
+    expect(output.outputERC20Amounts[0].expectedBalance).to.equal(
+      expectedFxUSDNet,
+    );
 
     // outputNFTs: position NFT at the pool address.
     expect(output.outputNFTs).to.deep.equal([
@@ -94,8 +102,9 @@ describe('FxMintOpenPositionStep', () => {
     );
 
     // Net = targetDebt × (1e9 - 7.5e6) / 1e9 = 5e18 × 0.9925 = 4.9625e18
-    expect(output.outputERC20Amounts[0].expectedBalance)
-      .to.equal(4_962_500_000_000_000_000n);
+    expect(output.outputERC20Amounts[0].expectedBalance).to.equal(
+      4_962_500_000_000_000_000n,
+    );
 
     // Collateral-side decimals plumbed through correctly.
     expect(output.spentERC20Amounts).to.deep.equal([

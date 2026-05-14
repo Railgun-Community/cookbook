@@ -1,11 +1,15 @@
 import { Recipe } from '../../recipe';
 import { ApproveERC20SpenderStep, ZeroXV2SwapStep, Step } from '../../../steps';
-import type { RecipeConfig, StepInput, SwapQuoteData } from '../../../models/export-models';
+import type {
+  RecipeConfig,
+  StepInput,
+  SwapQuoteData,
+} from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
-import type { Address } from 'viem';
 import {
   FX_ADDRESSES,
   resolvePool,
+  type Address,
   type FxMintPoolRef,
   type FxMintPoolName,
 } from '../../../steps/borrow/fx/fx-mint-util';
@@ -63,10 +67,11 @@ export type FxMintOpenRecipeOpts = {
  *   - Custom pool refs are trusted (caller's choice via swapQuote).
  */
 export class FxMintOpenRecipe extends Recipe {
-  readonly id = "fxmint-open-v1";
+  readonly id = 'fxmint-open-v1';
   readonly config: RecipeConfig = {
-    name: "fxMINT Open",
-    description: "Open f(x) Long position; swap-path or direct-path based on pool.",
+    name: 'fxMINT Open',
+    description:
+      'Open f(x) Long position; swap-path or direct-path based on pool.',
     minGasLimit: 1_500_000n,
   };
 
@@ -105,18 +110,18 @@ export class FxMintOpenRecipe extends Recipe {
       // approve/operate steps read input.expectedBalance at run time.
       const inputToken = FX_ADDRESSES.WETH as Address;
       return [
-        new ApproveERC20SpenderStep(
-          this.opts.swapQuote.spender,
-          { tokenAddress: inputToken, decimals: 18n },
-        ),
-        new ZeroXV2SwapStep(
-          this.opts.swapQuote,
-          { tokenAddress: inputToken, decimals: 18n },
-        ),
-        new ApproveERC20SpenderStep(
-          poolManager,
-          { tokenAddress: pool.collateralToken, decimals: pool.collateralDecimals },
-        ),
+        new ApproveERC20SpenderStep(this.opts.swapQuote.spender, {
+          tokenAddress: inputToken,
+          decimals: 18n,
+        }),
+        new ZeroXV2SwapStep(this.opts.swapQuote, {
+          tokenAddress: inputToken,
+          decimals: 18n,
+        }),
+        new ApproveERC20SpenderStep(poolManager, {
+          tokenAddress: pool.collateralToken,
+          decimals: pool.collateralDecimals,
+        }),
         openStep,
       ];
     }
@@ -125,10 +130,10 @@ export class FxMintOpenRecipe extends Recipe {
     // The recipe input ERC20 is the pool collateral itself (e.g. WBTC),
     // so we just approve PoolManager and call operate().
     return [
-      new ApproveERC20SpenderStep(
-        poolManager,
-        { tokenAddress: pool.collateralToken, decimals: pool.collateralDecimals },
-      ),
+      new ApproveERC20SpenderStep(poolManager, {
+        tokenAddress: pool.collateralToken,
+        decimals: pool.collateralDecimals,
+      }),
       openStep,
     ];
   }

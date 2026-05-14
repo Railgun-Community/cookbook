@@ -72,14 +72,17 @@ describe('FxMintClosePositionStep', () => {
       partialClose: true,
     });
 
-    const output = await step.getValidStepOutput(makeStepInput(wbtcPool.address));
+    const output = await step.getValidStepOutput(
+      makeStepInput(wbtcPool.address),
+    );
 
     // Every output/spent line referencing the WBTC collateral must carry decimals = 8.
     const collateralLines = [
       ...(output.outputERC20Amounts ?? []),
       ...(output.spentERC20Amounts ?? []),
     ].filter(
-      (l) => l.tokenAddress.toLowerCase() === wbtcPool.collateralToken.toLowerCase(),
+      l =>
+        l.tokenAddress.toLowerCase() === wbtcPool.collateralToken.toLowerCase(),
     );
 
     expect(collateralLines).to.have.length.greaterThan(0);
@@ -91,7 +94,7 @@ describe('FxMintClosePositionStep', () => {
     const fxUSDLines = [
       ...(output.outputERC20Amounts ?? []),
       ...(output.spentERC20Amounts ?? []),
-    ].filter((l) => l.tokenAddress.toLowerCase() === fxUSD.toLowerCase());
+    ].filter(l => l.tokenAddress.toLowerCase() === fxUSD.toLowerCase());
 
     for (const line of fxUSDLines) {
       expect(line.decimals).to.equal(18n);
@@ -102,7 +105,9 @@ describe('FxMintClosePositionStep', () => {
     // outputNFTs has the position NFT; spentNFTs is empty.
     expect(output.outputNFTs).to.have.length(1);
     expect(output.outputNFTs[0]?.nftAddress).to.equal(wbtcPool.address);
-    expect(output.outputNFTs[0]?.tokenSubID).to.equal('0x' + positionId.toString(16));
+    expect(output.outputNFTs[0]?.tokenSubID).to.equal(
+      '0x' + positionId.toString(16),
+    );
     expect(output.spentNFTs ?? []).to.have.length(0);
   });
 
@@ -119,14 +124,17 @@ describe('FxMintClosePositionStep', () => {
       partialClose: false,
     });
 
-    const output = await step.getValidStepOutput(makeStepInput(wbtcPool.address));
+    const output = await step.getValidStepOutput(
+      makeStepInput(wbtcPool.address),
+    );
 
     // Should produce at least one output/spent line for the WBTC collateral, all with decimals=8.
     const collateralLines = [
       ...(output.outputERC20Amounts ?? []),
       ...(output.spentERC20Amounts ?? []),
     ].filter(
-      (l) => l.tokenAddress.toLowerCase() === wbtcPool.collateralToken.toLowerCase(),
+      l =>
+        l.tokenAddress.toLowerCase() === wbtcPool.collateralToken.toLowerCase(),
     );
     expect(collateralLines).to.have.length.greaterThan(0);
     for (const line of collateralLines) {

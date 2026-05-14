@@ -1,8 +1,17 @@
-import { encodeFunctionData, type Address } from "viem";
-import { NFTTokenType } from "@railgun-community/shared-models";
+import { Interface, type ContractTransaction } from 'ethers';
+import { NFTTokenType } from '@railgun-community/shared-models';
 import { Step } from '../../step';
-import type { StepConfig, StepInput, UnvalidatedStepOutput } from '../../../models/export-models';
-import { FX_ADDRESSES, FX_POOL_MANAGER_ABI, FEE_DENOM } from './fx-mint-util';
+import type {
+  StepConfig,
+  StepInput,
+  UnvalidatedStepOutput,
+} from '../../../models/export-models';
+import {
+  FX_ADDRESSES,
+  FX_POOL_MANAGER_ABI,
+  FEE_DENOM,
+  type Address,
+} from './fx-mint-util';
 
 export type FxMintOpenPositionStepData = {
   /** f(x) Pool address. The position NFT is minted by this contract. */
@@ -53,9 +62,9 @@ export type FxMintOpenPositionStepData = {
  */
 export class FxMintOpenPositionStep extends Step {
   readonly config: StepConfig = {
-    name: "f(x) Open Position",
+    name: 'f(x) Open Position',
     description:
-      "Calls PoolManager.operate(pool, 0, +collateral, +debt). Mints fxUSD and a position NFT to msg.sender.",
+      'Calls PoolManager.operate(pool, 0, +collateral, +debt). Mints fxUSD and a position NFT to msg.sender.',
     hasNonDeterministicOutput: false, // predictedPositionId is provided
   };
 
@@ -63,7 +72,9 @@ export class FxMintOpenPositionStep extends Step {
     super();
   }
 
-  protected async getStepOutput(input: StepInput): Promise<UnvalidatedStepOutput> {
+  protected async getStepOutput(
+    input: StepInput,
+  ): Promise<UnvalidatedStepOutput> {
     const {
       pool,
       collateralToken,
@@ -82,7 +93,7 @@ export class FxMintOpenPositionStep extends Step {
     // we encode into operate(), and consume that exact amount from the
     // step input.
     const inputColl = input.erc20Amounts.find(
-      (a) => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
+      a => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
     );
     if (!inputColl) {
       throw new Error(
@@ -91,11 +102,18 @@ export class FxMintOpenPositionStep extends Step {
     }
     const collateralAmount = inputColl.expectedBalance;
 
-    const callData = encodeFunctionData({
-      abi: FX_POOL_MANAGER_ABI,
-      functionName: "operate",
-      args: [pool, 0n, collateralAmount, targetDebt],
-    });
+    // Encode operate(...) via ethers' Interface — matches the cookbook
+    // house style (other steps use ethers' Contract.populateTransaction;
+    // we use Interface directly because we're not maintaining a typechain
+    // binding for the f(x) PoolManager, just the ABI fragment in
+    // fx-mint-util).
+    const iface = new Interface(FX_POOL_MANAGER_ABI);
+    const callData = iface.encodeFunctionData('operate', [
+      pool,
+      0n,
+      collateralAmount,
+      targetDebt,
+    ]);
 
     // Borrow fee deduction: f(x) emits (targetDebt - fee) of fxUSD to
     // msg.sender (the relay-adapter). Cookbook's StepOutputERC20Amount
@@ -104,10 +122,14 @@ export class FxMintOpenPositionStep extends Step {
     // denominator and the existing computeFxClose convention.
     const fxUSDNet = targetDebt - (targetDebt * borrowFeeRatio) / FEE_DENOM;
 
+    const tx: ContractTransaction = {
+      to: poolManager,
+      data: callData,
+      value: 0n,
+    };
+
     return {
-      crossContractCalls: [
-        { to: poolManager, data: callData, value: 0n } as never,
-      ],
+      crossContractCalls: [tx],
       spentERC20Amounts: [
         {
           tokenAddress: collateralToken,
@@ -121,7 +143,11 @@ export class FxMintOpenPositionStep extends Step {
           tokenAddress: fxUSD,
           decimals: 18n,
           expectedBalance: fxUSDNet,
-          minBalance: 0n,
+          // Deterministic: targetDebt and borrowFeeRatio are both known at
+          // construction time. Setting minBalance = expectedBalance lets
+          // future steps consume this fxUSD with a fixed amount without
+          // tripping step.ts:71-83's non-deterministic-input gate.
+          minBalance: fxUSDNet,
           isBaseToken: false,
           approvedSpender: undefined,
         },
@@ -129,7 +155,7 @@ export class FxMintOpenPositionStep extends Step {
       outputNFTs: [
         {
           nftAddress: pool,
-          tokenSubID: "0x" + predictedPositionId.toString(16),
+          tokenSubID: '0x' + predictedPositionId.toString(16),
           nftTokenType: NFTTokenType.ERC721,
           amount: 1n,
         },
