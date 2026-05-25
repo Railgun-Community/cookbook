@@ -107,10 +107,6 @@ export async function getFxPool(
 ): Promise<FxPool> {
   const resolved = resolvePool(poolRef);
 
-  // PoolManager.getPoolInfo returns 5 fields per FX_POOL_MANAGER_ABI:
-  // [collateralCapacity, collateralBalance, rawCollateral, debtCapacity, debtBalance].
-  // ethers v6 Contract returns a Result (array-like + named accessors)
-  // for tuple returns; array-style destructuring is the canonical idiom.
   const poolManagerContract = new Contract(
     FX_ADDRESSES.fxPoolManager,
     FX_POOL_MANAGER_ABI,
@@ -119,11 +115,16 @@ export async function getFxPool(
   const poolInfo = (await poolManagerContract.getPoolInfo(
     resolved.address,
   )) as readonly [bigint, bigint, bigint, bigint, bigint];
+  // PoolManager.getPoolInfo tuple positions:
+  // [collateralCapacity, collateralBalance, rawCollateral,
+  //  debtCapacity, debtBalance]. Naming every slot (with _
+  // for the ones we don't use here) keeps the position
+  // labels glued to the right value.
   const [
-    ,
-    /* collateralCapacity */ collateralBalance,
-    ,
-    /* rawCollateral */ debtCapacity,
+    _collateralCapacity,
+    collateralBalance,
+    _rawCollateral,
+    debtCapacity,
     debtBalance,
   ] = poolInfo;
 
@@ -164,11 +165,14 @@ export async function getFxPool(
     resolved.address,
     operator,
   )) as readonly [bigint, bigint, bigint, bigint];
-  // Tuple positions confirmed in Task 1: [supply, withdraw, borrow, repay].
+  // PoolConfiguration.getPoolFeeRatio tuple:
+  // [supplyFeeRatio, withdrawFeeRatio, borrowFeeRatio, repayFeeRatio].
+  // Only borrow + repay are non-zero on v0.1 mainnet (no supply/
+  // withdraw fee on f(x)).
   const [
-    ,
-    ,
-    /* supplyFeeRatio */ /* withdrawFeeRatio */ borrowFeeRatio,
+    _supplyFeeRatio,
+    _withdrawFeeRatio,
+    borrowFeeRatio,
     repayFeeRatio,
   ] = fees;
 
@@ -287,9 +291,6 @@ export async function getFxPosition(
   // clarity over a shared multicall.
   const totalRawColls = (await poolContract.getTotalRawCollaterals()) as bigint;
 
-  // PoolManager.getPoolInfo returns (collateralCapacity, collateralBalance,
-  // rawCollateral, debtCapacity, debtBalance) — 5 fields per the existing
-  // FX_POOL_MANAGER_ABI in fx-mint-util.ts. Confirmed in Task 13.
   const poolManagerContract = new Contract(
     FX_ADDRESSES.fxPoolManager,
     FX_POOL_MANAGER_ABI,
@@ -298,7 +299,9 @@ export async function getFxPosition(
   const poolInfo = (await poolManagerContract.getPoolInfo(
     resolved.address,
   )) as readonly [bigint, bigint, bigint, bigint, bigint];
-  const [, /* collCap */ collateralBalance] = poolInfo;
+  // Only collateralBalance (slot 1) is used here;
+  // see getFxPool above for the full tuple shape.
+  const [_collateralCapacity, collateralBalance] = poolInfo;
 
   // collateralAmount = (rawColls × collateralBalance) / totalRawColls.
   // Guard against div-by-zero in the empty-pool case (no positions yet —
