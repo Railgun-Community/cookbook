@@ -326,8 +326,10 @@ import { getFxPool, getFxPosition } from '@railgun-community/cookbook';
 const pool = await getFxPool('wstETH-Long', provider);
 // pool.{address, collateralToken, collateralDecimals,
 //      debtCapacity, debtBalance, totalRawColls, collateralBalance,
-//      liquidationDebtRatio,        // 1e18-scaled; current mainnet 0.95e18 (95%)
-//      liquidationBonusRatio,       // 1e9-scaled; liquidator's bonus share
+//      liquidationDebtRatio,        // 1e18-scaled; mainnet 0.95e18 (95%)
+//      liquidationBonusRatio,       // 1e9-scaled; liquidator's bonus
+//      rebalanceDebtRatio,          // 1e18-scaled; mainnet 0.88e18 (88%) — yellow zone
+//      rebalanceBonusRatio,         // 1e9-scaled; rebalancer's bonus (2.5%)
 //      borrowFeeRatio,              // 1e9-scaled
 //      repayFeeRatio}               // 1e9-scaled
 
