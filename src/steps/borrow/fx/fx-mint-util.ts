@@ -32,7 +32,7 @@ export const FX_ADDRESSES = {
   // ERC-721 NFT contract (Pool inherits the ERC-721 interface). Use
   // `pool.address` from KNOWN_POOLS / resolvePool for outputNFTs.nftAddress.
   fxPoolConfiguration: getAddress('0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d'),
-} as const satisfies Record<string, Address>;
+} as const;
 
 /**
  * Default operator for f(x) fee queries: the Railgun relay-adapter.
