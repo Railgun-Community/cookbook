@@ -9,6 +9,7 @@ const { expect } = chai;
 // matter; everything else is filled with placeholder values that are
 // shape-correct but not exercised by the constructor-time validation tests.
 const fakeSwapQuote = {
+  sellTokenAddress: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', // wstETH (withdraw direction sells collateral)
   sellTokenValue: '0',
   spender: '0x000000000000000000000000000000000000beef',
   crossContractCall: { to: '0x1234', value: 0n, data: '0x5678' },

@@ -77,7 +77,7 @@ export class FxMintOpenRecipe extends Recipe {
 
   constructor(private readonly opts: FxMintOpenRecipeOpts) {
     super();
-    validatePoolFlow(opts.pool, opts.swapQuote);
+    validatePoolFlow(opts.pool, opts.swapQuote, 'deposit');
     if (opts.swapQuote && opts.slippageBasisPoints === undefined) {
       throw new Error(
         'fxmint: slippageBasisPoints required when swapQuote provided',
@@ -139,13 +139,31 @@ export class FxMintOpenRecipe extends Recipe {
   }
 }
 
+/** Direction of the swap leg, from the recipe's perspective. */
+export type SwapDirection = 'deposit' | 'withdraw';
+
 /**
  * Per-pool flow validation, factored out for reuse by FxMintCloseRecipe,
  * FxMintTopupRecipe, and FxMintTopupAndBorrowRecipe.
  *
- * v0.1 wstETH-Long REQUIRES swapQuote (WETH → wstETH).
- * v0.1 WBTC-Long FORBIDS swapQuote (WBTC direct only).
- * Custom pool refs are trusted — caller picks path via swapQuote presence.
+ * Two layers:
+ *   1. Presence — named-path requirements (direction-agnostic):
+ *        wstETH-Long REQUIRES swapQuote (WETH ↔ wstETH path).
+ *        WBTC-Long FORBIDS swapQuote (WBTC direct only).
+ *        Custom pool refs are trusted on presence; the caller picks the
+ *        path by whether a swapQuote is provided.
+ *   2. Shape — runs whenever a swapQuote is provided (named OR custom),
+ *      direction-aware:
+ *        'deposit'  (open/topup/topup-and-borrow):
+ *            sellTokenAddress           must equal WETH
+ *            buyERC20Amount.tokenAddress must equal pool.collateralToken
+ *        'withdraw' (close):
+ *            sellTokenAddress           must equal pool.collateralToken
+ *            buyERC20Amount.tokenAddress must equal WETH
+ *      All compares case-insensitive. Failures here would otherwise
+ *      surface as confusing on-chain gas-estimate reverts; the shape
+ *      check turns them into clear `fxmint:` errors at recipe
+ *      construction time.
  *
  * Errors are prefixed with `fxmint:` (not the specific recipe name) so
  * the same helper can be called from open/close/topup/topup-and-borrow
@@ -154,18 +172,59 @@ export class FxMintOpenRecipe extends Recipe {
 export function validatePoolFlow(
   poolRef: FxMintPoolRef,
   swapQuote: SwapQuoteData | undefined,
+  direction: SwapDirection,
 ): void {
-  if (typeof poolRef !== 'string') return; // custom pool — trust caller
+  // 1. Presence check — named-path requirements (unchanged from v0.1).
+  //    Custom pool refs are trusted on presence; the caller picks the
+  //    path by whether a swapQuote is provided.
+  if (typeof poolRef === 'string') {
+    const named: FxMintPoolName = poolRef;
+    if (named === 'wstETH-Long' && !swapQuote) {
+      throw new Error(
+        'fxmint: swapQuote required for wstETH-Long (WETH ↔ wstETH path)',
+      );
+    }
+    if (named === 'WBTC-Long' && swapQuote) {
+      throw new Error(
+        'fxmint: WBTC-Long uses direct path; swapQuote must be omitted',
+      );
+    }
+  }
 
-  const named: FxMintPoolName = poolRef;
-  if (named === 'wstETH-Long' && !swapQuote) {
+  // 2. Shape check — runs whenever a swapQuote is provided, on BOTH named
+  //    and custom pool refs. Catches the silent gas-estimate failure mode
+  //    where a quote's tokens don't match what the recipe will execute.
+  if (!swapQuote) return;
+
+  const resolved = resolvePool(poolRef);
+  const weth = FX_ADDRESSES.WETH.toLowerCase();
+  const collateral = resolved.collateralToken.toLowerCase();
+  const actualSell = swapQuote.sellTokenAddress.toLowerCase();
+  const actualBuy = swapQuote.buyERC20Amount.tokenAddress.toLowerCase();
+
+  const [expectedSell, expectedBuy, sellLabel, buyLabel] =
+    direction === 'deposit'
+      ? [
+          weth,
+          collateral,
+          `WETH (${FX_ADDRESSES.WETH})`,
+          `pool collateral (${resolved.collateralToken})`,
+        ]
+      : [
+          collateral,
+          weth,
+          `pool collateral (${resolved.collateralToken})`,
+          `WETH (${FX_ADDRESSES.WETH})`,
+        ];
+
+  if (actualSell !== expectedSell) {
     throw new Error(
-      'fxmint: swapQuote required for wstETH-Long (WETH → wstETH path)',
+      `fxmint: swapQuote.sellTokenAddress mismatch (${direction}) — expected ${sellLabel}, got ${swapQuote.sellTokenAddress}`,
     );
   }
-  if (named === 'WBTC-Long' && swapQuote) {
+  if (actualBuy !== expectedBuy) {
     throw new Error(
-      'fxmint: WBTC-Long uses direct path; swapQuote must be omitted',
+      `fxmint: swapQuote.buyERC20Amount.tokenAddress mismatch (${direction}) — expected ${buyLabel}, got ${swapQuote.buyERC20Amount.tokenAddress}`,
     );
   }
 }

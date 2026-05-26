@@ -85,7 +85,7 @@ export class FxMintTopupAndBorrowRecipe extends Recipe {
     super();
     // Per-pool flow validation shared with open/close/topup recipes — keeps
     // the 'fxmint:' error messages consistent across the recipe family.
-    validatePoolFlow(opts.pool, opts.swapQuote);
+    validatePoolFlow(opts.pool, opts.swapQuote, 'deposit');
     if (opts.swapQuote && opts.slippageBasisPoints === undefined) {
       throw new Error(
         'fxmint: slippageBasisPoints required when swapQuote provided',
