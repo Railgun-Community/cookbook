@@ -9,6 +9,7 @@ const { expect } = chai;
 // collDelta on the swap path) matter; everything else is shape-correct
 // placeholder. Pattern matches fx-mint-close-recipe.test.ts.
 const fakeSwapQuote = {
+  sellTokenAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH (deposit direction)
   sellTokenValue: '0',
   spender: '0x000000000000000000000000000000000000beef',
   crossContractCall: { to: '0x1234', value: 0n, data: '0x5678' },

@@ -72,7 +72,7 @@ export class FxMintCloseRecipe extends Recipe {
 
   constructor(private readonly opts: FxMintCloseRecipeOpts) {
     super();
-    validatePoolFlow(opts.pool, opts.swapQuote);
+    validatePoolFlow(opts.pool, opts.swapQuote, 'withdraw');
     if (opts.swapQuote && opts.slippageBasisPoints === undefined) {
       throw new Error(
         'fxmint: slippageBasisPoints required when swapQuote provided',
