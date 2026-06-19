@@ -12,10 +12,10 @@ index 62590aa..09eb89e 100644
          const engineV3ShieldEventUpdate030923BlockNumber = RailgunSmartWalletContract.getEngineV2ShieldEventUpdate030923BlockNumber(this.chain);
          // TODO: Possible data integrity issue in using commitment block numbers.
 diff --git a/node_modules/@railgun-community/engine/dist/poi/poi.js b/node_modules/@railgun-community/engine/dist/poi/poi.js
-index c140949..b5932c4 100644
+index 2c99f02..f55e738 100644
 --- a/node_modules/@railgun-community/engine/dist/poi/poi.js
 +++ b/node_modules/@railgun-community/engine/dist/poi/poi.js
-@@ -229,6 +229,7 @@ class POI {
+@@ -233,6 +233,7 @@ class POI {
      }
      static isActiveForChain(chain) {
          try {
@@ -23,7 +23,7 @@ index c140949..b5932c4 100644
              return this.nodeInterface.isActive(chain);
          }
          catch (err) {
-@@ -236,6 +237,7 @@ class POI {
+@@ -240,6 +241,7 @@ class POI {
          }
      }
      static isRequiredForChain(chain) {
