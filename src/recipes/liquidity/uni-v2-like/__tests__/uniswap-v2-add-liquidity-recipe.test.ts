@@ -9,6 +9,7 @@ import {
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
+import { UniV2LikeFactoryContract } from '../../../../contract/liquidity/uni-v2-like-factory-contract';
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -16,6 +17,7 @@ import {
 } from '../../../../models/export-models';
 import { UniV2LikeAddLiquidityRecipe } from '../uni-v2-like-add-liquidity-recipe';
 import { JsonRpcProvider } from 'ethers';
+import { ZERO_ADDRESS } from '../../../../models/constants';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -45,6 +47,8 @@ const LP_TOKEN: RecipeERC20Info = {
 let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
+let uniswapV2PairKLast: SinonStub;
+let uniswapV2FactoryFeeTo: SinonStub;
 
 const provider = new JsonRpcProvider('https://eth.llamarpc.com');
 
@@ -68,12 +72,22 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       UniV2LikePairContract.prototype,
       'totalSupply',
     ).resolves(oneInDecimals18 * 2_000_000n);
+    uniswapV2PairKLast = Sinon.stub(
+      UniV2LikePairContract.prototype,
+      'kLast',
+    ).resolves(0n);
+    uniswapV2FactoryFeeTo = Sinon.stub(
+      UniV2LikeFactoryContract.prototype,
+      'feeTo',
+    ).resolves(ZERO_ADDRESS);
   });
 
   after(() => {
     dateStub.restore();
     uniswapV2PairGetReserves.restore();
     uniswapV2PairTotalSupply.restore();
+    uniswapV2PairKLast.restore();
+    uniswapV2FactoryFeeTo.restore();
   });
 
   it('Should create uniswap-v2-add-liquidity-recipe', async () => {
