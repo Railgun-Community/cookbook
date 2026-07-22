@@ -6,6 +6,11 @@ import { Step } from '../../steps';
 import { RecipeConfig } from '../../models/export-models';
 import { MIN_GAS_LIMIT_TRANSFER } from '../../models/min-gas-limits';
 
+/**
+ * EIP-7702: the unwrap executes as the ephemeral EOA (msg.sender receives the
+ * base token); the trailing transfer sends it to `toAddress`. No relay-adapt
+ * recipient is baked in.
+ */
 export class UnwrapTransferBaseTokenRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'Unwrap Base Token and Transfer',

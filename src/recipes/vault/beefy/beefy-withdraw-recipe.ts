@@ -7,6 +7,10 @@ import { BeefyWithdrawStep } from '../../../steps/vault/beefy/beefy-withdraw-ste
 import { RecipeConfig } from '../../../models/export-models';
 import { MIN_GAS_LIMIT_BEEFY_VAULT_WITHDRAW } from '../../../models/min-gas-limits';
 
+/**
+ * EIP-7702: the batch executes as the ephemeral EOA, so the withdrawn tokens
+ * are received by that account (msg.sender). No relay-adapt recipient is baked in.
+ */
 export class BeefyWithdrawRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'Beefy Vault Withdraw',

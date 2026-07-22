@@ -40,6 +40,11 @@ export type FxMintTopupAndBorrowRecipeOpts = {
    * Required iff input asset doesn't match pool.collateralToken
    * (wstETH-Long with WETH input). Forbidden for WBTC-Long.
    * Custom pool refs are trusted via validatePoolFlow.
+   *
+   * EIP-7702: fetch this quote with 0x `taker` = the executing ephemeral EOA
+   * (the account the batch runs as); relay-adapt is no longer the swap
+   * recipient. A quote taken for relay-adapt would send the bought collateral
+   * to the wrong account.
    */
   swapQuote?: SwapQuoteData;
   /** Required iff swapQuote provided. */

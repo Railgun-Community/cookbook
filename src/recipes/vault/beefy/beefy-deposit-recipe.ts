@@ -10,6 +10,10 @@ import {
 import { BeefyDepositStep } from '../../../steps/vault/beefy/beefy-deposit-step';
 import { MIN_GAS_LIMIT_BEEFY_VAULT_DEPOSIT } from '../../../models/min-gas-limits';
 
+/**
+ * EIP-7702: the batch executes as the ephemeral EOA, so the minted vault shares
+ * are received by that account (msg.sender). No relay-adapt recipient is baked in.
+ */
 export class BeefyDepositRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'Beefy Vault Deposit',

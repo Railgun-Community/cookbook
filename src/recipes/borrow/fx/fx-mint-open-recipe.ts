@@ -35,6 +35,11 @@ export type FxMintOpenRecipeOpts = {
    * wstETH-Long uses WETH input + WETH→wstETH swap. Forbidden for
    * WBTC-Long (which expects direct WBTC input — no swap). Custom pool
    * refs trust the caller's choice. See validatePoolFlow below.
+   *
+   * EIP-7702: fetch this quote with 0x `taker` = the executing ephemeral EOA
+   * (the account the batch runs as); relay-adapt is no longer the swap
+   * recipient. A quote taken for relay-adapt would send the bought collateral
+   * to the wrong account.
    */
   swapQuote?: SwapQuoteData;
   /** Required iff swapQuote provided. */

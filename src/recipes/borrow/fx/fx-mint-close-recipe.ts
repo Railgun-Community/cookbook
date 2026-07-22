@@ -33,6 +33,11 @@ export type FxMintCloseRecipeOpts = {
    * Forbidden for WBTC-Long, which shields the collateral directly back
    * to the user (WBTC out, no swap leg). Custom pool refs trust the
    * caller's choice. See validatePoolFlow in fx-mint-open-recipe.
+   *
+   * EIP-7702: fetch this quote with 0x `taker` = the executing ephemeral EOA
+   * (the account the batch runs as); relay-adapt is no longer the swap
+   * recipient. A quote taken for relay-adapt would send the bought WETH to the
+   * wrong account.
    */
   swapQuote?: SwapQuoteData;
   /** Required iff swapQuote provided. */
