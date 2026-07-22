@@ -197,4 +197,15 @@ describe('uniswap-v2-add-liquidity-step', () => {
       'Uniswap V2 Add Liquidity step is invalid.',
     );
   });
+
+  it('Should reject an invalid recipient (EIP-7702)', () => {
+    expect(
+      () =>
+        new UniV2LikeAddLiquidityStep(
+          UniswapV2Fork.Uniswap,
+          addLiquidityData,
+          '0x0000000000000000000000000000000000000000',
+        ),
+    ).to.throw();
+  });
 });

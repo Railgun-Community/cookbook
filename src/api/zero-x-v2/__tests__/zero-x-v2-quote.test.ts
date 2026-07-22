@@ -146,4 +146,39 @@ describe('zero-x-v2-quote', () => {
       NETWORK_CONFIG[networkName].relayAdaptContract.toLowerCase();
     expect(params.taker.toLowerCase()).to.not.equal(relayAdaptContract);
   });
+
+  it('Should reject an invalid or zero recipient (EIP-7702)', () => {
+    const sellERC20Amount: RecipeERC20Amount = {
+      tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
+      decimals: 18n,
+      isBaseToken: false,
+      amount: BigInt('1000000000000000000'),
+    };
+    const buyERC20Info: RecipeERC20Info = {
+      tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      decimals: 18n,
+      isBaseToken: false,
+    };
+
+    // Zero address (would burn the bought tokens) and a malformed address must
+    // both fail loud rather than silently misroute.
+    expect(() =>
+      ZeroXV2Quote.getQuoteParams(
+        networkName,
+        sellERC20Amount,
+        buyERC20Info,
+        100,
+        '0x0000000000000000000000000000000000000000',
+      ),
+    ).to.throw();
+    expect(() =>
+      ZeroXV2Quote.getQuoteParams(
+        networkName,
+        sellERC20Amount,
+        buyERC20Info,
+        100,
+        'not-an-address',
+      ),
+    ).to.throw();
+  });
 })

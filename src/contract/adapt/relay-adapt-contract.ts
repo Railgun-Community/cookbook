@@ -1,6 +1,6 @@
 import { abi } from '../../abi/abi';
 import { ZERO_ADDRESS } from '../../models/constants';
-import { validateContractAddress } from '../../utils/address';
+import { assertValidRecipientAddress } from '../../utils/address';
 import { RelayAdapt } from '../../typechain';
 import { TokenDataStruct } from '../../typechain/adapt/RelayAdapt';
 import { Contract, ContractTransaction } from 'ethers';
@@ -15,9 +15,7 @@ export class RelayAdaptContract {
    * balance. The shared canonical relay-adapt contract is no longer used.
    */
   constructor(relayAdaptAddress: string) {
-    if (!validateContractAddress(relayAdaptAddress)) {
-      throw new Error('Invalid address for Relay Adapt contract.');
-    }
+    assertValidRecipientAddress(relayAdaptAddress, 'Relay Adapt contract');
     this.contract = new Contract(
       relayAdaptAddress,
       abi.adapt.relay,

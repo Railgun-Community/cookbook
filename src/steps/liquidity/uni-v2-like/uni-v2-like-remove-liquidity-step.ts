@@ -8,6 +8,7 @@ import {
   StepConfig,
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils';
+import { assertValidRecipientAddress } from '../../../utils/address';
 import { Step } from '../../step';
 import { UniV2LikeSDK } from '../../../api/uni-v2-like/uni-v2-like-sdk';
 import { minBalanceAfterSlippage } from '../../../utils/number';
@@ -38,6 +39,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
     this.removeLiquidityData = removeLiquidityData;
+    assertValidRecipientAddress(recipient, 'UniV2 remove-liquidity recipient');
     this.recipient = recipient;
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Remove Liquidity`;

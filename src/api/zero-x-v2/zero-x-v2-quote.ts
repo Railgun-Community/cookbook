@@ -13,6 +13,7 @@ import type {
 } from '../../models';
 import { getZeroXV2Data, ZeroXV2ApiEndpoint } from './zero-x-v2-fetch';
 import { minBalanceAfterSlippage } from '../../utils/number';
+import { assertValidRecipientAddress } from '../../utils/address';
 import { formatUnits, parseUnits, type ContractTransaction } from 'ethers';
 import { InvalidExchangeContractError, SwapQuoteError, InvalidProxyContractChainError, QuoteParamsError, NoLiquidityError } from './errors';
 import { ZERO_X_EXCHANGE_ALLOWANCE_HOLDER_ADDRESS, ZERO_X_PROXY_BASE_TOKEN_ADDRESS } from '../../models/constants';
@@ -58,6 +59,7 @@ export class ZeroXV2Quote {
     if (sellERC20Amount.amount === 0n) {
       throw new QuoteParamsError('Swap sell amount is 0.');
     }
+    assertValidRecipientAddress(recipient, 'ZeroXV2 swap recipient');
 
     const { chain } = NETWORK_CONFIG[networkName];
     const sellTokenAddress = this.getZeroXTokenAddress(sellERC20Amount);
