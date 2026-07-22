@@ -74,6 +74,8 @@ let uniswapV2FactoryFeeToStub: SinonStub;
 
 const provider = new JsonRpcProvider('https://eth.llamarpc.com');
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
   before(() => {
     setRailgunFees(
@@ -119,6 +121,7 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       slippageBasisPoints,
       vaultID,
       provider,
+      RECIPIENT,
     );
 
     const usdcAmount: RecipeERC20Amount = {

@@ -12,7 +12,6 @@ import { Step } from '../../step';
 import { UniV2LikeSDK } from '../../../api/uni-v2-like/uni-v2-like-sdk';
 import { minBalanceAfterSlippage } from '../../../utils/number';
 import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like-router-contract';
-import { NETWORK_CONFIG } from '@railgun-community/shared-models';
 
 export class UniV2LikeAddLiquidityStep extends Step {
   readonly config: StepConfig = {
@@ -25,13 +24,21 @@ export class UniV2LikeAddLiquidityStep extends Step {
 
   private readonly addLiquidityData: RecipeAddLiquidityData;
 
+  /**
+   * EIP-7702 execution account: the ephemeral EOA the batch runs as. Minted LP
+   * tokens are sent here (router `to`) instead of the shared relay-adapt contract.
+   */
+  private readonly recipient: string;
+
   constructor(
     uniswapV2Fork: UniswapV2Fork,
     addLiquidityData: RecipeAddLiquidityData,
+    recipient: string,
   ) {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
     this.addLiquidityData = addLiquidityData;
+    this.recipient = recipient;
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Add Liquidity`;
     this.config.description = `Adds liquidity to a ${forkName} Pool.`;
@@ -79,8 +86,6 @@ export class UniV2LikeAddLiquidityStep extends Step {
       slippageBasisPoints,
     );
 
-    const { relayAdaptContract } = NETWORK_CONFIG[input.networkName];
-
     const contract = new UniV2LikeRouterContract(routerContractAddress);
     const crossContractCall = await contract.createAddLiquidity(
       validatedERC20AmountA.tokenAddress,
@@ -89,7 +94,7 @@ export class UniV2LikeAddLiquidityStep extends Step {
       validatedERC20AmountB.expectedBalance,
       minAmountA,
       minAmountB,
-      relayAdaptContract,
+      this.recipient,
       deadlineTimestamp,
     );
 

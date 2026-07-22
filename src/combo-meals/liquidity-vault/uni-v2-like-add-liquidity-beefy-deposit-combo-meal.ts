@@ -32,6 +32,10 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
     slippageBasisPoints: bigint,
     vaultID: string,
     provider: Provider,
+    // EIP-7702 execution account: the ephemeral EOA the batch runs as. The
+    // add-liquidity leg mints LP here (msg.sender), where the beefy-deposit leg
+    // then picks it up. Replaces the legacy relay-adapt recipient.
+    recipient: string,
   ) {
     super();
 
@@ -41,6 +45,7 @@ export class UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal extends ComboMeal {
       erc20InfoB,
       slippageBasisPoints,
       provider,
+      recipient,
     );
     this.beefyDepositRecipe = new BeefyDepositRecipe(vaultID);
 

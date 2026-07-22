@@ -48,6 +48,8 @@ let uniswapV2PairTotalSupply: SinonStub;
 
 const provider = new JsonRpcProvider('https://eth.llamarpc.com');
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 describe('uniswap-v2-add-liquidity-recipe', () => {
   before(() => {
     setRailgunFees(
@@ -83,6 +85,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       WETH_TOKEN,
       slippageBasisPoints,
       provider,
+      RECIPIENT,
     );
 
     const recipeInput: RecipeInput = {
@@ -327,6 +330,7 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       WETH_TOKEN,
       slippageBasisPoints,
       provider,
+      RECIPIENT,
     );
 
     // No matching erc20 inputs

@@ -12,7 +12,6 @@ import { Step } from '../../step';
 import { UniV2LikeSDK } from '../../../api/uni-v2-like/uni-v2-like-sdk';
 import { minBalanceAfterSlippage } from '../../../utils/number';
 import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like-router-contract';
-import { NETWORK_CONFIG } from '@railgun-community/shared-models';
 
 export class UniV2LikeRemoveLiquidityStep extends Step {
   readonly config: StepConfig = {
@@ -25,13 +24,21 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
 
   private readonly removeLiquidityData: RecipeRemoveLiquidityData;
 
+  /**
+   * EIP-7702 execution account: the ephemeral EOA the batch runs as. Withdrawn
+   * tokens are sent here (router `to`) instead of the shared relay-adapt contract.
+   */
+  private readonly recipient: string;
+
   constructor(
     uniswapV2Fork: UniswapV2Fork,
     removeLiquidityData: RecipeRemoveLiquidityData,
+    recipient: string,
   ) {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
     this.removeLiquidityData = removeLiquidityData;
+    this.recipient = recipient;
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Remove Liquidity`;
     this.config.description = `Removes liquidity from a ${forkName} Pool.`;
@@ -59,8 +66,6 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
         lpERC20Amount.amount,
       );
 
-    const { relayAdaptContract } = NETWORK_CONFIG[input.networkName];
-
     const minAmountA = minBalanceAfterSlippage(
       expectedERC20AmountA.amount,
       slippageBasisPoints,
@@ -77,7 +82,7 @@ export class UniV2LikeRemoveLiquidityStep extends Step {
       erc20AmountForStep.expectedBalance,
       minAmountA,
       minAmountB,
-      relayAdaptContract,
+      this.recipient,
       deadlineTimestamp,
     );
 

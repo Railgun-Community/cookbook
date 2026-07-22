@@ -52,6 +52,8 @@ const VAULT_TOKEN: RecipeERC20Info = {
 };
 const vaultID = 'sushi-mainnet-usdc-weth';
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
   this.timeout(60000);
 
@@ -83,6 +85,7 @@ describe('FORK-run-uni-v2-like-liquidity-beefy-combo-meals', function run() {
       slippageBasisPoints,
       vaultID,
       testRPCProvider,
+      RECIPIENT,
     );
 
     const usdcAmount: RecipeERC20Amount = {

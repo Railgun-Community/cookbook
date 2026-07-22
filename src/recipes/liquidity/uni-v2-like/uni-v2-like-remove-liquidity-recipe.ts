@@ -33,6 +33,12 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
   private readonly slippageBasisPoints: bigint;
   private readonly provider: Provider;
 
+  /**
+   * EIP-7702 execution account: the ephemeral EOA the batch runs as. Withdrawn
+   * tokens are sent here instead of the shared relay-adapt contract.
+   */
+  private readonly recipient: string;
+
   constructor(
     uniswapV2Fork: UniswapV2Fork,
     lpERC20Info: RecipeERC20Info,
@@ -40,6 +46,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
     erc20InfoB: RecipeERC20Info,
     slippageBasisPoints: bigint,
     provider: Provider,
+    recipient: string,
   ) {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
@@ -50,6 +57,7 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
 
     this.slippageBasisPoints = slippageBasisPoints;
     this.provider = provider;
+    this.recipient = recipient;
 
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Remove Liquidity`;
@@ -95,7 +103,11 @@ export class UniV2LikeRemoveLiquidityRecipe extends RemoveLiquidityRecipe {
         removeLiquidityData.routerContractAddress,
         this.lpERC20Info,
       ),
-      new UniV2LikeRemoveLiquidityStep(this.uniswapV2Fork, removeLiquidityData),
+      new UniV2LikeRemoveLiquidityStep(
+        this.uniswapV2Fork,
+        removeLiquidityData,
+        this.recipient,
+      ),
     ];
   }
 }

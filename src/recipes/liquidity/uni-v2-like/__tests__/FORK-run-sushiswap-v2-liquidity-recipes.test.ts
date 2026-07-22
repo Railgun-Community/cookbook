@@ -51,6 +51,8 @@ const LP_TOKEN: RecipeERC20Info = {
   decimals: 18n,
 };
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
   this.timeout(60000);
 
@@ -78,6 +80,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       WETH_TOKEN,
       slippageBasisPoints,
       testRPCProvider,
+      RECIPIENT,
     );
     expect(addLiquidityRecipe.id.length).to.equal(16);
 
@@ -213,6 +216,7 @@ describe('FORK-run-sushiswap-v2-liquidity-recipes', function run() {
       WETH_TOKEN,
       slippageBasisPoints,
       testRPCProvider,
+      RECIPIENT,
     );
     expect(removeLiquidityRecipe.id.length).to.equal(16);
 

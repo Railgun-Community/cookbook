@@ -17,6 +17,10 @@ const { expect } = chai;
 const networkName = NetworkName.Ethereum;
 const uniswapV2Fork = UniswapV2Fork.Uniswap;
 
+// EIP-7702 execution account (ephemeral EOA). The router must send withdrawn
+// tokens here instead of a relay-adapt address pulled from NETWORK_CONFIG.
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 // Assume 2000:1 rate.for USDC:WETH.
 const USDC_TOKEN: RecipeERC20Info = {
   tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -62,6 +66,7 @@ describe('uniswap-v2-remove-liquidity-step', () => {
     const step = new UniV2LikeRemoveLiquidityStep(
       UniswapV2Fork.Uniswap,
       removeLiquidityData,
+      RECIPIENT,
     );
 
     const stepInput: StepInput = {
@@ -121,16 +126,23 @@ describe('uniswap-v2-remove-liquidity-step', () => {
 
     expect(output.crossContractCalls).to.deep.equal([
       {
-        data: '0xbaa2abde000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000001bc16d674ec8000000000000000000000000000000000000000000000000000000000000760467000000000000000000000000000000000000000000000000000dbd2fc137a30000000000000000000000000000ac9f360ae85469b27aeddeafc579ef2d052ad40500000000000000000000000000000000000000000000000000000000499602d2',
+        data: '0xbaa2abde000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000001bc16d674ec8000000000000000000000000000000000000000000000000000000000000760467000000000000000000000000000000000000000000000000000dbd2fc137a30000000000000000000000000000111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000499602d2',
         to: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
       },
     ]);
+
+    // EIP-7702 regression: the router `to` (token recipient) must be the passed
+    // ephemeral RECIPIENT, not a relay-adapt address pulled from NETWORK_CONFIG.
+    expect(output.crossContractCalls[0].data.toLowerCase()).to.contain(
+      RECIPIENT.slice(2).toLowerCase(),
+    );
   });
 
   it('Should test uniswap-v2-remove-liquidity-step step error cases', async () => {
     const step = new UniV2LikeRemoveLiquidityStep(
       UniswapV2Fork.Uniswap,
       removeLiquidityData,
+      RECIPIENT,
     );
 
     // Not both matching erc20 inputs

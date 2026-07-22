@@ -36,12 +36,19 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
   private readonly slippageBasisPoints: bigint;
   private readonly provider: Provider;
 
+  /**
+   * EIP-7702 execution account: the ephemeral EOA the batch runs as. Minted LP
+   * tokens are sent here instead of the shared relay-adapt contract.
+   */
+  private readonly recipient: string;
+
   constructor(
     uniswapV2Fork: UniswapV2Fork,
     erc20InfoA: RecipeERC20Info,
     erc20InfoB: RecipeERC20Info,
     slippageBasisPoints: bigint,
     provider: Provider,
+    recipient: string,
   ) {
     super();
     this.uniswapV2Fork = uniswapV2Fork;
@@ -50,6 +57,7 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
     this.erc20InfoB = erc20InfoB;
     this.slippageBasisPoints = slippageBasisPoints;
     this.provider = provider;
+    this.recipient = recipient;
 
     const forkName = UniV2LikeSDK.getForkName(uniswapV2Fork);
     this.config.name = `${forkName} Add Liquidity`;
@@ -135,7 +143,11 @@ export class UniV2LikeAddLiquidityRecipe extends AddLiquidityRecipe {
         this.addLiquidityData.routerContractAddress,
         this.erc20InfoB,
       ),
-      new UniV2LikeAddLiquidityStep(this.uniswapV2Fork, this.addLiquidityData),
+      new UniV2LikeAddLiquidityStep(
+        this.uniswapV2Fork,
+        this.addLiquidityData,
+        this.recipient,
+      ),
     ];
   }
 }
