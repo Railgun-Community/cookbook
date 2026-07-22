@@ -40,6 +40,12 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
 
   private readonly slippageBasisPoints: number;
 
+  /**
+   * EIP-7702 execution account: the ephemeral EOA the batch runs as. 0x sends
+   * the bought tokens here (quote `taker`). Relay-adapt is no longer used.
+   */
+  private readonly recipient: string;
+
   protected readonly destinationAddress: Optional<string>;
   protected readonly isRailgunDestinationAddress: Optional<boolean>;
 
@@ -47,6 +53,7 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
     sellERC20Info: RecipeERC20Info,
     buyERC20Info: RecipeERC20Info,
     slippageBasisPoints: number,
+    recipient: string,
     destinationAddress?: string,
   ) {
     super();
@@ -54,6 +61,7 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
     this.buyERC20Info = buyERC20Info;
 
     this.slippageBasisPoints = slippageBasisPoints;
+    this.recipient = recipient;
 
     this.destinationAddress = destinationAddress;
     if (isDefined(destinationAddress)) {
@@ -83,6 +91,7 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
       buyERC20Info: this.buyERC20Info,
       slippageBasisPoints: this.slippageBasisPoints,
       isRailgun: true,
+      recipient: this.recipient,
     };
     return ZeroXV2Quote.getSwapQuote(quoteParams);
   }

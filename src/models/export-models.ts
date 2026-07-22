@@ -111,26 +111,19 @@ export type SwapQuoteDataV2 = SwapQuoteData & {
   zid: string;
 };
 
-export type SwapQuoteParams = {
-  networkName: NetworkName;
-  sellERC20Amount: RecipeERC20Amount;
-  buyERC20Info: RecipeERC20Info;
-  slippageBasisPoints: bigint;
-  isRailgun: boolean;
-};
-
 export type SwapQuoteParamsV2 = {
   networkName: NetworkName;
   sellERC20Amount: RecipeERC20Amount;
   buyERC20Info: RecipeERC20Info;
   slippageBasisPoints: number;
   isRailgun: boolean;
-  activeWalletAddress?: string;
+  /**
+   * On-chain recipient of the swap output (0x `taker`/`txOrigin`). Under
+   * EIP-7702 the cross-contract batch executes as the ephemeral EOA, so this
+   * must be that account; the legacy relay-adapt contract is no longer used.
+   */
+  recipient: string;
 };
-
-export type GetSwapQuote = (
-  swapQuoteParams: SwapQuoteParams,
-) => Promise<SwapQuoteData>;
 
 export type GetSwapQuoteV2 = (
   swapQuoteParams: SwapQuoteParamsV2,

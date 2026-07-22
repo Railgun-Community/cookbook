@@ -40,6 +40,8 @@ const buyToken: RecipeERC20Info = {
 
 const slippageBasisPoints = 100;
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 
 const quote: SwapQuoteDataV2 = {
   sellTokenValue: '10000',
@@ -89,6 +91,7 @@ describe('zero-x-v2-swap-recipe-public-destination', () => {
       sellToken,
       buyToken,
       slippageBasisPoints,
+      RECIPIENT,
       VITALIK_WALLET, // destinationAddress
     );
 

@@ -40,6 +40,8 @@ const buyToken: RecipeERC20Info = {
 
 const slippageBasisPoints = 100;
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 const quote: SwapQuoteDataV2 = {
   sellTokenValue: '10000',
   spender,
@@ -91,6 +93,7 @@ describe('zero-x-v2-swap-recipe-private-destination', () => {
       sellToken,
       buyToken,
       slippageBasisPoints,
+      RECIPIENT,
       privateWalletAddress, // destinationAddress
     );
 

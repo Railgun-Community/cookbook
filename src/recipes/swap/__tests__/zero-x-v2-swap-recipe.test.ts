@@ -35,6 +35,8 @@ const buyToken: RecipeERC20Info = {
 
 const slippageBasisPoints = 100;
 
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 const quote: SwapQuoteDataV2 = {
   sellTokenValue: '10000',
   spender,
@@ -83,6 +85,7 @@ describe('zero-x-v2-swap-recipe', () => {
       sellToken,
       buyToken,
       slippageBasisPoints,
+      RECIPIENT,
     );
 
     const recipeInput: RecipeInput = {
@@ -282,6 +285,7 @@ describe('zero-x-v2-swap-recipe', () => {
       sellToken,
       buyToken,
       slippageBasisPoints,
+      RECIPIENT,
     );
 
     // No matching erc20 inputs

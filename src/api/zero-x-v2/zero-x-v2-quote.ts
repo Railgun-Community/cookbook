@@ -53,13 +53,13 @@ export class ZeroXV2Quote {
     sellERC20Amount: RecipeERC20Amount,
     buyERC20Info: RecipeERC20Info,
     slippageBasisPoints: number,
-    activeWalletAddress: Optional<string>,
+    recipient: string,
   ): QuoteParamsV2 => {
     if (sellERC20Amount.amount === 0n) {
       throw new QuoteParamsError('Swap sell amount is 0.');
     }
 
-    const { relayAdaptContract, chain } = NETWORK_CONFIG[networkName];
+    const { chain } = NETWORK_CONFIG[networkName];
     const sellTokenAddress = this.getZeroXTokenAddress(sellERC20Amount);
     const buyTokenAddress = this.getZeroXTokenAddress(buyERC20Info);
 
@@ -67,13 +67,16 @@ export class ZeroXV2Quote {
       throw new QuoteParamsError('Swap sell and buy tokens are the same');
     }
 
+    // EIP-7702: the batch executes as the ephemeral EOA, so 0x must send the
+    // bought tokens to that account (taker). The legacy relay-adapt contract is
+    // no longer used as the swap recipient.
     const params: QuoteParamsV2 = {
       chainId: chain.id.toString(),
       sellToken: sellTokenAddress,
       buyToken: buyTokenAddress,
       sellAmount: sellERC20Amount.amount.toString(),
-      taker: activeWalletAddress ?? relayAdaptContract,
-      txOrigin: activeWalletAddress ?? relayAdaptContract,
+      taker: recipient,
+      txOrigin: recipient,
       slippageBps: slippageBasisPoints,
       excludedSources: "0x_RFQ,Uniswap_V3"
     };
@@ -118,14 +121,14 @@ export class ZeroXV2Quote {
     buyERC20Info,
     slippageBasisPoints,
     isRailgun,
-    activeWalletAddress,
+    recipient,
   }: SwapQuoteParamsV2): Promise<SwapQuoteDataV2> => {
     const params = ZeroXV2Quote.getQuoteParams(
       networkName,
       sellERC20Amount,
       buyERC20Info,
       slippageBasisPoints,
-      isRailgun ? undefined : activeWalletAddress
+      recipient,
     );
 
     try {

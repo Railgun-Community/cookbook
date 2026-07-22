@@ -1,4 +1,4 @@
-import { NetworkName } from '@railgun-community/shared-models';
+import { NetworkName, NETWORK_CONFIG } from '@railgun-community/shared-models';
 import { ZeroXV2Quote } from '../zero-x-v2-quote';
 import * as zeroXV2Api from '../zero-x-v2-fetch';
 import chai from 'chai';
@@ -16,6 +16,11 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
+
+// EIP-7702 execution account (ephemeral EOA). 0x must send bought tokens here
+// (quote `taker`) instead of the relay-adapt contract the legacy flow baked in.
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 const runV2QuoteTest = async (amount = '1000000000000000000') => {
   const sellERC20Amount: RecipeERC20Amount = {
     tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -35,6 +40,7 @@ const runV2QuoteTest = async (amount = '1000000000000000000') => {
     buyERC20Info,
     slippageBasisPoints: 100,
     isRailgun: true,
+    recipient: RECIPIENT,
   });
 
   expect(typeof quote === 'object').to.be.true;
@@ -101,6 +107,7 @@ describe('zero-x-v2-quote', () => {
         buyERC20Info,
         slippageBasisPoints: 100,
         isRailgun: true,
+        recipient: RECIPIENT,
       });
     } catch(err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -108,5 +115,35 @@ describe('zero-x-v2-quote', () => {
     } finally {
       getZeroXV2DataStub.restore();
     }
+  });
+
+  it('Should route 0x taker/txOrigin to the provided recipient (EIP-7702, no relay-adapt)', () => {
+    const sellERC20Amount: RecipeERC20Amount = {
+      tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
+      decimals: 18n,
+      isBaseToken: false,
+      amount: BigInt('1000000000000000000'),
+    };
+    const buyERC20Info: RecipeERC20Info = {
+      tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      decimals: 18n,
+      isBaseToken: false,
+    };
+
+    const params = ZeroXV2Quote.getQuoteParams(
+      networkName,
+      sellERC20Amount,
+      buyERC20Info,
+      100,
+      RECIPIENT,
+    );
+
+    // The bought tokens must go to the executing ephemeral EOA — not the
+    // relay-adapt contract the legacy flow baked in from NETWORK_CONFIG.
+    expect(params.taker).to.equal(RECIPIENT);
+    expect(params.txOrigin).to.equal(RECIPIENT);
+    const relayAdaptContract =
+      NETWORK_CONFIG[networkName].relayAdaptContract.toLowerCase();
+    expect(params.taker.toLowerCase()).to.not.equal(relayAdaptContract);
   });
 })
