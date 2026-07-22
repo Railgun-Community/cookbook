@@ -539,8 +539,8 @@ export type FxRepayInputs = {
 };
 
 export type FxRepayAmounts = {
-  // shieldedFxUSD × (10000 - 25) / 10000 — what lands in the relay-adapter
-  // after Railgun's unshield haircut.
+  // shieldedFxUSD × (10000 - 25) / 10000 — what lands in the executing account
+  // (ephemeral EOA) after Railgun's unshield haircut.
   fxUSDAfterUnshield: bigint;
   // The largest repayAmount that can be supported by fxUSDAfterUnshield
   // given the f(x) repay fee uplift on PoolManager.transferFrom.
@@ -548,7 +548,7 @@ export type FxRepayAmounts = {
   // The actual debt reduction f(x)'s operate() will perform. Capped at
   // min(maxRepayUnderFee, rawDebts, desiredRepayAmount).
   repayAmount: bigint;
-  // What PoolManager will pull from the relay-adapter, including the
+  // What PoolManager will pull from the executing account (ephemeral EOA), including the
   // f(x) repay fee uplift: repayAmount × (1e9 + repayFeeRatio) / 1e9.
   // The recipe's ApproveERC20SpenderStep needs this exact value.
   approveAmount: bigint;

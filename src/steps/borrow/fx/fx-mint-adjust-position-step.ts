@@ -30,7 +30,7 @@ export type FxMintAdjustPositionStepData = {
   positionId: bigint;
   /**
    * Signed collateral delta, in native collateral units:
-   *   > 0: deposit additional collateral (relay-adapter must hold the amount)
+   *   > 0: deposit additional collateral (executing account (ephemeral EOA) must hold the amount)
    *   < 0: withdraw collateral (out of v0.1 scope; reserved for v0.2's
    *        FxMintWithdrawCollateralRecipe — the step accepts the value
    *        but no v0.1 recipe wires it through).
@@ -39,10 +39,10 @@ export type FxMintAdjustPositionStepData = {
   collDelta: bigint;
   /**
    * Signed debt delta, in fxUSD wei:
-   *   > 0: mint additional fxUSD (PoolManager pays the relay-adapter,
+   *   > 0: mint additional fxUSD (PoolManager pays the executing account (ephemeral EOA),
    *        net of borrow fee).
    *   < 0: burn fxUSD to repay debt (PoolManager pulls fxUSD from the
-   *        relay-adapter, including the f(x) repay fee uplift; recipe's
+   *        executing account (ephemeral EOA), including the f(x) repay fee uplift; recipe's
    *        preceding ApproveERC20SpenderStep authorizes the pull).
    *   = 0: no-op on the debt axis
    */
@@ -84,7 +84,7 @@ export type FxMintAdjustPositionStepData = {
  *     fxUSD net (= debtDelta × (FEE_DENOM - borrowFeeRatio) / FEE_DENOM).
  *   - debtDelta < 0: declares spentERC20Amounts for the fxUSD consumed
  *     (= |debtDelta| × (FEE_DENOM + repayFeeRatio) / FEE_DENOM; PoolManager
- *     pulls this amount from the relay-adapter via the recipe's preceding
+ *     pulls this amount from the executing account (ephemeral EOA) via the recipe's preceding
  *     approve step). Matches the close-side accounting pattern.
  *
  * v0.1 recipes only use non-negative collDelta. Negative-collDelta is
@@ -180,7 +180,7 @@ export class FxMintAdjustPositionStep extends Step {
 
     if (debtDelta < 0n) {
       // PoolManager.operate(... , -X) pulls X × (1e9 + repayFeeRatio)/1e9
-      // of fxUSD from the relay-adapter via transferFrom (allowed by the
+      // of fxUSD from the executing account (ephemeral EOA) via transferFrom (allowed by the
       // recipe's preceding approve step). Declared here so cookbook's
       // amount accounting reflects the actual outflow.
       const debtBurn = -debtDelta;
@@ -199,7 +199,7 @@ export class FxMintAdjustPositionStep extends Step {
     > = [];
 
     if (debtDelta > 0n) {
-      // Post-borrow-fee net fxUSD lands in the relay-adapter and shields
+      // Post-borrow-fee net fxUSD lands in the executing account (ephemeral EOA) and shields
       // back to the user.
       const fxUSDNet = debtDelta - (debtDelta * borrowFeeRatio!) / FEE_DENOM;
       outputERC20Amounts.push({

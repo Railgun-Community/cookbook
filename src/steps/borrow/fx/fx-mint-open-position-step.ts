@@ -53,8 +53,9 @@ export type FxMintOpenPositionStepData = {
  * Goes through PoolManager (not Pool directly) — Pool.operate reverts with
  * `ErrorCallerNotPoolManager` for any caller other than PoolManager.
  *
- * Consumes collateralToken from the relay adapter; produces fxUSD + an
- * ERC-721 position NFT (owner = msg.sender = relay adapter).
+ * Consumes collateralToken from the executing account; produces fxUSD + an
+ * ERC-721 position NFT (owner = msg.sender = the executing account, i.e. the
+ * ephemeral EOA under EIP-7702).
  *
  * The post-fee fxUSD output `expectedBalance` accounts for f(x)'s borrow
  * fee (now driven by `borrowFeeRatio` from opts; was previously a
@@ -116,7 +117,8 @@ export class FxMintOpenPositionStep extends Step {
     ]);
 
     // Borrow fee deduction: f(x) emits (targetDebt - fee) of fxUSD to
-    // msg.sender (the relay-adapter). Cookbook's StepOutputERC20Amount
+    // msg.sender (the executing account; the ephemeral EOA under EIP-7702).
+    // Cookbook's StepOutputERC20Amount
     // expects the post-fee net; the recipe layer doesn't fold this in.
     // Using FEE_DENOM (1e9) — matches PoolConfiguration.getPoolFeeRatio's
     // denominator and the existing computeFxClose convention.

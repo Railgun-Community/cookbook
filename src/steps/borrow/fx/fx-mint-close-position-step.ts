@@ -40,7 +40,7 @@ export type FxMintClosePositionStepData = {
 /**
  * Encodes `PoolManager.operate(pool, positionId, -withdrawColl, -repayAmount)`.
  *
- * Consumes fxUSD (relay-adapter must have approved PoolManager for
+ * Consumes fxUSD (executing account (ephemeral EOA) must have approved PoolManager for
  * `repayAmount × (1 + repayFeeRatio/1e9)`) and the position NFT;
  * produces collateralToken (wstETH or WBTC) for the swap-back leg.
  *
@@ -154,7 +154,7 @@ export class FxMintClosePositionStep extends Step {
         ],
       }),
       spentNFTs: partialClose
-        ? [] // partial: NFT stays with relay-adapter for shield-back
+        ? [] // partial: NFT stays with executing account (ephemeral EOA) for shield-back
         : [
             {
               nftAddress: pool,
