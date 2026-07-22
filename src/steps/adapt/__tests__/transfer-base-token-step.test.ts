@@ -13,9 +13,13 @@ const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
+// EIP-7702 relay-adapt host: the executing ephemeral EOA the transfer self-call
+// targets (holding the token); `toAddress` is the external destination.
+const RELAY_ADAPT_ADDRESS = '0x1111111111111111111111111111111111111111';
+
 describe('transfer-base-token-step', () => {
   it('Should create transfer-base-token step with amount', async () => {
-    const step = new TransferBaseTokenStep(toAddress, amount);
+    const step = new TransferBaseTokenStep(toAddress, RELAY_ADAPT_ADDRESS, amount);
 
     const stepInput: StepInput = {
       networkName,
@@ -69,16 +73,19 @@ describe('transfer-base-token-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
-        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+        to: '0x1111111111111111111111111111111111111111',
       },
     ]);
-    expect(output.crossContractCalls[0].to).to.equal(
+    // EIP-7702 regression: the transfer self-call targets the passed executor
+    // (ephemeral EOA), not the shared relay-adapt contract.
+    expect(output.crossContractCalls[0].to).to.equal(RELAY_ADAPT_ADDRESS);
+    expect(output.crossContractCalls[0].to).to.not.equal(
       NETWORK_CONFIG[networkName].relayAdaptContract,
     );
   });
 
   it('Should create transfer-base-token step without amount', async () => {
-    const step = new TransferBaseTokenStep(toAddress);
+    const step = new TransferBaseTokenStep(toAddress, RELAY_ADAPT_ADDRESS);
 
     const stepInput: StepInput = {
       networkName,
@@ -118,13 +125,13 @@ describe('transfer-base-token-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+        to: '0x1111111111111111111111111111111111111111',
       },
     ]);
   });
 
   it('Should test transfer-base-token step error cases', async () => {
-    const step = new TransferBaseTokenStep(toAddress, amount);
+    const step = new TransferBaseTokenStep(toAddress, RELAY_ADAPT_ADDRESS, amount);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {

@@ -22,10 +22,23 @@ export class TransferERC20Step extends Step {
 
   private readonly amount: Optional<bigint>;
 
-  constructor(toAddress: string, erc20Info: RecipeERC20Info, amount?: bigint) {
+  /**
+   * EIP-7702 relay-adapt host: the executing ephemeral EOA that holds the token
+   * being transferred. The transfer self-call targets this account (not the
+   * shared relay-adapt contract); `toAddress` is the external destination.
+   */
+  private readonly relayAdaptAddress: string;
+
+  constructor(
+    toAddress: string,
+    erc20Info: RecipeERC20Info,
+    relayAdaptAddress: string,
+    amount?: bigint,
+  ) {
     super();
     this.toAddress = toAddress;
     this.erc20Info = erc20Info;
+    this.relayAdaptAddress = relayAdaptAddress;
     this.amount = amount;
   }
 
@@ -41,7 +54,7 @@ export class TransferERC20Step extends Step {
         this.amount,
       );
 
-    const contract = new RelayAdaptContract(input.networkName);
+    const contract = new RelayAdaptContract(this.relayAdaptAddress);
     const crossContractCalls: ContractTransaction[] = [
       await contract.createERC20Transfer(
         this.toAddress,

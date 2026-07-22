@@ -19,8 +19,16 @@ export class WrapBaseTokenStep extends Step {
 
   private readonly amount: Optional<bigint>;
 
-  constructor(amount?: bigint) {
+  /**
+   * EIP-7702 relay-adapt host: the executing ephemeral EOA. The wrap self-call
+   * targets this account so it operates on that account's own balance rather
+   * than the shared relay-adapt contract.
+   */
+  private readonly relayAdaptAddress: string;
+
+  constructor(relayAdaptAddress: string, amount?: bigint) {
     super();
+    this.relayAdaptAddress = relayAdaptAddress;
     this.amount = amount;
   }
 
@@ -37,7 +45,7 @@ export class WrapBaseTokenStep extends Step {
         this.amount,
       );
 
-    const contract = new RelayAdaptContract(input.networkName);
+    const contract = new RelayAdaptContract(this.relayAdaptAddress);
     const crossContractCalls: ContractTransaction[] = [
       await contract.createBaseTokenWrap(this.amount),
     ];

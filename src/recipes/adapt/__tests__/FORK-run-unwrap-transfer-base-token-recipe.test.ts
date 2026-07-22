@@ -42,7 +42,11 @@ describe('FORK-run-unwrap-transfer-base-token-recipe', function run() {
       return;
     }
 
-    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
+    const recipe = new UnwrapTransferBaseTokenRecipe(
+      toAddress,
+      '0x1111111111111111111111111111111111111111',
+      amount,
+    );
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,
@@ -93,7 +97,10 @@ describe('FORK-run-unwrap-transfer-base-token-recipe', function run() {
       return;
     }
 
-    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
+    const recipe = new UnwrapTransferBaseTokenRecipe(
+      toAddress,
+      '0x1111111111111111111111111111111111111111',
+    );
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
       networkName,

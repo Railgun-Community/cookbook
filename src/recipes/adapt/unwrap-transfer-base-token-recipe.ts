@@ -7,9 +7,10 @@ import { RecipeConfig } from '../../models/export-models';
 import { MIN_GAS_LIMIT_TRANSFER } from '../../models/min-gas-limits';
 
 /**
- * EIP-7702: the unwrap executes as the ephemeral EOA (msg.sender receives the
- * base token); the trailing transfer sends it to `toAddress`. No relay-adapt
- * recipient is baked in.
+ * EIP-7702: pass the executing ephemeral EOA as `recipient`. The unwrap and
+ * transfer legs are relay-adapt self-calls that target that account (which
+ * holds the tokens); `toAddress` is the external transfer destination. The
+ * shared relay-adapt contract is no longer used.
  */
 export class UnwrapTransferBaseTokenRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -20,11 +21,13 @@ export class UnwrapTransferBaseTokenRecipe extends Recipe {
   };
 
   private readonly toAddress: string;
+  private readonly recipient: string;
   private readonly amount: Optional<bigint>;
 
-  constructor(toAddress: string, amount?: bigint) {
+  constructor(toAddress: string, recipient: string, amount?: bigint) {
     super();
     this.toAddress = toAddress;
+    this.recipient = recipient;
     this.amount = amount;
   }
 
@@ -34,8 +37,8 @@ export class UnwrapTransferBaseTokenRecipe extends Recipe {
 
   protected async getInternalSteps(): Promise<Step[]> {
     return [
-      new UnwrapBaseTokenStep(this.amount),
-      new TransferBaseTokenStep(this.toAddress),
+      new UnwrapBaseTokenStep(this.recipient, this.amount),
+      new TransferBaseTokenStep(this.toAddress, this.recipient),
     ];
   }
 }

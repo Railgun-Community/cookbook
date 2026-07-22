@@ -120,8 +120,12 @@ export class ZeroXV2SwapRecipe extends SwapRecipe {
               this.buyERC20Info,
             ])
           : this.buyERC20Info.isBaseToken ?? false
-          ? new TransferBaseTokenStep(this.destinationAddress)
-          : new TransferERC20Step(this.destinationAddress, this.buyERC20Info),
+          ? new TransferBaseTokenStep(this.destinationAddress, this.recipient)
+          : new TransferERC20Step(
+              this.destinationAddress,
+              this.buyERC20Info,
+              this.recipient,
+            ),
       );
     }
     return steps;

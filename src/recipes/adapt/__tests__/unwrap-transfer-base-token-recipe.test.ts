@@ -18,6 +18,11 @@ const toAddress = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
 const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
+// EIP-7702 execution account (ephemeral EOA). The unwrap and transfer legs are
+// relay-adapt self-calls that target this account instead of the shared
+// relay-adapt contract.
+const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
 describe('unwrap-transfer-base-token-recipe', () => {
   before(() => {
     setRailgunFees(
@@ -28,7 +33,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
   });
 
   it('Should create unwrap-transfer-base-token-recipe with amount', async () => {
-    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
+    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, RECIPIENT, amount);
 
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
@@ -99,7 +104,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       crossContractCalls: [
         {
           data: '0xd5774a280000000000000000000000000000000000000000000000000000000000002710',
-          to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+          to: '0x1111111111111111111111111111111111111111',
         },
       ],
       spentERC20Amounts: [
@@ -130,7 +135,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       crossContractCalls: [
         {
           data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-          to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+          to: '0x1111111111111111111111111111111111111111',
         },
       ],
       spentERC20Amounts: [
@@ -202,7 +207,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
   });
 
   it('Should create unwrap-transfer-base-token-recipe without amount', async () => {
-    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress);
+    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, RECIPIENT);
 
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
@@ -262,7 +267,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       crossContractCalls: [
         {
           data: '0xd5774a280000000000000000000000000000000000000000000000000000000000000000',
-          to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+          to: '0x1111111111111111111111111111111111111111',
         },
       ],
       spentERC20Amounts: [
@@ -284,7 +289,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
       crossContractCalls: [
         {
           data: '0xc2e9ffd800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-          to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+          to: '0x1111111111111111111111111111111111111111',
         },
       ],
       spentERC20Amounts: [
@@ -333,7 +338,7 @@ describe('unwrap-transfer-base-token-recipe', () => {
   });
 
   it('Should test unwrap-transfer-base-token-recipe error cases', async () => {
-    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, amount);
+    const recipe = new UnwrapTransferBaseTokenRecipe(toAddress, RECIPIENT, amount);
 
     // No matching erc20 inputs
     const recipeInputNoMatch: RecipeInput = {

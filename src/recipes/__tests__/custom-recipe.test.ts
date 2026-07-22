@@ -12,6 +12,10 @@ const { expect } = chai;
 
 const networkName = NetworkName.Ethereum;
 
+// EIP-7702 relay-adapt host: the executing ephemeral EOA the unwrap self-call
+// targets, replacing the shared relay-adapt contract.
+const RELAY_ADAPT_ADDRESS = '0x1111111111111111111111111111111111111111';
+
 describe('custom-recipe', () => {
   before(() => {
     setRailgunFees(networkName, 25n, 25n);
@@ -29,7 +33,7 @@ describe('custom-recipe', () => {
       supportedNetworks,
     );
 
-    recipe.addStep(new UnwrapBaseTokenStep());
+    recipe.addStep(new UnwrapBaseTokenStep(RELAY_ADAPT_ADDRESS));
 
     const firstStepInput: StepInput = {
       networkName,

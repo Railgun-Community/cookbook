@@ -12,9 +12,13 @@ const networkName = NetworkName.Ethereum;
 const amount = 10000n;
 const tokenAddress = NETWORK_CONFIG[networkName].baseToken.wrappedAddress;
 
+// EIP-7702 relay-adapt host: the executing ephemeral EOA the wrap self-call
+// targets, replacing the shared relay-adapt contract.
+const RELAY_ADAPT_ADDRESS = '0x1111111111111111111111111111111111111111';
+
 describe('wrap-base-token-step', () => {
   it('Should create wrap-base-token step with amount', async () => {
-    const step = new WrapBaseTokenStep(amount);
+    const step = new WrapBaseTokenStep(RELAY_ADAPT_ADDRESS, amount);
 
     const stepInput: StepInput = {
       networkName,
@@ -77,16 +81,19 @@ describe('wrap-base-token-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xe9a059a30000000000000000000000000000000000000000000000000000000000002710',
-        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+        to: '0x1111111111111111111111111111111111111111',
       },
     ]);
-    expect(output.crossContractCalls[0].to).to.equal(
+    // EIP-7702 regression: the wrap self-call targets the passed executor
+    // (ephemeral EOA), not the shared relay-adapt contract.
+    expect(output.crossContractCalls[0].to).to.equal(RELAY_ADAPT_ADDRESS);
+    expect(output.crossContractCalls[0].to).to.not.equal(
       NETWORK_CONFIG[networkName].relayAdaptContract,
     );
   });
 
   it('Should create wrap-base-token step without amount', async () => {
-    const step = new WrapBaseTokenStep();
+    const step = new WrapBaseTokenStep(RELAY_ADAPT_ADDRESS);
 
     const stepInput: StepInput = {
       networkName,
@@ -135,13 +142,13 @@ describe('wrap-base-token-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xe9a059a30000000000000000000000000000000000000000000000000000000000000000',
-        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+        to: '0x1111111111111111111111111111111111111111',
       },
     ]);
   });
 
   it('Should test wrap-base-token step error cases', async () => {
-    const step = new WrapBaseTokenStep(amount);
+    const step = new WrapBaseTokenStep(RELAY_ADAPT_ADDRESS, amount);
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {

@@ -16,9 +16,18 @@ const erc20Info: RecipeERC20Info = {
 };
 const amount = 10000n;
 
+// EIP-7702 relay-adapt host: the executing ephemeral EOA the transfer self-call
+// targets (holding the token); `toAddress` is the external destination.
+const RELAY_ADAPT_ADDRESS = '0x1111111111111111111111111111111111111111';
+
 describe('transfer-erc20-step', () => {
   it('Should create transfer-erc20 step with amount', async () => {
-    const step = new TransferERC20Step(toAddress, erc20Info, amount);
+    const step = new TransferERC20Step(
+      toAddress,
+      erc20Info,
+      RELAY_ADAPT_ADDRESS,
+      amount,
+    );
 
     const stepInput: StepInput = {
       networkName,
@@ -69,13 +78,17 @@ describe('transfer-erc20-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xc2e9ffd8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e76c6c83af64e4c60245d8c7de953df673a7a33d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710',
-        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+        to: '0x1111111111111111111111111111111111111111',
       },
     ]);
+
+    // EIP-7702 regression: the transfer self-call targets the passed executor
+    // (ephemeral EOA), not the shared relay-adapt contract.
+    expect(output.crossContractCalls[0].to).to.equal(RELAY_ADAPT_ADDRESS);
   });
 
   it('Should create transfer-erc20 step without amount', async () => {
-    const step = new TransferERC20Step(toAddress, erc20Info);
+    const step = new TransferERC20Step(toAddress, erc20Info, RELAY_ADAPT_ADDRESS);
 
     const stepInput: StepInput = {
       networkName,
@@ -113,13 +126,18 @@ describe('transfer-erc20-step', () => {
     expect(output.crossContractCalls).to.deep.equal([
       {
         data: '0xc2e9ffd8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e76c6c83af64e4c60245d8c7de953df673a7a33d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000000',
-        to: '0xAc9f360Ae85469B27aEDdEaFC579Ef2d052aD405',
+        to: '0x1111111111111111111111111111111111111111',
       },
     ]);
   });
 
   it('Should test transfer-erc20 step error cases', async () => {
-    const step = new TransferERC20Step(toAddress, erc20Info, amount);
+    const step = new TransferERC20Step(
+      toAddress,
+      erc20Info,
+      RELAY_ADAPT_ADDRESS,
+      amount,
+    );
 
     // No matching erc20 inputs
     const stepInputNoERC20s: StepInput = {

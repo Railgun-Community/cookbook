@@ -1,9 +1,4 @@
 import { abi } from '../../abi/abi';
-import {
-  NETWORK_CONFIG,
-  NetworkName,
-  isDefined,
-} from '@railgun-community/shared-models';
 import { ZERO_ADDRESS } from '../../models/constants';
 import { validateContractAddress } from '../../utils/address';
 import { RelayAdapt } from '../../typechain';
@@ -13,16 +8,18 @@ import { Contract, ContractTransaction } from 'ethers';
 export class RelayAdaptContract {
   private readonly contract: RelayAdapt;
 
-  constructor(networkName: NetworkName) {
-    const network = NETWORK_CONFIG[networkName];
-    if (!isDefined(network)) {
-      throw new Error(`Network not found: ${networkName}`);
-    }
-    if (!validateContractAddress(network.relayAdaptContract)) {
+  /**
+   * @param relayAdaptAddress Address hosting the RelayAdapt logic. Under
+   * EIP-7702 this is the executing ephemeral EOA (the account the batch runs
+   * as), so its wrap/unwrap/transfer self-calls operate on that account's own
+   * balance. The shared canonical relay-adapt contract is no longer used.
+   */
+  constructor(relayAdaptAddress: string) {
+    if (!validateContractAddress(relayAdaptAddress)) {
       throw new Error('Invalid address for Relay Adapt contract.');
     }
     this.contract = new Contract(
-      network.relayAdaptContract,
+      relayAdaptAddress,
       abi.adapt.relay,
     ) as unknown as RelayAdapt;
   }
