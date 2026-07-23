@@ -3,3 +3,5 @@
 /* eslint-disable */
 import type * as beefy from "./beefy";
 export type { beefy };
+import type * as morpho from "./morpho";
+export type { morpho };

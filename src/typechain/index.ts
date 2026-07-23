@@ -24,3 +24,5 @@ export type { Erc721 } from "./token/Erc721";
 export { Erc721__factory } from "./factories/token/Erc721__factory";
 export type { BeefyVaultMergedV6V7 } from "./vault/beefy/BeefyVaultMergedV6V7";
 export { BeefyVaultMergedV6V7__factory } from "./factories/vault/beefy/BeefyVaultMergedV6V7__factory";
+export type { MetaMorpho } from "./vault/morpho/MetaMorpho";
+export { MetaMorpho__factory } from "./factories/vault/morpho/MetaMorpho__factory";
