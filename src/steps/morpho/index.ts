@@ -2,6 +2,8 @@ export * from './morpho-blue-util';
 export * from './blue-supply-collateral-step';
 export * from './blue-borrow-step';
 export * from './blue-repay-step';
+export * from './blue-repay-shares-step';
 export * from './blue-withdraw-collateral-step';
 export * from './blue-liquidate-step';
+export * from './blue-set-authorization-step';
 export * from './morpho-transact-step';

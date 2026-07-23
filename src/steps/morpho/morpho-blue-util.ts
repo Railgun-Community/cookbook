@@ -78,6 +78,17 @@ const toAssetsUp = (
   mulDivUp(shares, totalAssets + VIRTUAL_ASSETS, totalShares + VIRTUAL_SHARES);
 
 /**
+ * Loan assets owed for a number of borrow shares, rounded up (matches Morpho's
+ * repay-by-shares conversion). Used to size a conservative repay budget for a
+ * shares-mode (full) close, which avoids debt growth between build and inclusion.
+ */
+export const borrowAssetsForShares = (
+  borrowShares: bigint,
+  totalBorrowAssets: bigint,
+  totalBorrowShares: bigint,
+): bigint => toAssetsUp(borrowShares, totalBorrowAssets, totalBorrowShares);
+
+/**
  * Liquidation incentive factor for a market, from its LLTV — matches Morpho's
  * `min(MAX_LIF, WAD / (WAD - CURSOR * (WAD - lltv)))`.
  */

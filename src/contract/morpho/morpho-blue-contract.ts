@@ -133,6 +133,16 @@ export class MorphoBlueContract {
     };
   }
 
+  createSetAuthorization(
+    authorized: string,
+    isAuthorized: boolean,
+  ): Promise<ContractTransaction> {
+    return this.contract.setAuthorization.populateTransaction(
+      authorized,
+      isAuthorized,
+    );
+  }
+
   createLiquidate(
     params: MarketParams,
     borrower: string,

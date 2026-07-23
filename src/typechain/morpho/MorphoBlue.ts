@@ -53,6 +53,8 @@ export interface MorphoBlueInterface extends Interface {
       | "supplyCollateral"
       | "withdrawCollateral"
       | "liquidate"
+      | "setAuthorization"
+      | "isAuthorized"
       | "idToMarketParams"
       | "position"
       | "market"
@@ -118,6 +120,14 @@ export interface MorphoBlueInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "setAuthorization",
+    values: [AddressLike, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isAuthorized",
+    values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "idToMarketParams",
     values: [BytesLike]
   ): string;
@@ -144,6 +154,14 @@ export interface MorphoBlueInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "liquidate", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setAuthorization",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isAuthorized",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "idToMarketParams",
     data: BytesLike
@@ -282,6 +300,18 @@ export interface MorphoBlue extends BaseContract {
     "nonpayable"
   >;
 
+  setAuthorization: TypedContractMethod<
+    [authorized: AddressLike, newIsAuthorized: boolean],
+    [void],
+    "nonpayable"
+  >;
+
+  isAuthorized: TypedContractMethod<
+    [authorizer: AddressLike, authorized: AddressLike],
+    [boolean],
+    "view"
+  >;
+
   idToMarketParams: TypedContractMethod<
     [id: BytesLike],
     [MarketParamsStructOutput],
@@ -413,6 +443,20 @@ export interface MorphoBlue extends BaseContract {
     ],
     [[bigint, bigint]],
     "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setAuthorization"
+  ): TypedContractMethod<
+    [authorized: AddressLike, newIsAuthorized: boolean],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "isAuthorized"
+  ): TypedContractMethod<
+    [authorizer: AddressLike, authorized: AddressLike],
+    [boolean],
+    "view"
   >;
   getFunction(
     nameOrSignature: "idToMarketParams"

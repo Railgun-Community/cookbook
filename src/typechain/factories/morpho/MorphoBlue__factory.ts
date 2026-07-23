@@ -474,6 +474,48 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "authorized",
+        type: "address",
+      },
+      {
+        internalType: "bool",
+        name: "newIsAuthorized",
+        type: "bool",
+      },
+    ],
+    name: "setAuthorization",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "authorizer",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "authorized",
+        type: "address",
+      },
+    ],
+    name: "isAuthorized",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "Id",
         name: "id",
         type: "bytes32",

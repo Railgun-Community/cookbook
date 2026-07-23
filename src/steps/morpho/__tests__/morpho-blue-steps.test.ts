@@ -8,6 +8,7 @@ import {
   MorphoRepayQuote,
   MorphoWithdrawCollateralQuote,
   MorphoLiquidationQuote,
+  MorphoRepaySharesQuote,
 } from '../../../api/morpho';
 import {
   MarketParams,
@@ -15,12 +16,15 @@ import {
   getMarketId,
   liquidationIncentiveFactor,
   computeRepaidAssetsFromSeized,
+  borrowAssetsForShares,
 } from '../morpho-blue-util';
 import { MorphoBlueSupplyCollateralStep } from '../blue-supply-collateral-step';
 import { MorphoBlueBorrowStep } from '../blue-borrow-step';
 import { MorphoBlueRepayStep } from '../blue-repay-step';
+import { MorphoBlueRepaySharesStep } from '../blue-repay-shares-step';
 import { MorphoBlueWithdrawCollateralStep } from '../blue-withdraw-collateral-step';
 import { MorphoBlueLiquidateStep } from '../blue-liquidate-step';
+import { MorphoBlueSetAuthorizationStep } from '../blue-set-authorization-step';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -59,6 +63,16 @@ describe('morpho-blue-util', () => {
     expect(liquidationIncentiveFactor(100000000000000000n)).to.equal(
       1150000000000000000n,
     );
+  });
+
+  it('Should convert borrow shares to loan assets (round up)', () => {
+    expect(
+      borrowAssetsForShares(
+        1_000_000_000_000_000_000n, // 1e18 shares
+        1_000_000_000_000n, // 1e12 assets
+        1_000_000_000_000_000_000n, // 1e18 shares
+      ),
+    ).to.equal(1_000_000_000_000n);
   });
 
   it('Should compute repaid loan assets from seized collateral (Morpho seize math)', () => {
@@ -205,6 +219,75 @@ describe('morpho-blue-repay-step', () => {
         approvedSpender: MORPHO_BLUE_ADDRESS,
       },
     ]);
+  });
+});
+
+describe('morpho-blue-repay-shares-step', () => {
+  it('Should repay by shares, spend conservative max, reshield change', async () => {
+    const quote: MorphoRepaySharesQuote = {
+      params: market,
+      marketId: MARKET_ID,
+      loanToken: USDC,
+      loanDecimals: 6n,
+      repayShares: 1_000_000_000_000_000_000n,
+      expectedRepaidAssets: 1_000_000_000n,
+      maxRepaidAssets: 1_010_000_000n,
+      slippageBasisPoints: 100n,
+      onBehalf,
+    };
+    const step = new MorphoBlueRepaySharesStep(quote);
+    const stepInput: StepInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: USDC,
+          decimals: 6n,
+          expectedBalance: 1_500_000_000n,
+          minBalance: 1_500_000_000n,
+          approvedSpender: MORPHO_BLUE_ADDRESS,
+        },
+      ],
+      nfts: [],
+    };
+    const output = await step.getValidStepOutput(stepInput);
+    expect(output.crossContractCalls.length).to.equal(1);
+    const spent = output.spentERC20Amounts ?? [];
+    expect(spent[0]?.amount).to.equal(1_010_000_000n);
+    expect(output.outputERC20Amounts).to.deep.equal([
+      {
+        tokenAddress: USDC,
+        decimals: 6n,
+        expectedBalance: 490_000_000n, // 1500 - 1010 change
+        minBalance: 490_000_000n,
+        approvedSpender: MORPHO_BLUE_ADDRESS,
+      },
+    ]);
+  });
+});
+
+describe('morpho-blue-set-authorization-step', () => {
+  it('Should emit setAuthorization and pass inputs through unchanged', async () => {
+    const step = new MorphoBlueSetAuthorizationStep(
+      '0x4a6c312ec70e8747a587ee860a0353cd42be0ae0', // GeneralAdapter1 // pragma: allowlist secret
+      true,
+    );
+    const stepInput: StepInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: USDC,
+          decimals: 6n,
+          expectedBalance: 1_000_000n,
+          minBalance: 1_000_000n,
+          approvedSpender: undefined,
+        },
+      ],
+      nfts: [],
+    };
+    const output = await step.getValidStepOutput(stepInput);
+    expect(output.crossContractCalls.length).to.equal(1);
+    expect(output.spentERC20Amounts ?? []).to.deep.equal([]);
+    expect(output.outputERC20Amounts).to.deep.equal(stepInput.erc20Amounts);
   });
 });
 

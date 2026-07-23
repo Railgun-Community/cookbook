@@ -7,6 +7,7 @@ import {
 import { ERC20Contract } from '../../contract/token/erc20-contract';
 import {
   MarketParams,
+  borrowAssetsForShares,
   computeRepaidAssetsFromSeized,
   getMarketId,
 } from '../../steps/morpho/morpho-blue-util';
@@ -40,6 +41,24 @@ export type MorphoRepayQuote = {
   loanToken: string;
   loanDecimals: bigint;
   repayAssets: bigint;
+  onBehalf: string;
+};
+
+/**
+ * A shares-mode repay quote (`repay(shares)`), for a clean (full or partial)
+ * close that avoids debt growth between build and inclusion. The exact loan
+ * pulled drifts with interest, so `maxRepaidAssets` is a conservative upper
+ * bound the caller must unshield; the remainder reshields.
+ */
+export type MorphoRepaySharesQuote = {
+  params: MarketParams;
+  marketId: string;
+  loanToken: string;
+  loanDecimals: bigint;
+  repayShares: bigint;
+  expectedRepaidAssets: bigint;
+  maxRepaidAssets: bigint;
+  slippageBasisPoints: bigint;
   onBehalf: string;
 };
 
@@ -195,6 +214,94 @@ export class MorphoBlueAPI {
       repayAssets: params.repayAssets,
       onBehalf,
     };
+  }
+
+  /**
+   * Build a shares-mode repay quote for the ephemeral EOA's position. If
+   * `repayShares` is omitted, the full `borrowShares` is read on-chain (full
+   * close). Reads market state to size a conservative loan budget.
+   */
+  static async getRepaySharesQuote(params: {
+    market: MarketParams;
+    recipient: EphemeralExecutor | string;
+    provider: Provider;
+    slippageBasisPoints: bigint;
+    repayShares?: bigint;
+  }): Promise<MorphoRepaySharesQuote> {
+    const { market, provider, slippageBasisPoints } = params;
+    if (slippageBasisPoints < 0n || slippageBasisPoints > 10000n) {
+      throw new Error(
+        `morpho: slippageBasisPoints out of range: ${slippageBasisPoints}`,
+      );
+    }
+    const onBehalf = resolveExecutorAddress(
+      params.recipient,
+      'Morpho repay-shares onBehalf',
+    );
+    const marketId = getMarketId(market);
+    const blue = new MorphoBlueContract(undefined, provider);
+    const [position, marketState, loanDecimals] = await Promise.all([
+      blue.position(marketId, onBehalf),
+      blue.market(marketId),
+      this.decimalsOf(market.loanToken, provider),
+    ]);
+    const repayShares = params.repayShares ?? position.borrowShares;
+    if (repayShares <= 0n) {
+      throw new Error('morpho: no borrow shares to repay');
+    }
+    if (repayShares > position.borrowShares) {
+      throw new Error(
+        `morpho: repayShares ${repayShares} exceeds position borrowShares ${position.borrowShares}`,
+      );
+    }
+    const expectedRepaidAssets = borrowAssetsForShares(
+      repayShares,
+      marketState.totalBorrowAssets,
+      marketState.totalBorrowShares,
+    );
+    const maxRepaidAssets =
+      expectedRepaidAssets +
+      (expectedRepaidAssets * slippageBasisPoints) / 10000n;
+    return {
+      params: market,
+      marketId,
+      loanToken: market.loanToken,
+      loanDecimals,
+      repayShares,
+      expectedRepaidAssets,
+      maxRepaidAssets,
+      slippageBasisPoints,
+      onBehalf,
+    };
+  }
+
+  /**
+   * Build a withdraw-collateral quote for the FULL collateral the ephemeral EOA
+   * holds in the market (reads `position(id, EOA).collateral`).
+   */
+  static async getWithdrawAllCollateralQuote(params: {
+    market: MarketParams;
+    recipient: EphemeralExecutor | string;
+    provider: Provider;
+  }): Promise<MorphoWithdrawCollateralQuote> {
+    const executor = resolveExecutorAddress(
+      params.recipient,
+      'Morpho withdraw-all receiver',
+    );
+    const position = await this.getPosition(
+      getMarketId(params.market),
+      executor,
+      params.provider,
+    );
+    if (position.collateral <= 0n) {
+      throw new Error('morpho: no collateral to withdraw');
+    }
+    return this.getWithdrawCollateralQuote({
+      market: params.market,
+      withdrawAssets: position.collateral,
+      recipient: executor,
+      provider: params.provider,
+    });
   }
 
   static async getLiquidationQuote(params: {
