@@ -101,10 +101,17 @@ fungible change/borrowed/withdrawn tokens shield back.
 | Recipe | Steps |
 | --- | --- |
 | `MorphoBlueSupplyCollateralAndBorrowRecipe` | approve + supplyCollateral + borrow (open, one batch) |
-| `MorphoBlueRepayAndWithdrawCollateralRecipe` | approve + repay + withdrawCollateral (close) |
+| `MorphoBlueRepayAndWithdrawCollateralRecipe` | approve + repay (assets) + withdrawCollateral (partial close) |
+| `MorphoBlueClosePositionRecipe` | approve + **repay-by-shares** (full) + withdraw-all-collateral (full close) |
 | `MorphoBlueBorrowRecipe` | borrow only — non-atomic follow-up on a position the same EOA opened earlier |
-| `MorphoBlueRepayRecipe` | repay only |
+| `MorphoBlueRepayRecipe` | repay only (assets) |
+| `MorphoBlueSetAuthorizationRecipe` | authorize/revoke an operator (retained-account / Bundler3 model) |
 | `MorphoBlueLiquidationRecipe` | approve + liquidate (see §5.1) |
+
+`MorphoBlueAPI` also exposes `getRepaySharesQuote` (reads `position.borrowShares` + market
+state; conservative loan budget) and `getWithdrawAllCollateralQuote` (reads
+`position.collateral`). `borrowAssetsForShares` exposes the round-up shares→assets conversion.
+Repay-by-shares is preferred for full closes — it avoids debt growth between build and inclusion.
 
 `MorphoBlueAPI`: `getMarketParamsFromId`, `getPosition`, `getSupplyCollateralQuote`,
 `getBorrowQuote`, `getRepayQuote`, `getWithdrawCollateralQuote`, `getLiquidationQuote`.
@@ -148,69 +155,52 @@ that the raw calldata matches the declared effects).
 
 ---
 
-## 7. High-value combo-meals — NOT YET IMPLEMENTED (planned)
+## 7. High-value combo-meals
 
-No Morpho combo-meals exist yet. A `ComboMeal` chains whole recipes (skipUnshield on all but
-the first, skipShield on all but the last), threading one recipe's shielded outputs into the
-next — distinct from the multi-step recipes above. Reference:
-`combo-meals/liquidity-vault/uni-v2-like-add-liquidity-beefy-deposit-combo-meal.ts`.
+A `ComboMeal` chains whole recipes (skipUnshield on all but the first, skipShield on all but
+the last), threading one recipe's shielded outputs into the next — distinct from the
+multi-step recipes above. Combo-meals are exported at the package root
+(`src/combo-meals/index.ts`).
 
-The target flows and their build-readiness against what is shipped:
+### 7.1 Private vault entry — SHIPPED
+```
+private asset → 0x swap (→ vault asset) → Morpho vault deposit → shield vault shares
+```
+`ZeroXSwap_MorphoVaultDeposit_ComboMeal` (`ZeroXV2SwapRecipe` → `MorphoVaultDepositRecipe`).
 
-### 7.1 Private vault entry — BUILDABLE NOW
+### 7.2 Private vault exit — SHIPPED
 ```
-private asset → [optional private swap] → Morpho Vault V2 deposit → shield vault shares
+unshield vault shares → redeem → 0x swap → shield desired asset
 ```
-Chain: `ZeroXV2SwapRecipe` (→ vault asset) → `MorphoVaultV2DepositRecipe`. Both exist.
+`MorphoVaultRedeem_ZeroXSwap_ComboMeal` (`MorphoVaultRedeemRecipe` → `ZeroXV2SwapRecipe`).
 
-### 7.2 Private vault exit — BUILDABLE NOW
-```
-unshield vault shares → redeem → [optional swap] → shield desired asset
-```
-Chain: `MorphoVaultV2RedeemRecipe` → `ZeroXV2SwapRecipe`. Both exist.
+### 7.3 Private borrow
+- **Same-account (SHIPPED):** `MorphoBlueSupplyCollateralAndBorrowRecipe` — atomic
+  supply+borrow with `onBehalf == msg.sender == the ephemeral EOA`; no authorization needed.
+- **Retained-account:** the `MorphoBlueSetAuthorizationRecipe` / `setAuthorization` primitive
+  is now available (§5) for the model where the position owner and acting account differ.
+  Full Bundler3 wiring of that flow is expressed via the transaction compiler (§6).
 
-### 7.3 Private borrow — PARTIAL (needs authorization for the retained-account model)
+### 7.4 Private close — SHIPPED
 ```
-unshield collateral → supply collateral (position account)
-  → authorize GeneralAdapter1 → borrow (to execution account) → shield borrowed asset
+unshield loan asset → repay ALL debt by shares → withdraw ALL collateral → shield collateral + refund
 ```
-- **Same-account model (shipped):** `MorphoBlueSupplyCollateralAndBorrowRecipe` already does
-  atomic supply+borrow with `onBehalf == msg.sender == the ephemeral EOA` — no
-  authorization needed, because the position owner *is* the borrower.
-- **Retained-position-account model (gap):** if the collateral position is owned by a
-  *persistent* account separate from the ephemeral execution account, Morpho requires
-  `setAuthorization` (or GeneralAdapter1 authorization via the SDK/Bundler3 path). Not built —
-  needs an authorization primitive (Mode-2 / §6 territory).
+`MorphoBlueClosePositionRecipe` (repay-by-shares + withdraw-all). Revoke-authorization (if the
+retained-account model was used) via `MorphoBlueSetAuthorizationRecipe(authorized, false)`.
 
-### 7.4 Private close — PARTIAL (needs repay-by-shares)
+### 7.5 Private liquidation — SHIPPED (flash-loan variant via §6)
 ```
-unshield loan asset → repay debt BY SHARES → withdraw all collateral
-  → revoke GeneralAdapter1 authorization → shield collateral + refund
+unshield repay asset → liquidate → seized collateral → 0x swap → shield profit
 ```
-- **repay-by-shares — GAP.** The shipped `MorphoBlueRepayStep` is assets-denominated only.
-  Closing by borrow **shares** avoids debt growth between recipe build and inclusion, so this
-  needs a shares-mode repay quote/step (read `position(id, EOA).borrowShares`, repay with
-  `shares` not `assets`).
-- **withdraw-all-collateral:** read `position(id, EOA).collateral` for the amount — small
-  addition on top of the shipped `MorphoBlueWithdrawCollateralStep`.
-- **revoke authorization:** only relevant under the retained-account model (§7.3).
+`MorphoLiquidation_ZeroXSwap_ComboMeal` (`MorphoBlueLiquidationRecipe` → `ZeroXV2SwapRecipe`).
+The flash-loan-funded variant (Bundler3: flash loan → liquidate → sell → repay, shield only
+net profit) is a Bundler3 composition — express it as a bundle through `MorphoTransactRecipe`
+(§6) rather than bespoke core code.
 
-### 7.5 Private liquidation — MOSTLY BUILDABLE NOW
-```
-unshield repayment asset → liquidate → receive seized collateral → [optional swap] → shield profit
-```
-Chain: `MorphoBlueLiquidationRecipe` → `ZeroXV2SwapRecipe`. Both exist. A later version could
-combine a Morpho flash loan + liquidate + collateral sale + repay, shielding only net profit —
-a Mode-2 (Bundler3 flash-loan) composition, not built.
-
-### 7.6 Gaps these combos require (build order)
-1. **repay-by-shares** step/quote (`MorphoBlueRepayStep` shares-mode) — needed for §7.4, small.
-2. **withdraw-all-collateral** helper (read position collateral) — §7.4, small.
-3. **swap-chained combo-meals** under `src/combo-meals/morpho/` for §7.1, §7.2, §7.5 — reuse
-   shipped recipes unchanged, medium.
-4. **Morpho authorization primitive** (`setAuthorization` / GeneralAdapter1) — §7.3, §7.4
-   retained-account model, Mode-2, larger.
-5. **Flash-loan liquidation composition** — §7.5 advanced, Bundler3, largest.
+### 7.6 Status summary
+Shipped: repay-by-shares, withdraw-all-collateral, full-close recipe, the three combo-meals,
+and the `setAuthorization` primitive. Remaining (optional, Mode-2 via the compiler): the full
+Bundler3-wired retained-account borrow and the flash-loan liquidation composition.
 
 ---
 
@@ -225,14 +215,15 @@ src/api/morpho/                          MorphoBlueAPI, MorphoCompilerAPI
 src/steps/vault/morpho/                  vault deposit/redeem/withdraw steps + util
 src/steps/morpho/                        blue-*, liquidate, transact steps + util
 src/recipes/vault/morpho/                vault recipes (V1/V2)
-src/recipes/morpho/                      blue market, liquidation, transact recipes
+src/recipes/morpho/                      blue market, close, set-authorization, liquidation, transact recipes
+src/combo-meals/morpho/                  swap-chained combos (entry / exit / liquidation)
 ```
 
 ---
 
 ## 9. Verification status
 
-- **Green now:** `tsc` (src + test configs), 29 unit tests, eslint, madge (no cycles).
+- **Green now:** `tsc` (src + test configs), 32 unit tests, eslint, madge (no cycles).
 - **On-chain verified** against live mainnet: `getMarketId` derivation, liquidation-incentive
   factor + repaid-assets math, the V2 vault ABI (`asset`/`decimals`/`preview*`, `maxDeposit`=0).
 - **NOT executed:** every `FORK-run-*` test gates on `shouldSkipForkTest` and requires an
