@@ -9,6 +9,10 @@ import { Step } from '../step';
 import { getWrappedBaseToken } from '../../utils/wrap-util';
 import { RelayAdaptContract } from '../../contract/adapt/relay-adapt-contract';
 import { compareERC20Info } from '../../utils/token';
+import {
+  EphemeralExecutor,
+  resolveExecutorAddress,
+} from '../../utils/7702';
 import { ContractTransaction } from 'ethers';
 
 export class UnwrapBaseTokenStep extends Step {
@@ -26,9 +30,15 @@ export class UnwrapBaseTokenStep extends Step {
    */
   private readonly relayAdaptAddress: string;
 
-  constructor(relayAdaptAddress: string, amount?: bigint) {
+  constructor(
+    relayAdaptAddress: EphemeralExecutor | string,
+    amount?: bigint,
+  ) {
     super();
-    this.relayAdaptAddress = relayAdaptAddress;
+    this.relayAdaptAddress = resolveExecutorAddress(
+      relayAdaptAddress,
+      'UnwrapBaseTokenStep',
+    );
     this.amount = amount;
   }
 

@@ -191,27 +191,17 @@ describe('wrap-base-token-step', () => {
     );
   });
 
-  it('Should reject an invalid relay-adapt host address (EIP-7702)', async () => {
-    // A zero/invalid relayAdaptAddress must fail loud when the self-call is
-    // built (RelayAdaptContract validates), not silently target nowhere.
-    const step = new WrapBaseTokenStep(
-      '0x0000000000000000000000000000000000000000',
-      amount,
-    );
-    const stepInput: StepInput = {
-      networkName,
-      erc20Amounts: [
-        {
-          tokenAddress,
-          decimals: 18n,
-          isBaseToken: true,
-          expectedBalance: 12000n,
-          minBalance: 12000n,
-          approvedSpender: undefined,
-        },
-      ],
-      nfts: [],
-    };
-    await expect(step.getValidStepOutput(stepInput)).to.be.rejected;
+  it('Should reject an invalid relay-adapt host address (EIP-7702)', () => {
+    // A zero/invalid relayAdaptAddress must fail loud, not silently target
+    // nowhere. The 7702 executor is now validated at construction (via
+    // resolveExecutorAddress), so the misconfiguration surfaces immediately
+    // rather than later when the self-call is built.
+    expect(
+      () =>
+        new WrapBaseTokenStep(
+          '0x0000000000000000000000000000000000000000',
+          amount,
+        ),
+    ).to.throw(/invalid recipient address/i);
   });
 });

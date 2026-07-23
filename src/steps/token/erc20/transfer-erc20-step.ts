@@ -9,6 +9,10 @@ import { compareERC20Info } from '../../../utils/token';
 import { Step } from '../../step';
 import { ContractTransaction } from 'ethers';
 import { RelayAdaptContract } from '../../../contract';
+import {
+  EphemeralExecutor,
+  resolveExecutorAddress,
+} from '../../../utils/7702';
 
 export class TransferERC20Step extends Step {
   readonly config: StepConfig = {
@@ -32,13 +36,16 @@ export class TransferERC20Step extends Step {
   constructor(
     toAddress: string,
     erc20Info: RecipeERC20Info,
-    relayAdaptAddress: string,
+    relayAdaptAddress: EphemeralExecutor | string,
     amount?: bigint,
   ) {
     super();
     this.toAddress = toAddress;
     this.erc20Info = erc20Info;
-    this.relayAdaptAddress = relayAdaptAddress;
+    this.relayAdaptAddress = resolveExecutorAddress(
+      relayAdaptAddress,
+      'TransferERC20Step',
+    );
     this.amount = amount;
   }
 
