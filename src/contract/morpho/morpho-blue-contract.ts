@@ -14,6 +14,15 @@ export type MorphoBluePosition = {
   collateral: bigint;
 };
 
+export type MorphoBlueMarketState = {
+  totalSupplyAssets: bigint;
+  totalSupplyShares: bigint;
+  totalBorrowAssets: bigint;
+  totalBorrowShares: bigint;
+  lastUpdate: bigint;
+  fee: bigint;
+};
+
 /**
  * Thin wrapper over the Morpho Blue singleton. Under EIP-7702 `onBehalf` and
  * `receiver` are the executing ephemeral EOA (also `msg.sender`, so it is always
@@ -103,5 +112,39 @@ export class MorphoBlueContract {
     const [loanToken, collateralToken, oracle, irm, lltv] =
       await this.contract.idToMarketParams(id);
     return { loanToken, collateralToken, oracle, irm, lltv };
+  }
+
+  async market(id: string): Promise<MorphoBlueMarketState> {
+    const [
+      totalSupplyAssets,
+      totalSupplyShares,
+      totalBorrowAssets,
+      totalBorrowShares,
+      lastUpdate,
+      fee,
+    ] = await this.contract.market(id);
+    return {
+      totalSupplyAssets,
+      totalSupplyShares,
+      totalBorrowAssets,
+      totalBorrowShares,
+      lastUpdate,
+      fee,
+    };
+  }
+
+  createLiquidate(
+    params: MarketParams,
+    borrower: string,
+    seizedAssets: bigint,
+  ): Promise<ContractTransaction> {
+    // Seize-mode: specify collateral to seize, repaidShares = 0 (derived).
+    return this.contract.liquidate.populateTransaction(
+      params,
+      borrower,
+      seizedAssets,
+      0n,
+      EMPTY_MORPHO_CALLBACK_DATA,
+    );
   }
 }

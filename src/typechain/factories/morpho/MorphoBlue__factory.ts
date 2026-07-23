@@ -403,6 +403,77 @@ const _abi = [
   {
     inputs: [
       {
+        components: [
+          {
+            internalType: "address",
+            name: "loanToken",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "collateralToken",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "oracle",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "irm",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "lltv",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct MarketParams",
+        name: "marketParams",
+        type: "tuple",
+      },
+      {
+        internalType: "address",
+        name: "borrower",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "seizedAssets",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "repaidShares",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
+      },
+    ],
+    name: "liquidate",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "Id",
         name: "id",
         type: "bytes32",

@@ -52,6 +52,7 @@ export interface MorphoBlueInterface extends Interface {
       | "repay"
       | "supplyCollateral"
       | "withdrawCollateral"
+      | "liquidate"
       | "idToMarketParams"
       | "position"
       | "market"
@@ -107,6 +108,16 @@ export interface MorphoBlueInterface extends Interface {
     values: [MarketParamsStruct, BigNumberish, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "liquidate",
+    values: [
+      MarketParamsStruct,
+      AddressLike,
+      BigNumberish,
+      BigNumberish,
+      BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "idToMarketParams",
     values: [BytesLike]
   ): string;
@@ -132,6 +143,7 @@ export interface MorphoBlueInterface extends Interface {
     functionFragment: "withdrawCollateral",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "liquidate", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "idToMarketParams",
     data: BytesLike
@@ -258,6 +270,18 @@ export interface MorphoBlue extends BaseContract {
     "nonpayable"
   >;
 
+  liquidate: TypedContractMethod<
+    [
+      marketParams: MarketParamsStruct,
+      borrower: AddressLike,
+      seizedAssets: BigNumberish,
+      repaidShares: BigNumberish,
+      data: BytesLike
+    ],
+    [[bigint, bigint]],
+    "nonpayable"
+  >;
+
   idToMarketParams: TypedContractMethod<
     [id: BytesLike],
     [MarketParamsStructOutput],
@@ -375,6 +399,19 @@ export interface MorphoBlue extends BaseContract {
       receiver: AddressLike
     ],
     [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "liquidate"
+  ): TypedContractMethod<
+    [
+      marketParams: MarketParamsStruct,
+      borrower: AddressLike,
+      seizedAssets: BigNumberish,
+      repaidShares: BigNumberish,
+      data: BytesLike
+    ],
+    [[bigint, bigint]],
     "nonpayable"
   >;
   getFunction(
