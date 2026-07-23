@@ -20,15 +20,16 @@ import {
 import { findFirstInputERC20Amount } from '../../../utils/filters';
 
 /**
- * Redeem MetaMorpho ERC-4626 shares for the underlying asset, routed to the
- * executing ephemeral EOA (EIP-7702). No approval leg — the EOA owns the
- * shares and is `msg.sender`.
+ * Redeem Morpho Vault V1 (MetaMorpho, ERC-4626) shares for the underlying
+ * asset, routed to the executing ephemeral EOA (EIP-7702). DIRECT vault call —
+ * no approval leg (the EOA owns the shares and is `msg.sender`), matching
+ * Morpho's own SDK which emits withdrawals/redemptions as direct calls.
  *
  * Self-contained (0x-V2 style): queries vault metadata + the ERC-4626 redeem
  * preview on-chain via {@link MorphoVaultAPI}. Asset output is non-deterministic
  * across blocks, so the withdraw step tolerates `[minAssets, expectedAssets]`.
  */
-export class MetaMorphoWithdrawRecipe extends Recipe {
+export class MorphoVaultV1WithdrawRecipe extends Recipe {
   readonly config: RecipeConfig = {
     name: 'MetaMorpho Vault Withdraw',
     description: 'Redeems shares from an ERC-4626 MetaMorpho vault.',
@@ -53,7 +54,7 @@ export class MetaMorphoWithdrawRecipe extends Recipe {
     this.slippageBasisPoints = slippageBasisPoints;
     this.recipient = resolveExecutorAddress(
       recipient,
-      'MetaMorphoWithdrawRecipe recipient',
+      'MorphoVaultV1WithdrawRecipe recipient',
     );
     this.provider = provider;
   }

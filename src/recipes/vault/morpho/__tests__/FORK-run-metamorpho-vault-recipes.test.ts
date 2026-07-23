@@ -2,8 +2,8 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
 import { balanceForERC20Token } from '@railgun-community/wallet';
-import { MetaMorphoDepositRecipe } from '../metamorpho-deposit-recipe';
-import { MetaMorphoWithdrawRecipe } from '../metamorpho-withdraw-recipe';
+import { MorphoVaultV1DepositRecipe } from '../metamorpho-deposit-recipe';
+import { MorphoVaultV1WithdrawRecipe } from '../metamorpho-withdraw-recipe';
 import { RecipeInput } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
 import {
@@ -64,7 +64,7 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     const provider = getTestProvider();
     const railgunWallet = getTestRailgunWallet();
 
-    const depositRecipe = new MetaMorphoDepositRecipe(
+    const depositRecipe = new MorphoVaultV1DepositRecipe(
       vaultAddress,
       slippageBasisPoints,
       RECIPIENT,
@@ -135,7 +135,7 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     const provider = getTestProvider();
     const railgunWallet = getTestRailgunWallet();
 
-    const withdrawRecipe = new MetaMorphoWithdrawRecipe(
+    const withdrawRecipe = new MorphoVaultV1WithdrawRecipe(
       vaultAddress,
       slippageBasisPoints,
       RECIPIENT,
