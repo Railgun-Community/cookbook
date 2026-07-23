@@ -1,4 +1,5 @@
 export * from './api';
+export * from './combo-meals';
 export * from './init';
 export * from './contract';
 export * from './models';
