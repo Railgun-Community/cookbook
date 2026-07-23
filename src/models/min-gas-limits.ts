@@ -18,6 +18,7 @@ export const MIN_GAS_LIMIT_MORPHO_BLUE_SUPPLY_BORROW: bigint = 3_100_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW: bigint = 3_000_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_BORROW: bigint = 2_700_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY: bigint = 2_700_000n;
+export const MIN_GAS_LIMIT_MORPHO_TRANSACT: bigint = 3_100_000n;
 export const MIN_GAS_LIMIT_LP_V2_ADD_LIQUIDITY: bigint = 2_700_000n; // 2.588
 export const MIN_GAS_LIMIT_LP_V2_REMOVE_LIQUIDITY: bigint = 2_300_000n; // 2.194
 export const MIN_GAS_LIMIT_TRANSFER: bigint = 1_900_000n; // 1.817

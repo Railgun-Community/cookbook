@@ -4,3 +4,4 @@ export * from './blue-borrow-step';
 export * from './blue-repay-step';
 export * from './blue-withdraw-collateral-step';
 export * from './blue-liquidate-step';
+export * from './morpho-transact-step';
