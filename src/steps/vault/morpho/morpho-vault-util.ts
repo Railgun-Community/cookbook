@@ -8,6 +8,13 @@ export const MORPHO_ADDRESSES = {
   blue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
 } as const;
 
+/**
+ * Morpho vault generation. V1 = MetaMorpho; V2 = Morpho Vault V2. Both expose
+ * the same ERC-4626 surface, so this only affects the recipe's display label
+ * and documents intent — the recipe reads all state on-chain regardless.
+ */
+export type MorphoVaultVersion = 'V1' | 'V2';
+
 export type KnownMetaMorphoVault = {
   name: string;
   vaultAddress: string;

@@ -41,14 +41,30 @@ export type MetaMorphoDepositQuote = MetaMorphoVaultData & {
 };
 
 /**
- * A redeem quote for a {@link MetaMorphoWithdrawStep}. `receiver` and `owner`
- * are both the ephemeral EOA: it holds the shares (owner == msg.sender, so no
- * allowance is needed) and receives the assets.
+ * A redeem quote (shares-denominated: `redeem(shares)`) for the redeem step.
+ * `receiver` and `owner` are both the ephemeral EOA: it holds the shares
+ * (owner == msg.sender, so no allowance is needed) and receives the assets.
+ * Asset output is non-deterministic → `[minAssets, expectedAssets]`.
  */
 export type MetaMorphoRedeemQuote = MetaMorphoVaultData & {
   redeemShares: bigint;
   expectedAssets: bigint;
   minAssets: bigint;
+  slippageBasisPoints: bigint;
+  receiver: string;
+  owner: string;
+};
+
+/**
+ * A withdraw quote (assets-denominated: `withdraw(assets)`). The ASSET output
+ * is deterministic (exactly `withdrawAssets`); the SHARES burned drift with the
+ * exchange rate, so `maxShares` is a conservative upper bound on consumption —
+ * the caller must unshield at least `maxShares` shares. Leftover shares reshield.
+ */
+export type MetaMorphoWithdrawQuote = MetaMorphoVaultData & {
+  withdrawAssets: bigint;
+  expectedShares: bigint;
+  maxShares: bigint;
   slippageBasisPoints: bigint;
   receiver: string;
   owner: string;
@@ -151,6 +167,42 @@ export class MorphoVaultAPI {
       redeemShares,
       expectedAssets,
       minAssets,
+      slippageBasisPoints,
+      receiver: executor,
+      owner: executor,
+    };
+  }
+
+  static async getWithdrawQuote(params: {
+    vaultAddress: string;
+    withdrawAssets: bigint;
+    slippageBasisPoints: bigint;
+    recipient: EphemeralExecutor | string;
+    provider: Provider;
+  }): Promise<MetaMorphoWithdrawQuote> {
+    const { vaultAddress, withdrawAssets, slippageBasisPoints, provider } =
+      params;
+    if (withdrawAssets <= 0n) {
+      throw new Error('morpho: withdraw assets must be > 0');
+    }
+    assertValidSlippage(slippageBasisPoints);
+    // owner == receiver == ephemeral EOA (owner is msg.sender under 7702).
+    const executor = resolveExecutorAddress(
+      params.recipient,
+      'MetaMorpho withdraw receiver',
+    );
+    const data = await this.getVaultData(vaultAddress, provider);
+    const vault = new MetaMorphoVaultContract(vaultAddress, provider);
+    const expectedShares = await vault.previewWithdraw(withdrawAssets);
+    // Conservative upper bound: shares burned can rise with rate drift, so
+    // over-declare consumption (never a share shortfall). Leftover reshields.
+    const maxShares =
+      expectedShares + (expectedShares * slippageBasisPoints) / 10000n;
+    return {
+      ...data,
+      withdrawAssets,
+      expectedShares,
+      maxShares,
       slippageBasisPoints,
       receiver: executor,
       owner: executor,

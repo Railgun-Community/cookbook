@@ -5,9 +5,11 @@ import { StepInput } from '../../../../models/export-models';
 import {
   MetaMorphoDepositQuote,
   MetaMorphoRedeemQuote,
+  MetaMorphoWithdrawQuote,
 } from '../../../../api/vault/morpho';
 import { MetaMorphoDepositStep } from '../metamorpho-deposit-step';
 import { MetaMorphoWithdrawStep } from '../metamorpho-withdraw-step';
+import { MetaMorphoWithdrawByAssetsStep } from '../metamorpho-withdraw-by-assets-step';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -99,6 +101,81 @@ describe('metamorpho-deposit-step', () => {
           expectedBalance: depositAssets,
           minBalance: depositAssets,
           approvedSpender: undefined, // not approved for the vault
+        },
+      ],
+      nfts: [],
+    };
+    await expect(step.getValidStepOutput(stepInput)).to.be.rejected;
+  });
+});
+
+const withdrawByAssetsQuote: MetaMorphoWithdrawQuote = {
+  vaultAddress,
+  assetAddress,
+  assetDecimals: 6n,
+  shareDecimals: 18n,
+  withdrawAssets: 500_000n,
+  expectedShares: 1_000_000_000_000_000_000n,
+  maxShares: 1_010_000_000_000_000_000n, // +1% conservative bound
+  slippageBasisPoints: 100n,
+  receiver: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+  owner: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+};
+
+describe('metamorpho-withdraw-by-assets-step', () => {
+  it('Should build withdraw(assets), declare deterministic asset out + conservative share spend, reshield remainder', async () => {
+    const step = new MetaMorphoWithdrawByAssetsStep(withdrawByAssetsQuote);
+    const inputShares = 2_000_000_000_000_000_000n; // 2 shares
+    const stepInput: StepInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: vaultAddress,
+          decimals: 18n,
+          expectedBalance: inputShares,
+          minBalance: inputShares,
+          approvedSpender: undefined,
+        },
+      ],
+      nfts: [],
+    };
+    const output = await step.getValidStepOutput(stepInput);
+
+    expect(output.crossContractCalls.length).to.equal(1);
+    // Conservative share spend == maxShares.
+    const spent = output.spentERC20Amounts ?? [];
+    expect(spent[0]?.tokenAddress).to.equal(vaultAddress);
+    expect(spent[0]?.amount).to.equal(withdrawByAssetsQuote.maxShares);
+    // Deterministic asset output + reshielded leftover shares.
+    expect(output.outputERC20Amounts).to.deep.equal([
+      {
+        tokenAddress: assetAddress,
+        decimals: 6n,
+        expectedBalance: withdrawByAssetsQuote.withdrawAssets,
+        minBalance: withdrawByAssetsQuote.withdrawAssets,
+        approvedSpender: undefined,
+      },
+      {
+        tokenAddress: vaultAddress,
+        decimals: 18n,
+        expectedBalance: inputShares - withdrawByAssetsQuote.maxShares,
+        minBalance: inputShares - withdrawByAssetsQuote.maxShares,
+        approvedSpender: undefined,
+      },
+    ]);
+  });
+
+  it('Should reject when input shares are below the conservative maxShares', async () => {
+    const step = new MetaMorphoWithdrawByAssetsStep(withdrawByAssetsQuote);
+    const stepInput: StepInput = {
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: vaultAddress,
+          decimals: 18n,
+          expectedBalance: 1_000_000_000_000_000_000n, // < maxShares
+          minBalance: 1_000_000_000_000_000_000n,
+          approvedSpender: undefined,
         },
       ],
       nfts: [],

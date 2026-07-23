@@ -3,7 +3,8 @@ import chaiAsPromised from 'chai-as-promised';
 import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
 import { balanceForERC20Token } from '@railgun-community/wallet';
 import { MorphoVaultV1DepositRecipe } from '../metamorpho-deposit-recipe';
-import { MorphoVaultV1WithdrawRecipe } from '../metamorpho-withdraw-recipe';
+import { MorphoVaultV1RedeemRecipe } from '../metamorpho-withdraw-recipe';
+import { MorphoVaultV1WithdrawRecipe } from '../metamorpho-withdraw-by-assets-recipe';
 import { RecipeInput } from '../../../../models/export-models';
 import { setRailgunFees } from '../../../../init';
 import {
@@ -126,7 +127,7 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     );
   });
 
-  it('[FORK] Should run metamorpho-withdraw-recipe', async function run() {
+  it('[FORK] Should run metamorpho-redeem-recipe', async function run() {
     if (shouldSkipForkTest(networkName)) {
       this.skip();
       return;
@@ -135,7 +136,7 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     const provider = getTestProvider();
     const railgunWallet = getTestRailgunWallet();
 
-    const withdrawRecipe = new MorphoVaultV1WithdrawRecipe(
+    const withdrawRecipe = new MorphoVaultV1RedeemRecipe(
       vaultAddress,
       slippageBasisPoints,
       RECIPIENT,
@@ -188,6 +189,73 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
       true,
       'Expected private USDC balance to increase after redeem',
     );
+    const low = (expectedUSDCBalance * 995n) / 1000n;
+    const high = (expectedUSDCBalance * 1005n) / 1000n;
+    expect(usdcBalance >= low && usdcBalance <= high).to.equal(
+      true,
+      `Private USDC balance ${usdcBalance} outside expected band [${low}, ${high}]`,
+    );
+  });
+
+  it('[FORK] Should run metamorpho-withdraw-recipe (exact assets)', async function run() {
+    if (shouldSkipForkTest(networkName)) {
+      this.skip();
+      return;
+    }
+
+    const provider = getTestProvider();
+    const railgunWallet = getTestRailgunWallet();
+
+    // Ask for an exact 50 USDC out; the recipe burns up to the quote's
+    // maxShares from the unshielded shares and reshields the remainder.
+    const withdrawAssets = oneUSDC * 50n;
+    const withdrawRecipe = new MorphoVaultV1WithdrawRecipe(
+      vaultAddress,
+      withdrawAssets,
+      slippageBasisPoints,
+      RECIPIENT,
+      provider,
+    );
+    expect(withdrawRecipe.id.length).to.equal(16);
+
+    // Unshield enough shares to cover maxShares (2 shares >> needed for 50 USDC).
+    const inputShares = 2n * 10n ** 18n;
+    const recipeInput: RecipeInput = {
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
+      networkName,
+      erc20Amounts: [
+        { tokenAddress: vaultAddress, decimals: 18n, amount: inputShares },
+      ],
+      nfts: [],
+    };
+
+    const initialUSDCBalance = await balanceForERC20Token(
+      txidVersion,
+      railgunWallet,
+      networkName,
+      usdcAddress,
+      false,
+    );
+
+    const recipeOutput = await withdrawRecipe.getRecipeOutput(recipeInput);
+    await executeRecipeStepsAndAssertUnshieldBalances(
+      withdrawRecipe.config.name,
+      recipeInput,
+      recipeOutput,
+    );
+
+    const usdcBalance = await balanceForERC20Token(
+      txidVersion,
+      railgunWallet,
+      networkName,
+      usdcAddress,
+      false,
+    );
+
+    // Exact-asset withdraw: private USDC increases by ~withdrawAssets minus the
+    // shield fee (deterministic asset output).
+    const shieldFee = shieldFeeOf(withdrawAssets);
+    const expectedUSDCBalance = initialUSDCBalance + withdrawAssets - shieldFee;
     const low = (expectedUSDCBalance * 995n) / 1000n;
     const high = (expectedUSDCBalance * 1005n) / 1000n;
     expect(usdcBalance >= low && usdcBalance <= high).to.equal(
