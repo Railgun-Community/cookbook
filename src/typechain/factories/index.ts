@@ -3,5 +3,6 @@
 /* eslint-disable */
 export * as adapt from "./adapt";
 export * as liquidity from "./liquidity";
+export * as morpho from "./morpho";
 export * as token from "./token";
 export * as vault from "./vault";

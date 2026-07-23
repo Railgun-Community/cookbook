@@ -6,6 +6,7 @@ import ABI_UNI_V2_LIKE_ROUTER from './liquidity/UniV2LikeRouter.json';
 import ABI_UNI_V2_LIKE_PAIR from './liquidity/UniV2LikePair.json';
 import ABI_BEEFY_VAULT_MERGED_V6V7 from './vault/beefy/BeefyVault-MergedV6V7.json';
 import ABI_META_MORPHO from './vault/morpho/MetaMorpho.json';
+import ABI_MORPHO_BLUE from './morpho/MorphoBlue.json';
 
 export const abi = {
   token: {
@@ -23,5 +24,8 @@ export const abi = {
   vault: {
     beefy: ABI_BEEFY_VAULT_MERGED_V6V7,
     metaMorpho: ABI_META_MORPHO,
+  },
+  morpho: {
+    blue: ABI_MORPHO_BLUE,
   },
 } as const;
