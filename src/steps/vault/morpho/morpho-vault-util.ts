@@ -37,3 +37,19 @@ export const KNOWN_METAMORPHO_VAULTS: Record<string, KnownMetaMorphoVault> = {
     assetDecimals: 6n,
   },
 };
+
+/**
+ * Curated Morpho Vault V2 vaults (same ERC-4626 surface as V1). Additive — see
+ * VAULT-LIST-REFRESH.md for the broader, ongoing registry work. Addresses
+ * verified on-chain via the Morpho Vault V2 factory + a live `asset()` read.
+ */
+export const KNOWN_MORPHO_VAULTS_V2: Record<string, KnownMetaMorphoVault> = {
+  // Steakhouse Prime USDC — confirmed on-chain 2026-07-23 (asset=USDC, shares
+  // 18-dec, maxDeposit()==0 per the V2 spec; our API uses only preview*).
+  steakPrimeUSDC: {
+    name: 'Steakhouse Prime USDC',
+    vaultAddress: '0xbeef088055857739C12CD3765F20b7679Def0f51',
+    assetAddress: USDC,
+    assetDecimals: 6n,
+  },
+};

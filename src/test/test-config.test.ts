@@ -33,6 +33,8 @@ export let testConfig = {
     mooConvexTriCryptoUSDC: '0xD1BeaD7CadcCC6b6a715A6272c39F1EC54F6EC99',
     // MetaMorpho ERC-4626 vault (Steakhouse USDC), asset = USDC.
     steakUSDCVault: '0xBEEF01735c132Ada46AA9aA4c54623cAA92A64CB',
+    // Morpho Vault V2 (Steakhouse Prime USDC), asset = USDC.
+    steakPrimeUSDCVaultV2: '0xbeef088055857739C12CD3765F20b7679Def0f51',
   },
 
   contractsArbitrum: {
