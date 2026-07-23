@@ -32,6 +32,7 @@ export interface MetaMorphoInterface extends Interface {
       | "convertToAssets"
       | "previewDeposit"
       | "previewRedeem"
+      | "previewWithdraw"
       | "deposit"
       | "mint"
       | "withdraw"
@@ -62,6 +63,10 @@ export interface MetaMorphoInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "previewRedeem",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "previewWithdraw",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -102,6 +107,10 @@ export interface MetaMorphoInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "previewRedeem",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "previewWithdraw",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
@@ -178,6 +187,12 @@ export interface MetaMorpho extends BaseContract {
 
   previewRedeem: TypedContractMethod<[shares: BigNumberish], [bigint], "view">;
 
+  previewWithdraw: TypedContractMethod<
+    [assets: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
   deposit: TypedContractMethod<
     [assets: BigNumberish, receiver: AddressLike],
     [bigint],
@@ -230,6 +245,9 @@ export interface MetaMorpho extends BaseContract {
   getFunction(
     nameOrSignature: "previewRedeem"
   ): TypedContractMethod<[shares: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "previewWithdraw"
+  ): TypedContractMethod<[assets: BigNumberish], [bigint], "view">;
   getFunction(
     nameOrSignature: "deposit"
   ): TypedContractMethod<

@@ -40,6 +40,14 @@ export class MetaMorphoVaultContract {
     return this.contract.redeem.populateTransaction(shares, receiver, owner);
   }
 
+  createWithdraw(
+    assets: bigint,
+    receiver: string,
+    owner: string,
+  ): Promise<ContractTransaction> {
+    return this.contract.withdraw.populateTransaction(assets, receiver, owner);
+  }
+
   asset(): Promise<string> {
     return this.contract.asset();
   }
@@ -54,6 +62,10 @@ export class MetaMorphoVaultContract {
 
   previewRedeem(shares: bigint): Promise<bigint> {
     return this.contract.previewRedeem(shares);
+  }
+
+  previewWithdraw(assets: bigint): Promise<bigint> {
+    return this.contract.previewWithdraw(assets);
   }
 
   balanceOf(account: string): Promise<bigint> {
