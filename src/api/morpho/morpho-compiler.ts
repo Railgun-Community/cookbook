@@ -1,5 +1,5 @@
-import { NetworkName } from '@railgun-community/shared-models';
-import { resolveExecutorAddress } from '../../utils/7702';
+import { NetworkName, isDefined } from '@railgun-community/shared-models';
+import { EphemeralExecutor, resolveExecutorAddress } from '../../utils/7702';
 import { validateContractAddress } from '../../utils/address';
 
 /**
@@ -50,17 +50,47 @@ export type MorphoBundle = {
 };
 
 /**
- * Validation for a {@link MorphoBundle} before it is compiled into steps. Keeps
- * the self-contained + safe-by-default invariants: the initiator is a valid
- * ephemeral EOA, no approval targets Bundler3, and amounts/addresses are sane.
+ * Shape validation for a {@link MorphoBundle} before it is compiled into steps.
+ *
+ * IMPORTANT — this is NOT a security boundary. It checks only the bundle's
+ * DECLARED metadata (initiator, pull/output shapes, no *declared* approval to
+ * Bundler3). It does NOT decode `calls[].data`, so it cannot stop a
+ * caller-supplied bundle from hiding an `approve(Bundler3, …)` in a raw call,
+ * approving an arbitrary spender, or moving funds in ways its declared
+ * pulls/outputs don't reflect. The ephemeral EOA executes `calls[]` verbatim, so
+ * the `bundleBuilder` is fully trusted — use only with a bundle you built from
+ * the official Morpho SDK.
  */
 export class MorphoCompilerAPI {
   static supportsNetwork(networkName: NetworkName): boolean {
     return networkName === NetworkName.Ethereum;
   }
 
-  static assertBundleSafe(bundle: MorphoBundle): void {
-    resolveExecutorAddress(bundle.initiator, 'MorphoBundle initiator');
+  /**
+   * @param bundle - the normalized bundle to shape-check.
+   * @param expectedInitiator - when provided, assert the bundle initiator
+   *   resolves to this executor (the ephemeral EOA / Bundler3 `initiator`).
+   *   Standalone callers SHOULD pass it; the recipe always does.
+   */
+  static assertBundleSafe(
+    bundle: MorphoBundle,
+    expectedInitiator?: EphemeralExecutor | string,
+  ): void {
+    const initiator = resolveExecutorAddress(
+      bundle.initiator,
+      'MorphoBundle initiator',
+    );
+    if (isDefined(expectedInitiator)) {
+      const expected = resolveExecutorAddress(
+        expectedInitiator,
+        'MorphoBundle expected initiator',
+      );
+      if (initiator !== expected) {
+        throw new Error(
+          'morpho-compiler: bundle initiator does not match the expected executor',
+        );
+      }
+    }
 
     if (!bundle.calls.length) {
       throw new Error('morpho-compiler: bundle has no calls');
@@ -69,14 +99,16 @@ export class MorphoCompilerAPI {
       if (!validateContractAddress(call.to)) {
         throw new Error(`morpho-compiler: call ${i} has invalid 'to'`);
       }
-      if (
-        call.to.toLowerCase() === BUNDLER3_ADDRESS.toLowerCase() &&
-        (call.value ?? 0n) < 0n
-      ) {
-        throw new Error(`morpho-compiler: call ${i} has negative value`);
+      // Native value is not modelled by pulls/outputs, so a value>0 call would
+      // be an unaccounted spend of the ephemeral EOA's ETH — reject it.
+      if ((call.value ?? 0n) !== 0n) {
+        throw new Error(
+          `morpho-compiler: call ${i} carries native value (${call.value}); native value is unsupported`,
+        );
       }
     });
 
+    const seenPullTokens = new Set<string>();
     bundle.pulls.forEach((pull, i) => {
       if (!validateContractAddress(pull.tokenAddress)) {
         throw new Error(`morpho-compiler: pull ${i} has invalid token`);
@@ -84,7 +116,8 @@ export class MorphoCompilerAPI {
       if (!validateContractAddress(pull.spender)) {
         throw new Error(`morpho-compiler: pull ${i} has invalid spender`);
       }
-      // Never approve Bundler3 — approvals go to GeneralAdapter1 / the target.
+      // Never *declare* an approval to Bundler3 — anyone can drive arbitrary
+      // calls through it. (Declared-shape guard only; see the class note.)
       if (pull.spender.toLowerCase() === BUNDLER3_ADDRESS.toLowerCase()) {
         throw new Error(
           `morpho-compiler: pull ${i} approves Bundler3 (forbidden); approve GeneralAdapter1 or the target instead`,
@@ -93,6 +126,16 @@ export class MorphoCompilerAPI {
       if (pull.amount <= 0n) {
         throw new Error(`morpho-compiler: pull ${i} amount must be > 0`);
       }
+      // The transact step de-dupes pulls by token (keeping the last), so two
+      // pulls of the same token silently under-account the spend while the
+      // recipe still emits one approval per pull — reject the ambiguity.
+      const tokenKey = pull.tokenAddress.toLowerCase();
+      if (seenPullTokens.has(tokenKey)) {
+        throw new Error(
+          `morpho-compiler: pull ${i} duplicates token ${pull.tokenAddress}; aggregate same-token pulls into one`,
+        );
+      }
+      seenPullTokens.add(tokenKey);
     });
 
     bundle.outputs.forEach((out, i) => {

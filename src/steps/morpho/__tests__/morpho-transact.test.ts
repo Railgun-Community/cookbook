@@ -73,6 +73,40 @@ describe('morpho-compiler assertBundleSafe', () => {
     bundle.initiator = '0x0000000000000000000000000000000000000000';
     expect(() => MorphoCompilerAPI.assertBundleSafe(bundle)).to.throw();
   });
+
+  it('Should reject a call carrying native value', () => {
+    const bundle = baseBundle();
+    bundle.calls[0].value = 1n;
+    expect(() => MorphoCompilerAPI.assertBundleSafe(bundle)).to.throw(
+      /native value/i,
+    );
+  });
+
+  it('Should reject duplicate-token pulls', () => {
+    const bundle = baseBundle();
+    bundle.pulls.push({
+      tokenAddress: USDC,
+      decimals: 6n,
+      amount: 500_000_000n,
+      spender: GENERAL_ADAPTER1_ADDRESS,
+    });
+    expect(() => MorphoCompilerAPI.assertBundleSafe(bundle)).to.throw(
+      /duplicates token/i,
+    );
+  });
+
+  it('Should bind the initiator to the expected executor when provided', () => {
+    const bundle = baseBundle();
+    expect(() =>
+      MorphoCompilerAPI.assertBundleSafe(bundle, initiator),
+    ).to.not.throw();
+    expect(() =>
+      MorphoCompilerAPI.assertBundleSafe(
+        bundle,
+        '0x1111111111111111111111111111111111111111',
+      ),
+    ).to.throw(/does not match the expected executor/i);
+  });
 });
 
 describe('morpho-transact-step', () => {

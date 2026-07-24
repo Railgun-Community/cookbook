@@ -32,14 +32,16 @@ export type MorphoBundleBuilder = (
  * maintained SDK rather than being re-implemented here.
  *
  * Self-contained: the recipe invokes the caller's `bundleBuilder` internally
- * (passing the provider + resolved executor) to produce the bundle, validates it
- * ({@link MorphoCompilerAPI.assertBundleSafe} — no approval targets Bundler3,
- * initiator matches the executor), adds exact-amount approvals for each pulled
- * token, then compiles the raw calls via {@link MorphoTransactStep}.
+ * (passing the provider + resolved executor) to produce the bundle, shape-checks
+ * it and binds its initiator to the executor ({@link
+ * MorphoCompilerAPI.assertBundleSafe}), adds exact-amount approvals for each
+ * pulled token, then compiles the raw calls via {@link MorphoTransactStep}.
  *
+ * TRUST: `assertBundleSafe` validates declared metadata only; it does not decode
+ * `calls[].data`, which the ephemeral EOA executes verbatim. The `bundleBuilder`
+ * is therefore fully trusted — build the bundle from the official Morpho SDK.
  * The ephemeral EOA (EIP-7702) must be the direct Bundler3 caller so it is the
- * adapter `initiator`; that is enforced by the wallet layer (msg.sender), and
- * the bundle's declared `initiator` is checked against the recipe's executor.
+ * adapter `initiator`; that is enforced by the wallet layer (msg.sender).
  */
 export class MorphoTransactRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -79,15 +81,10 @@ export class MorphoTransactRecipe extends Recipe {
       executor: this.executor,
     });
 
-    MorphoCompilerAPI.assertBundleSafe(bundle);
-    if (
-      resolveExecutorAddress(bundle.initiator, 'MorphoBundle initiator') !==
-      this.executor
-    ) {
-      throw new Error(
-        'MorphoTransactRecipe: bundle initiator does not match the recipe executor',
-      );
-    }
+    // Shape-check + bind the bundle initiator to this recipe's executor. NOTE:
+    // this validates declared metadata only — calls[] are trusted and executed
+    // verbatim, so the bundleBuilder must be trusted (see MorphoCompilerAPI).
+    MorphoCompilerAPI.assertBundleSafe(bundle, this.executor);
 
     const approvals = bundle.pulls.map(
       pull =>
