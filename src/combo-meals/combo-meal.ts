@@ -1,3 +1,4 @@
+import { isDefined } from '@railgun-community/shared-models';
 import {
   ComboMealConfig,
   RecipeInput,
@@ -11,17 +12,38 @@ export abstract class ComboMeal {
 
   protected abstract getRecipes(): Promise<Recipe[]>;
 
+  /**
+   * When true, the seam feeds each downstream recipe the worst-case (minimum)
+   * balance of the previous recipe's outputs instead of the optimistic expected
+   * amount. A combo whose downstream recipe bakes an EXACT on-chain amount from a
+   * NON-DETERMINISTIC upstream output (e.g. a 0x swap feeding an ERC-4626
+   * deposit, or a redeem feeding a swap) MUST enable this — otherwise the batch
+   * reverts whenever the upstream underfills within slippage. Default false
+   * preserves behavior for combos whose downstream consumes the actual on-EOA
+   * balance regardless (e.g. Beefy `depositAll`).
+   */
+  protected conservativeSeamAmounts(): boolean {
+    return false;
+  }
+
   private createNextRecipeInput(
     input: RecipeInput,
     output: RecipeOutput,
   ): RecipeInput {
+    const conservative = this.conservativeSeamAmounts();
     return {
       railgunAddress: input.railgunAddress,
       networkName: input.networkName,
-      // TODO: Minimum balance is lost for combos. (amount is expectedBalance).
-      erc20Amounts: output.erc20AmountRecipients.filter(
-        ({ amount }) => amount > 0n,
-      ),
+      // The recipient `amount` is expectedBalance; a conservative seam instead
+      // uses the carried worst-case `minBalance`, so a downstream exact-amount
+      // call can never exceed what the upstream is guaranteed to deliver.
+      erc20Amounts: output.erc20AmountRecipients
+        .map(recipient =>
+          conservative && isDefined(recipient.minBalance)
+            ? { ...recipient, amount: recipient.minBalance }
+            : recipient,
+        )
+        .filter(({ amount }) => amount > 0n),
       nfts: output.nftRecipients,
     };
   }

@@ -21,6 +21,11 @@ import {
  *
  * `sellERC20Info` MUST be the vault's underlying asset (the redeem output). If
  * no swap is needed, use `MorphoVaultRedeemRecipe` directly.
+ *
+ * The redeem's asset output is non-deterministic (`[minAssets, expectedAssets]`)
+ * while the swap sells an EXACT amount, so the seam runs in conservative mode:
+ * the swap sells the guaranteed `minAssets` and any surplus from a better redeem
+ * reshields — the batch never reverts on an underfill.
  */
 export class MorphoVaultRedeem_ZeroXSwap_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
@@ -65,5 +70,11 @@ export class MorphoVaultRedeem_ZeroXSwap_ComboMeal extends ComboMeal {
 
   protected async getRecipes(): Promise<Recipe[]> {
     return [this.redeemRecipe, this.swapRecipe];
+  }
+
+  // Swap sells an exact amount from the non-deterministic redeem output → feed
+  // it the guaranteed minimum across the seam (surplus reshields).
+  protected conservativeSeamAmounts(): boolean {
+    return true;
   }
 }

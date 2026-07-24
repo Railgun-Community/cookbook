@@ -161,7 +161,10 @@ export abstract class Recipe {
         ) {
           // Only set amount for final step outputs.
           allStepOutputERC20AmountRecipients[tokenAddress].amount =
-            outputERC20Amount.expectedBalance; // TODO: Minimum balance is lost for combos.
+            outputERC20Amount.expectedBalance;
+          // Carry the worst-case balance for conservative combo seams.
+          allStepOutputERC20AmountRecipients[tokenAddress].minBalance =
+            outputERC20Amount.minBalance;
           return;
         }
         allStepOutputERC20AmountRecipients[tokenAddress] = {
@@ -170,6 +173,7 @@ export abstract class Recipe {
           isBaseToken: outputERC20Amount.isBaseToken,
           // Expect 0 amount for middle step outputs.
           amount: isFinalStep ? outputERC20Amount.expectedBalance : 0n,
+          minBalance: isFinalStep ? outputERC20Amount.minBalance : 0n,
           recipient: outputERC20Amount.recipient ?? railgunAddress,
         };
       });
@@ -187,6 +191,7 @@ export abstract class Recipe {
         isBaseToken: erc20Amount.isBaseToken,
         // Expect 0 amount for unshield outputs.
         amount: 0n,
+        minBalance: 0n,
         recipient: erc20Amount.recipient ?? railgunAddress,
       };
     });

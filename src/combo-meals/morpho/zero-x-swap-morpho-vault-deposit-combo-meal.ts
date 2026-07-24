@@ -21,6 +21,11 @@ import {
  *
  * `buyERC20Info` MUST be the vault's underlying asset. If no swap is needed
  * (input already is the vault asset), use `MorphoVaultDepositRecipe` directly.
+ *
+ * The swap's buy amount is non-deterministic (`[minBuy, expectedBuy]`) while the
+ * deposit bakes an EXACT `deposit(assets)`, so the seam runs in conservative
+ * mode: the deposit consumes the guaranteed `minBuy` and any surplus from a
+ * better-than-quoted fill reshields — the batch never reverts on an underfill.
  */
 export class ZeroXSwap_MorphoVaultDeposit_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
@@ -65,5 +70,11 @@ export class ZeroXSwap_MorphoVaultDeposit_ComboMeal extends ComboMeal {
 
   protected async getRecipes(): Promise<Recipe[]> {
     return [this.swapRecipe, this.depositRecipe];
+  }
+
+  // Deposit bakes an exact amount from the non-deterministic swap output → feed
+  // it the guaranteed minimum across the seam (surplus reshields).
+  protected conservativeSeamAmounts(): boolean {
+    return true;
   }
 }

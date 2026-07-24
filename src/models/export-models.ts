@@ -22,6 +22,11 @@ export type RecipeERC20Amount = RecipeERC20Info & {
 
 export type RecipeERC20AmountRecipient = RecipeERC20Amount & {
   recipient: string;
+  // Worst-case (minimum) balance for a non-deterministic output, carried so a
+  // ComboMeal seam can feed a downstream recipe a conservative amount instead of
+  // the optimistic `amount` (= expectedBalance). Optional; unset ⇒ `amount` is
+  // the deterministic value.
+  minBalance?: bigint;
 };
 
 export type RecipeNFTInfo = RailgunNFTAmount & {
