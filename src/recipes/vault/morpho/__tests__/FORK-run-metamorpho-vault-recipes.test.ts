@@ -206,9 +206,9 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     const provider = getTestProvider();
     const railgunWallet = getTestRailgunWallet();
 
-    // Ask for an exact 50 USDC out; the recipe burns up to the quote's
-    // maxShares from the unshielded shares and reshields the remainder.
-    const withdrawAssets = oneUSDC * 50n;
+    // Ask for an exact 1 USDC out; the recipe burns up to the quote's maxShares
+    // from the unshielded shares and reshields the remainder.
+    const withdrawAssets = oneUSDC;
     const withdrawRecipe = new MorphoVaultV1WithdrawRecipe(
       vaultAddress,
       withdrawAssets,
@@ -218,7 +218,14 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     );
     expect(withdrawRecipe.id.length).to.equal(16);
 
-    // Unshield enough shares to cover maxShares (2 shares >> needed for 50 USDC).
+    // Vault shares are 18-decimal and ~1 share ≈ 1 USDC, so previewWithdraw(1
+    // USDC) ≈ 1e18. Unshield 2 shares — comfortably above the quote's maxShares
+    // (= previewWithdraw * (1 + slippage)) even after the unshield fee. NB: the
+    // fork wallet must hold >= inputShares shielded vault shares. (The earlier
+    // 50-USDC/2-share sizing was inconsistent — maxShares ≈ 50e18 > 2e18 — and
+    // threw "Specified amount exceeds balance" inside getRecipeOutput.)
+    const vault = new MetaMorphoVaultContract(vaultAddress, provider);
+    const previewShares = await vault.previewWithdraw(withdrawAssets);
     const inputShares = 2n * 10n ** 18n;
     const recipeInput: RecipeInput = {
       railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
@@ -236,6 +243,13 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
       usdcAddress,
       false,
     );
+    const initialShareBalance = await balanceForERC20Token(
+      txidVersion,
+      railgunWallet,
+      networkName,
+      vaultAddress,
+      false,
+    );
 
     const recipeOutput = await withdrawRecipe.getRecipeOutput(recipeInput);
     await executeRecipeStepsAndAssertUnshieldBalances(
@@ -251,6 +265,13 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
       usdcAddress,
       false,
     );
+    const shareBalance = await balanceForERC20Token(
+      txidVersion,
+      railgunWallet,
+      networkName,
+      vaultAddress,
+      false,
+    );
 
     // Exact-asset withdraw: private USDC increases by ~withdrawAssets minus the
     // shield fee (deterministic asset output).
@@ -261,6 +282,18 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
     expect(usdcBalance >= low && usdcBalance <= high).to.equal(
       true,
       `Private USDC balance ${usdcBalance} outside expected band [${low}, ${high}]`,
+    );
+
+    // Safety invariant (the property the whole conservative-spend design rests
+    // on): only ~previewShares were actually burned; the un-burned remainder of
+    // the unshielded inputShares reshielded via the relay-adapt balance sweep
+    // rather than stranding in the abandoned ephemeral EOA. Had it stranded,
+    // sharesConsumed would be ~inputShares.
+    const sharesConsumed = initialShareBalance - shareBalance;
+    expect(sharesConsumed < (inputShares * 80n) / 100n).to.equal(
+      true,
+      `Withdraw consumed ${sharesConsumed} shares (~${previewShares} expected); ` +
+        `un-burned remainder must reshield, not strand`,
     );
   });
 });
