@@ -17,9 +17,10 @@ import { MORPHO_BLUE_ADDRESS } from './morpho-blue-util';
  * position: it avoids debt growth between recipe build and inclusion.
  *
  * The exact loan pulled drifts with interest, so the step spends the
- * conservative `maxRepaidAssets` from the unshielded loan input (never
- * shortfalls) and reshields the remainder. The caller must unshield at least
- * `maxRepaidAssets` of the loan token.
+ * conservative `maxRepaidAssets` from the unshielded loan input (a revert-safe
+ * no-op if drift exceeds the slippage buffer, never a loss) and reshields the
+ * remainder. The caller must unshield at least `maxRepaidAssets` of the loan
+ * token.
  */
 export class MorphoBlueRepaySharesStep extends Step {
   readonly config: StepConfig = {

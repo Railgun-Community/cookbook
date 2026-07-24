@@ -19,9 +19,10 @@ import { MORPHO_BLUE_ADDRESS } from './morpho-blue-util';
  * seizes exactly `seizedCollateralAssets` (deterministic output).
  *
  * The loan pulled is computed via the exact Morpho seize math; the step spends
- * the conservative `maxRepaidAssets` from the unshielded loan input (so it never
- * shortfalls against interest/price drift) and reshields the remainder. The
- * caller must unshield at least `maxRepaidAssets` of the loan token.
+ * the conservative `maxRepaidAssets` from the unshielded loan input (reverting
+ * safely, never losing funds, if interest/price drift exceeds the slippage
+ * buffer) and reshields the remainder. The caller must unshield at least
+ * `maxRepaidAssets` of the loan token.
  */
 export class MorphoBlueLiquidateStep extends Step {
   readonly config: StepConfig = {

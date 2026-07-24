@@ -186,6 +186,15 @@ export class MorphoVaultAPI {
       throw new Error('morpho: withdraw assets must be > 0');
     }
     assertValidSlippage(slippageBasisPoints);
+    // Exact-assets withdraw burns a non-deterministic share count, so a zero
+    // buffer makes maxShares == previewWithdraw and reverts on any share-rate
+    // drift between build and inclusion. Require a non-zero buffer here (deposit
+    // /redeem tolerate 0 — their bands are validation-only, never on-chain).
+    if (slippageBasisPoints < 1n) {
+      throw new Error(
+        'morpho: withdraw slippageBasisPoints must be >= 1 to absorb share-rate drift',
+      );
+    }
     // owner == receiver == ephemeral EOA (owner is msg.sender under 7702).
     const executor = resolveExecutorAddress(
       params.recipient,

@@ -78,8 +78,9 @@ export type MorphoWithdrawCollateralQuote = {
  * ephemeral EOA under 7702). Seize-mode: the collateral out is exactly
  * `seizedCollateralAssets`; the loan pulled is computed via the exact Morpho
  * seize math. `maxRepaidAssets` adds a slippage buffer (interest/price drift)
- * so the declared loan spend never shortfalls — the caller must unshield at
- * least `maxRepaidAssets` of the loan token.
+ * to best-effort cover the declared loan spend; if drift exceeds the buffer the
+ * on-chain pull simply reverts (a no-op, never a loss). The caller must unshield
+ * at least `maxRepaidAssets` of the loan token.
  */
 export type MorphoLiquidationQuote = {
   params: MarketParams;
@@ -202,16 +203,35 @@ export class MorphoBlueAPI {
       params.recipient,
       'Morpho repay onBehalf',
     );
-    const loanDecimals = await this.decimalsOf(
-      params.market.loanToken,
-      params.provider,
+    const marketId = getMarketId(params.market);
+    const blue = new MorphoBlueContract(undefined, params.provider);
+    const [position, marketState, loanDecimals] = await Promise.all([
+      blue.position(marketId, onBehalf),
+      blue.market(marketId),
+      this.decimalsOf(params.market.loanToken, params.provider),
+    ]);
+    // Cap the assets-denominated repay to the position's current debt. Morpho's
+    // repay(assets) reverts on over-repay (borrow-share underflow); on the
+    // broadcaster path that revert is swallowed (requireSuccess=false), silently
+    // no-op'ing the repay while still charging fees. Debt only grows with accrual
+    // between build and inclusion, so a build-time cap never over-repays; any
+    // excess unshielded loan reshields via the relay-adapt balance sweep.
+    const owedAssets = borrowAssetsForShares(
+      position.borrowShares,
+      marketState.totalBorrowAssets,
+      marketState.totalBorrowShares,
     );
+    if (owedAssets <= 0n) {
+      throw new Error('morpho: no debt to repay');
+    }
+    const repayAssets =
+      params.repayAssets < owedAssets ? params.repayAssets : owedAssets;
     return {
       params: params.market,
-      marketId: getMarketId(params.market),
+      marketId,
       loanToken: params.market.loanToken,
       loanDecimals,
-      repayAssets: params.repayAssets,
+      repayAssets,
       onBehalf,
     };
   }
@@ -229,9 +249,10 @@ export class MorphoBlueAPI {
     repayShares?: bigint;
   }): Promise<MorphoRepaySharesQuote> {
     const { market, provider, slippageBasisPoints } = params;
-    if (slippageBasisPoints < 0n || slippageBasisPoints > 10000n) {
+    if (slippageBasisPoints < 1n || slippageBasisPoints > 10000n) {
       throw new Error(
-        `morpho: slippageBasisPoints out of range: ${slippageBasisPoints}`,
+        `morpho: slippageBasisPoints must be 1..10000 — a non-zero buffer is ` +
+          `required to absorb interest/oracle drift (got ${slippageBasisPoints})`,
       );
     }
     const onBehalf = resolveExecutorAddress(
@@ -316,9 +337,10 @@ export class MorphoBlueAPI {
     if (seizedCollateralAssets <= 0n) {
       throw new Error('morpho: seized collateral assets must be > 0');
     }
-    if (slippageBasisPoints < 0n || slippageBasisPoints > 10000n) {
+    if (slippageBasisPoints < 1n || slippageBasisPoints > 10000n) {
       throw new Error(
-        `morpho: slippageBasisPoints out of range: ${slippageBasisPoints}`,
+        `morpho: slippageBasisPoints must be 1..10000 — a non-zero buffer is ` +
+          `required to absorb interest/oracle drift (got ${slippageBasisPoints})`,
       );
     }
     const marketId = getMarketId(market);
