@@ -1,5 +1,5 @@
 import { NetworkName } from '@railgun-community/shared-models';
-import { Contract, Provider } from 'ethers';
+import { Provider } from 'ethers';
 import {
   MorphoBlueContract,
   MorphoBluePosition,
@@ -8,7 +8,6 @@ import { ERC20Contract } from '../../contract/token/erc20-contract';
 import {
   MarketParams,
   borrowAssetsForShares,
-  computeRepaidAssetsFromSeized,
   getMarketId,
 } from '../../steps/morpho/morpho-blue-util';
 import {
@@ -70,30 +69,6 @@ export type MorphoWithdrawCollateralQuote = {
   withdrawAssets: bigint;
   onBehalf: string;
   receiver: string;
-};
-
-/**
- * A liquidation quote. Morpho's `liquidate` has no address params — seized
- * collateral goes to, and repaid loan is pulled from, `msg.sender` (the
- * ephemeral EOA under 7702). Seize-mode: the collateral out is exactly
- * `seizedCollateralAssets`; the loan pulled is computed via the exact Morpho
- * seize math. `maxRepaidAssets` adds a slippage buffer (interest/price drift)
- * to best-effort cover the declared loan spend; if drift exceeds the buffer the
- * on-chain pull simply reverts (a no-op, never a loss). The caller must unshield
- * at least `maxRepaidAssets` of the loan token.
- */
-export type MorphoLiquidationQuote = {
-  params: MarketParams;
-  marketId: string;
-  borrower: string;
-  loanToken: string;
-  loanDecimals: bigint;
-  collateralToken: string;
-  collateralDecimals: bigint;
-  seizedCollateralAssets: bigint;
-  expectedRepaidAssets: bigint;
-  maxRepaidAssets: bigint;
-  slippageBasisPoints: bigint;
 };
 
 /**
@@ -323,66 +298,6 @@ export class MorphoBlueAPI {
       recipient: executor,
       provider: params.provider,
     });
-  }
-
-  static async getLiquidationQuote(params: {
-    market: MarketParams;
-    borrower: string;
-    seizedCollateralAssets: bigint;
-    slippageBasisPoints: bigint;
-    provider: Provider;
-  }): Promise<MorphoLiquidationQuote> {
-    const { market, borrower, seizedCollateralAssets, slippageBasisPoints, provider } =
-      params;
-    if (seizedCollateralAssets <= 0n) {
-      throw new Error('morpho: seized collateral assets must be > 0');
-    }
-    if (slippageBasisPoints < 1n || slippageBasisPoints > 10000n) {
-      throw new Error(
-        `morpho: slippageBasisPoints must be 1..10000 — a non-zero buffer is ` +
-          `required to absorb interest/oracle drift (got ${slippageBasisPoints})`,
-      );
-    }
-    const marketId = getMarketId(market);
-    const blue = new MorphoBlueContract(undefined, provider);
-    const oracle = new Contract(
-      market.oracle,
-      ['function price() view returns (uint256)'],
-      provider,
-    );
-    const [marketState, collateralPrice, loanDecimals, collateralDecimals] =
-      await Promise.all([
-        blue.market(marketId),
-        oracle.price() as Promise<bigint>,
-        this.decimalsOf(market.loanToken, provider),
-        this.decimalsOf(market.collateralToken, provider),
-      ]);
-
-    const expectedRepaidAssets = computeRepaidAssetsFromSeized({
-      seizedAssets: seizedCollateralAssets,
-      collateralPrice,
-      lltv: market.lltv,
-      totalBorrowAssets: marketState.totalBorrowAssets,
-      totalBorrowShares: marketState.totalBorrowShares,
-    });
-    // Conservative upper bound on the loan pulled (interest/price drift).
-    const maxRepaidAssets =
-      expectedRepaidAssets +
-      (expectedRepaidAssets * slippageBasisPoints) / 10000n;
-
-    return {
-      params: market,
-      marketId,
-      borrower,
-      loanToken: market.loanToken,
-      loanDecimals,
-      collateralToken: market.collateralToken,
-      collateralDecimals,
-      seizedCollateralAssets,
-      expectedRepaidAssets,
-      maxRepaidAssets,
-      slippageBasisPoints,
-    };
   }
 
   static async getWithdrawCollateralQuote(params: {

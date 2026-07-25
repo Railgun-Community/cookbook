@@ -142,19 +142,4 @@ export class MorphoBlueContract {
       isAuthorized,
     );
   }
-
-  createLiquidate(
-    params: MarketParams,
-    borrower: string,
-    seizedAssets: bigint,
-  ): Promise<ContractTransaction> {
-    // Seize-mode: specify collateral to seize, repaidShares = 0 (derived).
-    return this.contract.liquidate.populateTransaction(
-      params,
-      borrower,
-      seizedAssets,
-      0n,
-      EMPTY_MORPHO_CALLBACK_DATA,
-    );
-  }
 }

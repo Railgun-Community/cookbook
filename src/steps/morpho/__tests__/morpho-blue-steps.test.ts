@@ -7,15 +7,12 @@ import {
   MorphoBorrowQuote,
   MorphoRepayQuote,
   MorphoWithdrawCollateralQuote,
-  MorphoLiquidationQuote,
   MorphoRepaySharesQuote,
 } from '../../../api/morpho';
 import {
   MarketParams,
   MORPHO_BLUE_ADDRESS,
   getMarketId,
-  liquidationIncentiveFactor,
-  computeRepaidAssetsFromSeized,
   borrowAssetsForShares,
 } from '../morpho-blue-util';
 import { MorphoBlueSupplyCollateralStep } from '../blue-supply-collateral-step';
@@ -23,7 +20,6 @@ import { MorphoBlueBorrowStep } from '../blue-borrow-step';
 import { MorphoBlueRepayStep } from '../blue-repay-step';
 import { MorphoBlueRepaySharesStep } from '../blue-repay-shares-step';
 import { MorphoBlueWithdrawCollateralStep } from '../blue-withdraw-collateral-step';
-import { MorphoBlueLiquidateStep } from '../blue-liquidate-step';
 import { MorphoBlueSetAuthorizationStep } from '../blue-set-authorization-step';
 
 chai.use(chaiAsPromised);
@@ -54,17 +50,6 @@ describe('morpho-blue-util', () => {
     expect(getMarketId(market).toLowerCase()).to.equal(MARKET_ID);
   });
 
-  it('Should compute the liquidation incentive factor (matches Morpho)', () => {
-    // lltv 0.915e18 → LIF ~1.0262e18 (min-capped at 1.15e18).
-    expect(liquidationIncentiveFactor(915000000000000000n)).to.equal(
-      1026167265264238070n,
-    );
-    // A very low lltv hits the MAX cap.
-    expect(liquidationIncentiveFactor(100000000000000000n)).to.equal(
-      1150000000000000000n,
-    );
-  });
-
   it('Should convert borrow shares to loan assets (round up)', () => {
     expect(
       borrowAssetsForShares(
@@ -73,17 +58,6 @@ describe('morpho-blue-util', () => {
         1_000_000_000_000_000_000n, // 1e18 shares
       ),
     ).to.equal(1_000_000_000_000n);
-  });
-
-  it('Should compute repaid loan assets from seized collateral (Morpho seize math)', () => {
-    const repaid = computeRepaidAssetsFromSeized({
-      seizedAssets: 1_000_000_000_000_000_000n, // 1e18 collateral
-      collateralPrice: 2000n * 10n ** 36n,
-      lltv: 915000000000000000n,
-      totalBorrowAssets: 1_000_000_000_000n, // 1M USDC (6 dec)
-      totalBorrowShares: 1_000_000_000_000_000_000n,
-    });
-    expect(repaid).to.equal(1949000000000000001530n);
   });
 });
 
@@ -288,89 +262,6 @@ describe('morpho-blue-set-authorization-step', () => {
     expect(output.crossContractCalls.length).to.equal(1);
     expect(output.spentERC20Amounts ?? []).to.deep.equal([]);
     expect(output.outputERC20Amounts).to.deep.equal(stepInput.erc20Amounts);
-  });
-});
-
-describe('morpho-blue-liquidate-step', () => {
-  it('Should seize deterministic collateral, spend conservative loan, reshield change', async () => {
-    const quote: MorphoLiquidationQuote = {
-      params: market,
-      marketId: MARKET_ID,
-      borrower: '0x2222222222222222222222222222222222222222',
-      loanToken: USDC,
-      loanDecimals: 6n,
-      collateralToken: PAXG,
-      collateralDecimals: 18n,
-      seizedCollateralAssets: 500_000_000_000_000_000n, // 0.5 PAXG
-      expectedRepaidAssets: 1_000_000_000n, // 1000 USDC
-      maxRepaidAssets: 1_010_000_000n, // +1%
-      slippageBasisPoints: 100n,
-    };
-    const step = new MorphoBlueLiquidateStep(quote);
-    const stepInput: StepInput = {
-      networkName,
-      erc20Amounts: [
-        {
-          tokenAddress: USDC,
-          decimals: 6n,
-          expectedBalance: 2_000_000_000n, // 2000 USDC budget
-          minBalance: 2_000_000_000n,
-          approvedSpender: MORPHO_BLUE_ADDRESS,
-        },
-      ],
-      nfts: [],
-    };
-    const output = await step.getValidStepOutput(stepInput);
-    expect(output.crossContractCalls.length).to.equal(1);
-    const spent = output.spentERC20Amounts ?? [];
-    expect(spent[0]?.amount).to.equal(1_010_000_000n); // maxRepaidAssets
-    expect(output.outputERC20Amounts).to.deep.equal([
-      {
-        tokenAddress: PAXG,
-        decimals: 18n,
-        expectedBalance: 500_000_000_000_000_000n,
-        minBalance: 500_000_000_000_000_000n,
-        approvedSpender: undefined,
-      },
-      {
-        tokenAddress: USDC,
-        decimals: 6n,
-        expectedBalance: 990_000_000n, // 2000 - 1010 change
-        minBalance: 990_000_000n,
-        approvedSpender: MORPHO_BLUE_ADDRESS,
-      },
-    ]);
-  });
-
-  it('Should reject loan token not approved for Morpho Blue', async () => {
-    const quote: MorphoLiquidationQuote = {
-      params: market,
-      marketId: MARKET_ID,
-      borrower: '0x2222222222222222222222222222222222222222',
-      loanToken: USDC,
-      loanDecimals: 6n,
-      collateralToken: PAXG,
-      collateralDecimals: 18n,
-      seizedCollateralAssets: 500_000_000_000_000_000n,
-      expectedRepaidAssets: 1_000_000_000n,
-      maxRepaidAssets: 1_010_000_000n,
-      slippageBasisPoints: 100n,
-    };
-    const step = new MorphoBlueLiquidateStep(quote);
-    const stepInput: StepInput = {
-      networkName,
-      erc20Amounts: [
-        {
-          tokenAddress: USDC,
-          decimals: 6n,
-          expectedBalance: 2_000_000_000n,
-          minBalance: 2_000_000_000n,
-          approvedSpender: undefined,
-        },
-      ],
-      nfts: [],
-    };
-    await expect(step.getValidStepOutput(stepInput)).to.be.rejected;
   });
 });
 

@@ -106,7 +106,6 @@ fungible change/borrowed/withdrawn tokens shield back.
 | `MorphoBlueBorrowRecipe` | borrow only — non-atomic follow-up on a position the same EOA opened earlier |
 | `MorphoBlueRepayRecipe` | repay only (assets) |
 | `MorphoBlueSetAuthorizationRecipe` | authorize/revoke an operator (retained-account / Bundler3 model) |
-| `MorphoBlueLiquidationRecipe` | approve + liquidate (see §5.1) |
 
 `MorphoBlueAPI` also exposes `getRepaySharesQuote` (reads `position.borrowShares` + market
 state; conservative loan budget) and `getWithdrawAllCollateralQuote` (reads
@@ -114,20 +113,30 @@ state; conservative loan budget) and `getWithdrawAllCollateralQuote` (reads
 Repay-by-shares is preferred for full closes — it avoids debt growth between build and inclusion.
 
 `MorphoBlueAPI`: `getMarketParamsFromId`, `getPosition`, `getSupplyCollateralQuote`,
-`getBorrowQuote`, `getRepayQuote`, `getWithdrawCollateralQuote`, `getLiquidationQuote`.
+`getBorrowQuote`, `getRepayQuote`, `getWithdrawCollateralQuote`.
 
 Accounting: supply/repay consume an exact input (change reshields); borrow/withdraw produce
 a deterministic token with no input consumed (the RAILGUN validator only constrains tokens
 present in the input, so produced tokens are unconstrained).
 
-### 5.1 Liquidation
+### 5.1 Liquidation — OUT OF SCOPE (dropped)
 
-`liquidate` has no address params — seized collateral goes to, and repaid loan is pulled
-from, `msg.sender` (the ephemeral EOA). Seize-mode seizes an exact collateral amount; the
-loan pulled is computed on-chain via a faithful port of Morpho's math
-(`liquidationIncentiveFactor` + shares math, `computeRepaidAssetsFromSeized`), both covered
-by known-answer unit tests. The step spends a conservative `maxRepaidAssets` (never
-shortfalls) and reshields the remainder; the caller unshields ≥ `maxRepaidAssets`.
+Third-party liquidation is **not** provided, and is not a planned addition.
+
+A RAILGUN liquidation cannot win a competitive race: proof generation alone costs seconds
+and the broadcaster adds another hop, while liquidations are contested in-block by searchers
+running bespoke bundles. In any market a bot actually watches, a position is taken the moment
+it crosses the threshold.
+
+Self-liquidation was considered as damage control (capturing your own liquidation incentive
+instead of donating it to a searcher) and rejected for the same reason — you cannot outrun
+the bot that is already watching your position. It would only land in long-tail markets that
+searchers decline for lack of exit liquidity, which does not justify the maintenance surface.
+
+**Self-cleansing is served by `MorphoBlueClosePositionRecipe`** (repay-by-shares +
+withdraw-all-collateral), which operates on a healthy position and involves no liquidation
+path — Morpho's `liquidate` reverts on a healthy position (`HEALTHY_POSITION`) and so could
+never serve that case anyway.
 
 ---
 
@@ -188,19 +197,15 @@ unshield loan asset → repay ALL debt by shares → withdraw ALL collateral →
 `MorphoBlueClosePositionRecipe` (repay-by-shares + withdraw-all). Revoke-authorization (if the
 retained-account model was used) via `MorphoBlueSetAuthorizationRecipe(authorized, false)`.
 
-### 7.5 Private liquidation — SHIPPED (flash-loan variant via §6)
-```
-unshield repay asset → liquidate → seized collateral → 0x swap → shield profit
-```
-`MorphoLiquidation_ZeroXSwap_ComboMeal` (`MorphoBlueLiquidationRecipe` → `ZeroXV2SwapRecipe`).
-The flash-loan-funded variant (Bundler3: flash loan → liquidate → sell → repay, shield only
-net profit) is a Bundler3 composition — express it as a bundle through `MorphoTransactRecipe`
-(§6) rather than bespoke core code.
+### 7.5 Private liquidation — DROPPED
+Not shipped; see §5.1. Removed rather than deferred — MEV searchers take any liquidatable
+position the moment it crosses, so neither the third-party nor the self-liquidation variant
+is viable through RAILGUN's latency budget.
 
 ### 7.6 Status summary
-Shipped: repay-by-shares, withdraw-all-collateral, full-close recipe, the three combo-meals,
-and the `setAuthorization` primitive. Remaining (optional, Mode-2 via the compiler): the full
-Bundler3-wired retained-account borrow and the flash-loan liquidation composition.
+Shipped: repay-by-shares, withdraw-all-collateral, full-close recipe, the two swap combo-meals
+(vault entry / exit), and the `setAuthorization` primitive. Dropped: all liquidation (§5.1).
+Remaining (optional, Mode-2 via the compiler): the full Bundler3-wired retained-account borrow.
 
 ---
 
@@ -213,10 +218,10 @@ src/contract/{vault/morpho,morpho}/      thin ethers wrappers
 src/api/vault/morpho/                    MorphoVaultAPI (self-contained quotes)
 src/api/morpho/                          MorphoBlueAPI, MorphoCompilerAPI
 src/steps/vault/morpho/                  vault deposit/redeem/withdraw steps + util
-src/steps/morpho/                        blue-*, liquidate, transact steps + util
+src/steps/morpho/                        blue-*, transact steps + util
 src/recipes/vault/morpho/                vault recipes (V1/V2)
-src/recipes/morpho/                      blue market, close, set-authorization, liquidation, transact recipes
-src/combo-meals/morpho/                  swap-chained combos (entry / exit / liquidation)
+src/recipes/morpho/                      blue market, close, set-authorization, transact recipes
+src/combo-meals/morpho/                  swap-chained combos (vault entry / exit)
 ```
 
 ---
@@ -224,9 +229,8 @@ src/combo-meals/morpho/                  swap-chained combos (entry / exit / liq
 ## 9. Verification status
 
 - **Green now:** `tsc` (src + test configs), 32 unit tests, eslint, madge (no cycles).
-- **On-chain verified** against live mainnet: `getMarketId` derivation, liquidation-incentive
-  factor + repaid-assets math, the V2 vault ABI (`asset`/`decimals`/`preview*`, `maxDeposit`=0).
+- **On-chain verified** against live mainnet: `getMarketId` derivation, the V2 vault ABI
+  (`asset`/`decimals`/`preview*`, `maxDeposit`=0).
 - **NOT executed:** every `FORK-run-*` test gates on `shouldSkipForkTest` and requires an
-  anvil mainnet fork. The liquidation fork test additionally needs a liquidatable-position
-  fixture (pinned fork block or oracle override). The transaction compiler has no fork test.
+  anvil mainnet fork. The transaction compiler has no fork test.
 - **Deferred:** vault-list refresh (see `.claude/plans/.../VAULT-LIST-REFRESH.md`, not in-repo).
