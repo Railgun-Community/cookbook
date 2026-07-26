@@ -139,6 +139,34 @@ export class FxMintAdjustPositionStep extends Step {
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
+    // On the deposit axis, clamp the encoded collateral to what the executing
+    // account is GUARANTEED to hold.
+    //
+    // operate() pulls this exact amount via transferFrom, so encoding more than
+    // the guaranteed minimum reverts the batch whenever a non-deterministic
+    // upstream (a 0x swap) underfills within slippage. Clamping deposits
+    // slightly less collateral instead — a marginally higher debt ratio,
+    // bounded by the caller's slippage, and strictly better than a revert.
+    //
+    // No-op whenever min == expected, which is every path where the input comes
+    // straight from an unshield or a combo seam.
+    let effectiveCollDelta = collDelta;
+    let collateralSurplus = 0n;
+
+    if (collDelta > 0n) {
+      const inputColl = input.erc20Amounts.find(
+        a => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
+      );
+      if (!inputColl) {
+        throw new Error(
+          `FxMintAdjustPositionStep: no input balance for collateralToken ${collateralToken} (collDelta > 0 requires it)`,
+        );
+      }
+      effectiveCollDelta =
+        collDelta < inputColl.minBalance ? collDelta : inputColl.minBalance;
+      collateralSurplus = inputColl.expectedBalance - effectiveCollDelta;
+    }
+
     // Encoded operate() — passes signed deltas straight through. The Pool
     // contract handles the rawColls/rawDebts internal conversion. Using
     // ethers' Interface (matches cookbook house style; we don't ship a
@@ -147,7 +175,7 @@ export class FxMintAdjustPositionStep extends Step {
     const callData = iface.encodeFunctionData('operate', [
       pool,
       positionId,
-      collDelta,
+      effectiveCollDelta,
       debtDelta,
     ]);
 
@@ -157,23 +185,12 @@ export class FxMintAdjustPositionStep extends Step {
     > = [];
 
     if (collDelta > 0n) {
-      // Caller (recipe) ensures the input collateral matches collDelta.
-      // Look up the input balance — the upstream may be a 0x swap with
-      // non-deterministic output, in which case the recipe encoded
-      // collDelta from the swap quote's promised buy amount but the
-      // step still consumes inputColl.expectedBalance for accounting.
-      const inputColl = input.erc20Amounts.find(
-        a => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
-      );
-      if (!inputColl) {
-        throw new Error(
-          `FxMintAdjustPositionStep: no input balance for collateralToken ${collateralToken} (collDelta > 0 requires it)`,
-        );
-      }
+      // Spend exactly what operate() pulls; any remainder is declared as a
+      // surplus output below.
       spentERC20Amounts.push({
         tokenAddress: collateralToken,
         decimals: collateralDecimals,
-        amount: inputColl.expectedBalance,
+        amount: effectiveCollDelta,
         recipient: poolManager,
       });
     }
@@ -197,6 +214,21 @@ export class FxMintAdjustPositionStep extends Step {
     const outputERC20Amounts: NonNullable<
       UnvalidatedStepOutput['outputERC20Amounts']
     > = [];
+
+    if (collateralSurplus > 0n) {
+      // Collateral the caller supplied beyond what operate() pulls — either an
+      // explicit collDelta below the input balance, or the clamp above biting
+      // on a better-than-worst-case upstream fill. Declared so the step's
+      // amount accounting closes; it reshields to the user.
+      outputERC20Amounts.push({
+        tokenAddress: collateralToken,
+        decimals: collateralDecimals,
+        expectedBalance: collateralSurplus,
+        minBalance: 0n,
+        isBaseToken: false,
+        approvedSpender: undefined,
+      });
+    }
 
     if (debtDelta > 0n) {
       // Post-borrow-fee net fxUSD lands in the executing account (ephemeral EOA) and shields

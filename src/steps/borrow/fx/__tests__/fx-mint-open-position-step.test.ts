@@ -1,6 +1,12 @@
 import chai from 'chai';
+import { Interface } from 'ethers';
 import { FxMintOpenPositionStep } from '../fx-mint-open-position-step';
-import { FEE_DENOM, FX_ADDRESSES, resolvePool } from '../fx-mint-util';
+import {
+  FEE_DENOM,
+  FX_ADDRESSES,
+  FX_POOL_MANAGER_ABI,
+  resolvePool,
+} from '../fx-mint-util';
 import { NetworkName, NFTTokenType } from '@railgun-community/shared-models';
 import type { StepInput } from '../../../../models/export-models';
 
@@ -115,5 +121,53 @@ describe('FxMintOpenPositionStep', () => {
         recipient: FX_ADDRESSES.fxPoolManager,
       },
     ]);
+  });
+
+  it('encodes the guaranteed minimum, not the optimistic expectation', async () => {
+    // A non-deterministic upstream (0x swap) delivers somewhere in
+    // [minBalance, expectedBalance]. operate() pulls an EXACT amount, so
+    // encoding expectedBalance would revert the batch on any underfill.
+    const step = new FxMintOpenPositionStep({
+      pool: wstETHPool.address,
+      collateralToken: wstETHPool.collateralToken,
+      collateralDecimals: wstETHPool.collateralDecimals,
+      targetDebt,
+      predictedPositionId,
+      borrowFeeRatio: 5_000_000n,
+    });
+
+    const input = makeStepInput(1000n, 18n, wstETHPool.collateralToken);
+    input.erc20Amounts[0].minBalance = 900n;
+
+    const output = await step.getValidStepOutput(input);
+
+    // The wire carries 900n, not 1000n.
+    const decoded = new Interface(FX_POOL_MANAGER_ABI).decodeFunctionData(
+      'operate',
+      output.crossContractCalls[0].data,
+    );
+    expect(decoded[2]).to.equal(900n);
+
+    // Spend matches what operate() actually pulls.
+    expect(output.spentERC20Amounts).to.deep.equal([
+      {
+        tokenAddress: wstETHPool.collateralToken,
+        decimals: 18n,
+        amount: 900n,
+        recipient: FX_ADDRESSES.fxPoolManager,
+      },
+    ]);
+
+    // The 100n surplus is declared so accounting closes, and reshields.
+    const surplus = output.outputERC20Amounts.find(
+      o =>
+        o.tokenAddress.toLowerCase() ===
+        wstETHPool.collateralToken.toLowerCase(),
+    );
+    if (!surplus) {
+      throw new Error('expected a collateral surplus output');
+    }
+    expect(surplus.expectedBalance).to.equal(100n);
+    expect(surplus.minBalance).to.equal(0n);
   });
 });

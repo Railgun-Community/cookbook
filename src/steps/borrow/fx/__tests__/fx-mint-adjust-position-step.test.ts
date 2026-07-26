@@ -1,6 +1,11 @@
 import chai from 'chai';
+import { Interface } from 'ethers';
 import { FxMintAdjustPositionStep } from '../fx-mint-adjust-position-step';
-import { resolvePool, FX_ADDRESSES } from '../fx-mint-util';
+import {
+  resolvePool,
+  FX_ADDRESSES,
+  FX_POOL_MANAGER_ABI,
+} from '../fx-mint-util';
 import { NetworkName, NFTTokenType } from '@railgun-community/shared-models';
 import type { StepInput } from '../../../../models/export-models';
 
@@ -175,6 +180,67 @@ describe('FxMintAdjustPositionStep', () => {
 
     expect(output.outputERC20Amounts ?? []).to.have.length(0);
     expect(output.outputNFTs).to.have.length(1);
+  });
+
+  it('clamps collDelta to the guaranteed minimum on a non-deterministic input', async () => {
+    // Mirrors FxMintOpenPositionStep: operate() pulls an exact amount, so a
+    // swap that underfills within slippage must not revert the batch.
+    const step = new FxMintAdjustPositionStep({
+      ...baseData,
+      collDelta: 1000n,
+      debtDelta: 0n,
+    });
+
+    const input = inputWithCollateral(1000n);
+    input.erc20Amounts[0].minBalance = 900n;
+
+    const output = await step.getValidStepOutput(input);
+
+    const decoded = new Interface(FX_POOL_MANAGER_ABI).decodeFunctionData(
+      'operate',
+      output.crossContractCalls[0].data,
+    );
+    expect(decoded[2]).to.equal(900n);
+
+    const spent = output.spentERC20Amounts ?? [];
+    expect(spent).to.have.length(1);
+    expect(spent[0].amount).to.equal(900n);
+
+    const surplus = (output.outputERC20Amounts ?? []).find(
+      o => o.tokenAddress.toLowerCase() === pool.collateralToken.toLowerCase(),
+    );
+    if (!surplus) {
+      throw new Error('expected a collateral surplus output');
+    }
+    expect(surplus.expectedBalance).to.equal(100n);
+    expect(surplus.minBalance).to.equal(0n);
+  });
+
+  it('keeps a collDelta below the input balance and returns the remainder', async () => {
+    // Deliberate partial deposit: the clamp takes the min, so collDelta wins
+    // and the untouched balance is declared as surplus.
+    const step = new FxMintAdjustPositionStep({
+      ...baseData,
+      collDelta: 400n,
+      debtDelta: 0n,
+    });
+
+    const output = await step.getValidStepOutput(inputWithCollateral(1000n));
+
+    const decoded = new Interface(FX_POOL_MANAGER_ABI).decodeFunctionData(
+      'operate',
+      output.crossContractCalls[0].data,
+    );
+    expect(decoded[2]).to.equal(400n);
+    expect((output.spentERC20Amounts ?? [])[0].amount).to.equal(400n);
+
+    const surplus = (output.outputERC20Amounts ?? []).find(
+      o => o.tokenAddress.toLowerCase() === pool.collateralToken.toLowerCase(),
+    );
+    if (!surplus) {
+      throw new Error('expected a collateral surplus output');
+    }
+    expect(surplus.expectedBalance).to.equal(600n);
   });
 
   it('throws when both deltas are zero', () => {

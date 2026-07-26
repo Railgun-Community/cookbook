@@ -87,12 +87,10 @@ export class FxMintOpenPositionStep extends Step {
     const poolManager = FX_ADDRESSES.fxPoolManager as Address;
     const fxUSD = FX_ADDRESSES.fxUSD as Address;
 
-    // Read the actual collateral amount from the input — the upstream
-    // ZeroXV2SwapStep produces a non-deterministic amount (slippage), so
-    // we can't hardcode it at construction time. Use the swap output's
-    // `expectedBalance` (the quote's promised buy amount) as the value
-    // we encode into operate(), and consume that exact amount from the
-    // step input.
+    // Read the collateral amount from the step input rather than the
+    // constructor: through ZeroXSwap_FxMintOpen_ComboMeal the upstream is a 0x
+    // swap whose output is non-deterministic, so the amount isn't knowable at
+    // construction time.
     const inputColl = input.erc20Amounts.find(
       a => a.tokenAddress.toLowerCase() === collateralToken.toLowerCase(),
     );
@@ -101,7 +99,20 @@ export class FxMintOpenPositionStep extends Step {
         `FxMintOpenPositionStep: no input balance for collateralToken ${collateralToken}`,
       );
     }
-    const collateralAmount = inputColl.expectedBalance;
+    // Encode the GUARANTEED amount, never the optimistic expectation.
+    //
+    // operate() pulls this exact amount via transferFrom. If an upstream step
+    // is non-deterministic (a 0x swap fills anywhere in [minBalance,
+    // expectedBalance]) then encoding expectedBalance reverts the whole batch
+    // on any underfill within slippage. minBalance is the amount the executing
+    // account is guaranteed to hold.
+    //
+    // Trade-off on a shortfall: slightly less collateral is deposited at an
+    // unchanged targetDebt, so the position opens at a marginally higher debt
+    // ratio — bounded by the caller's slippage, and strictly better than a
+    // guaranteed revert. Any surplus is declared below and reshields.
+    const collateralAmount = inputColl.minBalance;
+    const collateralSurplus = inputColl.expectedBalance - collateralAmount;
 
     // Encode operate(...) via ethers' Interface — matches the cookbook
     // house style (other steps use ethers' Contract.populateTransaction;
@@ -141,6 +152,21 @@ export class FxMintOpenPositionStep extends Step {
         },
       ],
       outputERC20Amounts: [
+        // Unspent collateral from a better-than-worst-case upstream fill. Kept
+        // so the step's amount accounting still closes
+        // (input.expected == spent + outputs); it reshields to the user.
+        ...(collateralSurplus > 0n
+          ? [
+              {
+                tokenAddress: collateralToken,
+                decimals: collateralDecimals,
+                expectedBalance: collateralSurplus,
+                minBalance: 0n,
+                isBaseToken: false,
+                approvedSpender: undefined,
+              },
+            ]
+          : []),
         {
           tokenAddress: fxUSD,
           decimals: 18n,
