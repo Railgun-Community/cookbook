@@ -4,6 +4,8 @@ import {
   UnvalidatedStepOutput,
 } from '../models/export-models';
 import { RailgunNFTAmount, isDefined } from '@railgun-community/shared-models';
+// Direct module import (not the utils barrel) to keep madge --circular clean.
+import { nftIdentityKey } from '../utils/nft';
 
 export const validateStepOutput = (
   input: StepInput,
@@ -82,19 +84,28 @@ const validateStepOutputNFTs = (
   input: StepInput,
   output: UnvalidatedStepOutput,
 ) => {
-  const inputNFTMap: Record<string, Record<string, bigint>> = {};
-  const outputNFTMap: Record<string, Record<string, bigint>> = {};
+  // Keyed on nftIdentityKey rather than the raw (nftAddress, tokenSubID) pair,
+  // so an input carrying a zero-padded tokenSubID still matches an output that
+  // derived the unpadded form (or vice versa). Value is the caller-facing label
+  // for the error message.
+  const inputNFTMap: Record<string, string> = {};
+  const outputNFTMap: Record<string, string> = {};
+
+  const label = ({ nftAddress, tokenSubID }: RailgunNFTAmount) =>
+    `${nftAddress}:${tokenSubID}`;
 
   // Add all NFT inputs.
-  input.nfts.forEach(({ nftAddress, tokenSubID, amount }) => {
-    inputNFTMap[nftAddress] ??= {};
-    if (amount > 1n) {
+  input.nfts.forEach(nft => {
+    if (nft.amount > 1n) {
       throw new Error('NFTs must have amount 1');
     }
-    if (inputNFTMap[nftAddress][tokenSubID]) {
-      throw new Error(`Duplicate NFT input for ${nftAddress}: ${tokenSubID}`);
+    const key = nftIdentityKey(nft);
+    if (isDefined(inputNFTMap[key])) {
+      throw new Error(
+        `Duplicate NFT input for ${nft.nftAddress}: ${nft.tokenSubID}`,
+      );
     }
-    inputNFTMap[nftAddress][tokenSubID] = 1n;
+    inputNFTMap[key] = label(nft);
   });
 
   // Add all NFT outputs.
@@ -102,24 +113,22 @@ const validateStepOutputNFTs = (
     ...(output.spentNFTs ?? []),
     ...(output.outputNFTs ?? []),
   ];
-  nftOutputs.forEach(({ nftAddress, tokenSubID, amount }) => {
-    outputNFTMap[nftAddress] ??= {};
-    if (amount > 1n) {
+  nftOutputs.forEach(nft => {
+    if (nft.amount > 1n) {
       throw new Error('NFTs must have amount 1');
     }
-    if (outputNFTMap[nftAddress][tokenSubID]) {
-      throw new Error(`Duplicate NFT input for ${nftAddress}: ${tokenSubID}`);
+    const key = nftIdentityKey(nft);
+    if (isDefined(outputNFTMap[key])) {
+      throw new Error(
+        `Duplicate NFT input for ${nft.nftAddress}: ${nft.tokenSubID}`,
+      );
     }
-    outputNFTMap[nftAddress][tokenSubID] = 1n;
+    outputNFTMap[key] = label(nft);
   });
 
-  for (const nftAddress in inputNFTMap) {
-    for (const tokenSubID in inputNFTMap[nftAddress]) {
-      if (!outputNFTMap[nftAddress]?.[tokenSubID]) {
-        throw new Error(
-          `Input NFT ${nftAddress}:${tokenSubID} must match NFT output.`,
-        );
-      }
+  for (const key in inputNFTMap) {
+    if (!isDefined(outputNFTMap[key])) {
+      throw new Error(`Input NFT ${inputNFTMap[key]} must match NFT output.`);
     }
   }
 };

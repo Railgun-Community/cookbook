@@ -17,6 +17,8 @@ import { UnshieldDefaultStep } from '../steps/railgun/unshield-default-step';
 import { Step } from '../steps/step';
 import { ContractTransaction } from 'ethers';
 import { generateID } from '../utils/id';
+// Direct module import (not the utils barrel) to keep madge --circular clean.
+import { nftIdentityKey } from '../utils/nft';
 
 export abstract class Recipe {
   readonly id: string;
@@ -111,9 +113,10 @@ export abstract class Recipe {
   }
 
   private static getNFTID(nft: RailgunNFTAmount) {
-    return `${nft.nftAddress.toLowerCase()}-${nft.tokenSubID}-${
-      nft.nftTokenType
-    }`;
+    // Delegates to the shared identity key so this, the step validator, and the
+    // combo-meal seam all agree on what "the same NFT" means — notably across
+    // tokenSubID zero-padding.
+    return nftIdentityKey(nft);
   }
 
   async getRecipeOutput(

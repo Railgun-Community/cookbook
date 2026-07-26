@@ -5,7 +5,7 @@ import {
   RecipeOutput,
 } from '../models/export-models';
 import { Recipe } from '../recipes';
-import { compareTokenAddress } from '../utils';
+import { compareTokenAddress, nftIdentityKey } from '../utils';
 
 export abstract class ComboMeal {
   abstract readonly config: ComboMealConfig;
@@ -103,23 +103,26 @@ export abstract class ComboMeal {
         aggregatedRecipeOutput.erc20AmountRecipients.push(erc20AmountRecipient);
       });
 
-      // Add amounts to remove any duplicates.
+      // Last writer wins — do NOT sum, as the ERC20 branch above does.
+      //
+      // An NFT that transits the seam is re-declared by every recipe it passes
+      // through: each recipe's own final step emits it (see
+      // Recipe.getRecipeOutput — `amount: isFinalStep ? outputNFT.amount : 0n`).
+      // Summing those declarations yields amount 2n for an ERC-721, which
+      // validateStepOutputNFTs rejects outright. The downstream recipe's amount
+      // is the terminal state of the NFT: 1n survived, 0n burned.
       recipeOutput.nftRecipients.forEach(nftRecipient => {
         const found = aggregatedRecipeOutput.nftRecipients.find(
           existingNFTRecipient => {
             return (
-              compareTokenAddress(
-                existingNFTRecipient.nftAddress,
-                nftRecipient.nftAddress,
-              ) &&
-              nftRecipient.tokenSubID === existingNFTRecipient.tokenSubID &&
-              nftRecipient.nftTokenType === existingNFTRecipient.nftTokenType &&
+              nftIdentityKey(existingNFTRecipient) ===
+                nftIdentityKey(nftRecipient) &&
               existingNFTRecipient.recipient === nftRecipient.recipient
             );
           },
         );
         if (found) {
-          found.amount = found.amount + nftRecipient.amount;
+          found.amount = nftRecipient.amount;
           return;
         }
         aggregatedRecipeOutput.nftRecipients.push(nftRecipient);
