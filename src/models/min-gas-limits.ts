@@ -19,6 +19,13 @@ export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW: bigint = 3_000_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_BORROW: bigint = 2_700_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY: bigint = 2_700_000n;
 export const MIN_GAS_LIMIT_MORPHO_TRANSACT: bigint = 3_100_000n;
+// f(x) Protocol (fxMINT). Values carried over verbatim from the per-recipe
+// hardcodes they replace — NOT recalibrated. The fork harness asserts gas within
+// [minGasLimit - 200k, minGasLimit + 50k], so these want a real measurement once
+// a standalone fx recipe runs on a fork.
+export const MIN_GAS_LIMIT_FXMINT_OPEN: bigint = 1_500_000n;
+export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 1_500_000n;
+export const MIN_GAS_LIMIT_FXMINT_CLOSE: bigint = 2_500_000n;
 export const MIN_GAS_LIMIT_LP_V2_ADD_LIQUIDITY: bigint = 2_700_000n; // 2.588
 export const MIN_GAS_LIMIT_LP_V2_REMOVE_LIQUIDITY: bigint = 2_300_000n; // 2.194
 export const MIN_GAS_LIMIT_TRANSFER: bigint = 1_900_000n; // 1.817

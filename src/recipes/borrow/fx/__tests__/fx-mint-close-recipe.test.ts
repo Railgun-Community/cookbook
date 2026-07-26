@@ -1,91 +1,140 @@
 import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import { NFTTokenType, NetworkName } from '@railgun-community/shared-models';
 import { FxMintCloseRecipe } from '../fx-mint-close-recipe';
-import type { SwapQuoteData } from '../../../../models/export-models';
+import { RecipeInput } from '../../../../models/export-models';
+import { setRailgunFees } from '../../../../init';
+import {
+  MOCK_RAILGUN_WALLET_ADDRESS,
+  MOCK_SHIELD_FEE_BASIS_POINTS,
+  MOCK_UNSHIELD_FEE_BASIS_POINTS,
+} from '../../../../test/mocks.test';
+import {
+  FX_ADDRESSES,
+  resolvePool,
+} from '../../../../steps/borrow/fx/fx-mint-util';
 
+chai.use(chaiAsPromised);
 const { expect } = chai;
 
-// Minimal SwapQuoteData stub. Only the fields the recipe actually reads
-// (spender for the post-close approve, buyERC20Amount for ZeroXV2SwapStep)
-// matter; everything else is filled with placeholder values that are
-// shape-correct but not exercised by the constructor-time validation tests.
-const fakeSwapQuote = {
-  sellTokenAddress: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', // wstETH (withdraw direction sells collateral)
-  sellTokenValue: '0',
-  spender: '0x000000000000000000000000000000000000beef',
-  crossContractCall: { to: '0x1234', value: 0n, data: '0x5678' },
-  buyERC20Amount: {
-    tokenAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
-    decimals: 18n,
-    amount: 1n,
-  },
-} as unknown as SwapQuoteData;
+const networkName = NetworkName.Ethereum;
+const POSITION_ID = 1903n;
 
-describe('FxMintCloseRecipe — auto-branch + per-pool validation', () => {
-  // Shared close-side numbers. approveAmount = repayAmount × (1e9 + 5e6) / 1e9
-  // matches the close-fee shape produced by computeFxClose at a 0.5% repay
-  // fee (5_000_000 / 1e9). The recipe doesn't recompute these — it just
-  // plumbs them — so the values here only need to be internally consistent.
-  const baseOpts = {
-    positionId: 1903n,
-    repayAmount: 5_000_000_000_000_000_000n,
-    withdrawColl: 4_000_000_000_000_000n,
-    approveAmount: 5_025_000_000_000_000_000n,
-    partialClose: true,
-  };
+const REPAY_AMOUNT = 1_000_000_000_000_000_000n;
+const APPROVE_AMOUNT = 1_005_000_000_000_000_000n;
+const WITHDRAW_COLL = 500_000n;
 
-  it('wstETH-Long: throws if swapQuote is missing', () => {
-    expect(
-      () =>
-        new FxMintCloseRecipe({
-          ...baseOpts,
-          pool: 'wstETH-Long',
-        }),
-    ).to.throw(/swapQuote required.*wstETH-Long|wstETH-Long.*swapQuote/i);
+const recipeInputFor = (
+  poolAddress: string,
+  fxUSDAmount = 2_000_000_000_000_000_000n,
+): RecipeInput => ({
+  railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
+  networkName,
+  erc20Amounts: [
+    {
+      tokenAddress: FX_ADDRESSES.fxUSD,
+      decimals: 18n,
+      amount: fxUSDAmount,
+    },
+  ],
+  nfts: [
+    {
+      nftAddress: poolAddress,
+      tokenSubID: '0x' + POSITION_ID.toString(16),
+      nftTokenType: NFTTokenType.ERC721,
+      amount: 1n,
+    },
+  ],
+});
+
+describe('FxMintCloseRecipe', () => {
+  before(() => {
+    setRailgunFees(
+      networkName,
+      MOCK_SHIELD_FEE_BASIS_POINTS,
+      MOCK_UNSHIELD_FEE_BASIS_POINTS,
+    );
   });
 
-  it('WBTC-Long: throws if swapQuote is provided', () => {
+  it('Should build the direct step graph and shield the pool collateral', async () => {
+    const pool = resolvePool('wstETH-Long');
+    const recipe = new FxMintCloseRecipe({
+      pool: 'wstETH-Long',
+      positionId: POSITION_ID,
+      repayAmount: REPAY_AMOUNT,
+      withdrawColl: WITHDRAW_COLL,
+      approveAmount: APPROVE_AMOUNT,
+      partialClose: true,
+    });
+
+    const output = await recipe.getRecipeOutput(
+      recipeInputFor(pool.address),
+    );
+
+    // No swap leg on any pool — the collateral shields back as-is.
+    expect(output.stepOutputs.map(s => s.name)).to.deep.equal([
+      'Unshield (Default)',
+      'Approve ERC20 Spender',
+      'f(x) Close Position',
+      'Shield (Default)',
+    ]);
+
     expect(
-      () =>
-        new FxMintCloseRecipe({
-          ...baseOpts,
-          pool: 'WBTC-Long',
-          swapQuote: fakeSwapQuote,
-          slippageBasisPoints: 5,
-        }),
-    ).to.throw(/WBTC-Long.*direct|WBTC-Long.*omit|swapQuote.*forbidden/i);
+      output.erc20AmountRecipients.map(r => r.tokenAddress.toLowerCase()),
+    ).to.include(pool.collateralToken.toLowerCase());
+
+    // WETH is no longer forced as the output token.
+    expect(
+      output.erc20AmountRecipients.map(r => r.tokenAddress.toLowerCase()),
+    ).to.not.include(FX_ADDRESSES.WETH.toLowerCase());
   });
 
-  it('wstETH-Long with swapQuote: constructs', () => {
-    expect(
-      () =>
-        new FxMintCloseRecipe({
-          ...baseOpts,
-          pool: 'wstETH-Long',
-          swapQuote: fakeSwapQuote,
-          slippageBasisPoints: 5,
-        }),
-    ).not.to.throw();
+  it('Should keep the position NFT on a partial close', async () => {
+    const pool = resolvePool('wstETH-Long');
+    const recipe = new FxMintCloseRecipe({
+      pool: 'wstETH-Long',
+      positionId: POSITION_ID,
+      repayAmount: REPAY_AMOUNT,
+      withdrawColl: WITHDRAW_COLL,
+      approveAmount: APPROVE_AMOUNT,
+      partialClose: true,
+    });
+
+    const output = await recipe.getRecipeOutput(recipeInputFor(pool.address));
+    expect(output.nftRecipients).to.have.length(1);
+    expect(output.nftRecipients[0].amount).to.equal(1n);
   });
 
-  it('WBTC-Long without swapQuote: constructs', () => {
-    expect(
-      () =>
-        new FxMintCloseRecipe({
-          ...baseOpts,
-          pool: 'WBTC-Long',
-        }),
-    ).not.to.throw();
+  it('Should burn the position NFT on a full close', async () => {
+    const pool = resolvePool('wstETH-Long');
+    const recipe = new FxMintCloseRecipe({
+      pool: 'wstETH-Long',
+      positionId: POSITION_ID,
+      repayAmount: REPAY_AMOUNT,
+      withdrawColl: WITHDRAW_COLL,
+      approveAmount: APPROVE_AMOUNT,
+      partialClose: false,
+    });
+
+    const output = await recipe.getRecipeOutput(recipeInputFor(pool.address));
+    expect(output.nftRecipients).to.have.length(1);
+    expect(output.nftRecipients[0].amount).to.equal(0n);
   });
 
-  it('throws if swapQuote provided without slippageBasisPoints', () => {
+  it('Should shield the pool collateral on WBTC-Long too', async () => {
+    const pool = resolvePool('WBTC-Long');
+    const recipe = new FxMintCloseRecipe({
+      pool: 'WBTC-Long',
+      positionId: POSITION_ID,
+      repayAmount: REPAY_AMOUNT,
+      withdrawColl: WITHDRAW_COLL,
+      approveAmount: APPROVE_AMOUNT,
+      partialClose: true,
+    });
+
+    const output = await recipe.getRecipeOutput(recipeInputFor(pool.address));
     expect(
-      () =>
-        new FxMintCloseRecipe({
-          ...baseOpts,
-          pool: 'wstETH-Long',
-          swapQuote: fakeSwapQuote,
-          // slippageBasisPoints intentionally omitted
-        } as never),
-    ).to.throw(/slippageBasisPoints/);
+      output.erc20AmountRecipients.map(r => r.tokenAddress.toLowerCase()),
+    ).to.include(pool.collateralToken.toLowerCase());
   });
 });

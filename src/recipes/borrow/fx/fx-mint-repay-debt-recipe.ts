@@ -44,10 +44,9 @@ export type FxMintRepayDebtRecipeOpts = {
  * (cookbook's recipe-engine epilogue handles unconsumed input ERC-20s
  * automatically).
  *
- * Pool-agnostic: no swap leg, no collateral movement. No call to
- * validatePoolFlow — that helper enforces collateral-axis rules
- * (wstETH-Long needs WETH→wstETH swap, WBTC-Long is direct), which don't
- * apply to debt-only recipes.
+ * Pool-agnostic: debt-axis only, no collateral movement. Like
+ * FxMintBorrowMoreRecipe, it has no ComboMeal variant — there is no collateral
+ * leg to swap into or out of.
  *
  * Use case: position's CR is deteriorating from collateral price drop —
  * caller computes computeFxRepay({ rawDebts, shieldedFxUSD,

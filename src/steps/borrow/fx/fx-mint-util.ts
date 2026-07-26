@@ -458,6 +458,34 @@ export function resolvePool(ref: FxMintPoolRef): ResolvedFxPool {
   };
 }
 
+/**
+ * Locate the pool's collateral in a recipe's input balances.
+ *
+ * Every deposit-axis fx recipe (open, topup, topup-and-borrow) consumes the
+ * pool's collateral token directly — these recipes are single-protocol and do
+ * not swap. Entering from any other asset is a ComboMeal's job
+ * (`src/combo-meals/fx`), which puts a 0x swap recipe upstream of the fx recipe.
+ *
+ * Throwing here converts a caller mistake into a clear `fxmint:` error while the
+ * recipe builds its step graph, instead of a confusing low-level revert at
+ * gas-estimate time. It cannot fire at construction: the input balances are not
+ * known until `getRecipeOutput` supplies them.
+ */
+export function assertCollateralInput(
+  pool: ResolvedFxPool,
+  erc20Amounts: readonly { tokenAddress: string; expectedBalance: bigint }[],
+): { tokenAddress: string; expectedBalance: bigint } {
+  const collInput = erc20Amounts.find(
+    a => a.tokenAddress.toLowerCase() === pool.collateralToken.toLowerCase(),
+  );
+  if (!collInput) {
+    throw new Error(
+      `fxmint: no ${pool.collateralToken} in input.erc20Amounts — this recipe takes the pool collateral directly; use a ComboMeal to enter from another token`,
+    );
+  }
+  return collInput;
+}
+
 // =============================================================================
 // Close-side amount math.
 // =============================================================================

@@ -45,11 +45,9 @@ export type FxMintBorrowMoreRecipeOpts = {
  * net amount; the step accounts for the fee in its outputERC20Amounts).
  *
  * Pool-agnostic by design:
- *   - No swap leg (no input ERC-20 needs converting).
- *   - No collateral movement, so no PoolManager approve.
- *   - No call to validatePoolFlow — that helper enforces collateral-axis
- *     rules (wstETH-Long needs WETH→wstETH swap, WBTC-Long is direct),
- *     which don't apply to debt-only recipes. Single-step recipe.
+ *   - No input ERC-20 at all, so nothing to convert — this is the one fx
+ *     recipe with no ComboMeal variant.
+ *   - No collateral movement, so no PoolManager approve. Single-step recipe.
  *
  * Use case: position has appreciated, user wants to extract more fxUSD
  * without adding fresh collateral. This INCREASES the position's debt
