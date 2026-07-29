@@ -7,3 +7,4 @@ export * from './token';
 export * from './railgun';
 export * from './swap';
 export * from './borrow';
+export * from './vault';

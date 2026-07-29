@@ -28,13 +28,19 @@ export type FxMintOpenPositionStepData = {
   /** Absolute fxUSD debt to mint. operate() mints exactly this amount. */
   targetDebt: bigint;
   /**
-   * Predicted positionId from Pool.getNextPositionId() (caller queries
-   * before constructing the recipe). The Pool assigns this to the new
-   * position; we use it to declare the NFT in `outputNFTs` so the recipe
-   * engine's shield-back epilogue picks it up.
+   * Predicted positionId from Pool.getNextPositionId() — use
+   * `getNextFxPositionId()` in api/borrow/fx rather than hand-rolling the
+   * read. Used *only* to declare the NFT in `outputNFTs` so the recipe
+   * engine's shield-back epilogue picks it up; the `operate()` calldata below
+   * passes positionId 0 (mint-new), so this value never reaches f(x).
    *
-   * If a different tx grabs the id first, the gas-estimate revert
-   * surfaces the race cleanly before any real ETH is spent.
+   * Consequence, if another opener takes the id first: `operate()` still
+   * succeeds and mints the next id, but the epilogue then tries to shield an
+   * NFT the executor does not own and the batch reverts there. The position
+   * stays with the ephemeral EOA — recoverable, not shielded. Read the id as
+   * late as possible and treat that revert as "re-read and rebuild".
+   * (An earlier version of this comment claimed the race surfaces as a
+   * gas-estimate revert; it does not — passing 0 cannot revert on a taken id.)
    */
   predictedPositionId: bigint;
   /**

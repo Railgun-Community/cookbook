@@ -239,6 +239,48 @@ export type FxPosition = {
 };
 
 /**
+ * Reads `Pool.getNextPositionId()` — the id the pool will assign to the next
+ * position it mints. Needed by `FxMintOpenRecipe`/`FxMintOpenPositionStep`,
+ * which must declare the incoming position NFT in `outputNFTs` *before* the
+ * batch executes so the engine's shield-back epilogue picks it up.
+ *
+ * ## This value is a prediction, and the prediction can be wrong
+ *
+ * The id is pool-global and first-come-first-served. Between this read and
+ * your batch landing, anyone else opening a position on the same pool takes
+ * the id, and yours shifts.
+ *
+ * What that costs is worth being precise about, because the failure is *not*
+ * on the f(x) side. `FxMintOpenPositionStep` encodes `operate(pool, 0, ...)`
+ * — literal zero, meaning "mint me a new position" — so `operate()` itself
+ * is race-free and can never touch someone else's position. The mismatch
+ * lands one layer later: the recipe declared id N in `outputNFTs`, f(x)
+ * minted N+1, so the shield-back epilogue tries to shield an NFT the
+ * executor does not hold. The batch reverts there. The position itself is
+ * real and stays with the ephemeral EOA — recoverable, since that key is
+ * the caller's, but not shielded.
+ *
+ * Practical mitigation, in order of preference:
+ *   1. Read this as late as possible — ideally immediately before submitting.
+ *   2. Treat a revert in the shield epilogue of an open as "id was taken,
+ *      re-read and rebuild", not as a protocol error.
+ *   3. On a busy pool, accept that this is a retry loop, not a guarantee.
+ *
+ * A structurally race-free design would read the minted id out of the
+ * `operate()` return value or the ERC-721 `Transfer` event instead of
+ * predicting it, but the cookbook step graph has to declare its NFT outputs
+ * up front, so that is not expressible today.
+ */
+export async function getNextFxPositionId(
+  poolRef: FxMintPoolRef,
+  provider: Provider,
+): Promise<bigint> {
+  const resolved = resolvePool(poolRef);
+  const poolContract = new Contract(resolved.address, FX_POOL_ABI, provider);
+  return (await poolContract.getNextPositionId()) as bigint;
+}
+
+/**
  * Reads a single position's state. Caller obtains positionId from their
  * own NFT enumeration (wallet-side, since only the wallet's keys can
  * decrypt shielded NFT ownership). All shielded fxmint positions on-chain

@@ -134,6 +134,28 @@ export const FX_POOL_ABI = [
     type: 'function',
   },
 
+  // getNextPositionId — the id `operate()` will mint when called with
+  // positionId 0. Unlike the fragments around it, this one is NOT copied
+  // from the fx-sdk dist (the SDK omits it); the signature was confirmed
+  // by direct mainnet eth_call on both pools (2026-07-29, Alchemy
+  // archive): wstETH-Long -> 1983, WBTC-Long -> 900.
+  //
+  // See getNextFxPositionId() in api/borrow/fx/fx-position-reader.ts for
+  // the read wrapper and the race caveat that comes with predicting ids.
+  {
+    inputs: [],
+    name: 'getNextPositionId',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+
   // getPositionDebtRatio — lines 1012–1030 of dist/index.js (AFPool_default)
   {
     inputs: [
