@@ -3,10 +3,8 @@ import { ApproveERC20SpenderStep, Step } from '../../../steps';
 import type { RecipeConfig, StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import {
-  FX_ADDRESSES,
   FEE_DENOM,
   resolvePool,
-  type Address,
   type FxMintPoolRef,
 } from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
@@ -101,8 +99,6 @@ export class FxMintRepayDebtRecipe extends Recipe {
 
   protected async getInternalSteps(_first: StepInput): Promise<Step[]> {
     const pool = resolvePool(this.opts.pool);
-    const fxUSD = FX_ADDRESSES.fxUSD as Address;
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
 
     // Two-step recipe: approve fxUSD to PoolManager, then operate() with a
     // negative debtDelta (== repay).
@@ -117,14 +113,12 @@ export class FxMintRepayDebtRecipe extends Recipe {
     //   handles negative magnitudes as repay branches in PoolManager).
     return [
       new ApproveERC20SpenderStep(
-        poolManager,
-        { tokenAddress: fxUSD, decimals: 18n },
+        pool.poolManager,
+        { tokenAddress: pool.debtToken, decimals: pool.debtDecimals },
         this.opts.approveAmount,
       ),
       new FxMintAdjustPositionStep({
-        pool: pool.address,
-        collateralToken: pool.collateralToken,
-        collateralDecimals: pool.collateralDecimals,
+        pool,
         positionId: this.opts.positionId,
         collDelta: 0n,
         debtDelta: -this.opts.repayAmount,

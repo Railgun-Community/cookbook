@@ -63,9 +63,7 @@ describe('FxMintClosePositionStep', () => {
     const wbtcPool = resolvePool('WBTC-Long');
 
     const step = new FxMintClosePositionStep({
-      pool: wbtcPool.address,
-      collateralToken: wbtcPool.collateralToken,
-      collateralDecimals: wbtcPool.collateralDecimals, // 8n
+      pool: wbtcPool,
       positionId,
       repayAmount,
       withdrawColl,
@@ -115,9 +113,7 @@ describe('FxMintClosePositionStep', () => {
     const wbtcPool = resolvePool('WBTC-Long');
 
     const step = new FxMintClosePositionStep({
-      pool: wbtcPool.address,
-      collateralToken: wbtcPool.collateralToken,
-      collateralDecimals: wbtcPool.collateralDecimals,
+      pool: wbtcPool,
       positionId,
       repayAmount,
       withdrawColl,
@@ -149,5 +145,104 @@ describe('FxMintClosePositionStep', () => {
     expect(spentNFTs).to.have.length(1);
     expect(spentNFTs[0]?.nftAddress).to.equal(wbtcPool.address);
     expect(spentNFTs[0]?.tokenSubID).to.equal('0x' + positionId.toString(16));
+  });
+
+  describe('short pools (f(x) v2.1)', () => {
+    const stETHShort = resolvePool('stETH-Short');
+
+    // A short closes by repaying the volatile asset to release fxUSD — the
+    // mirror of a long. The approved input is therefore wstETH, not fxUSD.
+    const shortRepay = 1_000_000_000_000_000_000n; // 1 wstETH
+    const shortApprove = shortRepay; // shorts charge zero repay fee today
+    const shortWithdrawGross = 5_000_000_000_000_000_000_000n; // 5000 fxUSD
+
+    function makeShortStepInput(): StepInput {
+      return {
+        networkName: NetworkName.Ethereum,
+        erc20Amounts: [
+          {
+            tokenAddress: stETHShort.debtToken,
+            decimals: 18n,
+            isBaseToken: false,
+            expectedBalance: shortApprove,
+            minBalance: shortApprove,
+            approvedSpender: FX_ADDRESSES.fxShortPoolManager,
+          },
+        ],
+        nfts: [
+          {
+            nftAddress: stETHShort.address,
+            tokenSubID: '0x' + positionId.toString(16),
+            nftTokenType: NFTTokenType.ERC721,
+            amount: 1n,
+          },
+        ],
+      };
+    }
+
+    it('spends the debt token and outputs collateral NET of the withdraw fee', async () => {
+      const step = new FxMintClosePositionStep({
+        pool: stETHShort,
+        positionId,
+        repayAmount: shortRepay,
+        withdrawColl: shortWithdrawGross,
+        withdrawFeeRatio: 1_000_000n, // 0.1%, the measured mainnet short value
+        partialClose: true,
+      });
+
+      const output = await step.getValidStepOutput(makeShortStepInput());
+
+      expect(output.crossContractCalls[0].to.toLowerCase()).to.equal(
+        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
+      );
+
+      // Repays wstETH, not fxUSD.
+      expect(output.spentERC20Amounts).to.deep.equal([
+        {
+          tokenAddress: stETHShort.debtToken,
+          decimals: 18n,
+          amount: shortRepay,
+          recipient: FX_ADDRESSES.fxShortPoolManager,
+        },
+      ]);
+
+      // The withdraw fee comes out of the caller's proceeds, so the declared
+      // output must be 99.9% of the gross — declaring the gross would
+      // over-state the reshielded balance and fail accounting on-chain.
+      const collOut = output.outputERC20Amounts.find(
+        o =>
+          o.tokenAddress.toLowerCase() ===
+          stETHShort.collateralToken.toLowerCase(),
+      );
+      if (!collOut) {
+        throw new Error('expected an fxUSD collateral output');
+      }
+      expect(collOut.expectedBalance).to.equal(4_995_000_000_000_000_000_000n);
+      expect(collOut.expectedBalance).to.not.equal(shortWithdrawGross);
+      // Still deterministic, so a downstream 0x approve can consume it.
+      expect(collOut.minBalance).to.equal(collOut.expectedBalance);
+    });
+
+    it('omitting withdrawFeeRatio reproduces long behaviour (gross == net)', async () => {
+      // Guards the default: long callers that never pass the field must be
+      // unaffected by its introduction.
+      const step = new FxMintClosePositionStep({
+        pool: stETHShort,
+        positionId,
+        repayAmount: shortRepay,
+        withdrawColl: shortWithdrawGross,
+        partialClose: true,
+      });
+      const output = await step.getValidStepOutput(makeShortStepInput());
+      const collOut = output.outputERC20Amounts.find(
+        o =>
+          o.tokenAddress.toLowerCase() ===
+          stETHShort.collateralToken.toLowerCase(),
+      );
+      if (!collOut) {
+        throw new Error('expected an fxUSD collateral output');
+      }
+      expect(collOut.expectedBalance).to.equal(shortWithdrawGross);
+    });
   });
 });

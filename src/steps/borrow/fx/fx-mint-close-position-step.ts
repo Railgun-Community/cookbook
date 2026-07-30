@@ -7,32 +7,39 @@ import type {
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
 import {
-  FX_ADDRESSES,
   FX_POOL_MANAGER_ABI,
-  type Address,
+  fxCollateralWithdrawOutput,
+  type ResolvedFxPool,
 } from './fx-mint-util';
 
 export type FxMintClosePositionStepData = {
-  pool: Address;
-  collateralToken: Address;
   /**
-   * Native-units decimals for the collateral token (wstETH = 18, WBTC = 8).
-   * Cookbook's amount accounting must match the on-chain token's decimals;
-   * pre-Task-5 this was hardcoded to 18n on the close-side output, which
-   * mis-accounted WBTC-Long by a factor of 10^10. Plumbed from the pool
-   * registry by the recipe (see `resolvePool().collateralDecimals` in
-   * fx-mint-util.ts).
-   *
-   * Note: f(x) has NO withdraw fee, so this value affects bookkeeping only —
-   * it does not change the on-chain math (the operate() args use raw
-   * collateral wei regardless).
+   * The resolved pool — address (also the position-NFT contract), both tokens
+   * with their decimals, and the manager to call. From `resolvePool()`.
    */
-  collateralDecimals: bigint;
+  pool: ResolvedFxPool;
   positionId: bigint;
-  /** fxUSD debt to repay. PoolManager pulls `repayAmount × (1 + fee)` from msg.sender. */
+  /**
+   * Debt to repay, in `pool.debtToken` native units. PoolManager pulls
+   * `repayAmount × (1 + repayFeeRatio)` from msg.sender.
+   */
   repayAmount: bigint;
-  /** Actual collateral wei to withdraw. */
+  /**
+   * Collateral to withdraw, in `pool.collateralToken` native units, **gross of
+   * the withdraw fee** — this is the value encoded into `operate()`. What the
+   * caller actually receives is net of `withdrawFeeRatio`; the step derives that
+   * for its declared output.
+   */
   withdrawColl: bigint;
+  /**
+   * f(x)'s withdraw fee for this (pool, operator), 1e9-denominated, from
+   * PoolConfiguration.getPoolFeeRatio(pool, operator)[1].
+   *
+   * Zero on long pools — which is why the long-only code could ignore it — but
+   * **0.1% on shorts**, where omitting it would over-declare the reshielded
+   * collateral. Defaults to 0n so long callers are unaffected.
+   */
+  withdrawFeeRatio?: bigint;
   /** True if position survives (NFT shields back); false if full close (NFT burns). */
   partialClose: boolean;
 };
@@ -40,9 +47,12 @@ export type FxMintClosePositionStepData = {
 /**
  * Encodes `PoolManager.operate(pool, positionId, -withdrawColl, -repayAmount)`.
  *
- * Consumes fxUSD (executing account (ephemeral EOA) must have approved PoolManager for
- * `repayAmount × (1 + repayFeeRatio/1e9)`) and the position NFT;
- * produces collateralToken (wstETH or WBTC) for the swap-back leg.
+ * Consumes `pool.debtToken` (the executing account (ephemeral EOA) must have
+ * approved PoolManager for `repayAmount × (1 + repayFeeRatio/1e9)`) and the
+ * position NFT; produces `pool.collateralToken` for the swap-back leg.
+ *
+ * Side-agnostic: a long repays fxUSD to release wstETH/WBTC, a short repays
+ * wstETH/WBTC to release fxUSD. Both tokens come off the descriptor.
  *
  * For partial close the NFT survives and is shielded back. For full close
  * (repayAmount == position's full debt) f(x) burns the NFT inside operate
@@ -52,7 +62,7 @@ export class FxMintClosePositionStep extends Step {
   readonly config: StepConfig = {
     name: 'f(x) Close Position',
     description:
-      'Calls PoolManager.operate(pool, positionId, -coll, -debt). Burns fxUSD; releases collateral and (for full close) the position NFT.',
+      'Calls PoolManager.operate(pool, positionId, -coll, -debt). Repays the debt token; releases collateral and (for full close) the position NFT.',
     hasNonDeterministicOutput: false,
   };
 
@@ -65,49 +75,61 @@ export class FxMintClosePositionStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const {
       pool,
-      collateralToken,
-      collateralDecimals,
       positionId,
       repayAmount,
       withdrawColl,
+      withdrawFeeRatio,
       partialClose,
     } = this.data;
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
-    const fxUSD = FX_ADDRESSES.fxUSD as Address;
+    const {
+      address: poolAddress,
+      collateralToken,
+      collateralDecimals,
+      debtToken,
+      debtDecimals,
+      poolManager,
+    } = pool;
 
-    // The prior ApproveERC20SpenderStep declared `approveAmount` of fxUSD
+    // The prior ApproveERC20SpenderStep declared `approveAmount` of the debt token
     // as approved-for-PoolManager. Cookbook's accounting requires every
     // input wei to be classified as spent / fee / output. PoolManager
     // pulls the full approveAmount from msg.sender; `repayAmount` of that
     // is burned against the position, the rest is the f(x) repay fee
     // (treasury). Read the actual approved input amount so we can
     // declare the fee correctly.
-    const approvedFxUSDInput = input.erc20Amounts.find(
+    const approvedDebtInput = input.erc20Amounts.find(
       a =>
-        a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
+        a.tokenAddress.toLowerCase() === debtToken.toLowerCase() &&
         a.approvedSpender?.toLowerCase() === poolManager.toLowerCase(),
     );
-    if (!approvedFxUSDInput) {
+    if (!approvedDebtInput) {
       throw new Error(
-        `FxMintClosePositionStep: no PoolManager-approved fxUSD input found`,
+        `FxMintClosePositionStep: no PoolManager-approved ${debtToken} input found`,
       );
     }
-    const approveAmount = approvedFxUSDInput.expectedBalance;
+    const approveAmount = approvedDebtInput.expectedBalance;
     const feeAmount = approveAmount - repayAmount;
 
-    // Cookbook's accounting validator sums ALL fxUSD inputs, including any
+    // `withdrawColl` is the gross amount encoded into operate(); the caller
+    // receives it net of the withdraw fee.
+    const withdrawnNet = fxCollateralWithdrawOutput(
+      withdrawColl,
+      withdrawFeeRatio ?? 0n,
+    );
+
+    // Cookbook's accounting validator sums ALL debt-token inputs, including any
     // non-approved orphans left by upstream steps' integer rounding (we
     // observed a recurring 2-wei orphan from UnshieldDefaultStep + Approve
     // step's change accounting). Pass those through as outputs so input ==
     // spent + fees + outputs balances to the wei.
-    const orphanFxUSD = input.erc20Amounts
+    const orphanDebt = input.erc20Amounts
       .filter(
         a =>
-          a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
+          a.tokenAddress.toLowerCase() === debtToken.toLowerCase() &&
           a.approvedSpender?.toLowerCase() !== poolManager.toLowerCase(),
       )
       .map(a => ({
-        tokenAddress: fxUSD,
+        tokenAddress: debtToken,
         decimals: a.decimals,
         expectedBalance: a.expectedBalance,
         minBalance: a.minBalance,
@@ -121,7 +143,7 @@ export class FxMintClosePositionStep extends Step {
     // the f(x) PoolManager — just the ABI fragment in fx-mint-util).
     const iface = new Interface(FX_POOL_MANAGER_ABI);
     const callData = iface.encodeFunctionData('operate', [
-      pool,
+      poolAddress,
       positionId,
       -withdrawColl,
       -repayAmount,
@@ -137,8 +159,8 @@ export class FxMintClosePositionStep extends Step {
       crossContractCalls: [tx],
       spentERC20Amounts: [
         {
-          tokenAddress: fxUSD,
-          decimals: 18n,
+          tokenAddress: debtToken,
+          decimals: debtDecimals,
           amount: repayAmount, // burned by PoolManager against position debt
           recipient: poolManager,
         },
@@ -146,8 +168,8 @@ export class FxMintClosePositionStep extends Step {
       ...(feeAmount > 0n && {
         feeERC20AmountRecipients: [
           {
-            tokenAddress: fxUSD,
-            decimals: 18n,
+            tokenAddress: debtToken,
+            decimals: debtDecimals,
             amount: feeAmount, // f(x) repay fee → protocol treasury
             recipient: poolManager,
           },
@@ -157,7 +179,7 @@ export class FxMintClosePositionStep extends Step {
         ? [] // partial: NFT stays with executing account (ephemeral EOA) for shield-back
         : [
             {
-              nftAddress: pool,
+              nftAddress: poolAddress,
               tokenSubID: '0x' + positionId.toString(16),
               nftTokenType: NFTTokenType.ERC721,
               amount: 1n,
@@ -166,24 +188,27 @@ export class FxMintClosePositionStep extends Step {
       outputERC20Amounts: [
         {
           tokenAddress: collateralToken,
-          // Plumbed from the pool registry via constructor arg. Was hardcoded
-          // 18n, which broke WBTC-Long (8-decimal) bookkeeping by 10^10.
+          // Plumbed from the pool registry. Was hardcoded 18n, which broke
+          // WBTC-Long (8-decimal) bookkeeping by 10^10.
           decimals: collateralDecimals,
-          // PoolManager.operate withdraws exactly `withdrawColl` wstETH or
-          // reverts. Treating it as deterministic (min == expected) lets
-          // the downstream Approve(0x, withdrawColl) pass cookbook's
-          // "non-deterministic input" gate.
-          expectedBalance: withdrawColl,
-          minBalance: withdrawColl,
+          // What the caller actually receives: `_handleWithdraw` sends
+          // `withdrawColl - withdrawFee`. Zero-fee on longs, so this is
+          // identity there and the long behaviour is unchanged.
+          //
+          // Deterministic (min == expected) — operate() withdraws exactly this
+          // or reverts — which lets a downstream Approve(0x, ...) pass
+          // cookbook's "non-deterministic input" gate.
+          expectedBalance: withdrawnNet,
+          minBalance: withdrawnNet,
           isBaseToken: false,
           approvedSpender: undefined,
         },
-        ...orphanFxUSD,
+        ...orphanDebt,
       ],
       outputNFTs: partialClose
         ? [
             {
-              nftAddress: pool,
+              nftAddress: poolAddress,
               tokenSubID: '0x' + positionId.toString(16),
               nftTokenType: NFTTokenType.ERC721,
               amount: 1n,

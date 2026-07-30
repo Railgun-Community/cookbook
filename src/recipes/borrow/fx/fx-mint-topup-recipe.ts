@@ -3,10 +3,8 @@ import { ApproveERC20SpenderStep, Step } from '../../../steps';
 import type { RecipeConfig, StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import {
-  FX_ADDRESSES,
   assertCollateralInput,
   resolvePool,
-  type Address,
   type FxMintPoolRef,
 } from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
@@ -56,7 +54,6 @@ export class FxMintTopupRecipe extends Recipe {
 
   protected async getInternalSteps(first: StepInput): Promise<Step[]> {
     const pool = resolvePool(this.opts.pool);
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
 
     // The input collateral is what gets deposited, as-is. `first` is the
     // StepInput the recipe engine builds from RecipeInput, so its balances are
@@ -64,14 +61,12 @@ export class FxMintTopupRecipe extends Recipe {
     const collInput = assertCollateralInput(pool, first.erc20Amounts);
 
     return [
-      new ApproveERC20SpenderStep(poolManager, {
+      new ApproveERC20SpenderStep(pool.poolManager, {
         tokenAddress: pool.collateralToken,
         decimals: pool.collateralDecimals,
       }),
       new FxMintAdjustPositionStep({
-        pool: pool.address,
-        collateralToken: pool.collateralToken,
-        collateralDecimals: pool.collateralDecimals,
+        pool,
         positionId: this.opts.positionId,
         collDelta: collInput.expectedBalance,
         debtDelta: 0n,

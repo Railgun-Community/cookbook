@@ -3,10 +3,8 @@ import { ApproveERC20SpenderStep, Step } from '../../../steps';
 import type { RecipeConfig, StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import {
-  FX_ADDRESSES,
   assertCollateralInput,
   resolvePool,
-  type Address,
   type FxMintPoolRef,
 } from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
@@ -81,7 +79,6 @@ export class FxMintTopupAndBorrowRecipe extends Recipe {
 
   protected async getInternalSteps(first: StepInput): Promise<Step[]> {
     const pool = resolvePool(this.opts.pool);
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
 
     const collInput = assertCollateralInput(pool, first.erc20Amounts);
 
@@ -90,14 +87,12 @@ export class FxMintTopupAndBorrowRecipe extends Recipe {
     // can declare the post-fee fxUSD output. We do NOT pass repayFeeRatio
     // because debtDelta is positive (mint, not burn).
     return [
-      new ApproveERC20SpenderStep(poolManager, {
+      new ApproveERC20SpenderStep(pool.poolManager, {
         tokenAddress: pool.collateralToken,
         decimals: pool.collateralDecimals,
       }),
       new FxMintAdjustPositionStep({
-        pool: pool.address,
-        collateralToken: pool.collateralToken,
-        collateralDecimals: pool.collateralDecimals,
+        pool,
         positionId: this.opts.positionId,
         collDelta: collInput.expectedBalance,
         debtDelta: this.opts.additionalDebt,

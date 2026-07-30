@@ -7,59 +7,70 @@ import type {
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
 import {
-  FX_ADDRESSES,
   FX_POOL_MANAGER_ABI,
-  FEE_DENOM,
-  type Address,
+  fxCollateralWithdrawOutput,
+  fxDebtBorrowOutput,
+  fxDebtRepaySpend,
+  type ResolvedFxPool,
 } from './fx-mint-util';
 
 export type FxMintAdjustPositionStepData = {
-  /** f(x) Pool address (also the position-NFT contract). */
-  pool: Address;
-  /** Collateral token address for this pool. */
-  collateralToken: Address;
   /**
-   * Native-units decimals for the collateral token. Plumbed from the
-   * pool registry by the recipe (resolvePool().collateralDecimals).
-   * Cookbook's amount accounting must match the on-chain token's
-   * decimals; off by 10^(18-decimals) for non-18-decimal collateral
-   * if mis-set.
+   * The resolved pool — address (also the position-NFT contract), both tokens
+   * with their decimals, and the manager to call. Long and short pools use
+   * different managers, so this cannot be a module constant. From
+   * `resolvePool()`.
    */
-  collateralDecimals: bigint;
+  pool: ResolvedFxPool;
   /** Existing position to adjust. */
   positionId: bigint;
   /**
-   * Signed collateral delta, in native collateral units:
-   *   > 0: deposit additional collateral (executing account (ephemeral EOA) must hold the amount)
-   *   < 0: withdraw collateral (out of v0.1 scope; reserved for v0.2's
-   *        FxMintWithdrawCollateralRecipe — the step accepts the value
-   *        but no v0.1 recipe wires it through).
+   * Signed collateral delta, in `pool.collateralToken` native units — wstETH
+   * (18dp) or WBTC (8dp) for a long, fxUSD (18dp) for a short:
+   *   > 0: deposit additional collateral (executing account (ephemeral EOA)
+   *        must hold the amount)
+   *   < 0: withdraw collateral to the executing account, net of the withdraw
+   *        fee — requires `withdrawFeeRatio`
    *   = 0: no-op on the collateral axis
    */
   collDelta: bigint;
   /**
-   * Signed debt delta, in fxUSD wei:
-   *   > 0: mint additional fxUSD (PoolManager pays the executing account (ephemeral EOA),
+   * Signed debt delta, in `pool.debtToken` native units — fxUSD (18dp) for a
+   * long, wstETH (18dp) or **WBTC (8dp)** for a short:
+   *   > 0: borrow more (PoolManager pays the executing account (ephemeral EOA),
    *        net of borrow fee).
-   *   < 0: burn fxUSD to repay debt (PoolManager pulls fxUSD from the
-   *        executing account (ephemeral EOA), including the f(x) repay fee uplift; recipe's
-   *        preceding ApproveERC20SpenderStep authorizes the pull).
+   *   < 0: repay debt (PoolManager pulls the debt token from the executing
+   *        account (ephemeral EOA), including the f(x) repay fee uplift; the
+   *        recipe's preceding ApproveERC20SpenderStep authorizes the pull).
    *   = 0: no-op on the debt axis
    */
   debtDelta: bigint;
   /**
    * f(x)'s borrow fee for this (pool, operator), 1e9-denominated.
    * Required iff debtDelta > 0; ignored otherwise. Caller fetches via
-   * PoolConfiguration.getPoolFeeRatio(pool, operator)[2] (tuple index
-   * confirmed in discovery-notes.md).
+   * PoolConfiguration.getPoolFeeRatio(pool, operator)[2].
+   * Zero on short pools today.
    */
   borrowFeeRatio?: bigint;
   /**
    * f(x)'s repay fee for this (pool, operator), 1e9-denominated.
    * Required iff debtDelta < 0; ignored otherwise.
    * PoolConfiguration.getPoolFeeRatio(pool, operator)[3].
+   * Zero on short pools today.
    */
   repayFeeRatio?: bigint;
+  /**
+   * f(x)'s withdraw fee for this (pool, operator), 1e9-denominated.
+   * Required iff collDelta < 0; ignored otherwise.
+   * PoolConfiguration.getPoolFeeRatio(pool, operator)[1].
+   *
+   * Zero on long pools, **0.1% on shorts** — so the withdraw path could not be
+   * declared correctly for a short without it. There is deliberately no
+   * `supplyFeeRatio`: the manager pulls the full collateral amount and keeps the
+   * supply fee out of what it credits to the position, so that fee never
+   * changes the caller's outlay (see `fxCollateralSupplySpend`).
+   */
+  withdrawFeeRatio?: bigint;
 };
 
 /**
@@ -76,20 +87,23 @@ export type FxMintAdjustPositionStepData = {
  * Full close, which burns the NFT, is handled by FxMintClosePositionStep,
  * not here.
  *
- * Step output shape is conditional:
- *   - collDelta > 0: declares spentERC20Amounts for the input collateral
- *     (looked up from input.erc20Amounts matching collateralToken;
- *     amount = inputColl.expectedBalance, mirroring FxMintOpenPositionStep).
- *   - debtDelta > 0: declares outputERC20Amounts for the post-borrow-fee
- *     fxUSD net (= debtDelta × (FEE_DENOM - borrowFeeRatio) / FEE_DENOM).
- *   - debtDelta < 0: declares spentERC20Amounts for the fxUSD consumed
- *     (= |debtDelta| × (FEE_DENOM + repayFeeRatio) / FEE_DENOM; PoolManager
- *     pulls this amount from the executing account (ephemeral EOA) via the recipe's preceding
- *     approve step). Matches the close-side accounting pattern.
+ * Side-agnostic: it never names fxUSD or a volatile asset, reading both tokens
+ * and the manager off `pool`. A long deposits wstETH/WBTC against fxUSD debt; a
+ * short deposits fxUSD against wstETH/WBTC debt; the four branches below are
+ * identical in either direction.
  *
- * v0.1 recipes only use non-negative collDelta. Negative-collDelta is
- * accommodated structurally for v0.2's withdraw-collateral recipe, but
- * no v0.1 recipe constructs the step with collDelta < 0.
+ * Step output shape is conditional:
+ *   - collDelta > 0: declares spentERC20Amounts for the collateral pulled
+ *     (clamped to the guaranteed input balance; the remainder is declared as a
+ *     surplus output). The **supply fee is not subtracted** — the manager pulls
+ *     the full amount and keeps the fee out of what it credits to the position.
+ *   - collDelta < 0: declares outputERC20Amounts for the withdrawn collateral,
+ *     **net of withdrawFeeRatio** — this fee does reduce the caller's proceeds.
+ *   - debtDelta > 0: declares outputERC20Amounts for the post-borrow-fee debt
+ *     token (`fxDebtBorrowOutput`).
+ *   - debtDelta < 0: declares spentERC20Amounts for the debt token consumed
+ *     (`fxDebtRepaySpend` — principal PLUS fee; PoolManager pulls both via the
+ *     recipe's preceding approve step).
  */
 export class FxMintAdjustPositionStep extends Step {
   readonly config: StepConfig = {
@@ -119,6 +133,14 @@ export class FxMintAdjustPositionStep extends Step {
         'FxMintAdjustPositionStep: repayFeeRatio required when debtDelta < 0',
       );
     }
+    if (data.collDelta < 0n && data.withdrawFeeRatio === undefined) {
+      // Long pools charge nothing here, so omitting it would appear to work
+      // until the same code ran against a short pool and over-declared the
+      // withdrawn output by 0.1%.
+      throw new Error(
+        'FxMintAdjustPositionStep: withdrawFeeRatio required when collDelta < 0',
+      );
+    }
 
     this.data = data;
   }
@@ -128,16 +150,21 @@ export class FxMintAdjustPositionStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const {
       pool,
-      collateralToken,
-      collateralDecimals,
       positionId,
       collDelta,
       debtDelta,
       borrowFeeRatio,
       repayFeeRatio,
+      withdrawFeeRatio,
     } = this.data;
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
-    const fxUSD = FX_ADDRESSES.fxUSD as Address;
+    const {
+      address: poolAddress,
+      collateralToken,
+      collateralDecimals,
+      debtToken,
+      debtDecimals,
+      poolManager,
+    } = pool;
 
     // On the deposit axis, clamp the encoded collateral to what the executing
     // account is GUARANTEED to hold.
@@ -173,7 +200,7 @@ export class FxMintAdjustPositionStep extends Step {
     // typechain binding for the f(x) PoolManager).
     const iface = new Interface(FX_POOL_MANAGER_ABI);
     const callData = iface.encodeFunctionData('operate', [
-      pool,
+      poolAddress,
       positionId,
       effectiveCollDelta,
       debtDelta,
@@ -196,16 +223,20 @@ export class FxMintAdjustPositionStep extends Step {
     }
 
     if (debtDelta < 0n) {
-      // PoolManager.operate(... , -X) pulls X × (1e9 + repayFeeRatio)/1e9
-      // of fxUSD from the executing account (ephemeral EOA) via transferFrom (allowed by the
-      // recipe's preceding approve step). Declared here so cookbook's
-      // amount accounting reflects the actual outflow.
-      const debtBurn = -debtDelta;
-      const fxUSDPulled = (debtBurn * (FEE_DENOM + repayFeeRatio!)) / FEE_DENOM;
+      // PoolManager.operate(... , -X) pulls X × (1e9 + repayFeeRatio)/1e9 of the
+      // debt token from the executing account (ephemeral EOA) via transferFrom
+      // (allowed by the recipe's preceding approve step) — the fee is charged on
+      // TOP of the principal, in two separate transferFrom calls. Declared here
+      // so cookbook's amount accounting reflects the actual outflow.
+      if (repayFeeRatio === undefined) {
+        throw new Error(
+          'FxMintAdjustPositionStep: repayFeeRatio required when debtDelta < 0',
+        );
+      }
       spentERC20Amounts.push({
-        tokenAddress: fxUSD,
-        decimals: 18n,
-        amount: fxUSDPulled,
+        tokenAddress: debtToken,
+        decimals: debtDecimals,
+        amount: fxDebtRepaySpend(-debtDelta, repayFeeRatio),
         recipient: poolManager,
       });
     }
@@ -230,50 +261,76 @@ export class FxMintAdjustPositionStep extends Step {
       });
     }
 
-    if (debtDelta > 0n) {
-      // Post-borrow-fee net fxUSD lands in the executing account (ephemeral EOA) and shields
-      // back to the user.
-      const fxUSDNet = debtDelta - (debtDelta * borrowFeeRatio!) / FEE_DENOM;
+    if (collDelta < 0n) {
+      // Withdrawn collateral, net of the withdraw fee — unlike supply, this fee
+      // DOES come out of the caller's proceeds (_handleWithdraw transfers
+      // newColl - fee), so declaring the gross would over-state the reshielded
+      // balance. Zero on longs, 0.1% on shorts.
+      if (withdrawFeeRatio === undefined) {
+        throw new Error(
+          'FxMintAdjustPositionStep: withdrawFeeRatio required when collDelta < 0',
+        );
+      }
+      const withdrawn = fxCollateralWithdrawOutput(-collDelta, withdrawFeeRatio);
       outputERC20Amounts.push({
-        tokenAddress: fxUSD,
-        decimals: 18n,
-        expectedBalance: fxUSDNet,
+        tokenAddress: collateralToken,
+        decimals: collateralDecimals,
+        expectedBalance: withdrawn,
+        minBalance: withdrawn,
+        isBaseToken: false,
+        approvedSpender: undefined,
+      });
+    }
+
+    if (debtDelta > 0n) {
+      // Post-borrow-fee net debt token lands in the executing account
+      // (ephemeral EOA) and shields back to the user.
+      if (borrowFeeRatio === undefined) {
+        throw new Error(
+          'FxMintAdjustPositionStep: borrowFeeRatio required when debtDelta > 0',
+        );
+      }
+      const debtNet = fxDebtBorrowOutput(debtDelta, borrowFeeRatio);
+      outputERC20Amounts.push({
+        tokenAddress: debtToken,
+        decimals: debtDecimals,
+        expectedBalance: debtNet,
         // Deterministic: debtDelta and borrowFeeRatio are both known at
         // construction time. minBalance = expectedBalance keeps the
         // output spendable by future fixed-amount steps without hitting
         // step.ts:71-83's non-deterministic-input gate.
-        minBalance: fxUSDNet,
+        minBalance: debtNet,
         isBaseToken: false,
         approvedSpender: undefined,
       });
     }
 
     if (debtDelta < 0n) {
-      // Orphan fxUSD pass-through — mirrors FxMintClosePositionStep's
-      // pattern. The repay path receives the user's full shielded fxUSD
-      // (so the wallet doesn't have to know approveAmount when unshielding);
-      // ApproveERC20SpenderStep marks only `approveAmount` as
+      // Orphan debt-token pass-through — mirrors FxMintClosePositionStep's
+      // pattern. The repay path receives the user's full shielded debt-token
+      // balance (so the wallet doesn't have to know approveAmount when
+      // unshielding); ApproveERC20SpenderStep marks only `approveAmount` as
       // approvedSpender=PoolManager, leaving the rest as orphan change.
       // Cookbook's step-validator (validators/step-validator.ts) demands
       // input == spent + outputs + fees per token at THIS step (recipe-
       // engine epilogue shield-back happens AFTER all steps and isn't
       // accounted for inside the step-level check). Pass the orphan
       // through as an output so the balance closes to the wei.
-      const orphanFxUSD = input.erc20Amounts
+      const orphanDebt = input.erc20Amounts
         .filter(
           a =>
-            a.tokenAddress.toLowerCase() === fxUSD.toLowerCase() &&
+            a.tokenAddress.toLowerCase() === debtToken.toLowerCase() &&
             a.approvedSpender?.toLowerCase() !== poolManager.toLowerCase(),
         )
         .map(a => ({
-          tokenAddress: fxUSD,
+          tokenAddress: debtToken,
           decimals: a.decimals,
           expectedBalance: a.expectedBalance,
           minBalance: a.minBalance,
           isBaseToken: false,
           approvedSpender: a.approvedSpender,
         }));
-      outputERC20Amounts.push(...orphanFxUSD);
+      outputERC20Amounts.push(...orphanDebt);
     }
 
     // ---- outputNFTs ----
@@ -287,7 +344,7 @@ export class FxMintAdjustPositionStep extends Step {
     // duplicates across that union — so we must not put the NFT in both.
     const outputNFTs: NonNullable<UnvalidatedStepOutput['outputNFTs']> = [
       {
-        nftAddress: pool,
+        nftAddress: poolAddress,
         tokenSubID: '0x' + positionId.toString(16),
         nftTokenType: NFTTokenType.ERC721,
         amount: 1n,

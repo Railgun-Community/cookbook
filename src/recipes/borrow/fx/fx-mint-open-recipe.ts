@@ -3,10 +3,8 @@ import { ApproveERC20SpenderStep, Step } from '../../../steps';
 import type { RecipeConfig, StepInput } from '../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
 import {
-  FX_ADDRESSES,
   assertCollateralInput,
   resolvePool,
-  type Address,
   type FxMintPoolRef,
 } from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintOpenPositionStep } from '../../../steps/borrow/fx/fx-mint-open-position-step';
@@ -59,19 +57,16 @@ export class FxMintOpenRecipe extends Recipe {
 
   protected async getInternalSteps(first: StepInput): Promise<Step[]> {
     const pool = resolvePool(this.opts.pool);
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
 
     assertCollateralInput(pool, first.erc20Amounts);
 
     return [
-      new ApproveERC20SpenderStep(poolManager, {
+      new ApproveERC20SpenderStep(pool.poolManager, {
         tokenAddress: pool.collateralToken,
         decimals: pool.collateralDecimals,
       }),
       new FxMintOpenPositionStep({
-        pool: pool.address,
-        collateralToken: pool.collateralToken,
-        collateralDecimals: pool.collateralDecimals,
+        pool,
         targetDebt: this.opts.targetDebt,
         predictedPositionId: this.opts.predictedPositionId,
         borrowFeeRatio: this.opts.borrowFeeRatio,

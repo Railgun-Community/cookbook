@@ -16,9 +16,7 @@ describe('FxMintAdjustPositionStep', () => {
   const positionId = 1903n;
 
   const baseData = {
-    pool: pool.address,
-    collateralToken: pool.collateralToken,
-    collateralDecimals: pool.collateralDecimals,
+    pool: pool,
     positionId,
   };
 

@@ -95,9 +95,7 @@ export class FxMintBorrowMoreRecipe extends Recipe {
     // fxUSD to msg.sender (the relay-adapter itself).
     return [
       new FxMintAdjustPositionStep({
-        pool: pool.address,
-        collateralToken: pool.collateralToken,
-        collateralDecimals: pool.collateralDecimals,
+        pool,
         positionId: this.opts.positionId,
         collDelta: 0n,
         debtDelta: this.opts.additionalDebt,

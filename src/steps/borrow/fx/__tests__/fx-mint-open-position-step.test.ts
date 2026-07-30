@@ -42,9 +42,7 @@ describe('FxMintOpenPositionStep', () => {
 
   it('encodes operate() with the correct args (wstETH-Long)', async () => {
     const step = new FxMintOpenPositionStep({
-      pool: wstETHPool.address,
-      collateralToken: wstETHPool.collateralToken,
-      collateralDecimals: wstETHPool.collateralDecimals,
+      pool: wstETHPool,
       targetDebt,
       predictedPositionId,
       borrowFeeRatio: 5_000_000n, // 0.5% (current mainnet value, in 1e9 denom)
@@ -94,9 +92,7 @@ describe('FxMintOpenPositionStep', () => {
 
   it('encodes correctly with WBTC-Long collateralDecimals=8 and a different borrow fee', async () => {
     const step = new FxMintOpenPositionStep({
-      pool: wbtcPool.address,
-      collateralToken: wbtcPool.collateralToken,
-      collateralDecimals: wbtcPool.collateralDecimals,
+      pool: wbtcPool,
       targetDebt,
       predictedPositionId,
       borrowFeeRatio: 7_500_000n, // pretend governance moved it to 0.75%
@@ -128,9 +124,7 @@ describe('FxMintOpenPositionStep', () => {
     // [minBalance, expectedBalance]. operate() pulls an EXACT amount, so
     // encoding expectedBalance would revert the batch on any underfill.
     const step = new FxMintOpenPositionStep({
-      pool: wstETHPool.address,
-      collateralToken: wstETHPool.collateralToken,
-      collateralDecimals: wstETHPool.collateralDecimals,
+      pool: wstETHPool,
       targetDebt,
       predictedPositionId,
       borrowFeeRatio: 5_000_000n,
@@ -169,5 +163,110 @@ describe('FxMintOpenPositionStep', () => {
     }
     expect(surplus.expectedBalance).to.equal(100n);
     expect(surplus.minBalance).to.equal(0n);
+  });
+
+  describe('short pools (f(x) v2.1)', () => {
+    const stETHShort = resolvePool('stETH-Short');
+    const wbtcShort = resolvePool('WBTC-Short');
+
+    it('routes to the ShortPoolManager, not the long manager', async () => {
+      const step = new FxMintOpenPositionStep({
+        pool: stETHShort,
+        // Borrowing 1 wstETH against fxUSD collateral.
+        targetDebt: 1_000_000_000_000_000_000n,
+        predictedPositionId: 171n,
+        borrowFeeRatio: 0n, // shorts charge nothing on borrow today
+      });
+
+      const fxUSDCollateral = 5_000_000_000_000_000_000_000n; // 5000 fxUSD
+      const output = await step.getValidStepOutput(
+        makeStepInput(fxUSDCollateral, 18n, stETHShort.collateralToken),
+      );
+
+      // The whole reason the manager is carried per-pool: sending this to the
+      // long manager would revert as an unregistered pool.
+      expect(output.crossContractCalls[0].to.toLowerCase()).to.equal(
+        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
+      );
+      expect(output.crossContractCalls[0].to.toLowerCase()).to.not.equal(
+        FX_ADDRESSES.fxPoolManager.toLowerCase(),
+      );
+
+      // Spends fxUSD (collateral), outputs wstETH (debt) — the mirror of a long.
+      expect(output.spentERC20Amounts).to.deep.equal([
+        {
+          tokenAddress: FX_ADDRESSES.fxUSD,
+          decimals: 18n,
+          amount: fxUSDCollateral,
+          recipient: FX_ADDRESSES.fxShortPoolManager,
+        },
+      ]);
+      expect(output.outputERC20Amounts).to.have.length(1);
+      expect(output.outputERC20Amounts[0].tokenAddress.toLowerCase()).to.equal(
+        FX_ADDRESSES.wstETH.toLowerCase(),
+      );
+      // borrowFeeRatio 0 → the full borrowed amount is received.
+      expect(output.outputERC20Amounts[0].expectedBalance).to.equal(
+        1_000_000_000_000_000_000n,
+      );
+    });
+
+    it('declares 8-decimal WBTC debt against 18-decimal fxUSD collateral', async () => {
+      const step = new FxMintOpenPositionStep({
+        pool: wbtcShort,
+        targetDebt: 5_000_000n, // 0.05 WBTC, 8dp
+        predictedPositionId: 102n,
+        borrowFeeRatio: 0n,
+      });
+
+      const output = await step.getValidStepOutput(
+        makeStepInput(2_000_000_000_000_000_000_000n, 18n, wbtcShort.collateralToken),
+      );
+
+      // Decimals sit on opposite sides from WBTC-Long. Getting this wrong is a
+      // silent 10^10 error rather than a revert.
+      const collSpent = (output.spentERC20Amounts ?? [])[0];
+      if (!collSpent) {
+        throw new Error('expected a collateral spend line');
+      }
+      expect(collSpent.decimals).to.equal(18n);
+      const debtOut = output.outputERC20Amounts.find(
+        o => o.tokenAddress.toLowerCase() === wbtcShort.debtToken.toLowerCase(),
+      );
+      if (!debtOut) {
+        throw new Error('expected a WBTC debt output');
+      }
+      expect(debtOut.decimals).to.equal(8n);
+      expect(debtOut.expectedBalance).to.equal(5_000_000n);
+    });
+
+    it('encodes operate() against the short pool address with positionId 0', async () => {
+      const step = new FxMintOpenPositionStep({
+        pool: stETHShort,
+        targetDebt: 1_000_000_000_000_000_000n,
+        predictedPositionId: 171n,
+        borrowFeeRatio: 0n,
+      });
+      const output = await step.getValidStepOutput(
+        makeStepInput(5_000_000_000_000_000_000_000n, 18n, stETHShort.collateralToken),
+      );
+
+      const iface = new Interface(FX_POOL_MANAGER_ABI);
+      const decoded = iface.parseTransaction({
+        data: output.crossContractCalls[0].data as string,
+      });
+      if (!decoded) {
+        throw new Error('could not decode operate() calldata');
+      }
+      expect(decoded.name).to.equal('operate');
+      expect((decoded.args[0] as string).toLowerCase()).to.equal(
+        stETHShort.address.toLowerCase(),
+      );
+      expect(decoded.args[1]).to.equal(0n); // mint-new
+      // The NFT is declared at the short pool's own address.
+      expect(output.outputNFTs[0].nftAddress.toLowerCase()).to.equal(
+        stETHShort.address.toLowerCase(),
+      );
+    });
   });
 });

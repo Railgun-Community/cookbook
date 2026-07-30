@@ -7,25 +7,27 @@ import type {
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
 import {
-  FX_ADDRESSES,
   FX_POOL_MANAGER_ABI,
-  FEE_DENOM,
-  type Address,
+  fxDebtBorrowOutput,
+  type ResolvedFxPool,
 } from './fx-mint-util';
 
 export type FxMintOpenPositionStepData = {
-  /** f(x) Pool address. The position NFT is minted by this contract. */
-  pool: Address;
-  /** Collateral token address (wstETH for wstETH-Long, WBTC for WBTC-Long). */
-  collateralToken: Address;
   /**
-   * Native-units decimals for the collateral token (wstETH = 18, WBTC = 8).
-   * Cookbook's amount accounting must match the on-chain token's decimals;
-   * this field is plumbed from the pool registry by the recipe (see
-   * `resolvePool().collateralDecimals` in fx-mint-util.ts).
+   * The resolved pool. Carries the pool address (which is also the position-NFT
+   * contract), both token addresses and their decimals, and the manager to call
+   * — long and short pools are registered on **different** managers, so this
+   * cannot be a module constant. Get it from `resolvePool()`.
    */
-  collateralDecimals: bigint;
-  /** Absolute fxUSD debt to mint. operate() mints exactly this amount. */
+  pool: ResolvedFxPool;
+  /**
+   * Absolute debt to borrow, in `pool.debtToken` native units. `operate()`
+   * borrows exactly this amount.
+   *
+   * Long pools mint fxUSD (18dp). Short pools borrow the volatile asset from
+   * the counterparty long pool — wstETH (18dp) or **WBTC (8dp)**, so this is
+   * not always an 18-decimal value.
+   */
   targetDebt: bigint;
   /**
    * Predicted positionId from Pool.getNextPositionId() — use
@@ -45,10 +47,13 @@ export type FxMintOpenPositionStepData = {
   predictedPositionId: bigint;
   /**
    * f(x)'s borrow fee for this (pool, operator) pair, 1e9-denominated.
-   * Caller fetches via PoolConfiguration.getPoolFeeRatio(pool, operator)[2]
-   * (tuple confirmed in discovery-notes.md). Previously hardcoded to
-   * `5n / 1000n` (= 0.5% in /1000 denom — wrong denom AND wrong value if
-   * f(x) governance moves the rate). Now dynamic and using FEE_DENOM (1e9).
+   * Caller fetches via PoolConfiguration.getPoolFeeRatio(pool, operator)[2].
+   *
+   * Long pools charge 0.5% here; **short pools currently charge zero** and put
+   * their fees on the collateral side instead. The supply fee is deliberately
+   * absent from this step: the manager pulls the full collateral amount and
+   * keeps the fee out of what it credits to the position, so it never changes
+   * the caller's outlay — see `fxCollateralSupplySpend`.
    */
   borrowFeeRatio: bigint;
 };
@@ -57,21 +62,23 @@ export type FxMintOpenPositionStepData = {
  * Encodes `PoolManager.operate(pool, 0, +collateralAmount, +targetDebt)`.
  *
  * Goes through PoolManager (not Pool directly) — Pool.operate reverts with
- * `ErrorCallerNotPoolManager` for any caller other than PoolManager.
+ * `ErrorCallerNotPoolManager` for any caller other than PoolManager. Which
+ * manager is per-pool: `pool.poolManager`, because long and short pools are
+ * registered on different ones.
  *
- * Consumes collateralToken from the executing account; produces fxUSD + an
- * ERC-721 position NFT (owner = msg.sender = the executing account, i.e. the
- * ephemeral EOA under EIP-7702).
+ * Consumes `pool.collateralToken` from the executing account; produces
+ * `pool.debtToken` + an ERC-721 position NFT (owner = msg.sender = the
+ * executing account, i.e. the ephemeral EOA under EIP-7702).
  *
- * The post-fee fxUSD output `expectedBalance` accounts for f(x)'s borrow
- * fee (now driven by `borrowFeeRatio` from opts; was previously a
- * hardcoded 0.5%).
+ * Works for both sides unchanged — a long deposits wstETH/WBTC and receives
+ * fxUSD, a short deposits fxUSD and receives wstETH/WBTC. The step never names
+ * either token; it reads both off the descriptor.
  */
 export class FxMintOpenPositionStep extends Step {
   readonly config: StepConfig = {
     name: 'f(x) Open Position',
     description:
-      'Calls PoolManager.operate(pool, 0, +collateral, +debt). Mints fxUSD and a position NFT to msg.sender.',
+      'Calls PoolManager.operate(pool, 0, +collateral, +debt). Borrows the debt token and mints a position NFT to msg.sender.',
     hasNonDeterministicOutput: false, // predictedPositionId is provided
   };
 
@@ -82,16 +89,15 @@ export class FxMintOpenPositionStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
+    const { pool, targetDebt, predictedPositionId, borrowFeeRatio } = this.data;
     const {
-      pool,
+      address: poolAddress,
       collateralToken,
       collateralDecimals,
-      targetDebt,
-      predictedPositionId,
-      borrowFeeRatio,
-    } = this.data;
-    const poolManager = FX_ADDRESSES.fxPoolManager as Address;
-    const fxUSD = FX_ADDRESSES.fxUSD as Address;
+      debtToken,
+      debtDecimals,
+      poolManager,
+    } = pool;
 
     // Read the collateral amount from the step input rather than the
     // constructor: through ZeroXSwap_FxMintOpen_ComboMeal the upstream is a 0x
@@ -127,19 +133,17 @@ export class FxMintOpenPositionStep extends Step {
     // fx-mint-util).
     const iface = new Interface(FX_POOL_MANAGER_ABI);
     const callData = iface.encodeFunctionData('operate', [
-      pool,
+      poolAddress,
       0n,
       collateralAmount,
       targetDebt,
     ]);
 
-    // Borrow fee deduction: f(x) emits (targetDebt - fee) of fxUSD to
-    // msg.sender (the executing account; the ephemeral EOA under EIP-7702).
-    // Cookbook's StepOutputERC20Amount
-    // expects the post-fee net; the recipe layer doesn't fold this in.
-    // Using FEE_DENOM (1e9) — matches PoolConfiguration.getPoolFeeRatio's
-    // denominator and the existing computeFxClose convention.
-    const fxUSDNet = targetDebt - (targetDebt * borrowFeeRatio) / FEE_DENOM;
+    // Borrow fee deduction: the manager emits (targetDebt - fee) of the debt
+    // token to msg.sender (the executing account; the ephemeral EOA under
+    // EIP-7702). Cookbook's StepOutputERC20Amount expects the post-fee net; the
+    // recipe layer doesn't fold this in.
+    const debtNet = fxDebtBorrowOutput(targetDebt, borrowFeeRatio);
 
     const tx: ContractTransaction = {
       to: poolManager,
@@ -174,21 +178,21 @@ export class FxMintOpenPositionStep extends Step {
             ]
           : []),
         {
-          tokenAddress: fxUSD,
-          decimals: 18n,
-          expectedBalance: fxUSDNet,
+          tokenAddress: debtToken,
+          decimals: debtDecimals,
+          expectedBalance: debtNet,
           // Deterministic: targetDebt and borrowFeeRatio are both known at
           // construction time. Setting minBalance = expectedBalance lets
-          // future steps consume this fxUSD with a fixed amount without
-          // tripping step.ts:71-83's non-deterministic-input gate.
-          minBalance: fxUSDNet,
+          // future steps consume this with a fixed amount without tripping
+          // step.ts:71-83's non-deterministic-input gate.
+          minBalance: debtNet,
           isBaseToken: false,
           approvedSpender: undefined,
         },
       ],
       outputNFTs: [
         {
-          nftAddress: pool,
+          nftAddress: poolAddress,
           tokenSubID: '0x' + predictedPositionId.toString(16),
           nftTokenType: NFTTokenType.ERC721,
           amount: 1n,
