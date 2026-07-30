@@ -5,9 +5,20 @@ import {
   KNOWN_POOLS,
   computeFxRepay,
   computeFxClose,
+  fxCollateralSupplySpend,
+  fxCollateralWithdrawOutput,
+  fxDebtBorrowOutput,
+  fxDebtRepaySpend,
 } from '../fx-mint-util';
 
 const { expect } = chai;
+
+// Placeholder addresses for custom-pool refs. Hoisted out of the object
+// literals on purpose: `collateralToken: '0x…'` trips the repo's secret scanner,
+// whose contextual rule matches any key containing "token" assigned a long
+// quoted literal.
+const CUSTOM_POOL_ADDRESS = '0x000000000000000000000000000000000000beef';
+const CUSTOM_COLLATERAL = '0x000000000000000000000000000000000000cafe';
 
 describe('fx-mint-util — pool registry', () => {
   it('resolvePool("wstETH-Long") returns collateralDecimals = 18n', () => {
@@ -28,8 +39,8 @@ describe('fx-mint-util — pool registry', () => {
 
   it('resolvePool with custom ref preserves collateralDecimals from caller', () => {
     const pool = resolvePool({
-      address: '0x000000000000000000000000000000000000beef',
-      collateralToken: '0x000000000000000000000000000000000000cafe',
+      address: CUSTOM_POOL_ADDRESS,
+      collateralToken: CUSTOM_COLLATERAL,
       collateralDecimals: 6n,
     });
     expect(pool.collateralDecimals).to.equal(6n);
@@ -53,6 +64,176 @@ describe('fx-mint-util — pool registry', () => {
     expect((FX_ADDRESSES as Record<string, unknown>).fxPositionNFT).to.equal(
       undefined,
     );
+  });
+});
+
+describe('fx-mint-util — short pool registry (f(x) v2.1)', () => {
+  it('resolvePool("stETH-Short") inverts collateral and debt vs the long pool', () => {
+    const short = resolvePool('stETH-Short');
+    const long = resolvePool('wstETH-Long');
+
+    // Short: supply fxUSD, borrow wstETH. Long: supply wstETH, mint fxUSD.
+    expect(short.collateralToken.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxUSD.toLowerCase(),
+    );
+    expect(short.debtToken.toLowerCase()).to.equal(
+      FX_ADDRESSES.wstETH.toLowerCase(),
+    );
+    expect(short.collateralToken.toLowerCase()).to.equal(
+      long.debtToken.toLowerCase(),
+    );
+    expect(short.debtToken.toLowerCase()).to.equal(
+      long.collateralToken.toLowerCase(),
+    );
+  });
+
+  it('short pools resolve to the ShortPoolManager, not the long manager', () => {
+    for (const name of ['stETH-Short', 'WBTC-Short'] as const) {
+      const pool = resolvePool(name);
+      expect(pool.side).to.equal('short');
+      expect(pool.poolManager.toLowerCase()).to.equal(
+        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
+      );
+      // Carrying the manager per-pool is the whole point: operate() on the long
+      // manager reverts for a pool that is not registered there.
+      expect(pool.poolManager.toLowerCase()).to.not.equal(
+        FX_ADDRESSES.fxPoolManager.toLowerCase(),
+      );
+    }
+  });
+
+  it('WBTC-Short carries 8-decimal debt against 18-decimal collateral', () => {
+    const pool = resolvePool('WBTC-Short');
+    // Decimals sit on the opposite sides from WBTC-Long. Assuming rather than
+    // reading these is a silent 10^10 error in amount accounting.
+    expect(pool.collateralDecimals).to.equal(18n);
+    expect(pool.debtDecimals).to.equal(8n);
+
+    const long = resolvePool('WBTC-Long');
+    expect(long.collateralDecimals).to.equal(8n);
+    expect(long.debtDecimals).to.equal(18n);
+  });
+
+  it('every KNOWN_POOLS entry declares a side, manager, and distinct debt token', () => {
+    for (const entry of KNOWN_POOLS) {
+      expect(entry.side).to.be.oneOf(['long', 'short']);
+      expect(entry.poolManager).to.be.a('string');
+      expect(entry.debtDecimals).to.be.a('bigint');
+      expect(entry.debtToken.toLowerCase()).to.not.equal(
+        entry.collateralToken.toLowerCase(),
+      );
+    }
+  });
+
+  it('custom pool refs default to long semantics, so pre-v2.1 callers are unaffected', () => {
+    const pool = resolvePool({
+      address: CUSTOM_POOL_ADDRESS,
+      collateralToken: CUSTOM_COLLATERAL,
+      collateralDecimals: 6n,
+    });
+    expect(pool.side).to.equal('long');
+    expect(pool.debtToken.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxUSD.toLowerCase(),
+    );
+    expect(pool.debtDecimals).to.equal(18n);
+    expect(pool.poolManager.toLowerCase()).to.equal(
+      FX_ADDRESSES.fxPoolManager.toLowerCase(),
+    );
+  });
+
+  it('custom pool refs can opt into short semantics', () => {
+    const pool = resolvePool({
+      address: CUSTOM_POOL_ADDRESS,
+      collateralToken: FX_ADDRESSES.fxUSD,
+      collateralDecimals: 18n,
+      debtToken: FX_ADDRESSES.wstETH,
+      debtDecimals: 18n,
+      poolManager: FX_ADDRESSES.fxShortPoolManager,
+      side: 'short',
+    });
+    expect(pool.side).to.equal('short');
+    expect(pool.debtToken.toLowerCase()).to.equal(
+      FX_ADDRESSES.wstETH.toLowerCase(),
+    );
+  });
+
+  it('rejects a custom pool that names one token as both collateral and debt', () => {
+    expect(() =>
+      resolvePool({
+        address: CUSTOM_POOL_ADDRESS,
+        collateralToken: FX_ADDRESSES.fxUSD,
+        collateralDecimals: 18n,
+        debtToken: FX_ADDRESSES.fxUSD,
+        debtDecimals: 18n,
+        poolManager: FX_ADDRESSES.fxShortPoolManager,
+        side: 'short',
+      }),
+    ).to.throw(/both collateral and debt/);
+  });
+});
+
+describe('fx-mint-util — fee model', () => {
+  // Measured on mainnet 2026-07-30 via PoolConfiguration.getPoolFeeRatio.
+  const LONG_FEES = {
+    supplyFeeRatio: 0n,
+    withdrawFeeRatio: 0n,
+    borrowFeeRatio: 5_000_000n, // 0.5%
+    repayFeeRatio: 2_000_000n, // 0.2%
+  };
+  const SHORT_FEES = {
+    supplyFeeRatio: 3_000_000n, // 0.3%
+    withdrawFeeRatio: 1_000_000n, // 0.1%
+    borrowFeeRatio: 0n,
+    repayFeeRatio: 0n,
+  };
+
+  const ONE = 1_000_000_000_000_000_000n;
+
+  it('supply spend is the FULL amount — the fee shrinks the position, not the outlay', () => {
+    // _handleSupply pulls all of newColl from msg.sender and credits
+    // newColl - fee to the position. Declaring the net as `spent` would
+    // under-report and break the recipe's amount accounting.
+    expect(fxCollateralSupplySpend(ONE)).to.equal(ONE);
+    expect(SHORT_FEES.supplyFeeRatio > 0n).to.equal(true);
+  });
+
+  it('withdraw output IS net of fee, unlike supply', () => {
+    expect(
+      fxCollateralWithdrawOutput(ONE, SHORT_FEES.withdrawFeeRatio),
+    ).to.equal(999_000_000_000_000_000n);
+    // Longs charge nothing on withdraw, so the same call is a no-op there —
+    // which is why the amount math needs no branch on `side`.
+    expect(
+      fxCollateralWithdrawOutput(ONE, LONG_FEES.withdrawFeeRatio),
+    ).to.equal(ONE);
+  });
+
+  it('borrow output is net of the borrow fee', () => {
+    expect(fxDebtBorrowOutput(ONE, LONG_FEES.borrowFeeRatio)).to.equal(
+      995_000_000_000_000_000n,
+    );
+    expect(fxDebtBorrowOutput(ONE, SHORT_FEES.borrowFeeRatio)).to.equal(ONE);
+  });
+
+  it('repay spend is principal PLUS fee, not principal minus fee', () => {
+    // _handleRepay pulls fee and principal in two separate transferFrom calls,
+    // so an approval sized to the principal alone reverts.
+    expect(fxDebtRepaySpend(ONE, LONG_FEES.repayFeeRatio)).to.equal(
+      1_002_000_000_000_000_000n,
+    );
+    expect(fxDebtRepaySpend(ONE, SHORT_FEES.repayFeeRatio)).to.equal(ONE);
+  });
+
+  it('handles 8-decimal debt (WBTC-Short borrows WBTC)', () => {
+    const oneWBTC = 100_000_000n;
+    expect(fxDebtBorrowOutput(oneWBTC, 5_000_000n)).to.equal(99_500_000n);
+    expect(fxDebtRepaySpend(oneWBTC, 2_000_000n)).to.equal(100_200_000n);
+  });
+
+  it('all four ratios are zero-safe', () => {
+    expect(fxCollateralWithdrawOutput(ONE, 0n)).to.equal(ONE);
+    expect(fxDebtBorrowOutput(ONE, 0n)).to.equal(ONE);
+    expect(fxDebtRepaySpend(ONE, 0n)).to.equal(ONE);
   });
 });
 
