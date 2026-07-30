@@ -20,12 +20,12 @@ borrowing privately through Railgun while having a liquidatable debt position.
 
 These recipes wrap that flow as a Railgun cross-contract call so a user can:
 
-- **Open** a debt position: deposit shielded collateral, mint fxUSD against an
-  f(x) Long position; shield the fxUSD and the position NFT back to the user's
+- **Open** a debt position: deposit shielded collateral, borrow the pool's debt
+  token; shield the borrowed token and the position NFT back to the user's
   `0zk` address.
-- **Close** (or partially close): unshield fxUSD, repay debt against the
-  position, withdraw collateral; reshield the proceeds and (for partial close)
-  the surviving NFT.
+- **Close** (or partially close): unshield the debt token, repay debt against
+  the position, withdraw collateral; reshield the proceeds and (for partial
+  close) the surviving NFT.
 - **Top up collateral**: add collateral to an existing position without changing
   debt. The position's debt ratio falls — risk-management dial.
 - **Top up + borrow more**: add collateral AND mint additional fxUSD in one
@@ -43,6 +43,100 @@ f(x); the on-chain owner-of-record (the ephemeral EOA the batch executed as);
 the fact that a Railgun cross-contract call interacted with f(x). f(x)'s
 liquidation flow operates against the public position state regardless of who
 deposited.
+
+## Long and short pools
+
+Every recipe, combo and reader here works on **both** sides of the protocol. The
+pool descriptor carries which side it is on, and the amount math needs no branch
+on it — see [Which side is which](#which-side-is-which) for why.
+
+| Pool name | Side | Collateral | Debt | Manager |
+| --- | --- | --- | --- | --- |
+| `wstETH-Long` | long | wstETH (18) | fxUSD (18) | `0x250893CA…928FCD24` |
+| `WBTC-Long` | long | WBTC (**8**) | fxUSD (18) | `0x250893CA…928FCD24` |
+| `stETH-Short` | short | fxUSD (18) | wstETH (18) | `0xaCDc0AB5…1FDd66D` |
+| `WBTC-Short` | short | fxUSD (18) | WBTC (**8**) | `0xaCDc0AB5…1FDd66D` |
+
+A long deposits the volatile asset and mints fxUSD. A short is the mirror:
+deposit fxUSD, borrow the volatile asset (f(x) calls these *sPOSITION*, up to 6x
+short). Short pools are f(x) v2.1 and are registered on a **different
+PoolManager** — which is why the manager is carried per-pool rather than as a
+module constant. `operate()` has the same 4-arg signature on both.
+
+### Which side is which
+
+Three things flip, and it is worth internalising all three before writing
+against this:
+
+1. **The tokens swap roles.** `pool.collateralToken` and `pool.debtToken` are
+   the only correct way to refer to them. On `WBTC-Short` the 8-decimal token is
+   the *debt*; on `WBTC-Long` it is the *collateral*.
+2. **The fees swap sides.** Longs charge on the debt axis (0.5% borrow, 0.2%
+   repay) and nothing on collateral. Shorts charge on the collateral axis (0.3%
+   supply, 0.1% withdraw) and nothing on debt. Because each side's unused ratios
+   are zero, one set of formulas covers both.
+3. **The raw-scaled side flips.** A long pool reports collateral raw and debt
+   native; a short reports collateral native and **debt raw** (18dp-normalised).
+   `getFxPosition` converts for you — use `position.debt`, never `rawDebts`,
+   unless you are reconstructing f(x)-internal math. On `WBTC-Short` the two
+   differ by a factor of 10^10.
+
+### Fee semantics, precisely
+
+Read off the verified `ShortPoolManager.sol`. The two collateral-side fees are
+**not** symmetric, which is the easiest thing to get wrong:
+
+| Operation | What the caller parts with | What the caller receives |
+| --- | --- | --- |
+| supply (collDelta > 0) | the **full** amount | — |
+| withdraw (collDelta < 0) | — | amount **− withdraw fee** |
+| borrow (debtDelta > 0) | — | amount **− borrow fee** |
+| repay (debtDelta < 0) | amount **+ repay fee** | — |
+
+The supply fee does **not** reduce the caller's outlay — the manager pulls the
+full amount and keeps the fee out of what it credits to the *position*. So it
+affects position health, not step accounting. The repay fee is charged **on top
+of** the principal (two separate `transferFrom` calls), so an approval sized to
+the principal alone reverts. Helpers: `fxCollateralSupplySpend`,
+`fxCollateralWithdrawOutput`, `fxDebtBorrowOutput`, `fxDebtRepaySpend`.
+
+### Using a short pool
+
+```ts
+import {
+  FxMintOpenRecipe,
+  FxMintCloseRecipe,
+  getFxPool,
+  getFxPosition,
+  getNextFxPositionId,
+} from '@railgun-community/cookbook';
+
+const pool = await getFxPool('stETH-Short', provider);
+
+const open = new FxMintOpenRecipe({
+  pool: 'stETH-Short',
+  targetDebt: 1_000_000_000_000_000_000n, // 1 wstETH borrowed
+  predictedPositionId: await getNextFxPositionId('stETH-Short', provider),
+  borrowFeeRatio: pool.borrowFeeRatio, // 0 on shorts today — read it, don't assume
+});
+// input.erc20Amounts must contain fxUSD (the short's collateral).
+
+// Closing a short REQUIRES withdrawFeeRatio, or the reshielded collateral is
+// over-declared by 0.1% and the recipe's amount accounting fails.
+const close = new FxMintCloseRecipe({
+  pool: 'stETH-Short',
+  positionId,
+  repayAmount,      // native wstETH — from position.debt, NOT position.rawDebts
+  approveAmount,
+  withdrawColl,
+  withdrawFeeRatio: pool.withdrawFeeRatio,
+  partialClose: true,
+});
+```
+
+`creditNote` — a per-pool ERC20 redeemable for collateral via
+`ShortPoolManager.redeemByCreditNote` — is **not** covered. It is a separate
+entry point, off the open/topup/borrow/repay/close path.
 
 ## Recipes are single-protocol; combos handle the swap
 
@@ -169,9 +263,9 @@ const comboOutput = await combo.getComboMealOutput({
 
 `recipient` is the EIP-7702 ephemeral EOA the batch executes as. It is validated
 once (a relay-adapt address is rejected) and threaded into the 0x quote as the
-`taker`. The fx recipe itself takes no executor: `PoolManager.operate()` mints
-the fxUSD and the position NFT to `msg.sender`, which *is* the executing
-account.
+`taker`. The fx recipe itself takes no executor: `PoolManager.operate()` sends
+the borrowed debt token and the position NFT to `msg.sender`, which *is* the
+executing account.
 
 **Underfill behavior.** The swap's buy amount is a range
 (`[minimumBuyAmount, buyERC20Amount.amount]`) while `operate()` pulls an exact
@@ -499,8 +593,26 @@ reachable through these recipes** — that leg now lives in a ComboMeal.
 | _first 7702 combo broadcast_ | _tbd_ | _tbd_ |
 
 `minGasLimit` values (`MIN_GAS_LIMIT_FXMINT_*` in `src/models/min-gas-limits.ts`)
-are carried over verbatim from the v0.1 per-recipe hardcodes and have **not**
-been recalibrated against a 7702 execution.
+have **not** been measured against a 7702 execution — no fx recipe has ever run
+on a fork.
+
+They were, however, re-anchored, because the v0.1 values were provably wrong
+independent of measurement: open and adjust sat at 1.5M while
+`MIN_GAS_LIMIT_EMPTY` is a *measured* 1.8M for a recipe that only unshields and
+shields. Every fx recipe strictly contains that, plus an approve, plus an
+`operate()` that mints or burns an ERC-721. The floors are now 3.1M / 3.0M /
+3.1M, anchored to the measured neighbours in the same file (beefy deposit 3.1M,
+morpho blue supply+borrow 3.1M) rather than invented.
+
+Deliberately generous: over-provisioning costs allowance, under-provisioning
+reverts the batch. Short pools share the same constants and are the reason they
+are sized upward — `ShortPoolManager._handleBorrow` calls into the *long*
+manager via `counterparty` to source the debt token, so a short carries an extra
+cross-contract hop and is strictly dearer than the equivalent long.
+
+Real calibration needs the 7702 fork harness
+(`.claude/plans/7702-execute-fork-harness`), which cannot execute in the current
+container.
 
 ## File layout
 
