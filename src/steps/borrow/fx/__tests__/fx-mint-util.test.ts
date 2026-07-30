@@ -9,6 +9,9 @@ import {
   fxCollateralWithdrawOutput,
   fxDebtBorrowOutput,
   fxDebtRepaySpend,
+  fxComposeScalingFactor,
+  fxScaleDownRawDebt,
+  fxScaleUpNativeDebt,
 } from '../fx-mint-util';
 
 const { expect } = chai;
@@ -234,6 +237,55 @@ describe('fx-mint-util — fee model', () => {
     expect(fxCollateralWithdrawOutput(ONE, 0n)).to.equal(ONE);
     expect(fxDebtBorrowOutput(ONE, 0n)).to.equal(ONE);
     expect(fxDebtRepaySpend(ONE, 0n)).to.equal(ONE);
+  });
+});
+
+describe('fx-mint-util — raw debt scaling (short pools)', () => {
+  // Measured on the ShortPoolManager 2026-07-30 via the public tokenRates map:
+  //   wstETH -> scalar 1,    no rateProvider  => factor 1e18
+  //   WBTC   -> scalar 1e10, no rateProvider  => factor 1e28
+  // The dynamic rateProvider lives on the LONG manager's collateral, not here.
+  const WSTETH_FACTOR = 10n ** 18n;
+  const WBTC_FACTOR = 10n ** 28n;
+
+  it('composes the factor the same way _getTokenScalingFactor does', () => {
+    expect(fxComposeScalingFactor(1n)).to.equal(WSTETH_FACTOR);
+    expect(fxComposeScalingFactor(10_000_000_000n)).to.equal(WBTC_FACTOR);
+    // With a rate provider the PRECISION term is replaced by getRate().
+    expect(fxComposeScalingFactor(1n, 1_100_000_000_000_000_000n)).to.equal(
+      1_100_000_000_000_000_000n,
+    );
+  });
+
+  it('is the identity for wstETH debt (factor 1e18)', () => {
+    const raw = 2_604_470_033_929_010_143n; // live stETH-Short position #167
+    expect(fxScaleDownRawDebt(raw, WSTETH_FACTOR)).to.equal(raw);
+  });
+
+  it('divides WBTC debt by 1e10 — raw is 18dp-normalised, native is 8dp', () => {
+    // Live WBTC-Short position #94: 0.13947961 WBTC of debt.
+    const raw = 139_479_610_000_000_000n;
+    expect(fxScaleDownRawDebt(raw, WBTC_FACTOR)).to.equal(13_947_961n);
+    // Reporting raw as the debt would overstate it by ten orders of magnitude.
+    expect(fxScaleDownRawDebt(raw, WBTC_FACTOR)).to.not.equal(raw);
+  });
+
+  it('round-trips native -> raw -> native', () => {
+    const nativeWBTC = 13_947_961n;
+    expect(
+      fxScaleDownRawDebt(
+        fxScaleUpNativeDebt(nativeWBTC, WBTC_FACTOR),
+        WBTC_FACTOR,
+      ),
+    ).to.equal(nativeWBTC);
+  });
+
+  it('throws rather than dividing by zero when the manager has no rate entry', () => {
+    // fxUSD has no tokenRates entry on the short manager (scalar 0). Silently
+    // returning 0 or Infinity here would mis-size a position.
+    expect(() => fxScaleDownRawDebt(1_000n, 0n)).to.throw(
+      /scaling factor is 0/,
+    );
   });
 });
 

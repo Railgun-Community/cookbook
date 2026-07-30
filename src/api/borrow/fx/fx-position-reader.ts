@@ -1,14 +1,19 @@
-import { Contract, type Provider } from 'ethers';
+import { Contract, ZeroAddress, type Provider } from 'ethers';
 import {
   FX_ADDRESSES,
   FX_POOL_ABI,
   FX_POOL_MANAGER_ABI,
+  FX_SHORT_POOL_MANAGER_ABI,
   FX_POOL_CONFIGURATION_ABI,
+  FX_RATE_PROVIDER_ABI,
   DEFAULT_FXMINT_OPERATOR,
+  fxComposeScalingFactor,
+  fxScaleDownRawDebt,
   resolvePool,
   type Address,
   type FxMintPoolRef,
   type FxMintPoolName,
+  type FxPoolSide,
 } from '../../../steps/borrow/fx/fx-mint-util';
 
 // DEFAULT_FXMINT_OPERATOR moved to fx-mint-util.ts (alongside FX_ADDRESSES)
@@ -85,7 +90,70 @@ export type FxPool = {
    */
   borrowFeeRatio: bigint;
   repayFeeRatio: bigint;
+
+  /**
+   * Collateral-side fees, 1e9-denominated. Previously discarded because both are
+   * zero on long pools; **short pools put their entire fee load here** (0.3%
+   * supply / 0.1% withdraw as of 2026-07-30, with borrow/repay at zero), so a
+   * caller sizing a short cannot ignore them.
+   *
+   * `withdrawFeeRatio` is the one to thread into `FxMintCloseRecipe`.
+   */
+  supplyFeeRatio: bigint;
+  withdrawFeeRatio: bigint;
+
+  /** Which side of the protocol this pool is on. */
+  side: FxPoolSide;
+  /**
+   * The token the debt is denominated in — fxUSD for a long, wstETH/WBTC for a
+   * short. Surfaced so a UI does not have to re-derive it from the registry.
+   */
+  debtToken: Address;
+  debtDecimals: bigint;
+  /** Long and short pools live on different managers. */
+  poolManager: Address;
 };
+
+/**
+ * Read a short pool's debt-token scaling factor from its manager, composing it
+ * the same way `_getTokenScalingFactor` does.
+ *
+ * Two on-chain reads (one, when no rate provider is set). Only meaningful for
+ * short pools: on a long pool the debt is fxUSD and the manager reports debt
+ * figures already in native units.
+ */
+export async function getFxDebtScalingFactor(
+  poolRef: FxMintPoolRef,
+  provider: Provider,
+): Promise<bigint> {
+  const resolved = resolvePool(poolRef);
+  const managerContract = new Contract(
+    resolved.poolManager,
+    FX_SHORT_POOL_MANAGER_ABI,
+    provider,
+  );
+  const rate = (await managerContract.tokenRates(
+    resolved.debtToken,
+  )) as readonly [bigint, string];
+  const [scalar, rateProvider] = rate;
+
+  if (scalar === 0n) {
+    throw new Error(
+      `fxmint: manager ${resolved.poolManager} has no tokenRates entry for debt token ${resolved.debtToken} — cannot scale raw debt`,
+    );
+  }
+
+  if (rateProvider === ZeroAddress) {
+    return fxComposeScalingFactor(scalar);
+  }
+  const rateProviderContract = new Contract(
+    rateProvider,
+    FX_RATE_PROVIDER_ABI,
+    provider,
+  );
+  const providerRate = (await rateProviderContract.getRate()) as bigint;
+  return fxComposeScalingFactor(scalar, providerRate);
+}
 
 /**
  * Reads pool-level state and per-operator fee ratios from f(x) contracts.
@@ -107,26 +175,63 @@ export async function getFxPool(
 ): Promise<FxPool> {
   const resolved = resolvePool(poolRef);
 
-  const poolManagerContract = new Contract(
-    FX_ADDRESSES.fxPoolManager,
-    FX_POOL_MANAGER_ABI,
-    provider,
-  );
-  const poolInfo = (await poolManagerContract.getPoolInfo(
-    resolved.address,
-  )) as readonly [bigint, bigint, bigint, bigint, bigint];
-  // PoolManager.getPoolInfo tuple positions:
-  // [collateralCapacity, collateralBalance, rawCollateral,
-  //  debtCapacity, debtBalance]. Naming every slot (with _
-  // for the ones we don't use here) keeps the position
-  // labels glued to the right value.
-  const [
-    _collateralCapacity,
-    collateralBalance,
-    _rawCollateral,
-    debtCapacity,
-    debtBalance,
-  ] = poolInfo;
+  // The two managers disagree on this getter's shape, so the fragment and the
+  // destructure both have to follow `side`:
+  //   long : (collateralCapacity, collateralBalance, rawCollateral,
+  //           debtCapacity, debtBalance)   — debt figures NATIVE
+  //   short: (collateralCapacity, collateralBalance, rawDebtCapacity,
+  //           rawDebtBalance)              — debt figures RAW, no rawCollateral
+  // Using the long fragment against a short pool fails with an ABI buffer
+  // overrun rather than returning wrong numbers, which is at least loud.
+  let collateralBalance: bigint;
+  let debtCapacity: bigint;
+  let debtBalance: bigint;
+
+  if (resolved.side === 'short') {
+    const shortManagerContract = new Contract(
+      resolved.poolManager,
+      FX_SHORT_POOL_MANAGER_ABI,
+      provider,
+    );
+    const poolInfo = (await shortManagerContract.getPoolInfo(
+      resolved.address,
+    )) as readonly [bigint, bigint, bigint, bigint];
+    const [
+      _collateralCapacity,
+      shortCollateralBalance,
+      rawDebtCapacity,
+      rawDebtBalance,
+    ] = poolInfo;
+
+    // Convert the raw debt figures to native units so `debtCapacity` and
+    // `debtBalance` mean the same thing on both sides of the API. WBTC-Short
+    // raw debts are 10^10 times native.
+    const scalingFactor = await getFxDebtScalingFactor(resolved, provider);
+    collateralBalance = shortCollateralBalance;
+    debtCapacity = fxScaleDownRawDebt(rawDebtCapacity, scalingFactor);
+    debtBalance = fxScaleDownRawDebt(rawDebtBalance, scalingFactor);
+  } else {
+    const poolManagerContract = new Contract(
+      resolved.poolManager,
+      FX_POOL_MANAGER_ABI,
+      provider,
+    );
+    const poolInfo = (await poolManagerContract.getPoolInfo(
+      resolved.address,
+    )) as readonly [bigint, bigint, bigint, bigint, bigint];
+    // Naming every slot (with _ for the ones we don't use here) keeps the
+    // position labels glued to the right value.
+    const [
+      _collateralCapacity,
+      longCollateralBalance,
+      _rawCollateral,
+      longDebtCapacity,
+      longDebtBalance,
+    ] = poolInfo;
+    collateralBalance = longCollateralBalance;
+    debtCapacity = longDebtCapacity;
+    debtBalance = longDebtBalance;
+  }
 
   // Pool contract — used for the next three reads
   // (getTotalRawCollaterals, getLiquidateRatios, getRebalanceRatios).
@@ -169,12 +274,8 @@ export async function getFxPool(
   // [supplyFeeRatio, withdrawFeeRatio, borrowFeeRatio, repayFeeRatio].
   // Only borrow + repay are non-zero on v0.1 mainnet (no supply/
   // withdraw fee on f(x)).
-  const [
-    _supplyFeeRatio,
-    _withdrawFeeRatio,
-    borrowFeeRatio,
-    repayFeeRatio,
-  ] = fees;
+  const [supplyFeeRatio, withdrawFeeRatio, borrowFeeRatio, repayFeeRatio] =
+    fees;
 
   // typeof narrowing: FxMintPoolRef = FxMintPoolName | {address;...}, so
   // the string branch is already FxMintPoolName — no cast needed.
@@ -193,8 +294,14 @@ export async function getFxPool(
     liquidationBonusRatio,
     rebalanceDebtRatio,
     rebalanceBonusRatio,
+    supplyFeeRatio,
+    withdrawFeeRatio,
     borrowFeeRatio,
     repayFeeRatio,
+    side: resolved.side,
+    debtToken: resolved.debtToken,
+    debtDecimals: resolved.debtDecimals,
+    poolManager: resolved.poolManager,
   };
 }
 
@@ -225,10 +332,22 @@ export type FxPosition = {
   rawDebts: bigint;
 
   /**
-   * Alias for rawDebts; kept under a friendlier name for wallet display
-   * code that doesn't care about the rawColls/totalRawColls scaling.
+   * The position's debt in **native `debtToken` units** — what to display and
+   * what to pass as an `operate()` amount.
+   *
+   * On a long pool this equals `rawDebts` (fxUSD is unscaled). On a short pool
+   * it is `rawDebts` scaled down by the manager's token scaling factor; for
+   * WBTC-Short that is a factor of 10^10, so the two are **not**
+   * interchangeable. Prefer this over `rawDebts` unless you are reconstructing
+   * f(x)-internal math.
    */
   debt: bigint;
+
+  /** The token `debt` is denominated in, and its native decimals. */
+  debtToken: Address;
+  debtDecimals: bigint;
+  /** Which side of the protocol the position is on. */
+  side: FxPoolSide;
 
   /**
    * Position's current debt ratio in f(x)'s 1e18-scaled representation
@@ -333,23 +452,45 @@ export async function getFxPosition(
   // clarity over a shared multicall.
   const totalRawColls = (await poolContract.getTotalRawCollaterals()) as bigint;
 
-  const poolManagerContract = new Contract(
-    FX_ADDRESSES.fxPoolManager,
-    FX_POOL_MANAGER_ABI,
+  // collateralBalance comes from slot 1 either way, but the tuple shapes
+  // differ (5 words long / 4 words short), so the fragment must follow `side`.
+  const isShort = resolved.side === 'short';
+  const managerContract = new Contract(
+    resolved.poolManager,
+    isShort ? FX_SHORT_POOL_MANAGER_ABI : FX_POOL_MANAGER_ABI,
     provider,
   );
-  const poolInfo = (await poolManagerContract.getPoolInfo(
+  const poolInfo = (await managerContract.getPoolInfo(
     resolved.address,
-  )) as readonly [bigint, bigint, bigint, bigint, bigint];
-  // Only collateralBalance (slot 1) is used here;
-  // see getFxPool above for the full tuple shape.
-  const [_collateralCapacity, collateralBalance] = poolInfo;
+  )) as readonly bigint[];
+  // Only collateralBalance (slot 1) is used here; see getFxPool above for the
+  // full tuple shapes.
+  const collateralBalance = poolInfo[1];
 
   // collateralAmount = (rawColls × collateralBalance) / totalRawColls.
+  //
+  // This same ratio serves both sides. On a long it undoes the collateral
+  // rate-provider scaling (wstETH → stETH-denominated raw). On a short the
+  // collateral is fxUSD, which the manager holds unscaled, so the ratio is
+  // 1 and this is the identity — but computing it rather than special-casing
+  // keeps the reader correct if f(x) ever adds a collateral rate there.
+  //
   // Guard against div-by-zero in the empty-pool case (no positions yet —
   // shouldn't happen for production pools but worth being safe).
   const collateralAmount =
     totalRawColls === 0n ? 0n : (rawColls * collateralBalance) / totalRawColls;
+
+  // The debt side is where the two diverge. A long pool's debt is fxUSD and
+  // `getPosition` reports it in native wei. A short pool's debt is the volatile
+  // asset and `getPosition` reports it RAW (18dp-normalised), so WBTC-Short
+  // rawDebts are 10^10 times the native WBTC figure. Reporting raw as `debt`
+  // would overstate a WBTC short's debt by ten orders of magnitude.
+  const debt = isShort
+    ? fxScaleDownRawDebt(
+        rawDebts,
+        await getFxDebtScalingFactor(resolved, provider),
+      )
+    : rawDebts;
 
   const name = typeof poolRef === 'string' ? poolRef : undefined;
 
@@ -361,7 +502,10 @@ export async function getFxPosition(
     collateralAmount,
     rawColls,
     rawDebts,
-    debt: rawDebts,
+    debt,
+    debtToken: resolved.debtToken,
+    debtDecimals: resolved.debtDecimals,
+    side: resolved.side,
     debtRatio,
   };
 }

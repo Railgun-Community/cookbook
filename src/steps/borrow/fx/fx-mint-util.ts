@@ -414,6 +414,113 @@ export const FX_POOL_CONFIGURATION_ABI = [
   },
 ] as const;
 
+/**
+ * ShortPoolManager — the v2.1 manager. `operate` has the same 4-arg signature
+ * (selector `0xc1c8f15b`, verified present on the deployed implementation), so
+ * FX_POOL_MANAGER_ABI is reused for building calldata. This ABI exists for the
+ * two getters whose shapes **differ** from the long manager.
+ */
+export const FX_SHORT_POOL_MANAGER_ABI = [
+  // getPoolInfo — FOUR words here, not five. The long manager returns
+  // (collateralCapacity, collateralBalance, rawCollateral, debtCapacity,
+  // debtBalance); the short manager omits rawCollateral and reports the debt
+  // side RAW. Decoding a short pool with the long fragment fails with an ABI
+  // buffer overrun.
+  {
+    inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+    name: 'getPoolInfo',
+    outputs: [
+      { internalType: 'uint256', name: 'collateralCapacity', type: 'uint256' },
+      { internalType: 'uint256', name: 'collateralBalance', type: 'uint256' },
+      { internalType: 'uint256', name: 'rawDebtCapacity', type: 'uint256' },
+      { internalType: 'uint256', name: 'rawDebtBalance', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  // tokenRates — the public mapping behind the manager's internal
+  // `_getTokenScalingFactor`. Needed to convert the raw debt figures above into
+  // native token units.
+  {
+    inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
+    name: 'tokenRates',
+    outputs: [
+      { internalType: 'uint96', name: 'scalar', type: 'uint96' },
+      { internalType: 'address', name: 'rateProvider', type: 'address' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
+/** `IRateProvider.getRate()`, used by the scaling factor when one is set. */
+export const FX_RATE_PROVIDER_ABI = [
+  {
+    inputs: [],
+    name: 'getRate',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
+/** f(x)'s fixed-point base for scaling factors (`PRECISION` in the managers). */
+export const FX_SCALE_PRECISION = 10n ** 18n;
+
+/**
+ * Compose a token's scaling factor exactly as the manager's
+ * `_getTokenScalingFactor` does:
+ *
+ * ```
+ * scalar × (rateProvider == 0 ? PRECISION : rateProvider.getRate())
+ * ```
+ *
+ * Measured on mainnet 2026-07-30:
+ *
+ * | manager | token  | scalar | rateProvider  | factor |
+ * |---------|--------|--------|---------------|--------|
+ * | short   | wstETH | 1      | none          | 1e18   |
+ * | short   | WBTC   | 1e10   | none          | 1e28   |
+ * | long    | wstETH | 1      | `0x81A777c4…` | dynamic |
+ *
+ * Note where the dynamic provider actually is: on the **long** manager's
+ * collateral. The short manager's factors are static decimal normalisation
+ * today (1e28 is just the 8→18 decimal shift for WBTC), but the contract path
+ * supports a provider being added later, so callers must read this rather than
+ * hardcode a constant.
+ */
+export const fxComposeScalingFactor = (
+  scalar: bigint,
+  rateProviderRate?: bigint,
+): bigint => scalar * (rateProviderRate ?? FX_SCALE_PRECISION);
+
+/**
+ * Convert a raw (18dp-normalised) debt figure into native debt-token units,
+ * mirroring the manager's `_scaleDown`: `value × PRECISION / scale`.
+ *
+ * For a short pool `getPosition()[1]` and `getPoolInfo()`'s debt fields are raw,
+ * so this is the conversion a reader must apply before showing a debt to a user
+ * or feeding it into an `operate()` amount. WBTC-Short raw debts are 10^10 times
+ * the native value.
+ */
+export const fxScaleDownRawDebt = (
+  rawDebt: bigint,
+  scalingFactor: bigint,
+): bigint => {
+  if (scalingFactor === 0n) {
+    throw new Error(
+      'fxmint: token scaling factor is 0 — the manager has no tokenRates entry for this debt token',
+    );
+  }
+  return (rawDebt * FX_SCALE_PRECISION) / scalingFactor;
+};
+
+/** Inverse of {@link fxScaleDownRawDebt} — the manager's `_scaleUp`. */
+export const fxScaleUpNativeDebt = (
+  nativeDebt: bigint,
+  scalingFactor: bigint,
+): bigint => (nativeDebt * scalingFactor) / FX_SCALE_PRECISION;
+
 // =============================================================================
 // Pool registry — 4 mainnet pools: 2 Long (v2.0) + 2 Short (v2.1).
 // =============================================================================
