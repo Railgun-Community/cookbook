@@ -137,4 +137,92 @@ describe('FxMintCloseRecipe', () => {
       output.erc20AmountRecipients.map(r => r.tokenAddress.toLowerCase()),
     ).to.include(pool.collateralToken.toLowerCase());
   });
+
+  describe('short pools (f(x) v2.1)', () => {
+    const pool = resolvePool('stETH-Short');
+
+    // A short closes by repaying wstETH to release fxUSD. Shorts charge zero
+    // repay fee today, so approveAmount == repayAmount.
+    const SHORT_REPAY = 1_000_000_000_000_000_000n; // 1 wstETH
+    const SHORT_WITHDRAW_GROSS = 5_000_000_000_000_000_000_000n; // 5000 fxUSD
+
+    // The unshielded input is the DEBT token for a short, not fxUSD.
+    const shortInput = (): RecipeInput => ({
+      railgunAddress: MOCK_RAILGUN_WALLET_ADDRESS,
+      networkName,
+      erc20Amounts: [
+        {
+          tokenAddress: pool.debtToken,
+          decimals: pool.debtDecimals,
+          amount: 2_000_000_000_000_000_000n,
+        },
+      ],
+      nfts: [
+        {
+          nftAddress: pool.address,
+          tokenSubID: '0x' + POSITION_ID.toString(16),
+          nftTokenType: NFTTokenType.ERC721,
+          amount: 1n,
+        },
+      ],
+    });
+
+    it('approves the short manager to pull the debt token, and shields fxUSD back', async () => {
+      const recipe = new FxMintCloseRecipe({
+        pool: 'stETH-Short',
+        positionId: POSITION_ID,
+        repayAmount: SHORT_REPAY,
+        withdrawColl: SHORT_WITHDRAW_GROSS,
+        approveAmount: SHORT_REPAY,
+        withdrawFeeRatio: 1_000_000n, // 0.1%, measured mainnet short value
+        partialClose: true,
+      });
+
+      const output = await recipe.getRecipeOutput(shortInput());
+
+      const targets = output.crossContractCalls.map(c => c.to?.toLowerCase());
+      // The approve targets the debt token contract; the operate targets the
+      // SHORT manager. The long manager must not appear anywhere.
+      expect(targets).to.include(
+        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
+      );
+      expect(targets).to.not.include(FX_ADDRESSES.fxPoolManager.toLowerCase());
+
+      // fxUSD (the short's collateral) shields back — the mirror of a long,
+      // which returns wstETH/WBTC here.
+      const shielded = output.erc20AmountRecipients.map(r =>
+        r.tokenAddress.toLowerCase(),
+      );
+      expect(shielded).to.include(FX_ADDRESSES.fxUSD.toLowerCase());
+
+      // And it is net of the 0.1% withdraw fee, not the gross withdrawColl.
+      const fxUSDBack = output.erc20AmountRecipients.find(
+        r => r.tokenAddress.toLowerCase() === FX_ADDRESSES.fxUSD.toLowerCase(),
+      );
+      if (!fxUSDBack) {
+        throw new Error('expected fxUSD to shield back');
+      }
+      // chai 4.x's .below typings reject bigint, so compare directly.
+      expect(fxUSDBack.amount < SHORT_WITHDRAW_GROSS).to.equal(
+        true,
+        `expected fxUSD back (${fxUSDBack.amount}) to be net of the withdraw fee, below the gross ${SHORT_WITHDRAW_GROSS}`,
+      );
+    });
+
+    it('burns the NFT on a full short close', async () => {
+      const recipe = new FxMintCloseRecipe({
+        pool: 'stETH-Short',
+        positionId: POSITION_ID,
+        repayAmount: SHORT_REPAY,
+        withdrawColl: SHORT_WITHDRAW_GROSS,
+        approveAmount: SHORT_REPAY,
+        withdrawFeeRatio: 1_000_000n,
+        partialClose: false,
+      });
+
+      const output = await recipe.getRecipeOutput(shortInput());
+      expect(output.nftRecipients).to.have.length(1);
+      expect(output.nftRecipients[0].amount).to.equal(0n);
+    });
+  });
 });
