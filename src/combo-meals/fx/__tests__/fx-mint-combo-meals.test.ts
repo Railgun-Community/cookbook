@@ -101,17 +101,26 @@ const usdcInput = (amount = 1_000_000n) => [
   { tokenAddress: USDC, decimals: 6n, isBaseToken: false, amount },
 ];
 
-/** Collateral amount encoded into the first PoolManager.operate() call. */
-const encodedCollateral = (calls: { to?: string; data: string }[]): bigint => {
+/**
+ * Collateral amount encoded into the first PoolManager.operate() call.
+ *
+ * `manager` defaults to the long manager. Short pools are registered on a
+ * different one, so it has to be a parameter — the same 4-arg `operate`
+ * fragment decodes both.
+ */
+const encodedCollateral = (
+  calls: { to?: string; data: string }[],
+  manager: string = FX_ADDRESSES.fxPoolManager,
+): bigint => {
   const iface = new Interface(FX_POOL_MANAGER_ABI);
   for (const call of calls) {
-    if (call.to?.toLowerCase() !== FX_ADDRESSES.fxPoolManager.toLowerCase()) {
+    if (call.to?.toLowerCase() !== manager.toLowerCase()) {
       continue;
     }
     const decoded = iface.decodeFunctionData('operate', call.data);
     return decoded[2] as bigint;
   }
-  throw new Error('no PoolManager.operate call found');
+  throw new Error(`no operate() call found targeting ${manager}`);
 };
 
 let stub0xQuote: SinonStub;
@@ -438,6 +447,139 @@ describe('fx combo meals', () => {
             recipient: EXECUTOR,
           }),
       ).to.throw(/buy token is already the pool collateral/);
+    });
+  });
+
+  describe('short pools (f(x) v2.1)', () => {
+    const shortPool = resolvePool('stETH-Short');
+
+    it('open: swaps into fxUSD and routes operate() to the short manager', async () => {
+      // For a short the BUY side of the swap is fxUSD — the mirror of a long,
+      // where it is wstETH/WBTC.
+      stub0xQuote = stubQuoteBuying(
+        shortPool.collateralToken,
+        18n,
+        EXPECTED_BUY,
+        MINIMUM_BUY,
+      );
+
+      const combo = new ZeroXSwap_FxMintOpen_ComboMeal({
+        pool: 'stETH-Short',
+        targetDebt: 100_000_000_000_000_000n, // borrow 0.1 wstETH
+        predictedPositionId: 171n,
+        borrowFeeRatio: 0n,
+        sellERC20Info: usdcInfo,
+        swapSlippageBasisPoints: 100,
+        recipient: EXECUTOR,
+      });
+
+      const output = await combo.getComboMealOutput(comboInput(usdcInput()));
+
+      const targets = output.crossContractCalls.map(c => c.to?.toLowerCase());
+      expect(targets).to.include(
+        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
+      );
+      expect(targets).to.not.include(FX_ADDRESSES.fxPoolManager.toLowerCase());
+
+      // Same conservative-seam behaviour as a long: the GUARANTEED minimum is
+      // encoded, not the optimistic quote, so an underfill cannot revert the
+      // batch.
+      expect(
+        encodedCollateral(
+          output.crossContractCalls,
+          FX_ADDRESSES.fxShortPoolManager,
+        ),
+      ).to.equal(MINIMUM_BUY);
+
+      // The borrowed wstETH and the position NFT shield back.
+      const shielded = output.erc20AmountRecipients.map(r =>
+        r.tokenAddress.toLowerCase(),
+      );
+      expect(shielded).to.include(FX_ADDRESSES.wstETH.toLowerCase());
+      expect(output.nftRecipients).to.have.length(1);
+      expect(output.nftRecipients[0].nftAddress).to.equal(shortPool.address);
+    });
+
+    it('open: rejects fxUSD as the sell token on a short (it is the collateral)', () => {
+      // The guard has to follow the pool, not a hardcoded token: fxUSD is a
+      // perfectly valid sell token for a LONG and a self-swap for a short.
+      expect(
+        () =>
+          new ZeroXSwap_FxMintOpen_ComboMeal({
+            pool: 'stETH-Short',
+            targetDebt: 100_000_000_000_000_000n,
+            predictedPositionId: 171n,
+            borrowFeeRatio: 0n,
+            sellERC20Info: {
+              tokenAddress: FX_ADDRESSES.fxUSD,
+              decimals: 18n,
+              isBaseToken: false,
+            },
+            swapSlippageBasisPoints: 100,
+            recipient: EXECUTOR,
+          }),
+      ).to.throw(/sell token is already the pool collateral/);
+    });
+
+    it('close: sells the withdrawn fxUSD and honours withdrawFeeRatio', async () => {
+      stub0xQuote = stubQuoteBuying(USDC, 6n, 1_000_000n, 995_000n);
+
+      const withdrawGross = 1_000_000_000_000_000_000_000n; // 1000 fxUSD
+      const combo = new FxMintClose_ZeroXSwap_ComboMeal({
+        pool: 'stETH-Short',
+        positionId: POSITION_ID,
+        repayAmount: 100_000_000_000_000_000n, // 0.1 wstETH
+        approveAmount: 100_000_000_000_000_000n, // zero repay fee on shorts
+        withdrawColl: withdrawGross,
+        withdrawFeeRatio: 1_000_000n, // 0.1%
+        partialClose: true,
+        buyERC20Info: usdcInfo,
+        swapSlippageBasisPoints: 100,
+        recipient: EXECUTOR,
+      });
+
+      const output = await combo.getComboMealOutput(
+        comboInput(
+          [
+            {
+              tokenAddress: shortPool.debtToken,
+              decimals: 18n,
+              isBaseToken: false,
+              amount: 200_000_000_000_000_000n,
+            },
+          ],
+          [positionNFT(shortPool.address)],
+        ),
+      );
+
+      const targets = output.crossContractCalls.map(c => c.to?.toLowerCase());
+      expect(targets).to.include(
+        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
+      );
+
+      // The swap sells fxUSD net of the withdraw fee. If the combo sold the
+      // gross it would try to move 1 fxUSD it never received.
+      const swapSell = output.stepOutputs
+        .flatMap(s => s.spentERC20Amounts ?? [])
+        .filter(
+          a =>
+            a.tokenAddress.toLowerCase() ===
+            shortPool.collateralToken.toLowerCase(),
+        );
+      expect(swapSell.length).to.be.greaterThan(0);
+      for (const sell of swapSell) {
+        expect(sell.amount <= 999_000_000_000_000_000_000n).to.equal(
+          true,
+          `swap must sell at most the fee-net 999 fxUSD, got ${sell.amount}`,
+        );
+      }
+
+      // USDC comes out; the NFT survives a partial close.
+      const shielded = output.erc20AmountRecipients.map(r =>
+        r.tokenAddress.toLowerCase(),
+      );
+      expect(shielded).to.include(USDC.toLowerCase());
+      expect(output.nftRecipients[0].amount).to.equal(1n);
     });
   });
 });

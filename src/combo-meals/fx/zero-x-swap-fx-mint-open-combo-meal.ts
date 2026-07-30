@@ -40,7 +40,7 @@ export class ZeroXSwap_FxMintOpen_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
     name: '0x Swap + f(x) Open Position',
     description:
-      'Swaps into the pool collateral and opens an f(x) Long position (shields fxUSD and the position NFT).',
+      'Swaps into the pool collateral and opens an f(x) position, long or short (shields the borrowed debt token and the position NFT).',
     minGasLimit: MIN_GAS_LIMIT_COMBO_MEAL,
   };
 

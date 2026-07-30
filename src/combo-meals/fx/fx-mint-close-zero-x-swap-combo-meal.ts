@@ -19,12 +19,12 @@ export type FxMintClose_ZeroXSwap_ComboMealOpts = FxMintCloseRecipeOpts & {
 };
 
 /**
- * Private f(x) exit into ANY token: close (or partially close) a Long position,
+ * Private f(x) exit into ANY token: close (or partially close) a position,
  * then swap the withdrawn collateral into a desired asset — in one combo.
  *
  * ```
- * unshield fxUSD + NFT → operate(close) → 0x swap (collateral → desired)
- *   → shield asset (+ NFT on partial close, + unspent fxUSD)
+ * unshield debtToken + NFT → operate(close) → 0x swap (collateral → desired)
+ *   → shield asset (+ NFT on partial close, + unspent debt token)
  * ```
  *
  * The sell side is derived from the pool, never passed in — the swap can only
@@ -33,15 +33,20 @@ export type FxMintClose_ZeroXSwap_ComboMealOpts = FxMintCloseRecipeOpts & {
  * Two outputs beyond the obvious one:
  *   - **partial close** keeps the position NFT, which transits the swap leg
  *     untouched and shields back to the user; a full close burns it (`0n`).
- *   - **unspent fxUSD** from the close (see FxMintClosePositionStep's orphan
+ *   - **unspent debt token** from the close (see FxMintClosePositionStep's orphan
  *     pass-through) rides the seam as a second ERC-20. The swap recipe does not
  *     handle it, so the recipe engine's epilogue reshields it.
+ *
+ * Side-agnostic: a long sells the withdrawn wstETH/WBTC, a short sells the
+ * withdrawn fxUSD. The sell side comes from the pool descriptor either way.
+ * Pass `withdrawFeeRatio` for short pools — it flows through to
+ * FxMintCloseRecipe via the opts spread.
  */
 export class FxMintClose_ZeroXSwap_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
     name: 'f(x) Close Position + 0x Swap',
     description:
-      'Closes an f(x) Long position and swaps the withdrawn collateral into a desired asset.',
+      'Closes an f(x) position, long or short, and swaps the withdrawn collateral into a desired asset.',
     minGasLimit: MIN_GAS_LIMIT_COMBO_MEAL,
   };
 

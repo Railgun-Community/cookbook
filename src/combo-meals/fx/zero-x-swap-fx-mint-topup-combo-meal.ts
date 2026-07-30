@@ -37,7 +37,7 @@ export class ZeroXSwap_FxMintTopup_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
     name: '0x Swap + f(x) Topup',
     description:
-      'Swaps into the pool collateral and adds it to an existing f(x) Long position.',
+      'Swaps into the pool collateral and adds it to an existing f(x) position, long or short.',
     minGasLimit: MIN_GAS_LIMIT_COMBO_MEAL,
   };
 

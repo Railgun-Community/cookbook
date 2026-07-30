@@ -37,7 +37,7 @@ export class ZeroXSwap_FxMintTopupAndBorrow_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
     name: '0x Swap + f(x) Topup and Borrow',
     description:
-      'Swaps into the pool collateral, then adds collateral and mints additional fxUSD in one operate().',
+      'Swaps into the pool collateral, then adds collateral and borrows more of the debt token in one operate().',
     minGasLimit: MIN_GAS_LIMIT_COMBO_MEAL,
   };
 
