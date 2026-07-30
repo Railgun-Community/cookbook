@@ -14,6 +14,12 @@ dist/
 coverage/
 src/test/test-config-overrides.test.ts
 
+# Crash dumps. Node OOMs under memory pressure (eslint/mocha over the full
+# tree) and V8 leaves a ~1GB `core` in the repo root, which `git add -A`
+# will happily stage.
+core
+core.*
+
 # Quickstart assets
 test.db
 artifacts-*

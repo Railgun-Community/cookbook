@@ -33,7 +33,31 @@ after(() => {
   }
 });
 
+/**
+ * Set FORK_TEST_TOKENS=minimal to shield only the base wrapped token.
+ *
+ * Fork setup shields every token in the list, and each shield is a proof
+ * generation — the dominant memory and time cost of `before()`. A run targeting
+ * a single recipe that only needs WETH pays for seven unrelated shields
+ * otherwise, which is the difference between fitting in a memory-constrained
+ * container and being OOM-killed during setup.
+ *
+ * Unset (the default) keeps the full list, so existing fork runs are unchanged.
+ */
+const useMinimalTokenSet = (): boolean =>
+  process.env.FORK_TEST_TOKENS === 'minimal';
+
 const getTestERC20Addresses = (networkName: NetworkName): string[] => {
+  if (useMinimalTokenSet()) {
+    switch (networkName) {
+      case NetworkName.Ethereum:
+        return [testConfig.contractsEthereum.weth9];
+      case NetworkName.Arbitrum:
+        return [testConfig.contractsArbitrum.dai];
+      default:
+        return [];
+    }
+  }
   switch (networkName) {
     case NetworkName.Ethereum:
       return [
