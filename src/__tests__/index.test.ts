@@ -21,6 +21,12 @@ import {
   // positionId but shipped no way to obtain one, so consumers hand-rolled the
   // ABI fragment.
   getNextFxPositionId,
+  // Gas floors — see the two assertions at the bottom of this file.
+  MIN_GAS_LIMIT_COMBO_MEAL,
+  MIN_GAS_LIMIT_EMPTY,
+  MIN_GAS_LIMIT_FXMINT_OPEN,
+  MIN_GAS_LIMIT_FXMINT_ADJUST,
+  MIN_GAS_LIMIT_FXMINT_CLOSE,
 } from '../index';
 import type { MorphoVaultVersion } from '../index';
 
@@ -53,5 +59,34 @@ describe('index', () => {
 
   it('Should expose the fxMINT position-id reader', () => {
     expect(getNextFxPositionId).to.be.a('function');
+  });
+
+  it('Should expose the MIN_GAS_LIMIT_* floors from the root barrel', () => {
+    // `src/models/index.ts` omitted `./min-gas-limits`, so a consumer could read
+    // `recipeOutput.minGasLimit` but never name the constant behind it — which
+    // is what you need to decide whether overriding the floor is safe.
+    expect(MIN_GAS_LIMIT_COMBO_MEAL).to.be.a('bigint');
+    expect(MIN_GAS_LIMIT_EMPTY).to.be.a('bigint');
+    expect(MIN_GAS_LIMIT_FXMINT_OPEN).to.be.a('bigint');
+    expect(MIN_GAS_LIMIT_FXMINT_ADJUST).to.be.a('bigint');
+    expect(MIN_GAS_LIMIT_FXMINT_CLOSE).to.be.a('bigint');
+  });
+
+  it('Should keep every fxMINT floor above the measured empty-recipe floor', () => {
+    // MIN_GAS_LIMIT_EMPTY is a real measurement for a recipe that only unshields
+    // and shields. Every fx recipe strictly contains that plus an approve plus an
+    // operate() that mints or burns an ERC-721, so a floor at or below it
+    // under-provisions the batch. The v0.1 values (1.5M vs a 1.8M empty floor)
+    // violated this; the assertion exists so they cannot drift back.
+    for (const floor of [
+      MIN_GAS_LIMIT_FXMINT_OPEN,
+      MIN_GAS_LIMIT_FXMINT_ADJUST,
+      MIN_GAS_LIMIT_FXMINT_CLOSE,
+    ]) {
+      expect(floor > MIN_GAS_LIMIT_EMPTY).to.equal(
+        true,
+        `fxMINT floor ${floor} must exceed MIN_GAS_LIMIT_EMPTY ${MIN_GAS_LIMIT_EMPTY}`,
+      );
+    }
   });
 });
