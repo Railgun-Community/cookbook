@@ -8,11 +8,15 @@ import {
   type FxMintPoolRef,
 } from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
+import { MIN_GAS_LIMIT_FXMINT_ADJUST } from '../../../models/min-gas-limits';
 
 export type FxMintRepayDebtRecipeOpts = {
   pool: FxMintPoolRef;
   positionId: bigint;
-  /** > 0; debt reduction in fxUSD wei (pre-computed via computeFxRepay). */
+  /**
+   * > 0; debt reduction in **native `pool.debtToken` units** (pre-computed via
+   * `computeFxRepay`). fxUSD on a long, wstETH/WBTC on a short.
+   */
   repayAmount: bigint;
   /**
    * = repayAmount × (FEE_DENOM + repayFeeRatio) / FEE_DENOM. Pre-computed
@@ -29,16 +33,17 @@ export type FxMintRepayDebtRecipeOpts = {
 };
 
 /**
- * Cookbook recipe: Reduce debt on an existing f(x) Long position WITHOUT
- * withdrawing collateral. Symmetric counterpart to FxMintTopupRecipe —
- * the two together are the position's risk-management dials.
+ * Cookbook recipe: Reduce debt on an existing f(x) position WITHOUT withdrawing
+ * collateral. Symmetric counterpart to FxMintTopupRecipe — the two together are
+ * the position's risk-management dials.
  *
- *   approve(PoolManager, fxUSD, approveAmount)
+ *   approve(PoolManager, pool.debtToken, approveAmount)
  *     → operate(positionId, 0, -repayAmount)
  *
- * Inputs (RecipeInput): fxUSD (caller's unshielded balance, >= approveAmount)
- * + position NFT.
- * Outputs (shielded back): position NFT (same id), plus any unspent fxUSD
+ * Inputs (RecipeInput): the pool's DEBT token (caller's unshielded balance,
+ * >= approveAmount) + position NFT. That is fxUSD on a long and wstETH/WBTC on
+ * a short — read it off the descriptor rather than assuming fxUSD.
+ * Outputs (shielded back): position NFT (same id), plus any unspent debt token
  * (cookbook's recipe-engine epilogue handles unconsumed input ERC-20s
  * automatically).
  *
@@ -47,9 +52,10 @@ export type FxMintRepayDebtRecipeOpts = {
  * leg to swap into or out of.
  *
  * Use case: position's CR is deteriorating from collateral price drop —
- * caller computes computeFxRepay({ rawDebts, shieldedFxUSD,
+ * caller computes computeFxRepay({ debt, availableDebtToken,
  * desiredRepayAmount, repayFeeRatio, railgunUnshieldFeeBps }) →
- * { repayAmount, approveAmount } and passes both here.
+ * { repayAmount, approveAmount } and passes both here. `debt` is
+ * `getFxPosition().debt` — the native figure, never `.rawDebts`.
  */
 export class FxMintRepayDebtRecipe extends Recipe {
   readonly id = 'fxmint-repay-debt-v1';
@@ -57,7 +63,12 @@ export class FxMintRepayDebtRecipe extends Recipe {
     name: 'fxMINT Repay Debt',
     description:
       'Burn fxUSD to reduce debt on an f(x) Long position; collateral unchanged.',
-    minGasLimit: 1_500_000n,
+    // A v0.1 hardcode of 1.5M survived here when the fx floors were
+    // re-anchored. It sat below MIN_GAS_LIMIT_EMPTY (1.8M) — the measured cost
+    // of a bare unshield+shield, which this recipe strictly contains before it
+    // even reaches the approve and the operate(). `minGasLimit` is a floor
+    // enforced in-contract, not a cap.
+    minGasLimit: MIN_GAS_LIMIT_FXMINT_ADJUST,
   };
 
   constructor(private readonly opts: FxMintRepayDebtRecipeOpts) {

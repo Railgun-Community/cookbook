@@ -314,6 +314,7 @@ describe('fx combo meals', () => {
         repayAmount: REPAY_AMOUNT,
         withdrawColl: WITHDRAW_COLL,
         approveAmount: APPROVE_AMOUNT,
+        withdrawFeeRatio: 0n, // long pool
         partialClose: true,
         buyERC20Info: usdcInfo,
         swapSlippageBasisPoints: 100,
@@ -348,6 +349,7 @@ describe('fx combo meals', () => {
         repayAmount: REPAY_AMOUNT,
         withdrawColl: WITHDRAW_COLL,
         approveAmount: APPROVE_AMOUNT,
+        withdrawFeeRatio: 0n, // long pool
         partialClose: true,
         buyERC20Info: usdcInfo,
         swapSlippageBasisPoints: 100,
@@ -365,6 +367,7 @@ describe('fx combo meals', () => {
         repayAmount: REPAY_AMOUNT,
         withdrawColl: WITHDRAW_COLL,
         approveAmount: APPROVE_AMOUNT,
+        withdrawFeeRatio: 0n, // long pool
         partialClose: false,
         buyERC20Info: usdcInfo,
         swapSlippageBasisPoints: 100,
@@ -386,6 +389,7 @@ describe('fx combo meals', () => {
         repayAmount: REPAY_AMOUNT,
         withdrawColl: WITHDRAW_COLL,
         approveAmount: APPROVE_AMOUNT,
+        withdrawFeeRatio: 0n, // long pool
         partialClose: true,
         buyERC20Info: usdcInfo,
         swapSlippageBasisPoints: 100,
@@ -418,6 +422,7 @@ describe('fx combo meals', () => {
             repayAmount: REPAY_AMOUNT,
             withdrawColl: WITHDRAW_COLL,
             approveAmount: APPROVE_AMOUNT,
+            withdrawFeeRatio: 0n, // long pool
             partialClose: true,
             buyERC20Info: usdcInfo,
             swapSlippageBasisPoints: 100,
@@ -437,6 +442,7 @@ describe('fx combo meals', () => {
             repayAmount: REPAY_AMOUNT,
             withdrawColl: WITHDRAW_COLL,
             approveAmount: APPROVE_AMOUNT,
+            withdrawFeeRatio: 0n, // long pool
             partialClose: true,
             buyERC20Info: {
               tokenAddress: wstETHPool.collateralToken,

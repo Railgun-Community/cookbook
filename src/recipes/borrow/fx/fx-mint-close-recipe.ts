@@ -23,14 +23,13 @@ export type FxMintCloseRecipeOpts = {
   approveAmount: bigint;
   /**
    * f(x)'s withdraw fee for this (pool, operator), 1e9-denominated, from
-   * `PoolConfiguration.getPoolFeeRatio(pool, operator)[1]`.
+   * `getFxPool(...).withdrawFeeRatio`.
    *
-   * Omit for long pools — they charge nothing on withdraw, and the default of
-   * 0n reproduces the previous behaviour exactly. **Pass it for short pools**
-   * (0.1% today) or the reshielded collateral is over-declared and the recipe's
-   * amount accounting fails.
+   * **Required.** `0n` on the long pools, `1_000_000n` (0.1%) on the shorts. If
+   * you spread `computeFxClose`'s result into these options, this arrives with
+   * it and there is nothing to add.
    */
-  withdrawFeeRatio?: bigint;
+  withdrawFeeRatio: bigint;
   /** True if position survives the close (caller's computeFxClose result). */
   partialClose: boolean;
 };

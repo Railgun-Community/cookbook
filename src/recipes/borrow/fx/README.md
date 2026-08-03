@@ -289,28 +289,38 @@ import { NFTTokenType } from '@railgun-community/shared-models';
 const pool = await getFxPool('wstETH-Long', provider);
 const position = await getFxPosition(positionId, 'wstETH-Long', provider);
 
-// Pre-compute the operate amounts: the rawColls→native pro-rata conversion,
-// f(x)'s repay fee, and Railgun's 25 bps unshield fee.
+// Pre-compute the operate amounts: the pro-rata collateral release, f(x)'s
+// repay and withdraw fees, and Railgun's 25 bps unshield fee.
+//
+// Both amount fields are NATIVE token units and come straight off the position
+// reader, which has already done the raw→native conversion for whichever axis
+// this pool reports raw. Never pass `position.rawColls` / `position.rawDebts`
+// here — see "Raw vs native" above.
 const amounts = computeFxClose({
-  rawColls: position.rawColls,
-  rawDebts: position.rawDebts,
-  collateralBalance: pool.collateralBalance,
-  totalRawColls: pool.totalRawColls,
-  shieldedFxUSD,                          // wallet.balanceForERC20Token(fxUSD)
+  collateral: position.collateralAmount,
+  debt: position.debt,
+  availableDebtToken,                     // balance of pool.debtToken — fxUSD on
+                                          // a long, wstETH/WBTC on a short
   repayFeeRatio: pool.repayFeeRatio,
+  withdrawFeeRatio: pool.withdrawFeeRatio, // 0n on longs, 0.1% on shorts
   railgunUnshieldFeeBps: 25n,
 });
 
 const recipe = new FxMintCloseRecipe({
   pool: 'wstETH-Long',
   positionId,
-  ...amounts,                             // { repayAmount, withdrawColl, approveAmount, partialClose }
+  ...amounts,                             // { repayAmount, withdrawColl,
+                                          //   withdrawCollNet, withdrawFeeRatio,
+                                          //   approveAmount, partialClose }
 });
 
 const recipeOutput = await recipe.getRecipeOutput({
   networkName: NetworkName.Ethereum,
   railgunAddress,
-  erc20Amounts: [{ tokenAddress: FX_ADDRESSES.fxUSD, amount: shieldedFxUSD }],
+  // The DEBT token, off the pool descriptor. On a short this is wstETH/WBTC —
+  // fxUSD is that pool's *collateral*, so hardcoding it here sends the wrong
+  // token entirely.
+  erc20Amounts: [{ tokenAddress: pool.debtToken, amount: availableDebtToken }],
   nfts: [{
     nftAddress: pool.address,             // per-pool NFT contract
     tokenSubID: '0x' + positionId.toString(16),
@@ -443,8 +453,8 @@ const position = await getFxPosition(positionId, 'wstETH-Long', provider);
 // Caller decides how much to repay; the helper caps at the three-way min
 // (fee ceiling, current debt, user's intent) and computes the approve amount.
 const { repayAmount, approveAmount } = computeFxRepay({
-  rawDebts: position.rawDebts,
-  shieldedFxUSD,
+  debt: position.debt,                    // NATIVE, never position.rawDebts
+  availableDebtToken,                     // balance of pool.debtToken
   desiredRepayAmount: 2_000_000_000_000_000_000n,
   repayFeeRatio: pool.repayFeeRatio,
   railgunUnshieldFeeBps: 25n,

@@ -33,13 +33,21 @@ export type FxMintClosePositionStepData = {
   withdrawColl: bigint;
   /**
    * f(x)'s withdraw fee for this (pool, operator), 1e9-denominated, from
-   * PoolConfiguration.getPoolFeeRatio(pool, operator)[1].
+   * `PoolConfiguration.getPoolFeeRatio(pool, operator)[1]` —
+   * `getFxPool(...).withdrawFeeRatio`.
    *
-   * Zero on long pools — which is why the long-only code could ignore it — but
-   * **0.1% on shorts**, where omitting it would over-declare the reshielded
-   * collateral. Defaults to 0n so long callers are unaffected.
+   * **Required.** It is `0n` on the long pools and `1_000_000n` (0.1%) on the
+   * shorts; pass `0n` explicitly for a long rather than omitting. It used to
+   * default to `0n`, which is correct for one side and silently wrong for the
+   * other — and the over-declaration it produced on a short is not caught by
+   * the step validator, because that only reconciles tokens present in the
+   * step's *input* and the collateral is an output.
+   *
+   * Unlike {@link FxMintAdjustPositionStep}, where the fee applies only when
+   * `collDelta < 0` and so can only be enforced at runtime, a close always
+   * withdraws collateral — so the requirement is carried by the type here.
    */
-  withdrawFeeRatio?: bigint;
+  withdrawFeeRatio: bigint;
   /** True if position survives (NFT shields back); false if full close (NFT burns). */
   partialClose: boolean;
 };
@@ -68,6 +76,16 @@ export class FxMintClosePositionStep extends Step {
 
   constructor(private readonly data: FxMintClosePositionStepData) {
     super();
+    // Legibility backstop for plain-JS callers, who get no compile signal from
+    // the type above. Without it the failure is a `TypeError: Cannot convert
+    // undefined to a BigInt` raised inside fxCollateralWithdrawOutput, which
+    // names the wrong module.
+    if (data.withdrawFeeRatio === undefined) {
+      throw new Error(
+        'FxMintClosePositionStep: withdrawFeeRatio is required — read it from ' +
+          'getFxPool(...).withdrawFeeRatio. Pass 0n only for the long pools.',
+      );
+    }
   }
 
   protected async getStepOutput(
@@ -114,7 +132,7 @@ export class FxMintClosePositionStep extends Step {
     // receives it net of the withdraw fee.
     const withdrawnNet = fxCollateralWithdrawOutput(
       withdrawColl,
-      withdrawFeeRatio ?? 0n,
+      withdrawFeeRatio,
     );
 
     // Cookbook's accounting validator sums ALL debt-token inputs, including any

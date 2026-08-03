@@ -64,6 +64,7 @@ describe('FxMintCloseRecipe', () => {
       repayAmount: REPAY_AMOUNT,
       withdrawColl: WITHDRAW_COLL,
       approveAmount: APPROVE_AMOUNT,
+      withdrawFeeRatio: 0n, // long pools charge nothing on the collateral axis
       partialClose: true,
     });
 
@@ -97,6 +98,7 @@ describe('FxMintCloseRecipe', () => {
       repayAmount: REPAY_AMOUNT,
       withdrawColl: WITHDRAW_COLL,
       approveAmount: APPROVE_AMOUNT,
+      withdrawFeeRatio: 0n, // long pools charge nothing on the collateral axis
       partialClose: true,
     });
 
@@ -113,6 +115,7 @@ describe('FxMintCloseRecipe', () => {
       repayAmount: REPAY_AMOUNT,
       withdrawColl: WITHDRAW_COLL,
       approveAmount: APPROVE_AMOUNT,
+      withdrawFeeRatio: 0n, // long pools charge nothing on the collateral axis
       partialClose: false,
     });
 
@@ -129,6 +132,7 @@ describe('FxMintCloseRecipe', () => {
       repayAmount: REPAY_AMOUNT,
       withdrawColl: WITHDRAW_COLL,
       approveAmount: APPROVE_AMOUNT,
+      withdrawFeeRatio: 0n, // long pools charge nothing on the collateral axis
       partialClose: true,
     });
 

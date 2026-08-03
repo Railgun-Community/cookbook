@@ -67,6 +67,7 @@ describe('FxMintClosePositionStep', () => {
       positionId,
       repayAmount,
       withdrawColl,
+      withdrawFeeRatio: 0n, // long pool
       partialClose: true,
     });
 
@@ -117,6 +118,7 @@ describe('FxMintClosePositionStep', () => {
       positionId,
       repayAmount,
       withdrawColl,
+      withdrawFeeRatio: 0n, // long pool
       partialClose: false,
     });
 
@@ -223,14 +225,40 @@ describe('FxMintClosePositionStep', () => {
       expect(collOut.minBalance).to.equal(collOut.expectedBalance);
     });
 
-    it('omitting withdrawFeeRatio reproduces long behaviour (gross == net)', async () => {
-      // Guards the default: long callers that never pass the field must be
-      // unaffected by its introduction.
+    it('rejects an omitted withdrawFeeRatio instead of silently defaulting to 0n', () => {
+      // This test used to assert the opposite — that omitting the field on a
+      // SHORT pool "reproduces long behaviour (gross == net)". That behaviour
+      // was the defect: it over-declares the reshielded collateral by 0.1%, and
+      // nothing downstream catches it. The step validator only reconciles
+      // tokens present in the step's INPUT, and the collateral is an output, so
+      // the over-declaration is invisible there. On the combo path it becomes a
+      // 0x sell order for more fxUSD than the executor holds; that call reverts,
+      // relay-adapt runs with requireSuccess = false, and the batch mines with
+      // the collateral stranded at the executor.
+      //
+      // TS callers can no longer express this — the cast is what a plain-JS
+      // caller reaches the constructor with.
+      expect(
+        () =>
+          new FxMintClosePositionStep({
+            pool: stETHShort,
+            positionId,
+            repayAmount: shortRepay,
+            withdrawColl: shortWithdrawGross,
+            partialClose: true,
+          } as unknown as ConstructorParameters<
+            typeof FxMintClosePositionStep
+          >[0]),
+      ).to.throw(/withdrawFeeRatio/);
+    });
+
+    it('treats an explicit 0n as no fee, so long semantics stay reachable', async () => {
       const step = new FxMintClosePositionStep({
         pool: stETHShort,
         positionId,
         repayAmount: shortRepay,
         withdrawColl: shortWithdrawGross,
+        withdrawFeeRatio: 0n,
         partialClose: true,
       });
       const output = await step.getValidStepOutput(makeShortStepInput());

@@ -811,54 +811,125 @@ export const fxDebtRepaySpend = (
 export const FEE_DENOM = 1_000_000_000n;
 export const BPS_DENOM = 10_000n;
 
+/**
+ * Everything `computeFxClose` needs, in **native token units on both axes**.
+ *
+ * The previous shape took `rawColls` / `rawDebts` / `collateralBalance` /
+ * `totalRawColls` — four f(x)-internal values — and re-derived native collateral
+ * from three of them. That was wrong in a way no long-pool test could see:
+ * longs report debt native and collateral raw, shorts report debt **raw** and
+ * collateral native, so on `WBTC-Short` a caller passing `rawDebts` (10^10× the
+ * native figure) got a `withdrawColl` 10^10 too small, a `repayAmount` that the
+ * debt ceiling never capped, and `partialClose` stuck at `true`.
+ *
+ * `getFxPosition` already does both conversions once, at the reader boundary.
+ * This type now takes those two results directly, so the raw/native distinction
+ * is not expressible here at all.
+ */
 export type FxCloseInputs = {
-  rawColls: bigint; // Pool.getPosition()[0]
-  rawDebts: bigint; // Pool.getPosition()[1]
-  collateralBalance: bigint; // PoolManager.getPoolInfo(pool)[1]
-  totalRawColls: bigint; // Pool.getTotalRawCollaterals()
-  shieldedFxUSD: bigint; // wallet.balanceForERC20Token(fxUSD)
-  repayFeeRatio: bigint; // PoolConfiguration.getPoolFeeRatio(...)[3], 1e9-denominated
-  railgunUnshieldFeeBps: bigint; // 25 on mainnet
+  /**
+   * Position collateral in **native `collateralToken` units** —
+   * `getFxPosition().collateralAmount`. Not `rawColls`.
+   */
+  collateral: bigint;
+  /**
+   * Position debt in **native `debtToken` units** — `getFxPosition().debt`.
+   * Not `rawDebts`: on the short pools the two differ by the manager's token
+   * scaling factor (10^10 on `WBTC-Short`).
+   */
+  debt: bigint;
+  /**
+   * Caller's available shielded balance **of the pool's debt token** — the
+   * token a close repays. fxUSD on a long; wstETH/WBTC on a short, where fxUSD
+   * is the *collateral* and passing it here would be the wrong token entirely.
+   */
+  availableDebtToken: bigint;
+  /** `PoolConfiguration.getPoolFeeRatio(pool, operator)[3]`, 1e9-denominated. */
+  repayFeeRatio: bigint;
+  /**
+   * `PoolConfiguration.getPoolFeeRatio(pool, operator)[1]`, 1e9-denominated —
+   * `getFxPool(...).withdrawFeeRatio`. Required, not optional: it is `0n` on the
+   * long pools and `1_000_000n` (0.1%) on the shorts, and defaulting it to zero
+   * silently over-declares a short's reshielded collateral.
+   */
+  withdrawFeeRatio: bigint;
+  /** Railgun's unshield fee in basis points (25 on mainnet). */
+  railgunUnshieldFeeBps: bigint;
 };
 
 export type FxCloseAmounts = {
-  positionWstETH: bigint;
-  fxUSDAfterUnshield: bigint;
+  debtTokenAfterUnshield: bigint;
   maxRepayUnderFee: bigint;
   repayAmount: bigint;
   approveAmount: bigint;
+  /**
+   * **GROSS** collateral withdrawal — the magnitude encoded into `operate()`.
+   * f(x)'s `_handleWithdraw` transfers this *minus* the withdraw fee, so it is
+   * not what the caller receives. Use {@link FxCloseAmounts.withdrawCollNet}
+   * for anything user-facing or for sizing an external swap.
+   */
   withdrawColl: bigint;
+  /**
+   * Collateral the caller actually receives: `withdrawColl` net of the withdraw
+   * fee. This is the figure a downstream 0x leg must sell — quoting the gross
+   * amount sells more than the executor holds, and since relay-adapt runs with
+   * `requireSuccess = false` that reverts the swap while the batch still mines,
+   * stranding the collateral at the executor.
+   */
+  withdrawCollNet: bigint;
+  /** Echoed from the input so `...amounts` still satisfies the recipe options. */
+  withdrawFeeRatio: bigint;
   partialClose: boolean;
 };
 
 export function computeFxClose(input: FxCloseInputs): FxCloseAmounts {
-  const { rawColls, rawDebts, collateralBalance, totalRawColls } = input;
+  const { collateral, debt, withdrawFeeRatio } = input;
+
+  assertNativeDebt(debt, 'computeFxClose');
+  if (debt === 0n) {
+    throw new Error(
+      'fxmint: computeFxClose — position debt is 0; there is nothing to repay, ' +
+        'so the proportional withdraw is undefined. A collateral-only withdrawal ' +
+        'is an adjust, not a close.',
+    );
+  }
 
   // Repay-side math: factored out so FxMintRepayDebtRecipe shares it.
   // For close, the user's "desired repay amount" is the entire debt — they
-  // want to close as much as they can given fxUSD availability + fees.
+  // want to close as much as they can given debt-token availability + fees.
   const repay = computeFxRepay({
-    rawDebts,
-    shieldedFxUSD: input.shieldedFxUSD,
-    desiredRepayAmount: rawDebts,
+    debt,
+    availableDebtToken: input.availableDebtToken,
+    desiredRepayAmount: debt,
     repayFeeRatio: input.repayFeeRatio,
     railgunUnshieldFeeBps: input.railgunUnshieldFeeBps,
   });
 
-  // Collateral-side math: proportional withdraw at the repaid fraction.
-  // f(x) has no withdraw fee, so this is a clean ratio. Note the variable
-  // name is wstETH-Long-era — it's the native-collateral conversion
-  // regardless of which pool (WBTC-Long uses 8-decimal WBTC). Renaming
-  // would touch downstream callers, so out-of-scope here.
-  const positionWstETH = (rawColls * collateralBalance) / totalRawColls;
-  const withdrawColl = (positionWstETH * repay.repayAmount) / rawDebts;
-  const partialClose = repay.repayAmount < rawDebts;
+  // Collateral-side math: proportional withdraw at the repaid fraction. Both
+  // terms of the ratio are native, so the fraction is dimensionless — that is
+  // the property the old raw-denominator version silently violated.
+  const withdrawColl = (collateral * repay.repayAmount) / debt;
+
+  // The gross/net split is real, not redundancy: `withdrawColl` is the operate()
+  // argument and `withdrawCollNet` is the receivable. They differ by 0.1% on the
+  // shorts and are identical on the longs.
+  const withdrawCollNet = fxCollateralWithdrawOutput(
+    withdrawColl,
+    withdrawFeeRatio,
+  );
+  const partialClose = repay.repayAmount < debt;
 
   // FxRepayAmounts is a strict subset of FxCloseAmounts's repay-side
-  // fields (fxUSDAfterUnshield, maxRepayUnderFee, repayAmount,
+  // fields (debtTokenAfterUnshield, maxRepayUnderFee, repayAmount,
   // approveAmount), so spreading is type-safe and avoids the verbose
   // per-field re-listing this used to do.
-  return { ...repay, positionWstETH, withdrawColl, partialClose };
+  return {
+    ...repay,
+    withdrawColl,
+    withdrawCollNet,
+    withdrawFeeRatio,
+    partialClose,
+  };
 }
 
 // =============================================================================
@@ -868,12 +939,18 @@ export function computeFxClose(input: FxCloseInputs): FxCloseAmounts {
 // =============================================================================
 
 export type FxRepayInputs = {
-  // Position's current debt in fxUSD wei (Pool.getPosition(positionId)[1]).
-  rawDebts: bigint;
-  // Caller's available shielded fxUSD; the recipe input balance.
-  shieldedFxUSD: bigint;
-  // What the user wants to repay (in fxUSD wei). The function caps this
-  // against the rawDebts ceiling and the post-fee available ceiling.
+  /**
+   * Position's current debt in **native `debtToken` units** —
+   * `getFxPosition().debt`, never `.rawDebts`. On the short pools the raw figure
+   * is 10^10× larger, which makes the debt ceiling at the bottom of this
+   * function stop binding and lets `repayAmount` exceed the debt that exists.
+   */
+  debt: bigint;
+  // Caller's available shielded balance of the pool's DEBT token; the recipe
+  // input balance. fxUSD on a long, wstETH/WBTC on a short.
+  availableDebtToken: bigint;
+  // What the user wants to repay (in native debt-token units). The function
+  // caps this against the debt ceiling and the post-fee available ceiling.
   desiredRepayAmount: bigint;
   // PoolConfiguration.getPoolFeeRatio(pool, operator)[3] for repay fee
   // (CONFIRMED in discovery-notes.md as index [3]; tuple is
@@ -885,14 +962,14 @@ export type FxRepayInputs = {
 };
 
 export type FxRepayAmounts = {
-  // shieldedFxUSD × (10000 - 25) / 10000 — what lands in the executing account
-  // (ephemeral EOA) after Railgun's unshield haircut.
-  fxUSDAfterUnshield: bigint;
-  // The largest repayAmount that can be supported by fxUSDAfterUnshield
+  // availableDebtToken × (10000 - 25) / 10000 — what lands in the executing
+  // account (ephemeral EOA) after Railgun's unshield haircut.
+  debtTokenAfterUnshield: bigint;
+  // The largest repayAmount that can be supported by debtTokenAfterUnshield
   // given the f(x) repay fee uplift on PoolManager.transferFrom.
   maxRepayUnderFee: bigint;
   // The actual debt reduction f(x)'s operate() will perform. Capped at
-  // min(maxRepayUnderFee, rawDebts, desiredRepayAmount).
+  // min(maxRepayUnderFee, debt, desiredRepayAmount).
   repayAmount: bigint;
   // What PoolManager will pull from the executing account (ephemeral EOA), including the
   // f(x) repay fee uplift: repayAmount × (1e9 + repayFeeRatio) / 1e9.
@@ -900,14 +977,36 @@ export type FxRepayAmounts = {
   approveAmount: bigint;
 };
 
+/**
+ * The one place the type boundary provably cannot reach.
+ *
+ * A TypeScript caller who keeps passing `rawDebts` gets two compile errors (the
+ * unknown property and the missing one). A plain-JS caller gets neither, and
+ * `undefined < someBigint` evaluates to `false` rather than throwing — so the
+ * debt ceiling would silently stop binding and `repayAmount` would exceed the
+ * position's debt, surfacing as an `operate()` revert on chain instead of a
+ * stack trace here.
+ */
+const assertNativeDebt = (debt: bigint, fn: string): void => {
+  if (typeof debt !== 'bigint') {
+    throw new Error(
+      `fxmint: ${fn} — \`debt\` must be the position's debt in NATIVE debtToken ` +
+        'units (getFxPosition().debt), not `rawDebts`. On the short pools the two ' +
+        'differ by the manager token scaling factor.',
+    );
+  }
+};
+
 export function computeFxRepay(input: FxRepayInputs): FxRepayAmounts {
   const {
-    rawDebts,
-    shieldedFxUSD,
+    debt,
+    availableDebtToken,
     desiredRepayAmount,
     repayFeeRatio,
     railgunUnshieldFeeBps,
   } = input;
+
+  assertNativeDebt(debt, 'computeFxRepay');
 
   if (railgunUnshieldFeeBps > BPS_DENOM) {
     throw new Error(
@@ -915,17 +1014,24 @@ export function computeFxRepay(input: FxRepayInputs): FxRepayAmounts {
     );
   }
 
-  const fxUSDAfterUnshield =
-    (shieldedFxUSD * (BPS_DENOM - railgunUnshieldFeeBps)) / BPS_DENOM;
+  const debtTokenAfterUnshield =
+    (availableDebtToken * (BPS_DENOM - railgunUnshieldFeeBps)) / BPS_DENOM;
   const maxRepayUnderFee =
-    (fxUSDAfterUnshield * FEE_DENOM) / (FEE_DENOM + repayFeeRatio);
+    (debtTokenAfterUnshield * FEE_DENOM) / (FEE_DENOM + repayFeeRatio);
 
-  // Three-way min: fee ceiling, debt ceiling, user's intent.
+  // Three-way min: fee ceiling, debt ceiling, user's intent. All three terms
+  // are native debt-token units — mixing a raw ceiling in here is what let
+  // repayAmount exceed the position's actual debt on the short pools.
   let repayAmount = maxRepayUnderFee;
-  if (rawDebts < repayAmount) repayAmount = rawDebts;
+  if (debt < repayAmount) repayAmount = debt;
   if (desiredRepayAmount < repayAmount) repayAmount = desiredRepayAmount;
 
   const approveAmount = (repayAmount * (FEE_DENOM + repayFeeRatio)) / FEE_DENOM;
 
-  return { fxUSDAfterUnshield, maxRepayUnderFee, repayAmount, approveAmount };
+  return {
+    debtTokenAfterUnshield,
+    maxRepayUnderFee,
+    repayAmount,
+    approveAmount,
+  };
 }

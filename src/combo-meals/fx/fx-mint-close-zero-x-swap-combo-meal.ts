@@ -39,8 +39,12 @@ export type FxMintClose_ZeroXSwap_ComboMealOpts = FxMintCloseRecipeOpts & {
  *
  * Side-agnostic: a long sells the withdrawn wstETH/WBTC, a short sells the
  * withdrawn fxUSD. The sell side comes from the pool descriptor either way.
- * Pass `withdrawFeeRatio` for short pools — it flows through to
- * FxMintCloseRecipe via the opts spread.
+ * `withdrawFeeRatio` is required on every pool (`0n` on the longs) and flows
+ * through to FxMintCloseRecipe via the opts spread. It matters most here: the
+ * swap leg sells the collateral this combo withdraws, and an over-declared
+ * amount is a 0x order for more than the executor holds. That call reverts,
+ * relay-adapt runs with `requireSuccess = false`, and the batch still mines —
+ * so the failure is silent and the collateral strands at the executor.
  */
 export class FxMintClose_ZeroXSwap_ComboMeal extends ComboMeal {
   readonly config: ComboMealConfig = {
