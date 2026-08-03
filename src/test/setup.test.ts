@@ -6,6 +6,7 @@ import {
 } from '@railgun-community/shared-models';
 import { refreshBalances } from '@railgun-community/wallet';
 import {
+  clampQuickSyncToBlock,
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
@@ -18,10 +19,20 @@ import {
 import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
 import { getForkTestNetworkName } from './common.test';
+import { getTestProvider } from './shared.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
-    this.timeout(10 * 60 * 1000); // 10 min timeout for setup after adding refresh balances
+    // Fork setup is a genuine ~10-15 min: a full merkletree rescan from RAILGUN
+    // genesis (test.db is wiped just below), then one shield per token in the
+    // list — each a proof generation. Adding the three f(x) tokens took that
+    // list from 8 to 11 and pushed a previously-passing setup past the old
+    // 10-minute cap, which then reads as a mysterious `before all` timeout
+    // several seconds AFTER "Test setup complete" is logged.
+    //
+    // Use FORK_TEST_TOKENS=minimal to shield only WETH when the target recipe
+    // does not need the rest — that is the real lever on setup cost.
+    this.timeout(20 * 60 * 1000);
     removeTestDB();
     await setupForkTests();
   }
@@ -69,6 +80,12 @@ const getTestERC20Addresses = (networkName: NetworkName): string[] => {
         testConfig.contractsEthereum.mooConvexTriCryptoUSDC,
         testConfig.contractsEthereum.steakUSDCVault,
         testConfig.contractsEthereum.steakPrimeUSDCVaultV2,
+        // f(x) fxMINT collateral and debt tokens. Needed by every fx fork test:
+        // no fx leg is expressible without one of these shielded, which is why
+        // the fx family has never had an executed-batch test.
+        testConfig.contractsEthereum.wstETH,
+        testConfig.contractsEthereum.fxUSD,
+        testConfig.contractsEthereum.wbtc,
       ];
     case NetworkName.Arbitrum:
       return [testConfig.contractsArbitrum.dai];
@@ -113,6 +130,15 @@ export const setupForkTests = async () => {
 
     // Ganache forked Ethereum RPC setup
     await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
+
+    // Bound quicksync to the fork's own block BEFORE the engine starts.
+    // The indexer runs ahead of a pinned fork (and can overtake even a fork
+    // started at head, since a scan takes minutes), and any commitment it has
+    // that the fork does not fails merkleroot validation. See
+    // clampQuickSyncToBlock.
+    const forkBlockNumber = await getTestProvider().getBlockNumber();
+    clampQuickSyncToBlock(forkBlockNumber);
+
     // Quickstart setup
     await startRailgunForTests();
 

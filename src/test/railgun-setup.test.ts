@@ -17,6 +17,7 @@ import {
 } from '@railgun-community/wallet';
 import LevelDOWN from 'leveldown';
 import fs from 'fs';
+import path from 'path';
 import {
   FallbackProviderJsonConfig,
   MerkletreeScanStatus,
@@ -79,6 +80,66 @@ const testArtifactStore = new ArtifactStore(
   fileExists,
 );
 
+/**
+ * Bound quicksync to the fork's own block, killing the race that otherwise makes
+ * fork runs non-reproducible.
+ *
+ * `quickSyncEventsGraphV2` takes a STARTING block and no end bound, so it always
+ * returns commitments up to the *indexer's* head. The engine then validates the
+ * reconstructed tree against the *fork's* on-chain root. Any commitment the
+ * indexer has that the fork does not fails validation:
+ *
+ *   Error: Invalid merkleroot: 0e882133… Tree: 3. Index: 54260.
+ *
+ * where the failing index is exactly the indexer's head commitment. Without a
+ * bound the only workable configuration is "fork at head and hope the indexer
+ * does not catch up mid-scan" — which is a race, and rules out pinning a block,
+ * and therefore rules out comparing two measurements.
+ *
+ * The SDK gives no injection point (`startRailgunEngine` hardcodes
+ * `quickSyncEventsGraph`), but its CommonJS output resolves the binding as a
+ * property access at call time — `quick_sync_events_1.quickSyncEventsGraph` —
+ * so wrapping the module export before the engine starts is sufficient and
+ * needs no patch-package entry.
+ *
+ * Filtering after the fetch rather than in the GraphQL query means the network
+ * cost is unchanged; the point is determinism, not speed.
+ */
+export const clampQuickSyncToBlock = (maxBlockNumber: number): void => {
+  /* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, global-require */
+  // The package's `exports` map only publishes ".", so a deep specifier is
+  // rejected outright. Resolve the entry point and walk to the file instead —
+  // an absolute path bypasses `exports` and still lands on the SAME module-cache
+  // entry the SDK's own internal require populated, which is what makes the
+  // wrapper visible to `init.js`.
+  const walletEntry = require.resolve('@railgun-community/wallet');
+  const quickSyncPath = path.join(
+    path.dirname(walletEntry),
+    'services/railgun/quick-sync/quick-sync-events.js',
+  );
+  const quickSyncModule = require(quickSyncPath);
+  const original = quickSyncModule.quickSyncEventsGraph;
+  if (typeof original !== 'function') {
+    throw new Error(
+      'clampQuickSyncToBlock: could not resolve quickSyncEventsGraph — the wallet SDK layout changed, and an unbounded quicksync will fail merkleroot validation against a pinned fork.',
+    );
+  }
+  const atOrBelow = <T extends { blockNumber: number }>(events: T[]): T[] =>
+    events.filter(event => event.blockNumber <= maxBlockNumber);
+
+  quickSyncModule.quickSyncEventsGraph = async (...args: unknown[]) => {
+    const events = await original(...args);
+    return {
+      ...events,
+      commitmentEvents: atOrBelow(events.commitmentEvents),
+      unshieldEvents: atOrBelow(events.unshieldEvents),
+      nullifierEvents: atOrBelow(events.nullifierEvents),
+    };
+  };
+  dbgRailgunSetup(`Quicksync clamped to block ${maxBlockNumber}.`);
+  /* eslint-enable @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, global-require */
+};
+
 export const startRailgunForTests = async () => {
   const testWalletSource = 'cookbook tests';
   const shouldDebug = true;
@@ -139,18 +200,44 @@ export const utxoMerkletreeHistoryScanCallback = (
   currentUTXOMerkletreeScanStatus = scanData.scanStatus;
 };
 
+/**
+ * How long to wait for the UTXO merkletree scan before giving up.
+ *
+ * `setup.test.ts` wipes `test.db` before every fork run, so each run rescans from
+ * RAILGUN genesis. **On Ethereum that takes up to ~10 minutes** — the quicksync
+ * pull is large (the V2 client's MAX_QUERY_RESULTS is 16 * 2^16 commitments in a
+ * single query) and progress callbacks are sparse, so a run sits at a low
+ * percentage for minutes while still making progress.
+ *
+ * The previous 180s was below that floor, which made every Ethereum fork run
+ * fail in `before all` with a message that reads like a broken fork rather than
+ * an impatient timeout. 15 minutes gives Ethereum headroom; override with
+ * MERKLETREE_SCAN_TIMEOUT_MS for a slower endpoint or a faster chain.
+ */
+const MERKLETREE_SCAN_TIMEOUT_MS = isDefined(
+  process.env.MERKLETREE_SCAN_TIMEOUT_MS,
+)
+  ? Number(process.env.MERKLETREE_SCAN_TIMEOUT_MS)
+  : 900000;
+
 export const pollUntilUTXOMerkletreeScanned = async () => {
-  dbgRailgunSetup('Polling for UTXO merkletree scan to complete...');
+  dbgRailgunSetup(
+    `Polling for UTXO merkletree scan to complete (timeout ${MERKLETREE_SCAN_TIMEOUT_MS}ms)...`,
+  );
   const status = await poll(
     async () => {
       return currentUTXOMerkletreeScanStatus;
     },
     status => status === MerkletreeScanStatus.Complete,
     100,
-    180000 / 100, // 180 sec.
+    MERKLETREE_SCAN_TIMEOUT_MS / 100,
   );
   if (status !== MerkletreeScanStatus.Complete) {
-    throw new Error(`Merkletree scan should be completed - timed out`);
+    throw new Error(
+      `Merkletree scan should be completed - timed out after ${MERKLETREE_SCAN_TIMEOUT_MS}ms ` +
+        `(last status: ${String(currentUTXOMerkletreeScanStatus)}). ` +
+        `Raise MERKLETREE_SCAN_TIMEOUT_MS if the scan was still progressing.`,
+    );
   }
   dbgRailgunSetup('UTXO merkletree complete');
 };

@@ -5,7 +5,11 @@ import debug from 'debug';
 import { getTestEthersWallet, setSharedTestRPCProvider } from './shared.test';
 import { JsonRpcProvider, solidityPackedKeccak256 } from 'ethers';
 import { getLocalhostRPC, getRPCPort } from './common.test';
-import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
+import {
+  NETWORK_CONFIG,
+  NetworkName,
+  isDefined,
+} from '@railgun-community/shared-models';
 
 const dbg = debug('rpc:setup');
 
@@ -72,7 +76,24 @@ export const setupTestRPCAndWallets = async (
     );
   }
   if (forkRPCType === ForkRPCType.Anvil) {
-    await testRPCProvider.send('anvil_reset', [{}]);
+    // `anvil_reset` re-forks from whatever config it is given. Passing `{}` does
+    // NOT preserve the `--fork-block-number` anvil was started with — it drops
+    // the pin and re-forks at mainnet head. Verified directly: a fork pinned at
+    // 25_676_000 reported that block until reset, then reported the live head.
+    //
+    // Assertion-style fork tests tolerate that; measurement does not, because
+    // figures taken at drifting blocks are not comparable run to run. Re-state
+    // the fork config so the pin survives the reset.
+    await testRPCProvider.send('anvil_reset', [
+      {
+        forking: {
+          jsonRpcUrl: testConfig.ethereumForkRPC,
+          ...(isDefined(testConfig.forkBlockNumber)
+            ? { blockNumber: testConfig.forkBlockNumber }
+            : {}),
+        },
+      },
+    ]);
   } else if (forkRPCType === ForkRPCType.Hardhat) {
     await testRPCProvider.send('hardhat_reset', []);
   }

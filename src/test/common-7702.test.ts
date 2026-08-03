@@ -5,6 +5,8 @@ import {
   getCurrentEphemeralAddress,
   getRelayAdaptTransactionError,
   populateProvedCrossContractCalls,
+  pauseAllPollingProviders,
+  resumeIsolatedPollingProviderForNetwork,
 } from '@railgun-community/wallet';
 import {
   EVMGasType,
@@ -386,7 +388,15 @@ export const executeRecipe7702AndAssertUnshieldBalances = async (
     console.error(err);
     // eslint-disable-next-line no-console
     console.log(
-      `To debug, trace the call against the fork:\n` +
+      `To debug, FIRST install the 7702 delegation designator, then trace.\n` +
+        `Tracing without it hits a CODELESS account and returns SUCCESS — the\n` +
+        `authorization list only exists on the type-4 transaction, not on a call.\n` +
+        `curl http://localhost:8600 -X POST -H "Content-Type: application/json" --data ` +
+        `'{"method":"anvil_setCode","params":["${String(
+          transaction.to,
+        )}","0xef0100${NETWORK_CONFIG[
+          networkName
+        ].relayAdapt7702Contract.slice(2)}"],"id":1,"jsonrpc":"2.0"}'\n` +
         `curl http://localhost:8600 -X POST -H "Content-Type: application/json" ` +
         `--data '{"method":"debug_traceCall","params":[{"from":"${wallet.address}","to":"${String(
           transaction.to,
@@ -505,4 +515,277 @@ export const getTestEphemeralAddress = async (
     testConfig.encryptionKey,
     networkName,
   );
+};
+
+/**
+ * RailgunSmartWallet `Shield` — the event that proves the shield epilogue
+ * actually ran. Topic hash computed from engine/src/abi/V2.1/RailgunSmartWallet.json:
+ * `Shield(uint256,uint256,(bytes32,(uint8,address,uint256),uint120)[],(bytes32[3],bytes32)[],uint256[])`
+ */
+const SHIELD_EVENT_TOPIC =
+  '0x3a5b9dc26075a3801a6ddccf95fec485bb7500a91b44cec1add984c21ee6db3b';
+
+/**
+ * Recover the revert reason from a failed type-4 batch.
+ *
+ * The naive approach — re-`eth_call` the transaction — silently **succeeds**,
+ * which is worse than useless. A type-4 transaction's `to` is the ephemeral EOA,
+ * and the code only exists there by virtue of the authorization list. An
+ * `eth_call` carries no authorization list, so it hits a *codeless* account, and
+ * a call to a codeless account returns success with empty data. Every diagnostic
+ * therefore reported "fine" while the real batch reverted — which is precisely
+ * why an `Invalid Merkle Root` rejection presented for hours as an unexplained
+ * `status 0`.
+ *
+ * Installing the delegation designator (`0xef0100 || <impl>`) first — the exact
+ * bytes EIP-7702 writes — makes the call behave like the real one and surfaces
+ * the revert string. Done inside the caller's snapshot, so it is discarded.
+ */
+const decode7702Revert = async (
+  provider: ReturnType<typeof getTestProvider>,
+  from: string,
+  transaction: ContractTransaction,
+  gasLimit: bigint,
+  networkName: NetworkName,
+): Promise<string> => {
+  const { relayAdapt7702Contract } = NETWORK_CONFIG[networkName];
+  try {
+    await provider.send('anvil_setCode', [
+      transaction.to,
+      `0xef0100${relayAdapt7702Contract.slice(2)}`,
+    ]);
+    await provider.call({
+      from,
+      to: transaction.to,
+      data: transaction.data,
+      gasLimit,
+    });
+    return 'no revert reproduced under eth_call (state-dependent?)';
+  } catch (err) {
+    const e = err as { shortMessage?: string; message?: string };
+    return e.shortMessage ?? e.message ?? String(err);
+  }
+};
+
+export type GasFloorProbe = {
+  gasLimit: bigint;
+  shieldCompleted: boolean;
+  reason: string;
+};
+
+export type GasFloorMeasurement = {
+  /** Least wire gas limit at which the shield epilogue completed. */
+  minSuccessfulGasLimit: bigint;
+  /** Highest probed limit that still failed — the negative control for the answer. */
+  maxFailingGasLimit: Optional<bigint>;
+  probes: GasFloorProbe[];
+  forkBlockNumber: number;
+};
+
+/**
+ * Measure the real gas cost of a 7702 batch.
+ *
+ * ## Why `gasUsed` of a passing batch is not the answer
+ *
+ * `requireSuccess` is hardcoded `false` on both 7702 paths in the wallet SDK, so
+ * a batch whose inner work fails still mines. `eth_estimateGas` therefore
+ * converges on the cheapest gas at which the **outer** call succeeds, and a
+ * shield sub-call that runs out of gas is swallowed — `receipt.status === 1`
+ * with the value stranded at the executor. Measuring `gasUsed` of such a batch
+ * measures a failure.
+ *
+ * So the success oracle here is the **shield**, not the transaction: no
+ * RelayAdapt error event, and a `Shield` event actually emitted by the
+ * RailgunSmartWallet.
+ *
+ * ## Why it bisects the wire gas limit and not `minGasLimit`
+ *
+ * `minGasLimit` is baked into `actionData` *and the proof*, so searching over it
+ * would mean re-proving at every probe. The wire gas limit is not part of the
+ * proof, so one proof serves the whole search.
+ *
+ * Monotonicity (needed for bisection to be sound): raising the total raises what
+ * the 63/64 rule leaves for the shield sub-call, so success is monotone in the
+ * gas limit.
+ *
+ * Each probe runs against `evm_snapshot`/`evm_revert`, so probes do not observe
+ * each other's state.
+ */
+export const measure7702BatchGasFloor = async (
+  name: string,
+  recipeInput: RecipeInput,
+  recipeOutput: RecipeOutput,
+  opts?: {
+    lo?: bigint;
+    hi?: bigint;
+    toleranceGas?: bigint;
+    /**
+     * `actionData.minGasLimit` for the proof. Defaults to `0n` so the
+     * in-contract `gasleft()` require cannot bind and the search measures cost.
+     * Set it to a real value only to measure the require itself.
+     */
+    actionDataMinGasLimit?: bigint;
+  },
+): Promise<GasFloorMeasurement> => {
+  const { networkName } = recipeInput;
+  const txidVersion = TXIDVersion.V2_PoseidonMerkle;
+  await assert7702ForkSupport(networkName);
+
+  const provider = getTestProvider();
+  const wallet = getTestEthersWallet();
+  const { proxyContract } = NETWORK_CONFIG[networkName];
+
+  // One proof for the entire search, built with a SLACK `actionData.minGasLimit`.
+  //
+  // This is load-bearing. RelayAdapt enforces `gasleft() >= actionData.minGasLimit`
+  // in-contract, and the wallet's 7702 path bakes the recipe's declared
+  // `minGasLimit` into actionData verbatim. Measuring with the declared value
+  // therefore finds the point at which the REQUIRE passes, not the point at
+  // which the work fits — a result that is a function of the constant being
+  // measured. It shows up as a suspiciously uniform offset:
+  //
+  //   empty    declared 1_800_000 -> "floor" 1_880_004  (+80_004), gasUsed 1_747_532
+  //   fx open  declared 3_100_000 -> "floor" 3_187_377  (+87_377)
+  //
+  // The empty batch's actual gasUsed is BELOW its declared floor, so the work
+  // was never the binding constraint; the offset is pre-check overhead
+  // (intrinsic + calldata), which is why the larger fx batch's is ~7k bigger.
+  //
+  // Zeroing the floor for the proof makes the require vacuous, so the bisection
+  // isolates the real cost. The declared constant is still reported by the
+  // caller for comparison — it is the thing being calibrated, not an input.
+  const measurementOutput: RecipeOutput = {
+    ...recipeOutput,
+    minGasLimit: opts?.actionDataMinGasLimit ?? 0n,
+  };
+  const { transaction } = await createCrossContractCalls7702ForTest(
+    txidVersion,
+    networkName,
+    recipeInput,
+    measurementOutput,
+  );
+
+  const forkBlockNumber = await provider.getBlockNumber();
+  const block = await provider.getBlock('latest');
+  const blockGasLimit = block?.gasLimit ?? 30_000_000n;
+
+  // Stop the engine watching the chain for the duration of the search.
+  //
+  // Every probe mines a block, and a successful one emits `Shield` events. The
+  // engine's merkletree scans those blocks and does NOT un-scan on
+  // `evm_revert`, so an unguarded loop ends with the engine holding commitments
+  // the chain no longer has. The next proof built in this process is then
+  // rejected by `RailgunSmartWallet: Invalid Merkle Root` — and because the
+  // unshield leg sits OUTSIDE the `requireSuccess = false` loop, that rejection
+  // reverts the whole transaction and surfaces as `status 0` with no logs
+  // rather than a swallowed `CallError`. It looks nothing like a gas problem
+  // and everything like a broken recipe, which is exactly how it was misread.
+  //
+  // Pausing prevents the desync; repairing it afterwards with
+  // `rescanFullUTXOMerkletreesAndWallets` also works but re-scans the whole
+  // tree in-process and OOMs Node's default heap after two measurements.
+  pauseAllPollingProviders();
+
+  let lo = opts?.lo ?? 500_000n;
+  let hi = opts?.hi ?? blockGasLimit;
+  const tolerance = opts?.toleranceGas ?? 25_000n;
+  const probes: GasFloorProbe[] = [];
+
+  const probe = async (gasLimit: bigint): Promise<boolean> => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const snapshotId = await provider.send('evm_snapshot', []);
+    let shieldCompleted = false;
+    let reason: string;
+    try {
+      const txResponse = await wallet.sendTransaction({
+        ...transaction,
+        gasLimit,
+      });
+      const txReceipt = await txResponse.wait();
+      if (txReceipt == null) {
+        reason = 'no receipt';
+      } else if (txReceipt.status === 0) {
+        reason = `tx reverted: ${await decode7702Revert(
+          provider,
+          wallet.address,
+          transaction,
+          gasLimit,
+          networkName,
+        )}`;
+      } else {
+        const relayAdaptError = getRelayAdaptTransactionError(
+          txidVersion,
+          txReceipt.logs.map(log => ({
+            topics: log.topics as string[],
+            data: log.data,
+          })),
+        );
+        if (isDefined(relayAdaptError)) {
+          reason = `relay-adapt subcall revert: ${relayAdaptError}`;
+        } else {
+          // The load-bearing check. A batch can mine with status 1 and still
+          // have skipped the shield entirely, because requireSuccess is false.
+          const shielded = txReceipt.logs.some(
+            log =>
+              log.address.toLowerCase() === proxyContract.toLowerCase() &&
+              log.topics[0]?.toLowerCase() === SHIELD_EVENT_TOPIC,
+          );
+          shieldCompleted = shielded;
+          reason = shielded
+            ? 'shield event emitted'
+            : 'MINED BUT NO SHIELD EVENT — value stranded at the executor';
+        }
+      }
+    } catch (err) {
+      reason = `send failed: ${err instanceof Error ? err.message : String(err)}`;
+    } finally {
+      await provider.send('evm_revert', [snapshotId]);
+    }
+    probes.push({ gasLimit, shieldCompleted, reason });
+    // eslint-disable-next-line no-console
+    console.log(
+      `  [${name}] gasLimit=${gasLimit} -> ${
+        shieldCompleted ? 'SHIELD OK' : 'FAIL'
+      } (${reason})`,
+    );
+    return shieldCompleted;
+  };
+
+  // Establish that the ceiling actually works before bisecting toward it —
+  // otherwise a uniformly-failing search silently returns the ceiling.
+  if (!(await probe(hi))) {
+    throw new Error(
+      `${name}: shield did not complete even at the upper bound ${hi}. ` +
+        `This is not a gas floor problem — the batch is failing for another reason.`,
+    );
+  }
+
+  let best = hi;
+  while (hi - lo > tolerance) {
+    const mid = (lo + hi) / 2n;
+    if (await probe(mid)) {
+      best = mid;
+      hi = mid;
+    } else {
+      lo = mid;
+    }
+  }
+
+  // Let the engine start watching the chain again (see the pause above).
+  resumeIsolatedPollingProviderForNetwork(networkName);
+
+  const maxFailing = probes
+    .filter(p => !p.shieldCompleted)
+    .map(p => p.gasLimit)
+    .reduce<Optional<bigint>>(
+      (acc, g) => (acc === undefined || g > acc ? g : acc),
+      undefined,
+    );
+
+  return {
+    minSuccessfulGasLimit: best,
+    maxFailingGasLimit: maxFailing,
+    probes,
+    forkBlockNumber,
+  };
 };
