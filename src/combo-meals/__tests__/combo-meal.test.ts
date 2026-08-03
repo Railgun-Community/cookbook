@@ -292,3 +292,67 @@ describe('combo-meal NFT aggregation', () => {
     expect(downstream.receivedInput?.nfts[0].amount).to.equal(0n);
   });
 });
+
+/**
+ * A combo runs every constituent recipe inside ONE relay-adapt batch, so its
+ * declared floor cannot coherently be lower than the dearest recipe it wraps.
+ *
+ * The base class used to emit `config.minGasLimit` verbatim, and five of the
+ * seven shipped combos take the generic `MIN_GAS_LIMIT_COMBO_MEAL` (2.9M) while
+ * wrapping recipes sized 3.0M–3.1M — so they each declared a floor below their
+ * own worst leg, plus an extra swap on top. The floor is enforced in-contract
+ * as a `gasleft()` require, so the consequence is an under-provisioned batch
+ * that reverts at the shield epilogue with the value stranded at the executor.
+ */
+describe('combo-meal minGasLimit aggregation', () => {
+  class FlooredRecipe extends CapturingRecipe {
+    readonly config: RecipeConfig;
+
+    constructor(minGasLimit: bigint) {
+      super(emptyOutput('floored'));
+      this.config = { name: 'floored', description: '', minGasLimit };
+    }
+  }
+
+  class FlooredComboMeal extends TestComboMeal {
+    readonly config: ComboMealConfig;
+
+    constructor(minGasLimit: bigint, recipes: Recipe[]) {
+      super(recipes, false);
+      this.config = { name: 'floored-combo', description: '', minGasLimit };
+    }
+  }
+
+  const runFloor = async (
+    comboFloor: bigint,
+    recipeFloors: bigint[],
+  ): Promise<bigint> => {
+    const combo = new FlooredComboMeal(
+      comboFloor,
+      recipeFloors.map(f => new FlooredRecipe(f)),
+    );
+    const output = await combo.getComboMealOutput(comboInput());
+    return output.minGasLimit;
+  };
+
+  it('lifts the emitted floor to the dearest constituent recipe', async () => {
+    // The shipped shape: MIN_GAS_LIMIT_COMBO_MEAL wrapping an fx open recipe.
+    expect(await runFloor(2_900_000n, [2_400_000n, 3_100_000n])).to.equal(
+      3_100_000n,
+    );
+  });
+
+  it("keeps the combo's own floor when it is already the larger number", async () => {
+    // A combo is more than the sum of its legs — the seam, the extra swap and
+    // the shield epilogue are not attributable to any single recipe — so its
+    // own config must still win when it is higher. This is what keeps the fix
+    // from silently *lowering* anything.
+    expect(await runFloor(3_500_000n, [2_400_000n, 3_100_000n])).to.equal(
+      3_500_000n,
+    );
+  });
+
+  it('is unaffected when no recipe declares a floor', async () => {
+    expect(await runFloor(2_900_000n, [0n, 0n])).to.equal(2_900_000n);
+  });
+});

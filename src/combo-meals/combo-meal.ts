@@ -53,6 +53,26 @@ export abstract class ComboMeal {
 
     let nextInput = input;
 
+    // A combo executes every constituent recipe in ONE batch, so it cannot
+    // possibly need less gas than the dearest recipe it contains. This used to
+    // emit `this.config.minGasLimit` verbatim, which let a combo declare a floor
+    // *below* its own worst leg — five of the seven shipped combos did, because
+    // they all take the generic MIN_GAS_LIMIT_COMBO_MEAL while wrapping recipes
+    // sized higher. The floor is enforced in-contract as a `gasleft()` require,
+    // so declaring too little under-provisions the batch and reverts it at the
+    // shield epilogue with the value stranded at the executor.
+    //
+    // Taking the max here fixes the whole class at the seam rather than
+    // per-combo, and it cannot lower any existing floor. It deliberately does
+    // NOT invent a value: a combo's own config still wins whenever it is the
+    // larger number, which is the right answer once the constituent floors are
+    // re-measured on the 7702 path.
+    const minGasLimit = recipes.reduce(
+      (floor, recipe) =>
+        recipe.config.minGasLimit > floor ? recipe.config.minGasLimit : floor,
+      this.config.minGasLimit,
+    );
+
     const aggregatedRecipeOutput: RecipeOutput = {
       name: this.config.name,
       stepOutputs: [],
@@ -60,7 +80,7 @@ export abstract class ComboMeal {
       erc20AmountRecipients: [],
       nftRecipients: [],
       feeERC20AmountRecipients: [],
-      minGasLimit: this.config.minGasLimit,
+      minGasLimit,
     };
 
     for (let i = 0; i < recipes.length; i++) {
