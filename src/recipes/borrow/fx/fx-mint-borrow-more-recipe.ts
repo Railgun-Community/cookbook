@@ -7,6 +7,7 @@ import {
   type FxMintPoolRef,
 } from '../../../steps/borrow/fx/fx-mint-util';
 import { FxMintAdjustPositionStep } from '../../../steps/borrow/fx/fx-mint-adjust-position-step';
+import { MIN_GAS_LIMIT_FXMINT_ADJUST } from '../../../models/min-gas-limits';
 
 export type FxMintBorrowMoreRecipeOpts = {
   pool: FxMintPoolRef;
@@ -62,10 +63,17 @@ export class FxMintBorrowMoreRecipe extends Recipe {
     name: 'fxMINT Borrow More',
     description:
       'Mint additional fxUSD against an existing f(x) Long position.',
-    // Single-step recipe — operate() with debt-only delta is the lightest
-    // adjust op, but we keep a 1M floor so wstETH oracle calls + price
-    // fallback paths fit comfortably under the relay-adapter gas cap.
-    minGasLimit: 1_000_000n,
+    // `minGasLimit` is a FLOOR, not a cap: RelayAdapt bakes it into actionData
+    // and enforces it as a `gasleft()` require. The previous 1M hardcode was
+    // chosen as if it were a ceiling to stay under, which is why it sat 44%
+    // below MIN_GAS_LIMIT_EMPTY (1.8M) — the measured cost of a recipe that
+    // does nothing but unshield and shield, which this one strictly contains.
+    //
+    // Debt-only adjust is the lightest fx op, but it is still an adjust; sizing
+    // it below the shared adjust floor under-provisions the batch, and an
+    // under-provisioned batch reverts at the shield with the value stranded at
+    // the executor (see the mainnet trace in the fx README).
+    minGasLimit: MIN_GAS_LIMIT_FXMINT_ADJUST,
   };
 
   constructor(private readonly opts: FxMintBorrowMoreRecipeOpts) {
