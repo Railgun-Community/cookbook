@@ -23,6 +23,16 @@ export const setupTestRPCAndWallets = async (
   forkRPCType: ForkRPCType,
   networkName: NetworkName,
   tokenAddresses: string[],
+  /**
+   * Skip `anvil_reset` and the token top-up, keeping whatever the previous run
+   * left on the fork.
+   *
+   * Only pass true when the engine DB is being reused. The two are paired: a
+   * reset discards every block the previous run mined — including its shields —
+   * while the DB still remembers those commitments, which is exactly the state
+   * that fails merkleroot validation. Reset and wipe together, or neither.
+   */
+  skipReset = false,
 ) => {
   dbg(`Starting test RPC: ${networkName}...`);
 
@@ -75,7 +85,9 @@ export const setupTestRPCAndWallets = async (
         : `Could not connect to test Ganache RPC server.`,
     );
   }
-  if (forkRPCType === ForkRPCType.Anvil) {
+  if (skipReset) {
+    dbg('Skipping anvil_reset — reusing the existing fork state and engine DB.');
+  } else if (forkRPCType === ForkRPCType.Anvil) {
     // `anvil_reset` re-forks from whatever config it is given. Passing `{}` does
     // NOT preserve the `--fork-block-number` anvil was started with — it drops
     // the pin and re-forks at mainnet head. Verified directly: a fork pinned at

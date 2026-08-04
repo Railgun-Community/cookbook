@@ -33,7 +33,7 @@ import {
   poll,
 } from '@railgun-community/shared-models';
 import { testConfig } from './test-config.test';
-import { ContractTransaction, Wallet } from 'ethers';
+import { ContractTransaction, JsonRpcProvider, Wallet } from 'ethers';
 import { debug } from 'debug';
 import { ERC20Contract } from '../contract/token/erc20-contract';
 import {
@@ -60,6 +60,65 @@ export const removeTestDB = () => {
   fs.rm(ENGINE_TEST_DB, { recursive: true }, () => {
     // console.warn('Error removing test db.');
   });
+};
+
+/**
+ * Records which fork the engine DB was built against.
+ *
+ * Wiping `test.db` before every fork run costs a full merkletree rescan from
+ * RAILGUN genesis — ~10 minutes, and it is issued as one enormous quicksync
+ * query (MAX_QUERY_RESULTS = 16 * 2^16 commitments) that the indexer
+ * intermittently times out on. Reusing the DB makes the scan incremental and
+ * removes that query entirely.
+ *
+ * But a stale DB is worse than a slow one. The engine does not un-scan, so a DB
+ * carrying commitments the current fork does not have fails merkleroot
+ * validation — the `Invalid merkleroot` failure that presents as a broken
+ * recipe rather than a stale cache. That happens whenever anvil is restarted,
+ * because the blocks the previous run mined (its shields) no longer exist.
+ *
+ * So the DB is only reused when a block it saw is still present on the fork
+ * WITH THE SAME HASH. Same anvil that has moved forward: valid, the DB is a
+ * prefix of the chain. Restarted or re-forked anvil: the recorded block is
+ * missing or differs, and the DB is discarded.
+ */
+const DB_FORK_MARKER = `${ENGINE_TEST_DB}.fork.json`;
+
+export const testDBMatchesFork = async (
+  provider: JsonRpcProvider,
+): Promise<boolean> => {
+  try {
+    if (!fs.existsSync(ENGINE_TEST_DB) || !fs.existsSync(DB_FORK_MARKER)) {
+      return false;
+    }
+    const { blockNumber, blockHash } = JSON.parse(
+      fs.readFileSync(DB_FORK_MARKER, 'utf8'),
+    ) as { blockNumber: number; blockHash: string };
+    const block = await provider.getBlock(blockNumber);
+    return isDefined(block) && block !== null && block.hash === blockHash;
+  } catch {
+    return false;
+  }
+};
+
+export const recordTestDBFork = async (
+  provider: JsonRpcProvider,
+): Promise<void> => {
+  const blockNumber = await provider.getBlockNumber();
+  const block = await provider.getBlock(blockNumber);
+  if (block === null) {
+    return;
+  }
+  fs.writeFileSync(
+    DB_FORK_MARKER,
+    JSON.stringify({ blockNumber, blockHash: block.hash }),
+  );
+};
+
+/** Synchronous wipe — the async `removeTestDB` races the engine opening it. */
+export const removeTestDBSync = () => {
+  fs.rmSync(ENGINE_TEST_DB, { recursive: true, force: true });
+  fs.rmSync(DB_FORK_MARKER, { force: true });
 };
 
 const fileExists = (path: string): Promise<boolean> => {

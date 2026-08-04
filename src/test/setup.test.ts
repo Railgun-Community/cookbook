@@ -7,6 +7,9 @@ import {
 import { refreshBalances } from '@railgun-community/wallet';
 import {
   clampQuickSyncToBlock,
+  recordTestDBFork,
+  removeTestDBSync,
+  testDBMatchesFork,
   createRailgunWallet2ForTests,
   createRailgunWalletForTests,
   loadLocalhostFallbackProviderForTests,
@@ -18,28 +21,44 @@ import {
 } from './railgun-setup.test';
 import { ForkRPCType, setupTestRPCAndWallets } from './rpc-setup.test';
 import { testConfig } from './test-config.test';
-import { getForkTestNetworkName } from './common.test';
+import {
+  getForkTestNetworkName,
+  getLocalhostRPC,
+  getRPCPort,
+} from './common.test';
+import { JsonRpcProvider } from 'ethers';
 import { getTestProvider } from './shared.test';
 
 before(async function run() {
   if (isDefined(process.env.RUN_FORK_TESTS)) {
-    // Fork setup is a genuine ~10-15 min: a full merkletree rescan from RAILGUN
-    // genesis (test.db is wiped just below), then one shield per token in the
-    // list — each a proof generation. Adding the three f(x) tokens took that
-    // list from 8 to 11 and pushed a previously-passing setup past the old
+    // A COLD fork setup is a genuine ~10-15 min: a full merkletree rescan from
+    // RAILGUN genesis, then one shield per token in the list — each a proof
+    // generation. A warm test.db (see setupForkTests) makes the scan
+    // incremental and cuts most of that.
+    //
+    // The generous cap is for the cold case. Adding the three f(x) tokens took
+    // the list from 8 to 11 and pushed a previously-passing setup past the old
     // 10-minute cap, which then reads as a mysterious `before all` timeout
     // several seconds AFTER "Test setup complete" is logged.
     //
     // Use FORK_TEST_TOKENS=minimal to shield only WETH when the target recipe
     // does not need the rest — that is the real lever on setup cost.
     this.timeout(20 * 60 * 1000);
-    removeTestDB();
+    // NOTE: test.db is no longer wiped here. setupForkTests decides, once the
+    // provider exists, whether the existing DB still matches the fork — see
+    // testDBMatchesFork. A warm DB turns the scan incremental.
     await setupForkTests();
   }
 });
 
 after(() => {
-  if (isDefined(process.env.RUN_FORK_TESTS)) {
+  // Deliberately NOT wiping test.db: keeping it is what makes the next run's
+  // merkletree scan incremental. It is discarded on the next run if it no
+  // longer matches the fork. Set FORK_TEST_CLEAN_DB=1 to force a wipe.
+  if (
+    isDefined(process.env.RUN_FORK_TESTS) &&
+    isDefined(process.env.FORK_TEST_CLEAN_DB)
+  ) {
     removeTestDB();
   }
 });
@@ -128,8 +147,30 @@ export const setupForkTests = async () => {
         ? ForkRPCType.Hardhat
         : ForkRPCType.Anvil;
 
+    // Decide reuse BEFORE touching the chain. `anvil_reset` discards every block
+    // the previous run mined — including its shields — so once it has run, no DB
+    // can match. The check therefore needs its own provider, and the answer
+    // gates BOTH the reset and the wipe: reuse both, or neither. Reusing the DB
+    // across a reset is exactly the state that fails merkleroot validation.
+    const reuseFork =
+      forkRPCType === ForkRPCType.Anvil &&
+      (await testDBMatchesFork(
+        new JsonRpcProvider(getLocalhostRPC(getRPCPort(networkName))),
+      ));
+    if (reuseFork) {
+      // eslint-disable-next-line no-console
+      console.log('Reusing test.db and fork state — marker matches this fork.');
+    } else {
+      removeTestDBSync();
+    }
+
     // Ganache forked Ethereum RPC setup
-    await setupTestRPCAndWallets(forkRPCType, networkName, tokenAddresses);
+    await setupTestRPCAndWallets(
+      forkRPCType,
+      networkName,
+      tokenAddresses,
+      reuseFork, // skipReset
+    );
 
     // Bound quicksync to the fork's own block BEFORE the engine starts.
     // The indexer runs ahead of a pinned fork (and can overtake even a fork
@@ -156,6 +197,10 @@ export const setupForkTests = async () => {
 
     // Make sure shielded balances are updated
     await waitForShieldedTokenBalances(txidVersion, networkName, tokenAddresses);
+
+    // Stamp the DB with a block this fork actually has, so the next run can
+    // tell "same anvil, moved forward" from "restarted anvil, DB now stale".
+    await recordTestDBFork(getTestProvider());
   } catch (error) {
     console.error("Setup Fork tests error: ", error);
     throw error;

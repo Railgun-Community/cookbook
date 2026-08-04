@@ -28,3 +28,5 @@ artifacts-*
 # generated during interactive sessions, kept on disk but never committed
 # (so they don't end up in the upstream PR diff).
 docs/superpowers/
+test.db
+test.db.fork.json
