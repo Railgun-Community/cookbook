@@ -25,6 +25,7 @@ import {
   NETWORK_CONFIG,
   NFTTokenType,
   NetworkName,
+  POI_REQUIRED_LISTS,
   RailgunBalancesEvent,
   RailgunERC20AmountRecipient,
   TXIDVersion,
@@ -32,6 +33,7 @@ import {
   isDefined,
   poll,
 } from '@railgun-community/shared-models';
+import { POI } from '@railgun-community/engine';
 import { testConfig } from './test-config.test';
 import { ContractTransaction, JsonRpcProvider, Wallet } from 'ethers';
 import { debug } from 'debug';
@@ -205,6 +207,32 @@ export const startRailgunForTests = async () => {
 
   dbgRailgunSetup('Starting RAILGUN Engine...');
 
+  // poiNodeURLs is `undefined`, NOT `[]`.
+  //
+  // The SDK gates POI on `isDefined(poiNodeURLs)`, and `isDefined([])` is true —
+  // so an empty array does not mean "no POI node", it means "a POI node whose
+  // URL list happens to be empty". That builds a `POINodeRequest([])`, whose
+  // fallback loop advances with
+  //
+  //   if (nodeUrlAttemptIndex === this.nodeURLs.length - 1) { ...final attempt }
+  //   return attemptRequestWithFallbacks(..., nodeUrlAttemptIndex + 1, false);
+  //
+  // With an empty list `length - 1` is `-1`, which a non-negative index never
+  // equals, so the "final attempt" branch is unreachable and the recursion never
+  // terminates. Every iteration POSTs to the string `"undefined"`, fails, and
+  // immediately recurses — an unbounded promise chain that pins the event loop
+  // at 100% CPU and starves everything else in the process. The engine reaches
+  // it through the txid-merkleroot validator that `startRailgunEngine` builds
+  // from these same URLs, so it fires during a scan, not only under POI.
+  //
+  // The symptom is a test that simply stops: no error, no output, no further
+  // chain activity, while node burns a core. It cost two mis-diagnosed runs
+  // here, and it is only visible in a test that keeps working for minutes after
+  // a scan — a recipe fork test finishes its assertions first and mocha's
+  // `exit: true` tears the process down before anyone notices.
+  //
+  // `undefined` gives the intended "no POI aggregator", which is the truth in a
+  // fork environment.
   await startRailgunEngine(
     testWalletSource,
     db,
@@ -212,8 +240,23 @@ export const startRailgunForTests = async () => {
     testArtifactStore,
     false, // useNativeArtifacts
     false, // skipMerkletreeScans
-    [],
-    [],
+    undefined, // poiNodeURLs
+    [], // customPOILists
+  );
+
+  // ...but `POI.init` is called by `startRailgunEngine` only when poiNodeURLs is
+  // defined, and `POI.getActiveListKeys()` dereferences `POI.lists` on every
+  // balance read (`getBalanceBucket`), so skipping it trades the hang for
+  // `TypeError: Cannot read properties of undefined (reading 'filter')`.
+  //
+  // Initialise the registry directly with the same lists `WalletPOI.init` would
+  // have installed, and no node interface. Nothing dereferences the interface:
+  // `POI.isActiveForChain` and `POI.isRequiredForChain` both `return false`
+  // unconditionally in this engine build, so every call site that would reach
+  // the network is short-circuited before it gets there.
+  POI.init(
+    [...POI_REQUIRED_LISTS],
+    undefined as unknown as Parameters<typeof POI.init>[1],
   );
 
   setLoggers(
