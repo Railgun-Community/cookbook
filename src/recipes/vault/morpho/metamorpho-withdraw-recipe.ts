@@ -34,6 +34,10 @@ import { findFirstInputERC20Amount } from '../../../utils/filters';
  * Self-contained (0x-V2 style): queries vault metadata + the ERC-4626 redeem
  * preview on-chain via {@link MorphoVaultAPI}. Asset output is non-deterministic
  * across blocks, so the redeem step tolerates `[minAssets, expectedAssets]`.
+ *
+ * The quote also enforces the Vault V2 gate check, so this recipe refuses to
+ * build against a vault whose gates would reject the ephemeral executor — see
+ * {@link MorphoVaultAPI.assertVaultUsable}.
  */
 export class MorphoVaultRedeemRecipe extends Recipe {
   readonly config: RecipeConfig;

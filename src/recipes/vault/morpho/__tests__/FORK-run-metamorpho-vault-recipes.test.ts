@@ -22,6 +22,7 @@ import {
 } from '../../../../test/common.test';
 import { testConfig } from '../../../../test/test-config.test';
 import { MetaMorphoVaultContract } from '../../../../contract/vault/morpho/metamorpho-vault-contract';
+import { MorphoVaultAPI } from '../../../../api/vault/morpho';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -54,6 +55,24 @@ describe('FORK-run-metamorpho-vault-recipes', function run() {
       MOCK_SHIELD_FEE_BASIS_POINTS,
       MOCK_UNSHIELD_FEE_BASIS_POINTS,
     );
+  });
+
+  // Locks the generation discriminator against the real chain. A V1 MetaMorpho
+  // vault has no gate mechanism at all, so all four Vault V2 gate getters
+  // revert on it — which is exactly what makes them a reliable V1/V2 test. If
+  // this ever starts reporting supportsGates, the address is no longer a V1.
+  it('[FORK] Should report the V1 vault as having no gate mechanism', async function run() {
+    if (shouldSkipForkTest(networkName)) {
+      this.skip();
+      return;
+    }
+
+    const gates = await MorphoVaultAPI.getVaultGates(
+      vaultAddress,
+      getTestProvider(),
+    );
+    expect(gates.supportsGates).to.equal(false);
+    expect(gates.isGated).to.equal(false);
   });
 
   it('[FORK] Should run metamorpho-deposit-recipe', async function run() {

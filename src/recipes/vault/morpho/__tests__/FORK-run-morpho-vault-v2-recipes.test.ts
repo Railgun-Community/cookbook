@@ -1,6 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { NetworkName, TXIDVersion } from '@railgun-community/shared-models';
+import { ZeroAddress } from 'ethers';
 import { balanceForERC20Token } from '@railgun-community/wallet';
 import { MorphoVaultV2DepositRecipe } from '../metamorpho-deposit-recipe';
 import { MorphoVaultV2RedeemRecipe } from '../metamorpho-withdraw-recipe';
@@ -21,6 +22,7 @@ import {
 } from '../../../../test/common.test';
 import { testConfig } from '../../../../test/test-config.test';
 import { MetaMorphoVaultContract } from '../../../../contract/vault/morpho/metamorpho-vault-contract';
+import { MorphoVaultAPI } from '../../../../api/vault/morpho';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -53,6 +55,30 @@ describe('FORK-run-morpho-vault-v2-recipes', function run() {
       MOCK_SHIELD_FEE_BASIS_POINTS,
       MOCK_UNSHIELD_FEE_BASIS_POINTS,
     );
+  });
+
+  // The recipes below only build because this vault is UNGATED. A curator can
+  // attach a gate at any time, at which point every deposit and redemption
+  // reverts for the ephemeral executor — silently, since relay-adapt runs the
+  // cross-contract calls with requireSuccess = false. Assert the precondition
+  // explicitly so a gate shows up here as one clear failure rather than as
+  // three recipes that suddenly refuse to build.
+  it('[FORK] Should report the V2 vault as a Vault V2 with no gates attached', async function run() {
+    if (shouldSkipForkTest(networkName)) {
+      this.skip();
+      return;
+    }
+
+    const gates = await MorphoVaultAPI.getVaultGates(
+      vaultAddress,
+      getTestProvider(),
+    );
+    expect(gates.supportsGates).to.equal(true);
+    expect(gates.receiveSharesGate).to.equal(ZeroAddress);
+    expect(gates.sendSharesGate).to.equal(ZeroAddress);
+    expect(gates.receiveAssetsGate).to.equal(ZeroAddress);
+    expect(gates.sendAssetsGate).to.equal(ZeroAddress);
+    expect(gates.isGated).to.equal(false);
   });
 
   it('[FORK] Should run morpho-vault-v2-deposit-recipe', async function run() {

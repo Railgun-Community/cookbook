@@ -38,6 +38,12 @@ import { findFirstInputERC20Amount } from '../../../utils/filters';
  * provider, never a pre-fetched rate. Minted shares are non-deterministic
  * across blocks, so the deposit step tolerates `[minShares, expectedShares]`.
  *
+ * The quote also enforces the Vault V2 gate check, so this recipe refuses to
+ * build against a vault whose gates would reject the ephemeral executor — see
+ * {@link MorphoVaultAPI.assertVaultUsable}. That guard cannot live in this
+ * constructor (it is a network read; constructors are sync), but there is no
+ * path from here to a step that bypasses the quote.
+ *
  * Approval is scoped to the EXACT deposit amount and granted to the vault only;
  * `deposit` consumes it in full, so no residual allowance is left on the
  * ephemeral account.

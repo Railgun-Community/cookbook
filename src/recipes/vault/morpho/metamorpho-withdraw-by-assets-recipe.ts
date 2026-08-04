@@ -29,6 +29,10 @@ import {
  *
  * Self-contained (0x-V2 style): queries vault metadata + the ERC-4626 withdraw
  * preview on-chain via {@link MorphoVaultAPI}.
+ *
+ * The quote also enforces the Vault V2 gate check, so this recipe refuses to
+ * build against a vault whose gates would reject the ephemeral executor — see
+ * {@link MorphoVaultAPI.assertVaultUsable}.
  */
 export class MorphoVaultWithdrawRecipe extends Recipe {
   readonly config: RecipeConfig;
