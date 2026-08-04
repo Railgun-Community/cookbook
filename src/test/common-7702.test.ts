@@ -23,6 +23,12 @@ import chaiAsPromised from 'chai-as-promised';
 import { RecipeInput, RecipeOutput } from '../models/export-models';
 import { createShieldRecipients } from '../utils/shield-recipients';
 import {
+  ExecutorResiduePolicy,
+  ExecutorResidueReport,
+  assertExecutorResidue,
+  ethersResidueChainReader,
+} from '../utils/7702';
+import {
   getTestEthersWallet,
   getTestProvider,
   getTestRailgunWallet,
@@ -30,7 +36,6 @@ import {
 import { testConfig } from './test-config.test';
 import { getForkTestNetworkName, shouldSkipForkTest } from './common.test';
 import { ForkRPCType } from './rpc-setup.test';
-import { ERC20Contract } from '../contract';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -287,10 +292,15 @@ export const createCrossContractCalls7702ForTest = async (
 /**
  * Execute a recipe through the 7702 path and assert shielded balances settle.
  *
- * Mirrors `executeRecipeStepsAndAssertUnshieldBalances` with three deliberate
+ * Mirrors `executeRecipeStepsAndAssertUnshieldBalances` with four deliberate
  * differences:
- *  - residual-balance assertions target the **ephemeral EOA**, not relay-adapt,
+ *  - residual-state assertions target the **ephemeral EOA**, not relay-adapt,
  *    because that is where the unshield lands under 7702
+ *  - residue is checked over the recipe's *whole* surface, not just its inputs —
+ *    allowances, every asset any step names, and any NFT it touches. See
+ *    `assertExecutorResidue`: under a reused executor those are the ones that
+ *    accumulate, and under `requireSuccess = false` they are often the only
+ *    evidence that an inner call did not run
  *  - the executor address is returned to the caller so the test can assert the
  *    recipe was built for that exact address
  *  - the gas window assertion is opt-out (`skipGasWindowAssertion`), because
@@ -304,8 +314,22 @@ export const executeRecipe7702AndAssertUnshieldBalances = async (
   opts?: {
     expectPossiblePrecisionLossOverflow?: boolean;
     skipGasWindowAssertion?: boolean;
+    /**
+     * What residue this recipe is expected to leave on the executor.
+     *
+     * Omit it and the executor must end completely clean. Every exemption
+     * carries a required `reason`, so a recipe that legitimately leaves
+     * something behind says so at the call site instead of being discovered
+     * later. `SHIPPED_APPROVAL_RESIDUE_POLICY` documents which shipped recipes
+     * need one and why.
+     */
+    residuePolicy?: ExecutorResiduePolicy;
   },
-): Promise<{ gasUsed: bigint; ephemeralAddress: string }> => {
+): Promise<{
+  gasUsed: bigint;
+  ephemeralAddress: string;
+  residueReport: ExecutorResidueReport;
+}> => {
   const railgunWallet = getTestRailgunWallet();
   if (recipeInput.railgunAddress !== railgunWallet.getAddress()) {
     throw new Error(
@@ -422,14 +446,23 @@ export const executeRecipe7702AndAssertUnshieldBalances = async (
 
   await delay(SCAN_BALANCE_WAIT);
 
-  // I3: the ephemeral EOA is a pass-through. Anything left on it is value the
-  // recipe failed to account for — the 7702 analogue of the relay-adapt
-  // zero-balance assertions.
-  const ephemeralETHBalance = await provider.getBalance(ephemeralAddress);
-  expect(ephemeralETHBalance).to.equal(
-    0n,
-    `${name}: Ephemeral EOA ${ephemeralAddress} should hold no ETH after execution.`,
-  );
+  // I3: the ephemeral EOA is a pass-through. Anything left on it is value or
+  // authority the recipe failed to account for — the 7702 analogue of the
+  // relay-adapt zero-balance assertions, widened past ETH and the input assets
+  // because a reused executor accumulates whatever every earlier batch left.
+  //
+  // Runs before the private-balance reconciliation on purpose: when a batch
+  // fails inside `requireSuccess = false` it mines with status 1 and the
+  // private balances are simply short, which reads as an accounting bug. The
+  // residue report names what is actually still sitting on the executor.
+  const residueReport = await assertExecutorResidue({
+    name,
+    executor: ephemeralAddress,
+    recipeInput,
+    recipeOutput,
+    reader: ethersResidueChainReader(provider),
+    policy: opts?.residuePolicy,
+  });
 
   const shieldTokenMap: Record<string, bigint> = {};
   const shieldStepOutput =
@@ -447,13 +480,8 @@ export const executeRecipe7702AndAssertUnshieldBalances = async (
 
   await Promise.all(
     recipeInput.erc20Amounts.map(async ({ tokenAddress }) => {
-      const token = new ERC20Contract(tokenAddress, provider);
-      const ephemeralTokenBalance = await token.balanceOf(ephemeralAddress);
-      expect(ephemeralTokenBalance).to.equal(
-        0n,
-        `${name}: Ephemeral EOA token balance for ${tokenAddress} should be 0 after recipe execution.`,
-      );
-
+      // The executor's balance of this asset is asserted by
+      // assertExecutorResidue above, over a strictly wider set of assets.
       const postBalance = await balanceForERC20Token(
         txidVersion,
         railgunWallet,
@@ -484,7 +512,7 @@ export const executeRecipe7702AndAssertUnshieldBalances = async (
     }),
   );
 
-  return { gasUsed: txReceipt.gasUsed, ephemeralAddress };
+  return { gasUsed: txReceipt.gasUsed, ephemeralAddress, residueReport };
 };
 
 /**

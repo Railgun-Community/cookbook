@@ -72,20 +72,36 @@ describe('FORK-run-empty-recipe-7702', function run() {
 
     const recipeOutput = await recipe.getRecipeOutput(recipeInput);
 
-    const { gasUsed, ephemeralAddress: executedWith } =
-      await executeRecipe7702AndAssertUnshieldBalances(
-        recipe.config.name,
-        recipeInput,
-        recipeOutput,
-        {
-          // EmptyRecipe's min gas limit is tuned for the relay-adapt path; the
-          // 7702 path has a different constant cost. Measuring is the point of
-          // this test, so don't gate on the untuned window.
-          skipGasWindowAssertion: true,
-        },
-      );
+    const {
+      gasUsed,
+      ephemeralAddress: executedWith,
+      residueReport,
+    } = await executeRecipe7702AndAssertUnshieldBalances(
+      recipe.config.name,
+      recipeInput,
+      recipeOutput,
+      {
+        // EmptyRecipe's min gas limit is tuned for the relay-adapt path; the
+        // 7702 path has a different constant cost. Measuring is the point of
+        // this test, so don't gate on the untuned window.
+        skipGasWindowAssertion: true,
+        // No policy: EmptyRecipe approves nothing and holds nothing, so the
+        // executor must end completely clean.
+      },
+    );
 
     expect(executedWith).to.equal(ephemeralAddress);
+
+    // Prove the residue assertion actually looked at something. A bug in
+    // surface collection would otherwise make it pass vacuously here and
+    // everywhere else that relies on it.
+    expect(
+      residueReport.surface.tokenAddresses.map(a => a.toLowerCase()),
+    ).to.include(tokenAddress.toLowerCase());
+    expect(residueReport.surface.allowances).to.deep.equal(
+      [],
+      'EmptyRecipe encodes no approvals',
+    );
 
     // eslint-disable-next-line no-console
     console.log(

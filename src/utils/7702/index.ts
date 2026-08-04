@@ -1,4 +1,5 @@
 export * from './ephemeral-executor';
+export * from './executor-residue';
 export * from './position-owner';
 export * from './route-to-executor';
 // Note: the canonical `assertValidRecipientAddress` stays in ../address and is
