@@ -9,6 +9,7 @@ import {
   RecipeInput,
   RecipeNFTRecipient,
   RecipeOutput,
+  RecipePositionInfo,
 } from '../../models/export-models';
 import { FxMintTopupRecipe } from '../../recipes/borrow/fx/fx-mint-topup-recipe';
 import { resolvePool } from '../../steps/borrow/fx/fx-mint-util';
@@ -23,6 +24,11 @@ const { expect } = chai;
 
 const TOKEN = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // pragma: allowlist secret
 const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
+// Morpho Blue position fixture: an un-tokenized position keyed by an account.
+const OWNER = '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B';
+const MARKET_ID =
+  '0x8eaf7b29f02ba8d8c1d7aeb587403dcb16e2e943e4e2f5f94b0963c2386406c9';
 
 // f(x) position NFT shape: the pool contract is the NFT contract, and the
 // steps derive tokenSubID as '0x' + positionId.toString(16).
@@ -103,6 +109,7 @@ const emptyOutput = (name: string): RecipeOutput => ({
   erc20AmountRecipients: [],
   nftRecipients: [],
   feeERC20AmountRecipients: [],
+  outputPositions: [],
   minGasLimit: 0n,
 });
 
@@ -290,6 +297,105 @@ describe('combo-meal NFT aggregation', () => {
     await combo.getComboMealOutput(comboInput());
     expect(downstream.receivedInput?.nfts).to.have.length(1);
     expect(downstream.receivedInput?.nfts[0].amount).to.equal(0n);
+  });
+});
+
+/**
+ * Positions aggregate the OPPOSITE way to NFTs, for the same underlying reason.
+ *
+ * An NFT is a balance: it transits the seam and every recipe it passes through
+ * re-declares it, so the declarations must be reconciled (last writer wins). A
+ * position record is an event: nothing carries positions across the seam —
+ * `createNextRecipeInput` builds the next RecipeInput from `erc20AmountRecipients`
+ * and `nftRecipients` only — and a step emits one only when it itself changes a
+ * position. Two records for the same market and leg therefore describe two real
+ * changes, and collapsing them would drop one.
+ */
+describe('combo-meal position aggregation', () => {
+  const debtIncrease = (amount: bigint): RecipePositionInfo => ({
+    protocol: 'morpho-blue',
+    marketOrPoolId: MARKET_ID,
+    custody: 'address-bound',
+    owner: OWNER,
+    kind: 'debt',
+    direction: 'increase',
+    tokenAddress: TOKEN,
+    decimals: 6n,
+    amount,
+  });
+
+  const runPositionSeam = async (
+    upstream: RecipePositionInfo[],
+    downstream: RecipePositionInfo[],
+  ): Promise<RecipeOutput> => {
+    const combo = new TestComboMeal(
+      [
+        new CapturingRecipe({
+          ...emptyOutput('upstream'),
+          outputPositions: upstream,
+        }),
+        new CapturingRecipe({
+          ...emptyOutput('downstream'),
+          outputPositions: downstream,
+        }),
+      ],
+      false,
+    );
+    return combo.getComboMealOutput(comboInput());
+  };
+
+  it('Should keep both records when the same leg moves in both recipes', async () => {
+    const output = await runPositionSeam(
+      [debtIncrease(100n)],
+      [debtIncrease(50n)],
+    );
+    expect(output.outputPositions).to.have.length(2);
+    expect(output.outputPositions.map(({ amount }) => amount)).to.deep.equal([
+      100n,
+      50n,
+    ]);
+  });
+
+  it('Should preserve recipe order', async () => {
+    const output = await runPositionSeam(
+      [debtIncrease(1n), debtIncrease(2n)],
+      [debtIncrease(3n)],
+    );
+    expect(output.outputPositions.map(({ amount }) => amount)).to.deep.equal([
+      1n,
+      2n,
+      3n,
+    ]);
+  });
+
+  it('Should not carry positions into the downstream recipe input', async () => {
+    // The channel is output-only on purpose: no step consumes a position, and
+    // threading one in would create a second source of truth beside the
+    // on-chain reader. RecipeInput has no place to put it, and this asserts the
+    // seam does not grow one by accident.
+    const downstream = new CapturingRecipe(emptyOutput('downstream'));
+    const combo = new TestComboMeal(
+      [
+        new CapturingRecipe({
+          ...emptyOutput('upstream'),
+          outputPositions: [debtIncrease(100n)],
+        }),
+        downstream,
+      ],
+      false,
+    );
+    await combo.getComboMealOutput(comboInput());
+    expect(Object.keys(downstream.receivedInput ?? {})).to.deep.equal([
+      'railgunAddress',
+      'networkName',
+      'erc20Amounts',
+      'nfts',
+    ]);
+  });
+
+  it('Should emit an empty channel for a combo that touches no position', async () => {
+    const output = await runPositionSeam([], []);
+    expect(output.outputPositions).to.deep.equal([]);
   });
 });
 

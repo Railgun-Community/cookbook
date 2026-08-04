@@ -1,4 +1,5 @@
 import {
+  RecipePositionInfo,
   StepConfig,
   StepInput,
   StepOutputERC20Amount,
@@ -33,6 +34,7 @@ export class MorphoBlueWithdrawCollateralStep extends Step {
   ): Promise<UnvalidatedStepOutput> {
     const {
       params,
+      marketId,
       collateralToken,
       collateralDecimals,
       withdrawAssets,
@@ -56,11 +58,27 @@ export class MorphoBlueWithdrawCollateralStep extends Step {
       approvedSpender: undefined,
     };
 
+    // Debited from `onBehalf`'s position; paid to `receiver`. As with borrow,
+    // the two are the same account on every shipped path, and the position
+    // record must follow `onBehalf` if they ever diverge.
+    const withdrawnPosition: RecipePositionInfo = {
+      protocol: 'morpho-blue',
+      marketOrPoolId: marketId,
+      custody: 'address-bound',
+      owner: onBehalf,
+      kind: 'collateral',
+      direction: 'decrease',
+      tokenAddress: collateralToken,
+      decimals: collateralDecimals,
+      amount: withdrawAssets,
+    };
+
     return {
       crossContractCalls: [crossContractCall],
       // Withdrawal produces collateral tokens; existing inputs pass through.
       outputERC20Amounts: [withdrawnCollateral, ...input.erc20Amounts],
       outputNFTs: input.nfts,
+      outputPositions: [withdrawnPosition],
     };
   }
 }

@@ -8,9 +8,12 @@ import type {
 } from '../../../models/export-models';
 import {
   FX_POOL_MANAGER_ABI,
+  fxCollateralCreditWithCaveat,
   fxCollateralWithdrawOutput,
   fxDebtBorrowOutput,
   fxDebtRepaySpend,
+  fxPositionInfo,
+  fxPositionTokenSubID,
   type ResolvedFxPool,
 } from './fx-mint-util';
 
@@ -65,12 +68,23 @@ export type FxMintAdjustPositionStepData = {
    * PoolConfiguration.getPoolFeeRatio(pool, operator)[1].
    *
    * Zero on long pools, **0.1% on shorts** — so the withdraw path could not be
-   * declared correctly for a short without it. There is deliberately no
-   * `supplyFeeRatio`: the manager pulls the full collateral amount and keeps the
-   * supply fee out of what it credits to the position, so that fee never
-   * changes the caller's outlay (see `fxCollateralSupplySpend`).
+   * declared correctly for a short without it.
    */
   withdrawFeeRatio?: bigint;
+  /**
+   * f(x)'s supply fee for this (pool, operator), 1e9-denominated, from
+   * `PoolConfiguration.getPoolFeeRatio(pool, operator)[0]` —
+   * `getFxPool(...).supplyFeeRatio`. Meaningful only when `collDelta > 0`.
+   *
+   * Optional, and unlike the three ratios above it changes NO ERC-20 amount:
+   * the manager pulls the full collateral and keeps the supply fee out of what
+   * it credits to the position, so the fee shrinks the position rather than the
+   * caller's outlay (see `fxCollateralSupplySpend`). It is here because the
+   * `outputPositions` record cannot be exact without it — omitted, the deposit
+   * record is emitted as an upper bound carrying an `estimateReason`, which is
+   * exact on a long (fee 0) and 0.3% high on a short.
+   */
+  supplyFeeRatio?: bigint;
 };
 
 /**
@@ -156,6 +170,7 @@ export class FxMintAdjustPositionStep extends Step {
       borrowFeeRatio,
       repayFeeRatio,
       withdrawFeeRatio,
+      supplyFeeRatio,
     } = this.data;
     const {
       address: poolAddress,
@@ -345,11 +360,76 @@ export class FxMintAdjustPositionStep extends Step {
     const outputNFTs: NonNullable<UnvalidatedStepOutput['outputNFTs']> = [
       {
         nftAddress: poolAddress,
-        tokenSubID: '0x' + positionId.toString(16),
+        tokenSubID: fxPositionTokenSubID(positionId),
         nftTokenType: NFTTokenType.ERC721,
         amount: 1n,
       },
     ];
+
+    // ---- outputPositions ----
+    // One record per axis actually moved, mirroring the four branches above but
+    // in POSITION terms rather than caller terms. The two differ on three of
+    // the four:
+    //
+    //   collDelta > 0  caller pays `effectiveCollDelta`; position is credited
+    //                  that minus the supply fee.
+    //   collDelta < 0  position gives up the full `-collDelta`; the caller
+    //                  receives it minus the withdraw fee.
+    //   debtDelta > 0  position owes the full `debtDelta`; the caller is paid
+    //                  it minus the borrow fee.
+    //   debtDelta < 0  position's debt falls by `-debtDelta`; the caller pays
+    //                  that plus the repay fee.
+    //
+    // So every record below is the raw `operate()` argument except the deposit,
+    // which is the only axis where the fee lands on the position side.
+    const outputPositions: NonNullable<
+      UnvalidatedStepOutput['outputPositions']
+    > = [];
+
+    if (collDelta > 0n) {
+      outputPositions.push(
+        fxPositionInfo({
+          pool,
+          positionId,
+          kind: 'collateral',
+          direction: 'increase',
+          ...fxCollateralCreditWithCaveat(effectiveCollDelta, supplyFeeRatio),
+        }),
+      );
+    }
+    if (collDelta < 0n) {
+      outputPositions.push(
+        fxPositionInfo({
+          pool,
+          positionId,
+          kind: 'collateral',
+          direction: 'decrease',
+          amount: -collDelta,
+        }),
+      );
+    }
+    if (debtDelta > 0n) {
+      outputPositions.push(
+        fxPositionInfo({
+          pool,
+          positionId,
+          kind: 'debt',
+          direction: 'increase',
+          amount: debtDelta,
+        }),
+      );
+    }
+    if (debtDelta < 0n) {
+      outputPositions.push(
+        fxPositionInfo({
+          pool,
+          positionId,
+          kind: 'debt',
+          direction: 'decrease',
+          amount: -debtDelta,
+        }),
+      );
+    }
 
     const tx: ContractTransaction = {
       to: poolManager,
@@ -362,6 +442,7 @@ export class FxMintAdjustPositionStep extends Step {
       spentERC20Amounts,
       outputERC20Amounts,
       outputNFTs,
+      outputPositions,
     };
   }
 }

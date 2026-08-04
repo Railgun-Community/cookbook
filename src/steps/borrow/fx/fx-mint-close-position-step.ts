@@ -9,6 +9,8 @@ import type {
 import {
   FX_POOL_MANAGER_ABI,
   fxCollateralWithdrawOutput,
+  fxPositionInfo,
+  fxPositionTokenSubID,
   type ResolvedFxPool,
 } from './fx-mint-util';
 
@@ -198,7 +200,7 @@ export class FxMintClosePositionStep extends Step {
         : [
             {
               nftAddress: poolAddress,
-              tokenSubID: '0x' + positionId.toString(16),
+              tokenSubID: fxPositionTokenSubID(positionId),
               nftTokenType: NFTTokenType.ERC721,
               amount: 1n,
             },
@@ -227,12 +229,44 @@ export class FxMintClosePositionStep extends Step {
         ? [
             {
               nftAddress: poolAddress,
-              tokenSubID: '0x' + positionId.toString(16),
+              tokenSubID: fxPositionTokenSubID(positionId),
               nftTokenType: NFTTokenType.ERC721,
               amount: 1n,
             },
           ]
         : [],
+      // Both legs shrink, and both use the GROSS `operate()` argument rather
+      // than the caller-facing figure:
+      //
+      //   debt       — falls by `repayAmount`, the principal burned against the
+      //                position. The caller parts with `approveAmount`, which
+      //                is that plus the f(x) repay fee (declared above as spend
+      //                + fee); charging the fee to the position would report
+      //                more debt cleared than actually was.
+      //   collateral — the position gives up the full `withdrawColl`. The
+      //                caller receives `withdrawnNet`, which is that minus the
+      //                withdraw fee (0 on longs, 0.1% on shorts).
+      //
+      // On a FULL close the NFT is burned (`spentNFTs` above) and these two
+      // records are the position's epitaph — the only description of what the
+      // batch retired. The validator accepts the bearer handle from either NFT
+      // channel for exactly this case.
+      outputPositions: [
+        fxPositionInfo({
+          pool,
+          positionId,
+          kind: 'debt',
+          direction: 'decrease',
+          amount: repayAmount,
+        }),
+        fxPositionInfo({
+          pool,
+          positionId,
+          kind: 'collateral',
+          direction: 'decrease',
+          amount: withdrawColl,
+        }),
+      ],
     };
   }
 }

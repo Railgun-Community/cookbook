@@ -80,6 +80,7 @@ export abstract class ComboMeal {
       erc20AmountRecipients: [],
       nftRecipients: [],
       feeERC20AmountRecipients: [],
+      outputPositions: [],
       minGasLimit,
     };
 
@@ -101,6 +102,29 @@ export abstract class ComboMeal {
       );
       aggregatedRecipeOutput.feeERC20AmountRecipients.push(
         ...recipeOutput.feeERC20AmountRecipients,
+      );
+
+      // Concatenate — NOT last-writer-wins like the NFT branch below, and not
+      // summed like the ERC20 branch above.
+      //
+      // Both of those exist because an ARTIFACT that transits the seam is
+      // re-declared by every recipe it passes through, so one thing appears N
+      // times and the declarations have to be reconciled. A position record is
+      // not an artifact but an event, and it does not transit the seam at all:
+      // `createNextRecipeInput` builds the next RecipeInput from
+      // `erc20AmountRecipients` and `nftRecipients` only, and neither
+      // RecipeInput nor StepInput has a positions channel to carry one. A step
+      // emits a record only when it itself changes a position.
+      //
+      // So two records for the same (protocol, market, owner, kind) across the
+      // seam mean two real changes — a combo that borrows in one recipe and
+      // borrows again in the next — and last-writer-wins would silently drop
+      // the second. Note this is the opposite conclusion from the NFT case for
+      // the same underlying reason, not in spite of it: a bearer position's NFT
+      // still dedupes in `nftRecipients` (it is a balance), while the records
+      // describing what happened to that position accumulate (they are events).
+      aggregatedRecipeOutput.outputPositions.push(
+        ...recipeOutput.outputPositions,
       );
 
       // Add amounts to remove any duplicates.

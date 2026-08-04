@@ -1,6 +1,7 @@
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
+  RecipePositionInfo,
   StepConfig,
   StepInput,
   UnvalidatedStepOutput,
@@ -33,7 +34,7 @@ export class MorphoBlueRepayStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
-    const { params, loanToken, loanDecimals, repayAssets, onBehalf } =
+    const { params, marketId, loanToken, loanDecimals, repayAssets, onBehalf } =
       this.quote;
 
     const loanInfo: RecipeERC20Info = {
@@ -62,12 +63,30 @@ export class MorphoBlueRepayStep extends Step {
       recipient: 'Morpho Blue Market',
     };
 
+    // Assets-denominated repay: `Morpho.repay(assets, 0, onBehalf)` converts
+    // `assets` to shares and burns them, so the debt falls by exactly this much
+    // at inclusion. `getRepayQuote` has already capped it at the position's
+    // debt, and debt only grows with accrual between build and inclusion, so
+    // the cap cannot be exceeded by drift.
+    const repaidDebt: RecipePositionInfo = {
+      protocol: 'morpho-blue',
+      marketOrPoolId: marketId,
+      custody: 'address-bound',
+      owner: onBehalf,
+      kind: 'debt',
+      direction: 'decrease',
+      tokenAddress: loanToken,
+      decimals: loanDecimals,
+      amount: repayAssets,
+    };
+
     return {
       crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spentLoanToken],
       // Debt reduction is un-tokenized; only loan-token change passes through.
       outputERC20Amounts: unusedERC20Amounts,
       outputNFTs: input.nfts,
+      outputPositions: [repaidDebt],
     };
   }
 }

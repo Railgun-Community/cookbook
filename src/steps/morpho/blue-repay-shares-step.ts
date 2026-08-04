@@ -1,6 +1,7 @@
 import {
   RecipeERC20AmountRecipient,
   RecipeERC20Info,
+  RecipePositionInfo,
   StepConfig,
   StepInput,
   UnvalidatedStepOutput,
@@ -39,8 +40,16 @@ export class MorphoBlueRepaySharesStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
-    const { params, loanToken, loanDecimals, repayShares, maxRepaidAssets, onBehalf } =
-      this.quote;
+    const {
+      params,
+      marketId,
+      loanToken,
+      loanDecimals,
+      repayShares,
+      expectedRepaidAssets,
+      maxRepaidAssets,
+      onBehalf,
+    } = this.quote;
 
     const loanInfo: RecipeERC20Info = {
       tokenAddress: loanToken,
@@ -68,11 +77,37 @@ export class MorphoBlueRepaySharesStep extends Step {
       recipient: 'Morpho Blue Market (shares repay)',
     };
 
+    // Shares mode is the one case where the position delta is exact in a unit
+    // the ERC20 channels cannot express. `repayShares` is what Morpho burns —
+    // exactly, whenever the batch is included — while the asset figure drifts
+    // with interest between build and inclusion. So the record carries both,
+    // with `amount` set to the EXPECTED assets rather than the conservative
+    // `maxRepaidAssets` declared as spent: the spend has to be an upper bound
+    // (it sizes the unshield), but a debt reduction reported as an upper bound
+    // would over-state how much of the position was closed.
+    const repaidDebt: RecipePositionInfo = {
+      protocol: 'morpho-blue',
+      marketOrPoolId: marketId,
+      custody: 'address-bound',
+      owner: onBehalf,
+      kind: 'debt',
+      direction: 'decrease',
+      tokenAddress: loanToken,
+      decimals: loanDecimals,
+      amount: expectedRepaidAssets,
+      shares: repayShares,
+      estimateReason:
+        `assets drift with interest between build and inclusion; ` +
+        `\`shares\` (${repayShares}) is the exact burn and the actual assets ` +
+        `land in [${expectedRepaidAssets}, ${maxRepaidAssets}]`,
+    };
+
     return {
       crossContractCalls: [crossContractCall],
       spentERC20Amounts: [spentLoanToken],
       outputERC20Amounts: unusedERC20Amounts,
       outputNFTs: input.nfts,
+      outputPositions: [repaidDebt],
     };
   }
 }

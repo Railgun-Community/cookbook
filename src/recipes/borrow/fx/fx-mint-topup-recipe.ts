@@ -14,6 +14,16 @@ export type FxMintTopupRecipeOpts = {
   pool: FxMintPoolRef;
   /** Existing position to top up. */
   positionId: bigint;
+  /**
+   * f(x)'s supply fee for this (pool, operator), 1e9-denominated —
+   * `getFxPool(...).supplyFeeRatio`.
+   *
+   * Optional and ERC-20-neutral: the manager pulls the full collateral either
+   * way, so this recipe's amounts are unchanged by it. It only sharpens
+   * `recipeOutput.outputPositions` — omitted, the collateral record is an upper
+   * bound (exact on a long, 0.3% high on a short) and says so.
+   */
+  supplyFeeRatio?: bigint;
 };
 
 /**
@@ -70,6 +80,7 @@ export class FxMintTopupRecipe extends Recipe {
         positionId: this.opts.positionId,
         collDelta: collInput.expectedBalance,
         debtDelta: 0n,
+        supplyFeeRatio: this.opts.supplyFeeRatio,
       }),
     ];
   }

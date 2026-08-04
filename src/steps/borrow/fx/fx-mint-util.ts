@@ -1,4 +1,6 @@
 import { getAddress as ethersGetAddress } from 'ethers';
+import { NFTTokenType } from '@railgun-community/shared-models';
+import type { RecipePositionInfo } from '../../../models/export-models';
 
 /**
  * Type alias for an EVM address. Structurally identical to viem's
@@ -810,6 +812,93 @@ export type FxFeeRatios = {
  * {@link fxCollateralWithdrawOutput}.
  */
 export const fxCollateralSupplySpend = (supplied: bigint): bigint => supplied;
+
+/**
+ * Collateral actually **credited to the position** when the caller supplies
+ * `supplied` — the mirror of {@link fxCollateralSupplySpend}, and the reason
+ * that function exists as a named identity rather than being inlined.
+ *
+ * The supply fee is where the caller's outlay and the position's gain part
+ * company: `_handleSupply` pulls the full amount from `msg.sender` and keeps the
+ * fee out of what it credits. So the ERC-20 accounting must use the gross and a
+ * position record must use this. `0n` on the long pools; `3_000_000n` (0.3%) on
+ * the shorts, where reporting the gross over-states the position by that much —
+ * the same class of error the close step's `withdrawFeeRatio` was made required
+ * to prevent.
+ */
+export const fxCollateralPositionCredit = (
+  supplied: bigint,
+  supplyFeeRatio: bigint,
+): bigint => supplied - (supplied * supplyFeeRatio) / FEE_DENOM;
+
+/** `tokenSubID` for an f(x) position NFT, as every fx step derives it. */
+export const fxPositionTokenSubID = (positionId: bigint): string =>
+  '0x' + positionId.toString(16);
+
+/**
+ * Build one {@link RecipePositionInfo} for an f(x) position leg.
+ *
+ * Centralised so the token and its decimals are always taken from the pool
+ * descriptor by `kind` — pairing a debt amount with the collateral token (or
+ * with `18n` on `WBTC-Short`) is exactly the mistake the descriptor exists to
+ * prevent, and it is invisible in a test that only exercises a long pool.
+ *
+ * f(x) positions are BEARER: the handle is the position NFT, not an account.
+ * `Pool` is its own ERC-721 contract, so the pool address serves as both the
+ * venue id and the NFT contract.
+ */
+export const fxPositionInfo = (params: {
+  pool: ResolvedFxPool;
+  positionId: bigint;
+  kind: 'collateral' | 'debt';
+  direction: 'increase' | 'decrease';
+  amount: bigint;
+  estimateReason?: string;
+}): RecipePositionInfo => {
+  const { pool, positionId, kind, direction, amount, estimateReason } = params;
+  const isCollateral = kind === 'collateral';
+  return {
+    protocol: 'fx',
+    marketOrPoolId: pool.address,
+    custody: 'bearer',
+    nftAddress: pool.address,
+    tokenSubID: fxPositionTokenSubID(positionId),
+    nftTokenType: NFTTokenType.ERC721,
+    kind,
+    direction,
+    tokenAddress: isCollateral ? pool.collateralToken : pool.debtToken,
+    decimals: isCollateral ? pool.collateralDecimals : pool.debtDecimals,
+    amount,
+    ...(estimateReason !== undefined ? { estimateReason } : {}),
+  };
+};
+
+/**
+ * The collateral credit for a deposit, plus the caveat to attach when the
+ * supply fee is unknown.
+ *
+ * `supplyFeeRatio` is optional on the deposit-axis steps because making it
+ * required would break every existing caller. Omitting it is safe on a long
+ * pool (the fee is zero) and over-states the position by 0.3% on a short, so
+ * the shortfall is declared rather than hidden: the record carries the gross
+ * amount and an `estimateReason` naming it an upper bound.
+ */
+export const fxCollateralCreditWithCaveat = (
+  supplied: bigint,
+  supplyFeeRatio: Optional<bigint>,
+): { amount: bigint; estimateReason?: string } => {
+  if (supplyFeeRatio === undefined) {
+    return {
+      amount: supplied,
+      estimateReason:
+        'upper bound: supplyFeeRatio was not supplied, so the f(x) supply fee ' +
+        'is not deducted. Exact on the long pools (fee 0); over-states a short ' +
+        "pool's credited collateral by the fee (0.3% today). Read it from " +
+        'getFxPool(...).supplyFeeRatio.',
+    };
+  }
+  return { amount: fxCollateralPositionCredit(supplied, supplyFeeRatio) };
+};
 
 /**
  * Collateral actually received when withdrawing `withdrawn` from a position.

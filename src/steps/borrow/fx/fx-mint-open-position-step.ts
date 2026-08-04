@@ -8,7 +8,10 @@ import type {
 } from '../../../models/export-models';
 import {
   FX_POOL_MANAGER_ABI,
+  fxCollateralCreditWithCaveat,
   fxDebtBorrowOutput,
+  fxPositionInfo,
+  fxPositionTokenSubID,
   type ResolvedFxPool,
 } from './fx-mint-util';
 
@@ -50,12 +53,25 @@ export type FxMintOpenPositionStepData = {
    * Caller fetches via PoolConfiguration.getPoolFeeRatio(pool, operator)[2].
    *
    * Long pools charge 0.5% here; **short pools currently charge zero** and put
-   * their fees on the collateral side instead. The supply fee is deliberately
-   * absent from this step: the manager pulls the full collateral amount and
-   * keeps the fee out of what it credits to the position, so it never changes
-   * the caller's outlay — see `fxCollateralSupplySpend`.
+   * their fees on the collateral side instead. The supply fee never changes the
+   * caller's outlay — see `fxCollateralSupplySpend` and `supplyFeeRatio` below.
    */
   borrowFeeRatio: bigint;
+  /**
+   * f(x)'s supply fee for this (pool, operator) pair, 1e9-denominated, from
+   * `PoolConfiguration.getPoolFeeRatio(pool, operator)[0]` —
+   * `getFxPool(...).supplyFeeRatio`.
+   *
+   * Optional, and it does NOT affect any ERC-20 amount: the manager pulls the
+   * full collateral either way. It affects only how much collateral the
+   * *position* is credited with, which is why it appeared here at all — the
+   * `outputPositions` record cannot be exact without it.
+   *
+   * Omit it on a long pool (fee 0) with no loss. Omit it on a short and the
+   * position record is emitted as an upper bound with an `estimateReason`
+   * saying so, rather than silently over-stating the position by 0.3%.
+   */
+  supplyFeeRatio?: bigint;
 };
 
 /**
@@ -89,7 +105,13 @@ export class FxMintOpenPositionStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
-    const { pool, targetDebt, predictedPositionId, borrowFeeRatio } = this.data;
+    const {
+      pool,
+      targetDebt,
+      predictedPositionId,
+      borrowFeeRatio,
+      supplyFeeRatio,
+    } = this.data;
     const {
       address: poolAddress,
       collateralToken,
@@ -193,10 +215,37 @@ export class FxMintOpenPositionStep extends Step {
       outputNFTs: [
         {
           nftAddress: poolAddress,
-          tokenSubID: '0x' + predictedPositionId.toString(16),
+          tokenSubID: fxPositionTokenSubID(predictedPositionId),
           nftTokenType: NFTTokenType.ERC721,
           amount: 1n,
         },
+      ],
+      // The position the NFT above is a receipt FOR. Both records describe what
+      // the POSITION gets, which is not what the caller pays or receives:
+      //
+      //   collateral — the caller parts with the full `collateralAmount`
+      //                (declared as spent), the position is credited that minus
+      //                the supply fee.
+      //   debt       — the position owes the full `targetDebt`, the caller is
+      //                paid `debtNet` (declared as an output).
+      //
+      // Reusing either caller-facing figure here would misreport the position
+      // by a fee, in opposite directions on the two axes.
+      outputPositions: [
+        fxPositionInfo({
+          pool,
+          positionId: predictedPositionId,
+          kind: 'collateral',
+          direction: 'increase',
+          ...fxCollateralCreditWithCaveat(collateralAmount, supplyFeeRatio),
+        }),
+        fxPositionInfo({
+          pool,
+          positionId: predictedPositionId,
+          kind: 'debt',
+          direction: 'increase',
+          amount: targetDebt,
+        }),
       ],
     };
   }

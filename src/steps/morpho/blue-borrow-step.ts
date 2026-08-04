@@ -1,4 +1,5 @@
 import {
+  RecipePositionInfo,
   StepConfig,
   StepInput,
   StepOutputERC20Amount,
@@ -34,8 +35,15 @@ export class MorphoBlueBorrowStep extends Step {
   protected async getStepOutput(
     input: StepInput,
   ): Promise<UnvalidatedStepOutput> {
-    const { params, loanToken, loanDecimals, borrowAssets, onBehalf, receiver } =
-      this.quote;
+    const {
+      params,
+      marketId,
+      loanToken,
+      loanDecimals,
+      borrowAssets,
+      onBehalf,
+      receiver,
+    } = this.quote;
 
     const contract = new MorphoBlueContract();
     const crossContractCall = await contract.createBorrow(
@@ -53,11 +61,35 @@ export class MorphoBlueBorrowStep extends Step {
       approvedSpender: undefined,
     };
 
+    // The debt is booked against `onBehalf`, NOT `receiver`. Morpho's `borrow`
+    // takes both and only the first carries the liability; the shipped builders
+    // resolve one executor into both, so they are equal today. If they ever
+    // diverge, the loan token lands with `receiver` (the ERC20 output above)
+    // while the obligation stays with `onBehalf` (this record) — mixing them up
+    // would attribute a debt to whoever was paid.
+    //
+    // Deterministic and fee-free at this instant: a Blue market's `fee` is
+    // taken out of ACCRUED INTEREST (as fee shares to the fee recipient — see
+    // `accrueMorphoBlueInterest`), never out of the principal, so the debt goes
+    // up by exactly `borrowAssets` and grows from there with interest.
+    const borrowedDebt: RecipePositionInfo = {
+      protocol: 'morpho-blue',
+      marketOrPoolId: marketId,
+      custody: 'address-bound',
+      owner: onBehalf,
+      kind: 'debt',
+      direction: 'increase',
+      tokenAddress: loanToken,
+      decimals: loanDecimals,
+      amount: borrowAssets,
+    };
+
     return {
       crossContractCalls: [crossContractCall],
       // Borrow produces new loan tokens; existing inputs pass through unchanged.
       outputERC20Amounts: [borrowedLoanToken, ...input.erc20Amounts],
       outputNFTs: input.nfts,
+      outputPositions: [borrowedDebt],
     };
   }
 }

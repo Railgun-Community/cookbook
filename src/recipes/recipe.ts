@@ -9,6 +9,7 @@ import {
   RecipeInput,
   RecipeNFTRecipient,
   RecipeOutput,
+  RecipePositionInfo,
   StepInput,
   StepOutput,
 } from '../models/export-models';
@@ -258,6 +259,27 @@ export abstract class Recipe {
       )
       .flat();
 
+    // Positions are events, not balances, so they concatenate rather than
+    // dedupe.
+    //
+    // The ERC20 and NFT branches above key-and-collapse because every step
+    // re-declares its inputs as outputs, so one artifact appears once per step
+    // and only the final step's figure is the terminal state. A position record
+    // is emitted only by the step that actually changes the position, and no
+    // later step re-declares it. Two records for the same market and leg
+    // therefore mean two real changes, and collapsing them would drop one.
+    //
+    // Concatenating also preserves per-step provenance, which is what a
+    // consumer renders: "supplied X collateral, then borrowed Y" rather than a
+    // single netted figure whose two halves are no longer visible.
+    //
+    // Not filtered on `amount > 0n` the way fees are: a shares-denominated
+    // repay carries its exact magnitude in `shares`, so a record can carry a
+    // zero or estimated `amount` and still describe a real change.
+    const outputPositions: RecipePositionInfo[] = stepOutputs
+      .map(output => output.outputPositions ?? [])
+      .flat();
+
     const recipeOutput: RecipeOutput = {
       name: this.config.name,
       stepOutputs,
@@ -265,6 +287,7 @@ export abstract class Recipe {
       erc20AmountRecipients: outputERC20AmountRecipients,
       nftRecipients: outputNFTRecipients,
       feeERC20AmountRecipients,
+      outputPositions,
       minGasLimit: this.config.minGasLimit,
     };
     return recipeOutput;

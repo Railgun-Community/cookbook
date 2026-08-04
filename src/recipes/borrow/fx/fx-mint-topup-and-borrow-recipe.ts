@@ -29,6 +29,17 @@ export type FxMintTopupAndBorrowRecipeOpts = {
    * Required because debtDelta > 0 by definition for this recipe.
    */
   borrowFeeRatio: bigint;
+  /**
+   * f(x)'s supply fee for this (pool, operator), 1e9-denominated —
+   * `getFxPool(...).supplyFeeRatio`, index [0] of the tuple `borrowFeeRatio`
+   * already comes from.
+   *
+   * Optional and ERC-20-neutral: the manager pulls the full collateral either
+   * way. It only sharpens `recipeOutput.outputPositions` — omitted, the
+   * collateral record is an upper bound (exact on a long, 0.3% high on a short)
+   * and says so.
+   */
+  supplyFeeRatio?: bigint;
 };
 
 /**
@@ -97,6 +108,7 @@ export class FxMintTopupAndBorrowRecipe extends Recipe {
         collDelta: collInput.expectedBalance,
         debtDelta: this.opts.additionalDebt,
         borrowFeeRatio: this.opts.borrowFeeRatio,
+        supplyFeeRatio: this.opts.supplyFeeRatio,
       }),
     ];
   }
