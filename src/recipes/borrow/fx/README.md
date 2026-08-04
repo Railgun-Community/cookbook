@@ -192,6 +192,78 @@ these parameters take them as constructor args; the caller is expected to fetch
 live values via `getFxPool` (see [Read API](#read-api)) rather than hardcoding.
 None of these recipes embed fee or threshold constants.
 
+## Preflight: `onlyTopLevelCall` can switch off the whole fx surface
+
+Both managers guard `operate()` with a modifier that, when armed, refuses every
+caller that is not in a smart-wallet allowlist:
+
+```solidity
+modifier onlyTopLevelCall() {
+  uint256 codesize = msg.sender.code.length;
+  if (whitelist != address(0) && (codesize > 0 || msg.sender != tx.origin)) {
+    if (!ISmartWalletChecker(whitelist).check(msg.sender)) revert ErrorTopLevelCall();
+  }
+  _;
+}
+```
+
+**Every call these recipes build trips the trigger.** A classic relay-adapt call
+has code; an EIP-7702 executor has code too, because the account carries the
+23-byte `0xef0100 || delegate` designator and `EXTCODESIZE` reports *that*, not
+the delegate's code. So `codesize > 0` holds unconditionally and self-sponsoring
+the transaction does not evade the gate. And a per-batch ephemeral EOA is in
+nobody's allowlist by construction. If the gate is ever armed, **every fx recipe
+in this directory stops working at once** — no mis-quote, total loss of function.
+
+Worse, it is silent. `RelayAdapt7702` executes with `requireSuccess = false`, so
+a reverting `operate()` cannot produce `receipt.status === 0`: the batch mines
+with status 1 having done nothing, and the unshielded value strands with the
+ephemeral executor. A receipt alone will not tell you what happened.
+
+**Measured on mainnet 2026-08-04: `whitelist()` reads `address(0)` on both
+managers** (`fxPoolManager 0x250893CA…`, `fxShortPoolManager 0xaCDc0AB5…`), so
+the gate is inert today.
+
+It cannot be armed by a single transaction: `whitelist` is
+`address public immutable` on both managers and is written only in the
+constructor — there is no setter. Both managers are ERC-1967 proxies, so arming
+it means deploying a new implementation with a non-zero `_whitelist` and
+upgrading the proxy. Two consequences worth using:
+
+- the value is **constant between proxy upgrades**, so it is safe to cache per
+  implementation address rather than re-read before every batch;
+- the invalidation signal is the proxy's `Upgraded(address)` event.
+
+Preflight it. `getFxPool` carries it on `topLevelCallGate`, or read it on its
+own:
+
+```ts
+import {
+  assertFxTopLevelCallAllowed,
+  getFxTopLevelCallGate,
+} from '@railgun-community/cookbook';
+
+// Report-only. Never throws for a gate that is merely enabled.
+const gate = await getFxTopLevelCallGate('wstETH-Long', provider);
+if (gate.blocksOperate) {
+  // gate.status is one of: 'blocked' | 'enforced-caller-unknown'
+  //                      | 'enforced-checker-unreadable'
+  //                      ('inert' | 'allowed' never block)
+}
+
+// Guard-clause form: throws a named `fxmint:` error instead.
+await assertFxTopLevelCallAllowed('wstETH-Long', provider, ephemeralAddress);
+```
+
+The optional third argument is the account f(x) will see as `msg.sender` — the
+**ephemeral 7702 executor**, not `DEFAULT_FXMINT_OPERATOR` and not the relay
+adapter. Omit it when the executor does not exist yet; the gate then reports
+`'enforced-caller-unknown'`, which `blocksOperate` treats as blocking because a
+fresh ephemeral account is never allowlisted.
+
+The gate is a property of the **manager**, not the pool: both long pools share
+one, both shorts share the other.
+
 ## Position NFT `tokenSubID` contract
 
 The steps derive the position NFT's `tokenSubID` as
@@ -536,7 +608,9 @@ const pool = await getFxPool('wstETH-Long', provider);
 //      rebalanceDebtRatio,          // 1e18-scaled; mainnet 0.88e18 (88%)
 //      rebalanceBonusRatio,         // 1e9-scaled; rebalancer's bonus (2.5%)
 //      borrowFeeRatio,              // 1e9-scaled
-//      repayFeeRatio}               // 1e9-scaled
+//      repayFeeRatio,               // 1e9-scaled
+//      topLevelCallGate}            // see Preflight, above — check
+//                                   // .blocksOperate before building a batch
 
 // Per-position state, native-decimals collateral.
 const position = await getFxPosition(positionId, 'wstETH-Long', provider);
@@ -547,7 +621,11 @@ const position = await getFxPosition(positionId, 'wstETH-Long', provider);
 
 `getFxPool`'s optional third arg is the operator address whose
 per-(pool, operator) fee table is queried. It defaults to
-`DEFAULT_FXMINT_OPERATOR`.
+`DEFAULT_FXMINT_OPERATOR`. It is **not** reused as the `onlyTopLevelCall`
+caller: it addresses the fee table, whereas that gate judges `msg.sender`. So
+`getFxPool(...).topLevelCallGate` is always evaluated caller-less and reports
+`'inert'` or `'enforced-caller-unknown'`; pass a specific account to
+`getFxTopLevelCallGate` to get `'allowed'` / `'blocked'`.
 
 > **Integrator note — `DEFAULT_FXMINT_OPERATOR` under EIP-7702.** The constant
 > is pinned to the Railgun relay-adapt address, but under 7702 the `operator`
@@ -647,5 +725,7 @@ src/steps/borrow/fx/
   fx-mint-util.ts                        addresses, ABIs, KNOWN_POOLS, computeFxClose,
                                          computeFxRepay, assertCollateralInput
 src/api/borrow/fx/
-  fx-position-reader.ts                  getFxPool, getFxPosition
+  fx-position-reader.ts                  getFxPool, getFxPosition,
+                                         getFxTopLevelCallGate,
+                                         assertFxTopLevelCallAllowed
 ```

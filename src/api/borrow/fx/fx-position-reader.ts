@@ -1,4 +1,4 @@
-import { Contract, ZeroAddress, type Provider } from 'ethers';
+import { Contract, ZeroAddress, getAddress, type Provider } from 'ethers';
 import {
   FX_ADDRESSES,
   FX_POOL_ABI,
@@ -6,6 +6,8 @@ import {
   FX_SHORT_POOL_MANAGER_ABI,
   FX_POOL_CONFIGURATION_ABI,
   FX_RATE_PROVIDER_ABI,
+  FX_SMART_WALLET_CHECKER_ABI,
+  FX_TOP_LEVEL_CALL_ABI,
   DEFAULT_FXMINT_OPERATOR,
   fxComposeScalingFactor,
   fxScaleDownRawDebt,
@@ -20,6 +22,296 @@ import {
 // as the single source of truth — package consumers continue to import it
 // from `@railgun-community/cookbook` unchanged, since fx-mint-util is also
 // re-exported at the package root.
+
+// =============================================================================
+// onlyTopLevelCall — the manager-level gate that can disable every fx recipe.
+// =============================================================================
+
+/**
+ * Why this type exists.
+ *
+ * Both managers guard `operate()` with `onlyTopLevelCall`:
+ *
+ * ```solidity
+ * modifier onlyTopLevelCall() {
+ *   uint256 codesize = msg.sender.code.length;
+ *   if (whitelist != address(0) && (codesize > 0 || msg.sender != tx.origin)) {
+ *     if (!ISmartWalletChecker(whitelist).check(msg.sender)) revert ErrorTopLevelCall();
+ *   }
+ *   _;
+ * }
+ * ```
+ *
+ * **Every call this cookbook builds trips the trigger conditions.** A classic
+ * relay-adapt call has code. An EIP-7702 executor has code too — the account
+ * carries the 23-byte `0xef0100 || delegate` designator, and `EXTCODESIZE`
+ * reports that designator, not the delegate's code — so `codesize > 0` holds
+ * *unconditionally*, and self-sponsoring the transaction (which would make
+ * `msg.sender == tx.origin`) does **not** evade the gate. So for fx recipes
+ * `whitelist != address(0)` is equivalent to "the checker decides", and a
+ * per-batch ephemeral EOA is in nobody's smart-wallet allowlist by
+ * construction.
+ *
+ * The consequence of getting this wrong is not a mis-quote, it is total loss of
+ * function — and it is **silent**. `RelayAdapt7702` executes the batch with
+ * `requireSuccess = false`, so a reverting `operate()` cannot produce
+ * `receipt.status === 0`: the batch mines with status 1 having done nothing,
+ * and the unshielded value strands with the ephemeral executor.
+ *
+ * Measured on mainnet 2026-08-04, `whitelist()` reads `address(0)` on both
+ * managers, so the gate is inert today.
+ *
+ * **How it can change.** `whitelist` is declared `address public immutable`
+ * on both managers and is written only in the constructor — there is no
+ * setter, so no single governance transaction can flip it. Both managers are
+ * ERC-1967 proxies, so activating the gate means deploying a new
+ * implementation with a non-zero `_whitelist` and upgrading the proxy. That is
+ * still a governance action with no user-visible precursor, but it has two
+ * useful consequences:
+ *
+ *  - the value is **constant between proxy upgrades**, so it is safe to cache
+ *    per implementation address rather than re-read per batch;
+ *  - the invalidation signal is the proxy's `Upgraded(address)` event, which an
+ *    integrator monitoring f(x) can subscribe to.
+ */
+export type FxTopLevelCallStatus =
+  /** `whitelist() == address(0)`. `operate()` accepts any caller. */
+  | 'inert'
+  /** Gate enforced, and `ISmartWalletChecker.check(caller)` returned true. */
+  | 'allowed'
+  /** Gate enforced, and `check(caller)` returned false — `operate()` reverts. */
+  | 'blocked'
+  /**
+   * Gate enforced, but no `caller` was supplied to evaluate. This is the
+   * realistic state for a 7702 flow doing a preflight *before* the ephemeral
+   * executor exists. Treat it as blocked: a fresh ephemeral EOA is never
+   * allowlisted.
+   */
+  | 'enforced-caller-unknown'
+  /**
+   * Gate enforced, but the `check(address)` **call** reverted or returned
+   * something undecodable — the configured whitelist is not (or is no longer)
+   * an `ISmartWalletChecker`. Cannot be proven safe; treat as blocked.
+   *
+   * Contract-level only. A transport failure (RPC down, timeout) is *not*
+   * folded in here — it rejects, because "we could not reach the chain" is not
+   * a verdict about the gate.
+   */
+  | 'enforced-checker-unreadable';
+
+/**
+ * Result of a preflight read of a manager's `onlyTopLevelCall` gate.
+ *
+ * This describes the **manager**, not the pool: both long pools share
+ * `FX_ADDRESSES.fxPoolManager` and both shorts share
+ * `FX_ADDRESSES.fxShortPoolManager`, so two pools on the same side always
+ * report the same gate.
+ */
+export type FxTopLevelCallGate = {
+  /** The manager whose gate this describes (echoed from the pool ref). */
+  poolManager: Address;
+
+  /**
+   * `PoolManager.whitelist()` — the `ISmartWalletChecker` the manager
+   * consults. `ZeroAddress` means the gate is inert.
+   */
+  whitelist: Address;
+
+  /**
+   * `whitelist !== ZeroAddress`. Because every fx call this cookbook builds
+   * has code, this is equivalent to "the checker decides whether `operate()`
+   * runs".
+   */
+  enforced: boolean;
+
+  /** The caller the gate was evaluated against, when one was supplied. */
+  caller?: Address;
+
+  /**
+   * Conservative verdict. `true` when `operate()` is known to revert with
+   * `ErrorTopLevelCall()`, **and also** when the gate is enforced but this
+   * preflight could not prove the caller passes. Only `'inert'` and
+   * `'allowed'` produce `false`; read {@link status} for which case you are in.
+   */
+  blocksOperate: boolean;
+
+  /** The named condition. See {@link FxTopLevelCallStatus}. */
+  status: FxTopLevelCallStatus;
+
+  /**
+   * Present only for `'enforced-checker-unreadable'`: the failure from the
+   * `check(address)` call, for logging.
+   */
+  checkerError?: string;
+};
+
+/**
+ * Preflight the `onlyTopLevelCall` gate on the manager behind `poolRef`.
+ *
+ * One `eth_call` (`whitelist()`), plus a second (`check(caller)`) only when the
+ * gate is enforced *and* `caller` is supplied. Read-only, and it never throws
+ * for a gate that is merely enabled — a reader must not fail on a legitimate
+ * on-chain state. It *does* propagate transport failures, because those are not
+ * a verdict. Use {@link assertFxTopLevelCallAllowed} when you want the throwing
+ * guard-clause form.
+ *
+ * `getFxPool` already carries this on {@link FxPool.topLevelCallGate}, so
+ * callers on that path get it for free. Call this directly when you want the
+ * check without paying for full pool state, or when you want to cache it (see
+ * {@link FxTopLevelCallStatus} — the value is immutable per implementation).
+ *
+ * @param caller The account that will be `msg.sender` on `operate()`. Under
+ *   EIP-7702 that is the **ephemeral executor**, not
+ *   `DEFAULT_FXMINT_OPERATOR` and not the relay adapter — do not conflate it
+ *   with `getFxPool`'s `operator` argument, which addresses a different
+ *   (fee-table) lookup. Omit it when the executor does not exist yet; the
+ *   result is then `'enforced-caller-unknown'` if the gate is on.
+ */
+export async function getFxTopLevelCallGate(
+  poolRef: FxMintPoolRef,
+  provider: Provider,
+  caller?: Address,
+): Promise<FxTopLevelCallGate> {
+  return readFxTopLevelCallGate(
+    resolvePool(poolRef).poolManager,
+    provider,
+    caller,
+  );
+}
+
+/**
+ * Did this error come from the contract, or from the wire?
+ *
+ * ethers v6 tags a revert / an empty return as `CALL_EXCEPTION` and an
+ * undecodable one as `BAD_DATA`. Everything else it raises against a read —
+ * `NETWORK_ERROR`, `SERVER_ERROR`, `TIMEOUT` — is transport, and must not be
+ * mistaken for a statement about the whitelist.
+ */
+const isContractCallFailure = (cause: unknown): boolean => {
+  if (typeof cause !== 'object' || cause === null || !('code' in cause)) {
+    return false;
+  }
+  const { code } = cause as { code?: unknown };
+  return code === 'CALL_EXCEPTION' || code === 'BAD_DATA';
+};
+
+/**
+ * Manager-scoped worker behind {@link getFxTopLevelCallGate}. Kept separate so
+ * `getFxPool` — which has already resolved the pool — does not resolve twice.
+ */
+async function readFxTopLevelCallGate(
+  poolManager: Address,
+  provider: Provider,
+  caller?: Address,
+): Promise<FxTopLevelCallGate> {
+  const managerContract = new Contract(
+    poolManager,
+    FX_TOP_LEVEL_CALL_ABI,
+    provider,
+  );
+  const whitelist = getAddress(
+    (await managerContract.whitelist()) as string,
+  ) as Address;
+
+  const normalizedCaller =
+    caller === undefined ? undefined : (getAddress(caller) as Address);
+
+  if (whitelist === ZeroAddress) {
+    return {
+      poolManager,
+      whitelist,
+      enforced: false,
+      caller: normalizedCaller,
+      blocksOperate: false,
+      status: 'inert',
+    };
+  }
+
+  if (normalizedCaller === undefined) {
+    return {
+      poolManager,
+      whitelist,
+      enforced: true,
+      caller: undefined,
+      blocksOperate: true,
+      status: 'enforced-caller-unknown',
+    };
+  }
+
+  const checkerContract = new Contract(
+    whitelist,
+    FX_SMART_WALLET_CHECKER_ABI,
+    provider,
+  );
+  try {
+    const allowed = (await checkerContract.check(normalizedCaller)) as boolean;
+    return {
+      poolManager,
+      whitelist,
+      enforced: true,
+      caller: normalizedCaller,
+      blocksOperate: !allowed,
+      status: allowed ? 'allowed' : 'blocked',
+    };
+  } catch (cause) {
+    // Only a CONTRACT-level failure becomes a status. A transport failure is
+    // rethrown: reporting "blocked" because the RPC timed out would tell the
+    // integrator something false about f(x)'s configuration, and the
+    // whitelist() read above already propagates transport errors — this keeps
+    // the two halves of the preflight consistent.
+    if (!isContractCallFailure(cause)) {
+      throw cause;
+    }
+    // A whitelist that is not an ISmartWalletChecker cannot be proven safe.
+    // Reporting it as its own status (rather than folding it into 'blocked')
+    // keeps "the allowlist said no" distinguishable from "we could not ask".
+    return {
+      poolManager,
+      whitelist,
+      enforced: true,
+      caller: normalizedCaller,
+      blocksOperate: true,
+      status: 'enforced-checker-unreadable',
+      checkerError: cause instanceof Error ? cause.message : String(cause),
+    };
+  }
+}
+
+/**
+ * Throwing form of {@link getFxTopLevelCallGate}: use it as a guard before
+ * building an fx batch.
+ *
+ * Returns the gate when `operate()` is known to be callable, and throws a
+ * `fxmint:`-prefixed error naming the on-chain condition otherwise. This is the
+ * whole point of the unit — without it the same failure arrives as a bare
+ * `ErrorTopLevelCall()` selector inside a batch that **mined successfully**
+ * (`requireSuccess = false`), which is close to undiagnosable from a receipt.
+ */
+export async function assertFxTopLevelCallAllowed(
+  poolRef: FxMintPoolRef,
+  provider: Provider,
+  caller?: Address,
+): Promise<FxTopLevelCallGate> {
+  const gate = await getFxTopLevelCallGate(poolRef, provider, caller);
+  if (!gate.blocksOperate) {
+    return gate;
+  }
+  throw new Error(
+    `fxmint: PoolManager ${gate.poolManager} enforces onlyTopLevelCall ` +
+      `(whitelist ${gate.whitelist}, status "${gate.status}"${
+        gate.caller === undefined ? '' : `, caller ${gate.caller}`
+      }${
+        gate.checkerError === undefined
+          ? ''
+          : `, checker error: ${gate.checkerError}`
+      }) — operate() would revert with ErrorTopLevelCall(). ` +
+      `Every fx call path has code, so the gate applies to the relay adapter ` +
+      `and to an EIP-7702 ephemeral executor alike, and a fresh ephemeral ` +
+      `account is never in an ISmartWalletChecker allowlist. Do not build ` +
+      `this batch: RelayAdapt7702 runs with requireSuccess=false, so it would ` +
+      `mine with status 1 having done nothing and strand the unshielded value.`,
+  );
+}
 
 // =============================================================================
 // FxPool — pool-level state + per-(pool, operator) fee ratios.
@@ -112,6 +404,26 @@ export type FxPool = {
   debtDecimals: bigint;
   /** Long and short pools live on different managers. */
   poolManager: Address;
+
+  /**
+   * State of `poolManager`'s `onlyTopLevelCall` gate — **check
+   * `topLevelCallGate.blocksOperate` before building any fx batch.**
+   *
+   * Carried here, rather than left to an opt-in call, because activating the
+   * gate takes away the entire fx surface with no precursor and no error a
+   * receipt can show. A preflight nobody calls is worth nothing, and every
+   * integrator already calls `getFxPool` to pick up live fee ratios.
+   *
+   * Evaluated with **no caller**, so it reports either `'inert'` or
+   * `'enforced-caller-unknown'`. `getFxPool`'s `operator` argument is *not*
+   * reused as the caller: it addresses the fee table and defaults to the relay
+   * adapter, whereas the `msg.sender` this gate judges is the ephemeral 7702
+   * executor. To evaluate a specific account, call
+   * {@link getFxTopLevelCallGate} with it directly.
+   *
+   * See {@link FxTopLevelCallStatus} for the full mechanism.
+   */
+  topLevelCallGate: FxTopLevelCallGate;
 };
 
 /**
@@ -158,15 +470,19 @@ export async function getFxDebtScalingFactor(
 /**
  * Reads pool-level state and per-operator fee ratios from f(x) contracts.
  *
- * Performs four sequential on-chain reads (PoolManager.getPoolInfo,
+ * Performs six sequential on-chain reads (PoolManager.getPoolInfo,
  * Pool.getTotalRawCollaterals, Pool.getLiquidateRatios,
- * Pool.getRebalanceRatios, PoolConfiguration.getPoolFeeRatio). Cookbook
- * v0.1 doesn't bake in batching; integrators wanting a single-roundtrip
- * read can compose with ethers' Multicall3 helper (or any external
- * batcher) against these same function selectors.
+ * Pool.getRebalanceRatios, PoolConfiguration.getPoolFeeRatio,
+ * PoolManager.whitelist). Cookbook v0.1 doesn't bake in batching;
+ * integrators wanting a single-roundtrip read can compose with ethers'
+ * Multicall3 helper (or any external batcher) against these same function
+ * selectors.
  *
  * Default operator is the Railgun relay-adapter. Pass `operator`
  * explicitly to query fees from a different operator's perspective.
+ *
+ * The last read populates {@link FxPool.topLevelCallGate}; see
+ * {@link getFxTopLevelCallGate} to take that check on its own.
  */
 export async function getFxPool(
   poolRef: FxMintPoolRef,
@@ -277,6 +593,14 @@ export async function getFxPool(
   const [supplyFeeRatio, withdrawFeeRatio, borrowFeeRatio, repayFeeRatio] =
     fees;
 
+  // The onlyTopLevelCall gate on this pool's manager. Deliberately evaluated
+  // WITHOUT a caller: `operator` above is the fee-table key (defaulting to the
+  // relay adapter), not the account f(x) will see as msg.sender.
+  const topLevelCallGate = await readFxTopLevelCallGate(
+    resolved.poolManager,
+    provider,
+  );
+
   // typeof narrowing: FxMintPoolRef = FxMintPoolName | {address;...}, so
   // the string branch is already FxMintPoolName — no cast needed.
   const name = typeof poolRef === 'string' ? poolRef : undefined;
@@ -302,6 +626,7 @@ export async function getFxPool(
     debtToken: resolved.debtToken,
     debtDecimals: resolved.debtDecimals,
     poolManager: resolved.poolManager,
+    topLevelCallGate,
   };
 }
 

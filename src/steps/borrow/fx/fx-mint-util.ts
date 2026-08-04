@@ -453,6 +453,51 @@ export const FX_SHORT_POOL_MANAGER_ABI = [
   },
 ] as const;
 
+/**
+ * `whitelist()` — the `onlyTopLevelCall` gate on **both** managers.
+ *
+ * `PoolManager` and `ShortPoolManager` declare it identically
+ * (`address public immutable whitelist`), so it lives in its own fragment
+ * rather than being duplicated into the two side-specific ABIs —
+ * FX_SHORT_POOL_MANAGER_ABI is documented as carrying only the getters whose
+ * shapes *differ* from the long manager, and this one does not.
+ *
+ * Selector `0x93e59dc1`; asserted against the deployed managers in
+ * `fx-top-level-call-gate.test.ts` rather than trusted.
+ *
+ * See {@link getFxTopLevelCallGate} in `src/api/borrow/fx/fx-position-reader.ts`
+ * for what the value means and why it is worth reading before building a batch.
+ */
+export const FX_TOP_LEVEL_CALL_ABI = [
+  {
+    inputs: [],
+    name: 'whitelist',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
+/**
+ * `ISmartWalletChecker.check(address)` — the allowlist the managers consult
+ * when `whitelist()` is non-zero.
+ *
+ * Verbatim from f(x)'s
+ * `contracts/voting-escrow/interfaces/ISmartWalletChecker.sol`:
+ * `function check(address) external view returns (bool);`
+ *
+ * `view`, so it is safe to `eth_call`. Selector `0xc23697a8`.
+ */
+export const FX_SMART_WALLET_CHECKER_ABI = [
+  {
+    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+    name: 'check',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
 /** `IRateProvider.getRate()`, used by the scaling factor when one is set. */
 export const FX_RATE_PROVIDER_ABI = [
   {
