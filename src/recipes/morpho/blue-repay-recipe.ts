@@ -15,20 +15,24 @@ import {
 } from '../../models/export-models';
 import { MIN_GAS_LIMIT_MORPHO_BLUE_REPAY } from '../../models/min-gas-limits';
 import { MorphoBlueAPI } from '../../api/morpho';
-import {
-  EphemeralExecutor,
-  resolveExecutorAddress,
-} from '../../utils/7702';
+import { PositionOwner, resolvePositionOwnerAddress } from '../../utils/7702';
 import { findFirstInputERC20Amount } from '../../utils/filters';
 
 /**
- * Repay-only recipe against an existing Morpho Blue debt held by the ephemeral
- * EOA (EIP-7702). Unshields the loan token, approves the Blue singleton for the
- * exact amount, and repays (assets-denominated; must be <= current debt). The
- * position (and any remaining debt) stays with the same EOA identity.
+ * Repay-only recipe against an existing Morpho Blue debt. Unshields the loan
+ * token, approves the Blue singleton for the exact amount, and repays
+ * (assets-denominated; must be <= current debt). The position (and any
+ * remaining debt) stays with the same owner.
  *
- * Self-contained: reads the loan-token decimals on-chain and validates the 7702
- * executor. The repay amount comes from the unshielded input.
+ * **Owner-only — there is no receiver role here.** `Morpho.repay` takes no
+ * `receiver`: the loan token is pulled from `msg.sender` (the executing
+ * ephemeral EOA) and the debt of `onBehalf` falls. Morpho lets anyone repay
+ * anyone's debt, so no authorization is involved, and `owner` may be any
+ * account — including one this batch does not run as. It is also therefore
+ * irreversible in the wrong direction: repaying the wrong owner is a gift.
+ *
+ * Self-contained: reads the loan-token decimals on-chain and validates the
+ * owner. The repay amount comes from the unshielded input.
  */
 export class MorphoBlueRepayRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -38,19 +42,19 @@ export class MorphoBlueRepayRecipe extends Recipe {
   };
 
   private readonly market: MarketParams;
-  private readonly recipient: string;
+  private readonly owner: string;
   private readonly provider: Provider;
 
   constructor(
     market: MarketParams,
-    recipient: EphemeralExecutor | string,
+    owner: PositionOwner,
     provider: Provider,
   ) {
     super();
     this.market = market;
-    this.recipient = resolveExecutorAddress(
-      recipient,
-      'MorphoBlueRepayRecipe recipient',
+    this.owner = resolvePositionOwnerAddress(
+      owner,
+      'MorphoBlueRepayRecipe owner',
     );
     this.provider = provider;
   }
@@ -70,7 +74,7 @@ export class MorphoBlueRepayRecipe extends Recipe {
     const repayQuote = await MorphoBlueAPI.getRepayQuote({
       market: this.market,
       repayAssets: loanInput.amount,
-      recipient: this.recipient,
+      owner: this.owner,
       provider: this.provider,
     });
     const loanInfo: RecipeERC20Info = {

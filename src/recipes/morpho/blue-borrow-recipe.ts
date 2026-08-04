@@ -9,18 +9,26 @@ import { MIN_GAS_LIMIT_MORPHO_BLUE_BORROW } from '../../models/min-gas-limits';
 import { MorphoBlueAPI } from '../../api/morpho';
 import {
   EphemeralExecutor,
+  PositionOwner,
   resolveExecutorAddress,
+  resolvePositionOwnerAddress,
 } from '../../utils/7702';
 
 /**
- * Borrow-only recipe against a Morpho Blue position the ephemeral EOA already
- * holds — the non-atomic 7702 payoff: the collateral was supplied in an earlier
- * `execute()` batch by the same EOA, and this batch draws (more) debt against
- * it, shielding the borrowed loan token.
+ * Borrow-only recipe against a Morpho Blue position that already exists — the
+ * non-atomic 7702 payoff: the collateral was supplied in an earlier `execute()`
+ * batch, and this batch draws (more) debt against it, shielding the borrowed
+ * loan token. No unshield is required.
  *
- * The executor identity MUST match the batch that opened the position, else
- * `onBehalf` points at an empty position and the borrow reverts. No unshield is
- * required — this recipe only produces borrowed tokens to shield.
+ * `executor` is the account this batch runs as; the borrowed loan token is
+ * delivered to it and shielded from it.
+ *
+ * `owner` is the account the debt is booked against. It defaults to `executor`
+ * — the self-custody case, where the identity MUST match the batch that opened
+ * the position, else `onBehalf` points at an empty position. Pass it
+ * explicitly to borrow against a durable owner's collateral; the owner must
+ * have authorised the executor on Morpho first, which
+ * {@link MorphoBlueAPI.getBorrowQuote} preflights.
  */
 export class MorphoBlueBorrowRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -31,22 +39,28 @@ export class MorphoBlueBorrowRecipe extends Recipe {
 
   private readonly market: MarketParams;
   private readonly borrowAssets: bigint;
-  private readonly recipient: string;
+  private readonly executor: string;
+  private readonly owner: string;
   private readonly provider: Provider;
 
   constructor(
     market: MarketParams,
     borrowAssets: bigint,
-    recipient: EphemeralExecutor | string,
+    executor: EphemeralExecutor | string,
     provider: Provider,
+    owner?: PositionOwner,
   ) {
     super();
     this.market = market;
     this.borrowAssets = borrowAssets;
-    this.recipient = resolveExecutorAddress(
-      recipient,
-      'MorphoBlueBorrowRecipe recipient',
+    this.executor = resolveExecutorAddress(
+      executor,
+      'MorphoBlueBorrowRecipe executor',
     );
+    this.owner =
+      owner === undefined
+        ? this.executor
+        : resolvePositionOwnerAddress(owner, 'MorphoBlueBorrowRecipe owner');
     this.provider = provider;
   }
 
@@ -63,7 +77,8 @@ export class MorphoBlueBorrowRecipe extends Recipe {
     const borrowQuote = await MorphoBlueAPI.getBorrowQuote({
       market: this.market,
       borrowAssets: this.borrowAssets,
-      recipient: this.recipient,
+      owner: this.owner,
+      receiver: this.executor,
       provider: this.provider,
     });
     return [new MorphoBlueBorrowStep(borrowQuote)];

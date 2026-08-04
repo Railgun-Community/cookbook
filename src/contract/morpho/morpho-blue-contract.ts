@@ -24,10 +24,16 @@ export type MorphoBlueMarketState = {
 };
 
 /**
- * Thin wrapper over the Morpho Blue singleton. Under EIP-7702 `onBehalf` and
- * `receiver` are the executing ephemeral EOA (also `msg.sender`, so it is always
- * authorised to manage its own position — no `setAuthorization` needed).
- * Positions are NOT tokenized: the EOA identity is the only handle to them.
+ * Thin wrapper over the Morpho Blue singleton.
+ *
+ * Positions are NOT tokenized: the `onBehalf` address is the only handle to
+ * them. Under EIP-7702 `receiver` is the executing ephemeral EOA (also
+ * `msg.sender`), because the shield leg sweeps that account's balance.
+ * `onBehalf` is the *owner*, which may be the same account — the ordinary
+ * self-custody case, always authorised for itself — or a durable account that
+ * has granted the executor `setAuthorization`. `borrow` and
+ * `withdrawCollateral` require `isAuthorized[onBehalf][msg.sender]` when the
+ * two differ; `supplyCollateral` and `repay` never do.
  */
 export class MorphoBlueContract {
   private readonly contract: MorphoBlue;
@@ -131,6 +137,17 @@ export class MorphoBlueContract {
       lastUpdate,
       fee,
     };
+  }
+
+  /**
+   * `isAuthorized[authorizer][authorized]` — may `authorized` manage
+   * `authorizer`'s positions? Note the argument order is the mapping's, i.e.
+   * (position owner, operator); Morpho's `_isSenderAuthorized(onBehalf)` reads
+   * `msg.sender == onBehalf || isAuthorized[onBehalf][msg.sender]`, so this is
+   * called `(owner, executor)`.
+   */
+  async isAuthorized(authorizer: string, authorized: string): Promise<boolean> {
+    return this.contract.isAuthorized(authorizer, authorized);
   }
 
   createSetAuthorization(

@@ -18,17 +18,25 @@ import { MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW } from '../../models/min-gas-l
 import { MorphoBlueAPI } from '../../api/morpho';
 import {
   EphemeralExecutor,
+  PositionOwner,
   resolveExecutorAddress,
+  resolvePositionOwnerAddress,
 } from '../../utils/7702';
 
 /**
  * Fully close a Morpho Blue position in one batch: repay ALL debt by borrow
  * shares (avoids debt growth between build and inclusion), then withdraw ALL
- * collateral to the executing ephemeral EOA (EIP-7702). Both the debt shares and
- * the collateral amount are read on-chain from the EOA's position.
+ * collateral to the executing ephemeral EOA (EIP-7702), which shields it. Both
+ * the debt shares and the collateral amount are read on-chain from the
+ * **owner's** position.
  *
  * The unshielded loan token must cover the conservative repay bound
  * (`maxRepaidAssets`); any surplus reshields alongside the collateral.
+ *
+ * `owner` defaults to the executor. When it differs, this closes a durable
+ * owner's position and shields the proceeds to the executor; the owner must
+ * have authorised the executor on Morpho (preflighted at quote time, before
+ * any debt is repaid).
  */
 export class MorphoBlueClosePositionRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -40,22 +48,31 @@ export class MorphoBlueClosePositionRecipe extends Recipe {
 
   private readonly market: MarketParams;
   private readonly slippageBasisPoints: bigint;
-  private readonly recipient: string;
+  private readonly executor: string;
+  private readonly owner: string;
   private readonly provider: Provider;
 
   constructor(
     market: MarketParams,
     slippageBasisPoints: bigint,
-    recipient: EphemeralExecutor | string,
+    executor: EphemeralExecutor | string,
     provider: Provider,
+    owner?: PositionOwner,
   ) {
     super();
     this.market = market;
     this.slippageBasisPoints = slippageBasisPoints;
-    this.recipient = resolveExecutorAddress(
-      recipient,
-      'MorphoBlueClosePositionRecipe recipient',
+    this.executor = resolveExecutorAddress(
+      executor,
+      'MorphoBlueClosePositionRecipe executor',
     );
+    this.owner =
+      owner === undefined
+        ? this.executor
+        : resolvePositionOwnerAddress(
+            owner,
+            'MorphoBlueClosePositionRecipe owner',
+          );
     this.provider = provider;
   }
 
@@ -68,13 +85,14 @@ export class MorphoBlueClosePositionRecipe extends Recipe {
   ): Promise<Step[]> {
     const repayQuote = await MorphoBlueAPI.getRepaySharesQuote({
       market: this.market,
-      recipient: this.recipient,
+      owner: this.owner,
       provider: this.provider,
       slippageBasisPoints: this.slippageBasisPoints,
     });
     const withdrawQuote = await MorphoBlueAPI.getWithdrawAllCollateralQuote({
       market: this.market,
-      recipient: this.recipient,
+      owner: this.owner,
+      receiver: this.executor,
       provider: this.provider,
     });
 

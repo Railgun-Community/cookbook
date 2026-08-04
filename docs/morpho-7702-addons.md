@@ -25,7 +25,11 @@ handle to the position across separate (non-atomic) `execute()` batches.
 | `EphemeralExecutor` | Nominal, branded value object wrapping a checksummed address. |
 | `makeEphemeralExecutor(addr)` | Validate + wrap a raw address. |
 | `resolveExecutorAddress(EphemeralExecutor \| string)` | The single choke point every 7702-aware step routes its recipient/executor through. Returns a validated, checksummed string. |
-| `assertValidExecutorAddress` | Alias of the canonical `assertValidRecipientAddress`. |
+| `assertValidExecutorAddress` | The canonical `assertValidRecipientAddress` **plus** a rejection of every configured relay-adapt contract. |
+| `isRelayAdaptAddress(addr)` | Membership test behind that rejection, so a role-specific validator can raise its own diagnosis. |
+| `PositionOwner` | Input type for the account that **holds** an address-bound position (`EphemeralExecutor \| string`). Not a second brand — see the module docs for why. |
+| `resolvePositionOwnerAddress(...)` | Write-side owner validator: rejects relay-adapt, because a position booked against shared custody can never be unwound. |
+| `resolvePositionOwnerAddressForRead(...)` | Read-side owner validator: **allows** relay-adapt, so a scanner can still see a position already stranded there. |
 | `spentToExecutor(...)` | Build a spent-amount record routed to the resolved executor. |
 
 The wrap/unwrap/transfer-base-token and transfer-erc20 adapt steps accept
@@ -95,8 +99,11 @@ Registries: `KNOWN_METAMORPHO_VAULTS` (V1) and `KNOWN_MORPHO_VAULTS_V2`
 Morpho Blue singleton: `0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`.
 `MarketParams = (loanToken, collateralToken, oracle, irm, lltv)`;
 `marketId = keccak256(abi.encode(marketParams))` (`getMarketId`, verified against a live
-market). Positions are **un-tokenized**: `onBehalf == receiver ==` the ephemeral EOA; only
-fungible change/borrowed/withdrawn tokens shield back.
+market). Positions are **un-tokenized**: the `onBehalf` address is the only handle to one,
+and only fungible change/borrowed/withdrawn tokens shield back.
+
+`onBehalf` and `receiver` are **separate accounts** (see §5.1). They are equal in the
+ordinary self-custody case, which is still the default.
 
 | Recipe | Steps |
 | --- | --- |
@@ -113,13 +120,71 @@ state; conservative loan budget) and `getWithdrawAllCollateralQuote` (reads
 Repay-by-shares is preferred for full closes — it avoids debt growth between build and inclusion.
 
 `MorphoBlueAPI`: `getMarketParamsFromId`, `getPosition`, `getSupplyCollateralQuote`,
-`getBorrowQuote`, `getRepayQuote`, `getWithdrawCollateralQuote`.
+`getBorrowQuote`, `getRepayQuote`, `getWithdrawCollateralQuote`, `getAuthorization`,
+`assertAuthorized`.
 
 Accounting: supply/repay consume an exact input (change reshields); borrow/withdraw produce
 a deterministic token with no input consumed (the RAILGUN validator only constrains tokens
 present in the input, so produced tokens are unconstrained).
 
-### 5.1 Liquidation — OUT OF SCOPE (dropped)
+### 5.1 `owner` vs `receiver` — BREAKING (was one collapsed `recipient`)
+
+Because a 7702 ephemeral account is **reusable**, the account is the position handle, and
+two roles that used to be one account are now distinct:
+
+| role | Blue argument | what it is | validated as |
+| --- | --- | --- | --- |
+| `owner` | `onBehalf` | the durable account the position is booked against | `resolvePositionOwnerAddress` |
+| `receiver` | `receiver` | the account this batch runs as, and shields from | `resolveExecutorAddress` |
+
+`receiver` is deliberately not free-form: the relay-adapt shield leg sweeps the executor's
+balance, so value delivered anywhere else could not be shielded by the batch. The new degree
+of freedom is `owner`.
+
+Which builders take which — `supplyCollateral` and `repay` have no `receiver` in the Blue
+ABI, so those quotes are owner-only:
+
+| builder | takes |
+| --- | --- |
+| `getSupplyCollateralQuote` | `owner` |
+| `getRepayQuote` | `owner` |
+| `getRepaySharesQuote` | `owner` |
+| `getBorrowQuote` | `owner` + `receiver` |
+| `getWithdrawCollateralQuote` | `owner` + `receiver` |
+| `getWithdrawAllCollateralQuote` | `owner` + `receiver` |
+
+**Authorization.** `Morpho._isSenderAuthorized` gates `borrow` and `withdrawCollateral` on
+`msg.sender == onBehalf || isAuthorized[onBehalf][msg.sender]`; `supplyCollateral` and
+`repay` are ungated (anyone may supply or repay for anyone). Both gated builders therefore
+preflight `MorphoBlueAPI.assertAuthorized` whenever `owner !== receiver`, because
+`RelayAdapt7702` runs with `requireSuccess = false`: an `UNAUTHORIZED` revert would otherwise
+mine with status 1 having done nothing. The self-custody path costs no extra read.
+
+The ungated legs are the sharper edge: supplying collateral or repaying to the wrong `owner`
+succeeds and is unrecoverable.
+
+#### Migration
+
+The quote *result* types are unchanged, so no step or consumer of a quote is affected.
+
+1. `MorphoBlueAPI.*Quote({ recipient })` → `{ owner }`, or `{ owner, receiver }` for the
+   three builders above. Passing the same account for both reproduces the old behaviour
+   exactly.
+2. Recipe constructors are positionally source-compatible; only the parameter *name* changed
+   (`recipient` → `executor`), plus a new trailing optional `owner`:
+   - `MorphoBlueBorrowRecipe(market, borrowAssets, executor, provider, owner?)`
+   - `MorphoBlueSupplyCollateralAndBorrowRecipe(market, borrowAssets, executor, provider, owner?)`
+   - `MorphoBlueRepayAndWithdrawCollateralRecipe(market, withdrawAssets, executor, provider, owner?)`
+   - `MorphoBlueClosePositionRecipe(market, slippageBasisPoints, executor, provider, owner?)`
+   - `MorphoBlueRepayRecipe(market, owner, provider)` — owner-only; the second argument is
+     now a position owner rather than an executor, which is the same value in the
+     self-custody case.
+3. Two reads moved onto the owner: `getRepaySharesQuote` sizes the close from
+   `position(id, owner).borrowShares`, and `getWithdrawAllCollateralQuote` reads
+   `position(id, owner).collateral`. Identical for `owner === receiver`; correct (rather
+   than empty) for a delegated unwind.
+
+### 5.2 Liquidation — OUT OF SCOPE (dropped)
 
 Third-party liquidation is **not** provided, and is not a planned addition.
 
@@ -198,13 +263,13 @@ unshield loan asset → repay ALL debt by shares → withdraw ALL collateral →
 retained-account model was used) via `MorphoBlueSetAuthorizationRecipe(authorized, false)`.
 
 ### 7.5 Private liquidation — DROPPED
-Not shipped; see §5.1. Removed rather than deferred — MEV searchers take any liquidatable
+Not shipped; see §5.2. Removed rather than deferred — MEV searchers take any liquidatable
 position the moment it crosses, so neither the third-party nor the self-liquidation variant
 is viable through RAILGUN's latency budget.
 
 ### 7.6 Status summary
 Shipped: repay-by-shares, withdraw-all-collateral, full-close recipe, the two swap combo-meals
-(vault entry / exit), and the `setAuthorization` primitive. Dropped: all liquidation (§5.1).
+(vault entry / exit), and the `setAuthorization` primitive. Dropped: all liquidation (§5.2).
 Remaining (optional, Mode-2 via the compiler): the full Bundler3-wired retained-account borrow.
 
 ---

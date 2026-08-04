@@ -1,4 +1,5 @@
 export * from './ephemeral-executor';
+export * from './position-owner';
 export * from './route-to-executor';
 // Note: the canonical `assertValidRecipientAddress` stays in ../address and is
 // re-exported by utils/index.ts from there. 7702-aware code should use the

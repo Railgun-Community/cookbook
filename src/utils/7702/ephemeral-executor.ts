@@ -26,9 +26,10 @@ const RELAY_ADAPT_ADDRESSES: ReadonlySet<string> = new Set(
  * Under the 7702 relay-adapt flow, a recipe's cross-contract batch executes as
  * an *ephemeral EOA* (the account the delegated code runs as) rather than the
  * shared relay-adapt contract. Every recipe that routes funds — a 0x `taker`, a
- * router `to`, an ERC-4626 `receiver`, a Morpho `onBehalf`/`receiver`, or a
- * relay-adapt self-call target — must point at *this* account so the assets
- * land on, and positions are owned by, the executing identity.
+ * router `to`, an ERC-4626 `receiver`, a Morpho `receiver`, or a relay-adapt
+ * self-call target — must point at *this* account, because the shield leg
+ * sweeps the executor's balance: value delivered anywhere else cannot be
+ * shielded by this batch.
  *
  * This is intentionally a nominal wrapper (not a bare string) so a call site
  * that requires a validated executor cannot be handed an arbitrary,
@@ -36,14 +37,30 @@ const RELAY_ADAPT_ADDRESSES: ReadonlySet<string> = new Set(
  * checksummed, non-zero EVM address that is not a shared relay-adapt contract.
  *
  * Non-atomic flows: the same executor identity may be reused across several
- * separate `execute()` batches (e.g. supply collateral now, borrow later). For
- * un-tokenized positions (Morpho Blue) the executor address is the *only*
- * handle to the position — it must be the identical account in each batch.
+ * separate `execute()` batches (e.g. supply collateral now, borrow later).
+ *
+ * **Not the same role as the position owner.** Because the executor persists,
+ * an address-bound position (Morpho Blue `onBehalf`, an Aave/Compound account,
+ * a gauge stake) can be held by a *durable* account while a given batch runs as
+ * — and shields to — this one. See `PositionOwner` in `./position-owner`. The
+ * two are equal in the ordinary self-custody case and that remains the default;
+ * they are no longer required to be.
  */
 export type EphemeralExecutor = {
   readonly __brand: 'EphemeralExecutor';
   readonly address: string;
 };
+
+/**
+ * Is this one of the shared RAILGUN relay-adapt contracts (on any network)?
+ *
+ * Exported so role-specific validators can reuse the membership test while
+ * raising an error that names *their* role — see `resolvePositionOwnerAddress`
+ * in `./position-owner`, where routing a position to shared custody is the same
+ * hazard but a different diagnosis.
+ */
+export const isRelayAdaptAddress = (address: string): boolean =>
+  RELAY_ADAPT_ADDRESSES.has(address.toLowerCase());
 
 /**
  * Validate a 7702 executor address: it must be a well-formed, non-zero EVM
@@ -56,7 +73,7 @@ export const assertValidExecutorAddress = (
   context = 'EphemeralExecutor',
 ): void => {
   assertValidRecipientAddress(address, context);
-  if (RELAY_ADAPT_ADDRESSES.has(address.toLowerCase())) {
+  if (isRelayAdaptAddress(address)) {
     throw new Error(
       `${context}: executor must be the ephemeral EOA, not the shared relay-adapt contract ("${address}")`,
     );

@@ -37,6 +37,11 @@ import {
   morphoBlueLiquidationIncentiveFactor,
   ORACLE_PRICE_SCALE,
   MorphoBlueAPI,
+  // owner/receiver seam — the two validators behind the split. A consumer that
+  // cannot reach them has to re-derive the relay-adapt policy by hand, and the
+  // read/write divergence is exactly the part that is easy to get backwards.
+  resolvePositionOwnerAddress,
+  resolvePositionOwnerAddressForRead,
   // fxMINT position-id predictor — `FxMintOpenRecipe` requires a predicted
   // positionId but shipped no way to obtain one, so consumers hand-rolled the
   // ABI fragment.
@@ -48,7 +53,7 @@ import {
   MIN_GAS_LIMIT_FXMINT_ADJUST,
   MIN_GAS_LIMIT_FXMINT_CLOSE,
 } from '../index';
-import type { MorphoVaultVersion } from '../index';
+import type { MorphoVaultVersion, PositionOwner } from '../index';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -105,6 +110,18 @@ describe('index', () => {
     expect(MorphoBlueAPI.getPositionRisk).to.be.a('function');
     expect(MorphoBlueAPI.getPositionRisks).to.be.a('function');
     expect(MorphoBlueAPI.buildPositionRisk).to.be.a('function');
+  });
+
+  it('Should expose the owner/receiver seam from the root barrel', () => {
+    // `PositionOwner` is a type; naming it in a value position is the
+    // assertion, as with MorphoVaultVersion above.
+    const owner: PositionOwner = MORPHO_BLUE_ADDRESS;
+    expect(owner).to.be.a('string');
+    expect(resolvePositionOwnerAddress).to.be.a('function');
+    expect(resolvePositionOwnerAddressForRead).to.be.a('function');
+    // The preflight that makes owner !== receiver safe to express.
+    expect(MorphoBlueAPI.getAuthorization).to.be.a('function');
+    expect(MorphoBlueAPI.assertAuthorized).to.be.a('function');
   });
 
   it('Should expose the MIN_GAS_LIMIT_* floors from the root barrel', () => {

@@ -18,19 +18,28 @@ import { MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW } from '../../models/min-gas-l
 import { MorphoBlueAPI } from '../../api/morpho';
 import {
   EphemeralExecutor,
+  PositionOwner,
   resolveExecutorAddress,
+  resolvePositionOwnerAddress,
 } from '../../utils/7702';
 import { findFirstInputERC20Amount } from '../../utils/filters';
 
 /**
  * Unwind a Morpho Blue position in one batch: repay loan-token debt with the
  * unshielded loan token, then withdraw collateral to the executing ephemeral
- * EOA (EIP-7702). Repay is assets-denominated (must be <= current debt);
- * withdrawing collateral reverts if it would leave the position unhealthy.
+ * EOA (EIP-7702), which shields it. Repay is assets-denominated (must be <=
+ * current debt); withdrawing collateral reverts if it would leave the position
+ * unhealthy.
  *
  * Self-contained: reads token decimals on-chain via {@link MorphoBlueAPI} and
- * validates the 7702 executor. The loan amount to repay comes from the
- * unshielded input; the collateral amount to withdraw is a caller parameter.
+ * validates the accounts. The loan amount to repay comes from the unshielded
+ * input; the collateral amount to withdraw is a caller parameter.
+ *
+ * `owner` defaults to the executor. When it differs, this batch repays a
+ * durable owner's debt (never authorization-gated) and withdraws that owner's
+ * collateral to the executor (gated — preflighted at quote time). Ordering
+ * matters for the failure mode: an unauthorised withdraw would leave the debt
+ * repaid and the collateral behind, which is why the guard is at build time.
  */
 export class MorphoBlueRepayAndWithdrawCollateralRecipe extends Recipe {
   readonly config: RecipeConfig = {
@@ -41,22 +50,31 @@ export class MorphoBlueRepayAndWithdrawCollateralRecipe extends Recipe {
 
   private readonly market: MarketParams;
   private readonly withdrawCollateralAssets: bigint;
-  private readonly recipient: string;
+  private readonly executor: string;
+  private readonly owner: string;
   private readonly provider: Provider;
 
   constructor(
     market: MarketParams,
     withdrawCollateralAssets: bigint,
-    recipient: EphemeralExecutor | string,
+    executor: EphemeralExecutor | string,
     provider: Provider,
+    owner?: PositionOwner,
   ) {
     super();
     this.market = market;
     this.withdrawCollateralAssets = withdrawCollateralAssets;
-    this.recipient = resolveExecutorAddress(
-      recipient,
-      'MorphoBlueRepayAndWithdrawCollateralRecipe recipient',
+    this.executor = resolveExecutorAddress(
+      executor,
+      'MorphoBlueRepayAndWithdrawCollateralRecipe executor',
     );
+    this.owner =
+      owner === undefined
+        ? this.executor
+        : resolvePositionOwnerAddress(
+            owner,
+            'MorphoBlueRepayAndWithdrawCollateralRecipe owner',
+          );
     this.provider = provider;
   }
 
@@ -75,7 +93,7 @@ export class MorphoBlueRepayAndWithdrawCollateralRecipe extends Recipe {
     const repayQuote = await MorphoBlueAPI.getRepayQuote({
       market: this.market,
       repayAssets: loanInput.amount,
-      recipient: this.recipient,
+      owner: this.owner,
       provider: this.provider,
     });
     const loanInfo: RecipeERC20Info = {
@@ -86,7 +104,8 @@ export class MorphoBlueRepayAndWithdrawCollateralRecipe extends Recipe {
     const withdrawQuote = await MorphoBlueAPI.getWithdrawCollateralQuote({
       market: this.market,
       withdrawAssets: this.withdrawCollateralAssets,
-      recipient: this.recipient,
+      owner: this.owner,
+      receiver: this.executor,
       provider: this.provider,
     });
 

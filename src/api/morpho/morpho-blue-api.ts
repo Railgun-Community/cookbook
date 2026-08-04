@@ -1,5 +1,5 @@
 import { NetworkName } from '@railgun-community/shared-models';
-import { Contract, Provider, ZeroAddress, getAddress } from 'ethers';
+import { Contract, Provider, ZeroAddress } from 'ethers';
 import {
   MorphoBlueContract,
   MorphoBluePosition,
@@ -19,10 +19,12 @@ import {
   morphoBlueLiquidationIncentiveFactor,
   supplyAssetsForShares,
 } from '../../steps/morpho/morpho-blue-util';
-import { assertValidRecipientAddress } from '../../utils/address';
 import {
   EphemeralExecutor,
+  PositionOwner,
   resolveExecutorAddress,
+  resolvePositionOwnerAddress,
+  resolvePositionOwnerAddressForRead,
 } from '../../utils/7702';
 
 export type MorphoSupplyCollateralQuote = {
@@ -324,30 +326,53 @@ const readOrThrow = async <T>(
 };
 
 /**
- * Validate a position owner for a **read**.
+ * Whether an executor may act on an owner's Blue position.
  *
- * Deliberately NOT `resolveExecutorAddress`: that guard rejects the shared
- * relay-adapt contract, which is correct when routing funds but wrong here. A
- * scanner must be able to inspect any account's position, including one
- * stranded on the relay-adapt.
+ * Modelled on f(x)'s `FxTopLevelCallGate` (`src/api/borrow/fx/`): a
+ * non-throwing reader that reports an on-chain condition, plus a throwing
+ * assert for the build path. Both roles are named so a caller cannot mistake
+ * "the owner never authorised us" for "we could not ask".
  */
-const resolvePositionOwner = (
-  owner: EphemeralExecutor | string,
-  context: string,
-): string => {
-  const raw = typeof owner === 'string' ? owner : owner.address;
-  assertValidRecipientAddress(raw, context);
-  return getAddress(raw);
+export type MorphoBlueAuthorization = {
+  /** The position holder — Blue's `onBehalf`. */
+  owner: string;
+  /** The account that will be `msg.sender` — under 7702, the ephemeral executor. */
+  executor: string;
+  /** `owner === executor`; an account is always authorised for itself. */
+  isSelf: boolean;
+  /** `isAuthorized[owner][executor]`. Read only when `!isSelf`. */
+  isAuthorized: boolean;
+  /**
+   * True when `borrow` / `withdrawCollateral` would revert `UNAUTHORIZED`.
+   * `supplyCollateral` and `repay` are unaffected — Morpho lets anyone supply
+   * or repay on anyone's behalf.
+   */
+  blocksOwnerWrites: boolean;
 };
 
 /**
  * Self-contained data layer for Morpho Blue market recipes — reads market
- * params + token decimals on-chain and validates the 7702 executor, so callers
- * pass only the market (or its id), an amount, the executor, and a provider.
+ * params + token decimals on-chain and validates the accounts, so callers pass
+ * only the market (or its id), an amount, the accounts, and a provider.
  *
- * Positions are un-tokenized: `onBehalf` == `receiver` == the ephemeral EOA (also
- * `msg.sender`, always authorised for its own position). The EOA identity is the
- * only handle to the position across non-atomic batches.
+ * ## `owner` and `receiver` are separate accounts
+ *
+ * Positions are un-tokenized, so the `onBehalf` address is the only handle to
+ * one. Two roles therefore exist and are named separately on every builder:
+ *
+ *   - **`owner`** (`onBehalf`) — the durable account the position is booked
+ *     against. It persists across non-atomic batches and across executors.
+ *   - **`receiver`** — the account this batch runs as and shields from. Under
+ *     EIP-7702 that is the ephemeral executor, and it is also `msg.sender` on
+ *     every call in the batch. It is not free-form: the relay-adapt shield leg
+ *     sweeps the executor's balance, so value delivered anywhere else cannot be
+ *     shielded by this batch, which is why `receiver` is validated as an
+ *     executor rather than as an arbitrary address.
+ *
+ * The two are equal in the ordinary self-custody case, and that is still what a
+ * caller passing one account everywhere gets. When they differ, Morpho requires
+ * `isAuthorized[owner][executor]` for `borrow` and `withdrawCollateral` — see
+ * {@link MorphoBlueAPI.assertAuthorized}, which every affected builder runs.
  */
 export class MorphoBlueAPI {
   static supportsNetwork(networkName: NetworkName): boolean {
@@ -378,17 +403,108 @@ export class MorphoBlueAPI {
     return new ERC20Contract(tokenAddress, provider).decimals();
   }
 
+  /**
+   * Read whether `executor` may act on `owner`'s position.
+   *
+   * Non-throwing, and it never fails for a legitimate on-chain state — a
+   * missing authorization is a verdict, not an error. Transport failures do
+   * propagate (named by {@link readOrThrow}), because "the RPC timed out" is
+   * not a statement about the authorization.
+   *
+   * `isAuthorized[owner][executor]` is only read when the two differ; the
+   * self-custody path costs no extra round trip.
+   */
+  static async getAuthorization(params: {
+    owner: PositionOwner;
+    executor: EphemeralExecutor | string;
+    provider: Provider;
+  }): Promise<MorphoBlueAuthorization> {
+    const owner = resolvePositionOwnerAddress(
+      params.owner,
+      'Morpho position owner',
+    );
+    const executor = resolveExecutorAddress(
+      params.executor,
+      'Morpho executor (receiver)',
+    );
+    if (owner === executor) {
+      return {
+        owner,
+        executor,
+        isSelf: true,
+        isAuthorized: true,
+        blocksOwnerWrites: false,
+      };
+    }
+    const isAuthorized = await readOrThrow(
+      `isAuthorized(${owner}, ${executor})`,
+      () =>
+        new MorphoBlueContract(undefined, params.provider).isAuthorized(
+          owner,
+          executor,
+        ),
+    );
+    return {
+      owner,
+      executor,
+      isSelf: false,
+      isAuthorized,
+      blocksOwnerWrites: !isAuthorized,
+    };
+  }
+
+  /**
+   * Throwing form of {@link getAuthorization}: the guard every `borrow` /
+   * `withdrawCollateral` quote runs before it is built.
+   *
+   * Without it the failure is close to undiagnosable. `Morpho._isSenderAuthorized`
+   * reverts `UNAUTHORIZED`, but `RelayAdapt7702` runs with
+   * `requireSuccess = false`, so the batch **mines with status 1** having done
+   * nothing: no borrow, no collateral out, fees charged, and — on a
+   * repay-then-withdraw batch — the debt repaid with the collateral left
+   * behind. The one signal is this read.
+   */
+  static async assertAuthorized(params: {
+    owner: PositionOwner;
+    executor: EphemeralExecutor | string;
+    provider: Provider;
+    /** The Blue call being guarded, named in the error. */
+    operation: string;
+  }): Promise<MorphoBlueAuthorization> {
+    const authorization = await this.getAuthorization(params);
+    if (!authorization.blocksOwnerWrites) {
+      return authorization;
+    }
+    throw new Error(
+      `morpho: ${params.operation} on behalf of ${authorization.owner} would ` +
+        `revert UNAUTHORIZED — executor ${authorization.executor} is not in ` +
+        `isAuthorized[${authorization.owner}][${authorization.executor}]. The ` +
+        `owner must grant it first, in a transaction the owner itself sends ` +
+        `(setAuthorization) or signs (setAuthorizationWithSig); an executor ` +
+        `cannot authorise itself. Do not build this batch: RelayAdapt7702 runs ` +
+        `with requireSuccess=false, so it would mine with status 1 having done ` +
+        `nothing.`,
+    );
+  }
+
+  /**
+   * @param owner The account the collateral is booked against (`onBehalf`).
+   *   No authorization is required — Morpho lets anyone supply collateral on
+   *   anyone's behalf — but note the consequence: collateral supplied to an
+   *   owner can only be withdrawn by that owner or an account it has
+   *   authorised. `supplyCollateral` takes no `receiver`.
+   */
   static async getSupplyCollateralQuote(params: {
     market: MarketParams;
     collateralAssets: bigint;
-    recipient: EphemeralExecutor | string;
+    owner: PositionOwner;
     provider: Provider;
   }): Promise<MorphoSupplyCollateralQuote> {
     if (params.collateralAssets <= 0n) {
       throw new Error('morpho: supply collateral assets must be > 0');
     }
-    const onBehalf = resolveExecutorAddress(
-      params.recipient,
+    const onBehalf = resolvePositionOwnerAddress(
+      params.owner,
       'Morpho supply-collateral onBehalf',
     );
     const collateralDecimals = await this.decimalsOf(
@@ -405,20 +521,42 @@ export class MorphoBlueAPI {
     };
   }
 
+  /**
+   * Draw debt against `owner`'s collateral and deliver the loan token to
+   * `receiver`.
+   *
+   * The acceptance case for the owner/receiver split: a batch-local receiver is
+   * credited (and shields the proceeds) while a durable owner is charged. When
+   * they differ the borrow is authorization-gated, so this preflights
+   * {@link assertAuthorized}.
+   *
+   * @param owner Blue `onBehalf` — the account whose collateral backs the debt
+   *   and whose `borrowShares` grow.
+   * @param receiver The account this batch runs as, which the loan token is
+   *   delivered to and shielded from. Validated as an executor: the shield leg
+   *   sweeps this account's balance, so a third-party receiver would make the
+   *   step's declared output unshieldable.
+   */
   static async getBorrowQuote(params: {
     market: MarketParams;
     borrowAssets: bigint;
-    recipient: EphemeralExecutor | string;
+    owner: PositionOwner;
+    receiver: EphemeralExecutor | string;
     provider: Provider;
   }): Promise<MorphoBorrowQuote> {
     if (params.borrowAssets <= 0n) {
       throw new Error('morpho: borrow assets must be > 0');
     }
-    // onBehalf == receiver == ephemeral EOA.
-    const executor = resolveExecutorAddress(
-      params.recipient,
+    const receiver = resolveExecutorAddress(
+      params.receiver,
       'Morpho borrow receiver',
     );
+    const { owner: onBehalf } = await this.assertAuthorized({
+      owner: params.owner,
+      executor: receiver,
+      provider: params.provider,
+      operation: 'borrow',
+    });
     const loanDecimals = await this.decimalsOf(
       params.market.loanToken,
       params.provider,
@@ -429,22 +567,29 @@ export class MorphoBlueAPI {
       loanToken: params.market.loanToken,
       loanDecimals,
       borrowAssets: params.borrowAssets,
-      onBehalf: executor,
-      receiver: executor,
+      onBehalf,
+      receiver,
     };
   }
 
+  /**
+   * @param owner The account whose debt is repaid (`onBehalf`), and whose
+   *   position the debt cap below is read from. No authorization is required —
+   *   Morpho lets anyone repay anyone's debt — and `repay` takes no `receiver`:
+   *   the loan token is pulled from `msg.sender`, so the executor pays and the
+   *   owner's debt falls.
+   */
   static async getRepayQuote(params: {
     market: MarketParams;
     repayAssets: bigint;
-    recipient: EphemeralExecutor | string;
+    owner: PositionOwner;
     provider: Provider;
   }): Promise<MorphoRepayQuote> {
     if (params.repayAssets <= 0n) {
       throw new Error('morpho: repay assets must be > 0');
     }
-    const onBehalf = resolveExecutorAddress(
-      params.recipient,
+    const onBehalf = resolvePositionOwnerAddress(
+      params.owner,
       'Morpho repay onBehalf',
     );
     const marketId = getMarketId(params.market);
@@ -481,13 +626,18 @@ export class MorphoBlueAPI {
   }
 
   /**
-   * Build a shares-mode repay quote for the ephemeral EOA's position. If
-   * `repayShares` is omitted, the full `borrowShares` is read on-chain (full
-   * close). Reads market state to size a conservative loan budget.
+   * Build a shares-mode repay quote for `owner`'s position. If `repayShares` is
+   * omitted, the full `borrowShares` is read on-chain (full close). Reads
+   * market state to size a conservative loan budget.
+   *
+   * @param owner The account whose debt is repaid (`onBehalf`), and the account
+   *   `position(id, owner).borrowShares` is read from — so a delegated close
+   *   sizes itself against the *owner's* debt, not the executor's. No
+   *   authorization is required to repay.
    */
   static async getRepaySharesQuote(params: {
     market: MarketParams;
-    recipient: EphemeralExecutor | string;
+    owner: PositionOwner;
     provider: Provider;
     slippageBasisPoints: bigint;
     repayShares?: bigint;
@@ -499,8 +649,8 @@ export class MorphoBlueAPI {
           `required to absorb interest/oracle drift (got ${slippageBasisPoints})`,
       );
     }
-    const onBehalf = resolveExecutorAddress(
-      params.recipient,
+    const onBehalf = resolvePositionOwnerAddress(
+      params.owner,
       'Morpho repay-shares onBehalf',
     );
     const marketId = getMarketId(market);
@@ -541,21 +691,25 @@ export class MorphoBlueAPI {
   }
 
   /**
-   * Build a withdraw-collateral quote for the FULL collateral the ephemeral EOA
-   * holds in the market (reads `position(id, EOA).collateral`).
+   * Build a withdraw-collateral quote for the FULL collateral `owner` holds in
+   * the market — `position(id, owner).collateral`, so a delegated unwind reads
+   * the owner's collateral and not the executor's (which is typically zero, and
+   * would otherwise throw "no collateral to withdraw" against a funded
+   * position).
    */
   static async getWithdrawAllCollateralQuote(params: {
     market: MarketParams;
-    recipient: EphemeralExecutor | string;
+    owner: PositionOwner;
+    receiver: EphemeralExecutor | string;
     provider: Provider;
   }): Promise<MorphoWithdrawCollateralQuote> {
-    const executor = resolveExecutorAddress(
-      params.recipient,
-      'Morpho withdraw-all receiver',
+    const owner = resolvePositionOwnerAddress(
+      params.owner,
+      'Morpho withdraw-all onBehalf',
     );
     const position = await this.getPosition(
       getMarketId(params.market),
-      executor,
+      owner,
       params.provider,
     );
     if (position.collateral <= 0n) {
@@ -564,24 +718,39 @@ export class MorphoBlueAPI {
     return this.getWithdrawCollateralQuote({
       market: params.market,
       withdrawAssets: position.collateral,
-      recipient: executor,
+      owner,
+      receiver: params.receiver,
       provider: params.provider,
     });
   }
 
+  /**
+   * @param owner Blue `onBehalf` — the account the collateral is withdrawn
+   *   from. Authorization-gated when it is not the receiver.
+   * @param receiver The account this batch runs as, which the collateral is
+   *   delivered to and shielded from. Validated as an executor, for the same
+   *   reason as {@link getBorrowQuote}.
+   */
   static async getWithdrawCollateralQuote(params: {
     market: MarketParams;
     withdrawAssets: bigint;
-    recipient: EphemeralExecutor | string;
+    owner: PositionOwner;
+    receiver: EphemeralExecutor | string;
     provider: Provider;
   }): Promise<MorphoWithdrawCollateralQuote> {
     if (params.withdrawAssets <= 0n) {
       throw new Error('morpho: withdraw collateral assets must be > 0');
     }
-    const executor = resolveExecutorAddress(
-      params.recipient,
+    const receiver = resolveExecutorAddress(
+      params.receiver,
       'Morpho withdraw-collateral receiver',
     );
+    const { owner: onBehalf } = await this.assertAuthorized({
+      owner: params.owner,
+      executor: receiver,
+      provider: params.provider,
+      operation: 'withdrawCollateral',
+    });
     const collateralDecimals = await this.decimalsOf(
       params.market.collateralToken,
       params.provider,
@@ -592,8 +761,8 @@ export class MorphoBlueAPI {
       collateralToken: params.market.collateralToken,
       collateralDecimals,
       withdrawAssets: params.withdrawAssets,
-      onBehalf: executor,
-      receiver: executor,
+      onBehalf,
+      receiver,
     };
   }
 
@@ -803,11 +972,14 @@ export class MorphoBlueAPI {
    */
   static buildPositionRisk(params: {
     market: MorphoBlueMarket;
-    owner: EphemeralExecutor | string;
+    owner: PositionOwner;
     position: MorphoBluePosition;
   }): MorphoBluePositionRisk {
     const { market, position } = params;
-    const owner = resolvePositionOwner(params.owner, 'Morpho position owner');
+    const owner = resolvePositionOwnerAddressForRead(
+      params.owner,
+      'Morpho position owner',
+    );
 
     const borrowAssets = borrowAssetsForShares(
       position.borrowShares,
@@ -875,7 +1047,7 @@ export class MorphoBlueAPI {
    */
   static async getPositionRisk(params: {
     market: MorphoBlueMarketRef;
-    owner: EphemeralExecutor | string;
+    owner: PositionOwner;
     provider: Provider;
     timestamp?: bigint;
   }): Promise<MorphoBluePositionRisk> {
@@ -884,7 +1056,10 @@ export class MorphoBlueAPI {
       provider: params.provider,
       timestamp: params.timestamp,
     });
-    const owner = resolvePositionOwner(params.owner, 'Morpho position owner');
+    const owner = resolvePositionOwnerAddressForRead(
+      params.owner,
+      'Morpho position owner',
+    );
     const position = await readOrThrow(
       `position(${market.marketId}, ${owner})`,
       () => this.getPosition(market.marketId, owner, params.provider),
@@ -903,7 +1078,7 @@ export class MorphoBlueAPI {
    */
   static async getPositionRisks(params: {
     market: MorphoBlueMarketRef;
-    owners: readonly (EphemeralExecutor | string)[];
+    owners: readonly PositionOwner[];
     provider: Provider;
     timestamp?: bigint;
     /**
@@ -936,13 +1111,16 @@ export class MorphoBlueAPI {
       | { ok: false; owner: string; error: string };
 
     const readOne = async (
-      rawOwner: EphemeralExecutor | string,
+      rawOwner: PositionOwner,
     ): Promise<OwnerResult> => {
       // Resolve inside the per-owner boundary: a malformed address in the list
       // is that owner's failure, not the whole scan's.
       let owner: string;
       try {
-        owner = resolvePositionOwner(rawOwner, 'Morpho position owner');
+        owner = resolvePositionOwnerAddressForRead(
+          rawOwner,
+          'Morpho position owner',
+        );
       } catch (cause: unknown) {
         const raw = typeof rawOwner === 'string' ? rawOwner : rawOwner.address;
         return {
