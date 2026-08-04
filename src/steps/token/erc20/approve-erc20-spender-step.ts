@@ -66,7 +66,29 @@ export class ApproveERC20SpenderStep extends Step {
       );
 
     const contract = new ERC20Contract(erc20AmountForStep.tokenAddress);
-    const approveAmount = this.amount ?? maxBigNumberForTransaction();
+    // Half the shipped call sites pass no `amount`, and this used to fall
+    // straight through to an unlimited approval for all of them. That is a
+    // standing grant on a live spender: the shield epilogue sweeps balances, not
+    // allowances, so it outlives the batch that created it. Under 7702 the
+    // grantor is a single-use account nobody is watching afterwards.
+    //
+    // Those call sites omit the amount because they cannot pass one — supplying
+    // it makes `getValidInputERC20Amount` throw whenever the input is
+    // non-deterministic (see step.ts). But omitting the ARGUMENT never meant the
+    // approval had to be unbounded: when the input is deterministic
+    // (`minBalance === expectedBalance`, which is the case whenever the token
+    // arrives straight from an unshield) the exact figure is known right here.
+    //
+    // Unlimited survives only where the balance genuinely is not known until
+    // execution, because a downstream that pulls the whole runtime balance
+    // (Beefy `depositAll`) would fail against a short approval if the fill beats
+    // the quote. That residue is asserted rather than silent —
+    // `assertExecutorResidue` classifies it under `allowance`.
+    const approveAmount =
+      this.amount ??
+      (erc20AmountForStep.minBalance === erc20AmountForStep.expectedBalance
+        ? erc20AmountForStep.expectedBalance
+        : maxBigNumberForTransaction());
 
     const crossContractCalls: ContractTransaction[] = [];
 

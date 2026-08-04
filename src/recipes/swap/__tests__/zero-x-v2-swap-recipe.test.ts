@@ -1,7 +1,11 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ZeroXV2SwapRecipe } from '../zero-x-v2-swap-recipe';
-import { RecipeERC20Info, RecipeInput, type SwapQuoteDataV2 } from '../../../models/export-models';
+import {
+  RecipeERC20Info,
+  RecipeInput,
+  type SwapQuoteDataV2,
+} from '../../../models/export-models';
 import { NETWORK_CONFIG, NetworkName } from '@railgun-community/shared-models';
 import { setRailgunFees } from '../../../init';
 import Sinon, { SinonStub } from 'sinon';
@@ -9,6 +13,7 @@ import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
+  mockERC20ApprovalCalldata,
 } from '../../../test/mocks.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 import { testConfig } from '../../../test/test-config.test';
@@ -153,7 +158,7 @@ describe('zero-x-v2-swap-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(spender, 11970n),
           to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },
       ],

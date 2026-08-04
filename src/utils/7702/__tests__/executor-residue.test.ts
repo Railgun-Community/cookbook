@@ -907,7 +907,7 @@ describe('7702 assertExecutorResidue', () => {
       return { pool, input, output: await recipe.getRecipeOutput(input) };
     };
 
-    it('Should find the infinite collateral approval fx-mint-open really encodes', async () => {
+    it('Should find fx-mint-open bounds its collateral approval to the unshielded amount', async () => {
       const { pool, input, output } = await buildFxOpenOutput();
       const surface = collectExecutorResidueSurface(input, output);
 
@@ -917,9 +917,18 @@ describe('7702 assertExecutorResidue', () => {
           a.spender.toLowerCase() === pool.poolManager.toLowerCase(),
       );
       expect(collateralAllowance).to.not.equal(undefined);
+      // This asserted UNBOUNDED_ALLOWANCE when written, characterising the
+      // defect: fx-mint-open passes no amount, and the step fell through to
+      // max uint. It now bounds to the amount actually available — 1,000,000
+      // unshielded less the 0.25% RAILGUN fee — because that input is
+      // deterministic. Left as an assertion on the exact figure rather than
+      // "less than max", so a regression to a sloppier bound also fails.
       expect(collateralAllowance?.encodedApproval).to.equal(
+        997_500n,
+        'fx-mint-open must not leave a standing grant on the f(x) PoolManager',
+      );
+      expect(collateralAllowance?.encodedApproval).to.not.equal(
         UNBOUNDED_ALLOWANCE,
-        'fx-mint-open passes no amount to ApproveERC20SpenderStep, so it approves max',
       );
       expect(collateralAllowance?.declaredBySteps).to.contain(
         'Approve ERC20 Spender',

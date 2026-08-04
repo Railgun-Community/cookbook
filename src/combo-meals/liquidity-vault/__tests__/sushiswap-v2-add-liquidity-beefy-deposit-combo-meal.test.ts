@@ -13,6 +13,7 @@ import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
+  mockERC20ApprovalCalldata,
 } from '../../../test/mocks.test';
 import { BeefyAPI, BeefyVaultData } from '../../../api/beefy/beefy-api';
 import { UniV2LikeAddLiquidity_BeefyDeposit_ComboMeal } from '../uni-v2-like-add-liquidity-beefy-deposit-combo-meal';
@@ -232,7 +233,10 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b3000000000000000000000000d9e1ce17f2641f24ae83637ab66a2cca9c378b9fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F',
+            getUnshieldedAmountAfterFee(networkName, usdcAmount.amount),
+          ),
           to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         },
       ],
@@ -274,7 +278,10 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b3000000000000000000000000d9e1ce17f2641f24ae83637ab66a2cca9c378b9fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F',
+            getUnshieldedAmountAfterFee(networkName, wethAmount.amount),
+          ),
           to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },
       ],
@@ -332,7 +339,10 @@ describe('sushiswap-v2-add-liquidity-beefy-deposit-combo-meal', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b300000000000000000000000061f96ca5c79c9753c93244c73f1d4b4a90c1ac8cffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            vault.vaultContractAddress,
+            BigInt('0x1bafa9ee16e78000'),
+          ),
           to: '0x397ff1542f962076d0bfe58ea045ffa2d347aca0',
         },
       ],

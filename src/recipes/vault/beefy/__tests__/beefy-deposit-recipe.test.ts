@@ -9,6 +9,7 @@ import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
+  mockERC20ApprovalCalldata,
 } from '../../../../test/mocks.test';
 import { BeefyAPI, BeefyVaultData } from '../../../../api/beefy/beefy-api';
 import { testConfig } from '../../../../test/test-config.test';
@@ -134,7 +135,10 @@ describe('beefy-deposit-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b300000000000000000000000040324434a0b53dd1ed167ba30dcb6b4bd7a9536dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            ethVault.vaultContractAddress,
+            BigInt('9975'),
+          ),
           to: ethVault.depositERC20Address,
         },
       ],
@@ -306,7 +310,10 @@ describe('beefy-deposit-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b30000000000000000000000002f4bba9fc4f77f16829f84181eb7c8b50f639f95ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            polygonVault.vaultContractAddress,
+            BigInt('9975'),
+          ),
           to: polygonVault.depositERC20Address,
         },
       ],

@@ -7,6 +7,7 @@ import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
+  mockERC20ApprovalCalldata,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
 import {
@@ -156,7 +157,10 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+            (oneInDecimals18 * 2n * 9975n) / 10000n,
+          ),
           to: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
         },
       ],

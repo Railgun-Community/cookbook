@@ -7,6 +7,7 @@ import {
   MOCK_RAILGUN_WALLET_ADDRESS,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
+  mockERC20ApprovalCalldata,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
 import {
@@ -180,7 +181,10 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+            (oneInDecimals18 * 1n * 9975n) / 10000n,
+          ),
           to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         },
       ],
@@ -210,7 +214,10 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(
+            '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+            (oneInDecimals6 * 2000n * 9975n) / 10000n,
+          ),
           to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },
       ],

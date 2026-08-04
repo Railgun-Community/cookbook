@@ -4,6 +4,7 @@ import { ApproveERC20SpenderStep } from '../approve-erc20-spender-step';
 
 import { RecipeERC20Info, StepInput } from '../../../../models/export-models';
 import { NetworkName } from '@railgun-community/shared-models';
+import { mockERC20ApprovalCalldata } from '../../../../test/mocks.test';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -114,7 +115,7 @@ describe('approve-erc20-spender-step', () => {
 
     expect(output.crossContractCalls).to.deep.equal([
       {
-        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        data: mockERC20ApprovalCalldata(spender, 12000n),
         to: '0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D',
       },
     ]);
@@ -170,7 +171,7 @@ describe('approve-erc20-spender-step', () => {
         to: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       },
       {
-        data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        data: mockERC20ApprovalCalldata(spender, 12000n),
         to: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       },
     ]);
@@ -228,9 +229,7 @@ describe('approve-erc20-spender-step', () => {
     };
     await expect(
       approveStep.getValidStepOutput(stepInputNoERC20s),
-    ).to.be.rejectedWith(
-      'Approve ERC20 Spender step is invalid.',
-    );
+    ).to.be.rejectedWith('Approve ERC20 Spender step is invalid.');
 
     // Too low balance for erc20 input
     const stepInputLowBalance: StepInput = {
@@ -248,8 +247,6 @@ describe('approve-erc20-spender-step', () => {
     };
     await expect(
       approveStep.getValidStepOutput(stepInputLowBalance),
-    ).to.be.rejectedWith(
-      'Approve ERC20 Spender step is invalid.',
-    );
+    ).to.be.rejectedWith('Approve ERC20 Spender step is invalid.');
   });
 });

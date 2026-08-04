@@ -14,6 +14,7 @@ import {
   MOCK_RAILGUN_WALLET_ADDRESS_2,
   MOCK_SHIELD_FEE_BASIS_POINTS,
   MOCK_UNSHIELD_FEE_BASIS_POINTS,
+  mockERC20ApprovalCalldata,
 } from '../../../test/mocks.test';
 import { ZeroXConfig } from '../../../models/zero-x-config';
 import { testConfig } from '../../../test/test-config.test';
@@ -162,7 +163,7 @@ describe('zero-x-v2-swap-recipe-private-destination', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
-          data: '0x095ea7b3000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          data: mockERC20ApprovalCalldata(spender, 11970n),
           to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },
       ],
@@ -170,7 +171,8 @@ describe('zero-x-v2-swap-recipe-private-destination', () => {
 
     expect(output.stepOutputs[2]).to.deep.equal({
       name: '0x V2 Exchange Swap',
-      description: 'Swaps two ERC20 tokens using 0x V2 Exchange DEX Aggregator.',
+      description:
+        'Swaps two ERC20 tokens using 0x V2 Exchange DEX Aggregator.',
       outputERC20Amounts: [
         {
           approvedSpender: undefined,
