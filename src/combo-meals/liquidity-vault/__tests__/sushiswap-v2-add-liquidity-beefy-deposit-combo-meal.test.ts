@@ -73,7 +73,7 @@ let uniswapV2PairTotalSupply: SinonStub;
 let beefyVaultForIDStub: SinonStub;
 let uniswapV2FactoryFeeToStub: SinonStub;
 
-const provider = new JsonRpcProvider('https://eth.llamarpc.com');
+const provider = new JsonRpcProvider('https://ethereum-rpc.publicnode.com');
 
 const RECIPIENT = '0x1111111111111111111111111111111111111111';
 

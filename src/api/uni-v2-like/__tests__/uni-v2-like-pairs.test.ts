@@ -76,7 +76,7 @@ let provider: JsonRpcProvider;
 
 describe('uni-v2-like-pairs', () => {
   before(() => {
-    provider = new JsonRpcProvider('https://eth.llamarpc.com');
+    provider = new JsonRpcProvider('https://ethereum-rpc.publicnode.com');
   });
 
   it('Should query Uniswap LP pairs for USDC and WETH', async () => {

@@ -47,7 +47,7 @@ let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
 
-const provider = new JsonRpcProvider('https://eth.llamarpc.com');
+const provider = new JsonRpcProvider('https://ethereum-rpc.publicnode.com');
 
 const RECIPIENT = '0x1111111111111111111111111111111111111111';
 
