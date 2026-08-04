@@ -17,6 +17,26 @@ import {
   MORPHO_ADDRESSES,
   KNOWN_METAMORPHO_VAULTS,
   KNOWN_MORPHO_VAULTS_V2,
+  // Morpho Blue steps + market math — the same gap as the vault one above,
+  // reopened one directory over: `steps/index.ts` listed `./vault` but not
+  // `./morpho`, so the Blue steps, `getMarketId`, `WAD`, `ORACLE_PRICE_SCALE`
+  // and `borrowAssetsForShares` were unreachable from the package root even
+  // though `MorphoBlueAPI` and every Blue recipe that consumes them were
+  // exported.
+  MORPHO_BLUE_ADDRESS,
+  MorphoBlueSupplyCollateralStep,
+  MorphoBlueBorrowStep,
+  MorphoBlueRepayStep,
+  MorphoBlueRepaySharesStep,
+  MorphoBlueWithdrawCollateralStep,
+  MorphoBlueSetAuthorizationStep,
+  getMarketId,
+  borrowAssetsForShares,
+  computeMorphoBlueRisk,
+  accrueMorphoBlueInterest,
+  morphoBlueLiquidationIncentiveFactor,
+  ORACLE_PRICE_SCALE,
+  MorphoBlueAPI,
   // fxMINT position-id predictor — `FxMintOpenRecipe` requires a predicted
   // positionId but shipped no way to obtain one, so consumers hand-rolled the
   // ABI fragment.
@@ -59,6 +79,32 @@ describe('index', () => {
 
   it('Should expose the fxMINT position-id reader', () => {
     expect(getNextFxPositionId).to.be.a('function');
+  });
+
+  it('Should expose the Morpho Blue steps and market math from the root barrel', () => {
+    expect(MORPHO_BLUE_ADDRESS).to.be.a('string');
+    expect(MorphoBlueSupplyCollateralStep).to.be.a('function');
+    expect(MorphoBlueBorrowStep).to.be.a('function');
+    expect(MorphoBlueRepayStep).to.be.a('function');
+    expect(MorphoBlueRepaySharesStep).to.be.a('function');
+    expect(MorphoBlueWithdrawCollateralStep).to.be.a('function');
+    expect(MorphoBlueSetAuthorizationStep).to.be.a('function');
+    expect(getMarketId).to.be.a('function');
+    expect(borrowAssetsForShares).to.be.a('function');
+    expect(ORACLE_PRICE_SCALE).to.be.a('bigint');
+  });
+
+  it('Should expose the Morpho Blue risk reader from the root barrel', () => {
+    // A Blue borrow can be liquidated by anyone at any time with no wallet
+    // involvement, so this reader is the only warning a holder gets. It is
+    // useless if a consumer cannot reach it.
+    expect(computeMorphoBlueRisk).to.be.a('function');
+    expect(accrueMorphoBlueInterest).to.be.a('function');
+    expect(morphoBlueLiquidationIncentiveFactor).to.be.a('function');
+    expect(MorphoBlueAPI.getMarket).to.be.a('function');
+    expect(MorphoBlueAPI.getPositionRisk).to.be.a('function');
+    expect(MorphoBlueAPI.getPositionRisks).to.be.a('function');
+    expect(MorphoBlueAPI.buildPositionRisk).to.be.a('function');
   });
 
   it('Should expose the MIN_GAS_LIMIT_* floors from the root barrel', () => {
