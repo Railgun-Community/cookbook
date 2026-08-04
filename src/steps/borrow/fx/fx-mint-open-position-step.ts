@@ -102,8 +102,16 @@ export type FxMintOpenPositionStepData = {
  *
  * The same shape applies when the id race is lost (see `predictedPositionId`
  * above): the position exists at a different id, so the declared one is still
- * unowned and the shield still reverts. Read the id as late as possible. See
- * `steps/failure-modes.ts`.
+ * unowned and the shield still reverts.
+ *
+ * The collateral is recoverable — the wallet holds the ephemeral key and can
+ * sweep it in a follow-up transaction — so what a failed open really costs is
+ * privacy: the unshield is now publicly and permanently associated with that
+ * address. Unlike the close and authorization cases, this one cannot be closed
+ * from the cookbook: the shield request list is fixed when the proof is built,
+ * so it cannot be made conditional on what `operate()` did. `preflightFxOpen`
+ * in `api/borrow/fx` narrows the window instead — run it immediately before
+ * building and pass its id straight through. See `steps/failure-modes.ts`.
  */
 export class FxMintOpenPositionStep extends Step {
   readonly config: StepConfig = {

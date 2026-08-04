@@ -14,7 +14,20 @@ export type FxMintOpenRecipeOpts = {
   pool: FxMintPoolRef;
   /** Absolute fxUSD debt to mint. */
   targetDebt: bigint;
-  /** Predicted positionId from Pool.getNextPositionId(). Race-checked at gas-estimate. */
+  /**
+   * The id `operate()` will mint, from `Pool.getNextPositionId()`.
+   *
+   * **Not race-checked at gas-estimate** — an earlier version of this comment
+   * said it was. It cannot be: the calldata passes positionId 0 (mint-new), and
+   * 0 cannot revert on a taken id. If another opener takes the id first,
+   * `operate()` still succeeds at the NEXT id, and the batch then reverts its
+   * entire shield trying to approve the one declared here, leaving the
+   * collateral public at the ephemeral account.
+   *
+   * Get it from `preflightFxOpen` in `api/borrow/fx`, immediately before
+   * building, and pass the id back in so a stale one is reported rather than
+   * discovered on chain.
+   */
   predictedPositionId: bigint;
   /**
    * f(x)'s borrow fee for this (pool, operator), 1e9-denominated.
