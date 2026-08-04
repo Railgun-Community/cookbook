@@ -25,7 +25,7 @@ passing `position.rawDebts` got three simultaneous failures:
 |---|---|
 | `repayAmount` | 872,500 sats **more** than the debt — `operate()` underflows the position and reverts |
 | `withdrawColl` | 1.017e-8 % of the position released instead of the pro-rata share |
-| `partialClose` | stuck `true`, so a full close declares an NFT f(x) just burned as a surviving output, and the shield reverts |
+| `partialClose` | stuck `true`, so a full close was treated as partial and the amounts above were computed against the wrong branch |
 
 ### What changed
 
@@ -146,7 +146,19 @@ calldata, those fixtures will need updating. Build the expected calldata from th
 amount rather than pinning a hex literal: a 64-character run of `f` reads like
 any other calldata tail, which is exactly how this shipped unnoticed.
 
-### 3.2 A combo's gas floor is now its dearest constituent recipe
+### 3.2 A full f(x) close now shields the position NFT back
+
+f(x) does **not** burn a position NFT on close. `FxMintClosePositionStep`
+assumed it did, so the full-close branch declared `outputNFTs: []` and left the
+bearer handle public at the ephemeral account on **every successful full close**.
+It is now declared unconditionally.
+
+If you keyed anything on "a full close consumes the NFT" — a UI that removes the
+position on seeing `spentNFTs`, or a reader that treats a surviving NFT as a
+failed close — invert it. A closed position is a live NFT reading `(0, 0)`; the
+`outputPositions` records, not the NFT, are what describe the retirement.
+
+### 3.3 A combo's gas floor is now its dearest constituent recipe
 
 Five of seven shipped combos declared a floor *below* their own worst leg, all
 taking the generic `MIN_GAS_LIMIT_COMBO_MEAL` while wrapping recipes sized
@@ -154,7 +166,7 @@ higher. The floor is enforced in-contract as a `gasleft()` require. A combo's ow
 config still wins when it is the larger number; this can only raise a floor,
 never lower one.
 
-### 3.3 Two gas-floor constants moved, from measurement
+### 3.4 Two gas-floor constants moved, from measurement
 
 | constant | was | now |
 |---|---|---|
@@ -190,25 +202,41 @@ Two consequences that are easy to get backwards:
   user's value shielded and whole. "The value strands at the executor" is a
   per-step property, not a property of the mechanism.
 
-`src/steps/failure-modes.ts` states the outcome for all 27 steps. Two strand, and
-both are f(x):
+`src/steps/failure-modes.ts` states the outcome for all 27 steps.
 
-- **`FxMintOpenPositionStep`** declares `predictedPositionId` in `outputNFTs`
-  unconditionally. If `operate()` fails, the epilogue carries an ERC-721 shield
-  request for a token that was never minted; `RelayAdapt7702.shield` calls
-  `approve(railgun, id)` on every NFT request **before any ERC-20 work**, that
-  reverts, and it takes the entire shield with it. The collateral that would
-  otherwise have swept back is left public. Same shape when the predicted id
-  races.
-- **`FxMintClosePositionStep`, full-close branch** declares `outputNFTs: []` on
-  the assumption f(x) burns the NFT inside `operate()`. If `operate()` fails it is
-  neither burned nor reshielded — the bearer token for the whole position sits on
-  a public ephemeral EOA while the debt token sweeps back around it. **If the
-  ephemeral key is genuinely single-use, the position is unrecoverable.**
+**Nothing is lost.** The wallet holds the ephemeral key, so anything left on the
+executor — ERC-20 dust, a position NFT, native balance — can be swept in a
+follow-up transaction. What a failed batch costs is **privacy**: the unshield
+becomes publicly and permanently associated with that address, and someone has to
+notice and send the recovery. Two of the three cases below are now fixed
+outright; the third is narrowed and named.
 
-A third case is not about value at all: `MorphoBlueSetAuthorizationStep` can
-leave **standing authority** over every position the executor holds. No sweep
-clears an authorization, and no re-run revokes it.
+- **`FxMintClosePositionStep` — FIXED.** f(x) does not burn a position NFT on
+  close (measured: 1,097 transfers, 33 mints, zero burns over 200,000 blocks; 19
+  of 51 sampled positions read `(0, 0)` with `ownerOf` still live). The full-close
+  branch assumed it did, declared `outputNFTs: []`, and so left the handle public
+  on **every successful full close**, not only on failure. The NFT is now declared
+  unconditionally, which fixes the success path and removes the stranding case
+  together.
+- **`MorphoBlueSetAuthorizationStep` — FIXED, and it was the only one that
+  mattered structurally.** A standing grant is not value, so no sweep reaches it
+  and holding the ephemeral key does not help; only an explicit revoke removes it.
+  Wrap the grant in `withScopedMorphoBlueAuthorization` when it is a means to
+  something else in the same batch — the trailing revoke still runs when the
+  wrapped steps fail, precisely because continue-semantics do not skip it. Use the
+  bare step only when the grant is meant to outlive the batch.
+- **`FxMintOpenPositionStep` — narrowed, not closed.** It declares
+  `predictedPositionId` in `outputNFTs` unconditionally, so a failed `operate()`
+  leaves an ERC-721 shield request for a token never minted; `RelayAdapt7702.shield`
+  approves every NFT request **before any ERC-20 work**, that reverts, and the
+  whole shield goes with it. Same shape when the predicted id races. This cannot
+  be fixed from the cookbook: the shield request list is fixed when the proof is
+  built, so it cannot depend on what `operate()` did. Closing it needs the
+  relay-adapt contract to tolerate an unapprovable NFT request. Until then, run
+  `preflightFxOpen` immediately before building and pass its id straight through
+  — it reports the gate, the pool's debt capacity and a stale id, and names what
+  it does not check (`resulting-debt-ratio`, `operate-simulation`,
+  `same-block-guarantee`).
 
 `minGasLimit` does not help with any of this. It appears only in `execute`, as
 its first statement, ahead of nonce and signature validation; `multicall` has no
@@ -228,6 +256,8 @@ batch and **cannot protect the shield epilogue specifically**.
 | Blue health / liquidation risk | `MorphoBlueAPI.getPositionRisks` |
 | Assert the executor was left empty | `assertExecutorResidue` |
 | Refuse a gated Morpho vault before it strands shares | in the three `get*Quote` builders |
+| Scope a Blue authorization to one batch | `withScopedMorphoBlueAuthorization` |
+| Preflight an f(x) open before building it | `preflightFxOpen` / `assertFxOpenViable` |
 | Preflight f(x)'s `onlyTopLevelCall` whitelist | in the f(x) API |
 | Shield-args adapter (previously duplicated in two test files) | root barrel |
 
