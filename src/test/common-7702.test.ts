@@ -12,8 +12,6 @@ import {
   EVMGasType,
   NETWORK_CONFIG,
   NetworkName,
-  RailgunERC20Recipient,
-  RailgunNFTAmountRecipient,
   TXIDVersion,
   TransactionGasDetails,
   delay,
@@ -23,6 +21,7 @@ import { ContractTransaction } from 'ethers';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { RecipeInput, RecipeOutput } from '../models/export-models';
+import { createShieldRecipients } from '../utils/shield-recipients';
 import {
   getTestEthersWallet,
   getTestProvider,
@@ -166,24 +165,10 @@ export const createCrossContractCalls7702ForTest = async (
 
   const { erc20Amounts: unshieldERC20Amounts, nfts: unshieldNFTs } =
     recipeInput;
-  const { minGasLimit, crossContractCalls, erc20AmountRecipients, nftRecipients } =
-    recipeOutput;
+  const { minGasLimit, crossContractCalls } = recipeOutput;
 
-  const shieldERC20Recipients: RailgunERC20Recipient[] =
-    erc20AmountRecipients.map(erc20AmountRecipient => ({
-      tokenAddress: erc20AmountRecipient.tokenAddress,
-      recipientAddress: erc20AmountRecipient.recipient,
-    }));
-
-  const shieldNFTRecipients: RailgunNFTAmountRecipient[] = nftRecipients.map(
-    nftRecipient => ({
-      nftAddress: nftRecipient.nftAddress,
-      nftTokenType: nftRecipient.nftTokenType,
-      tokenSubID: nftRecipient.tokenSubID,
-      amount: nftRecipient.amount,
-      recipientAddress: nftRecipient.recipient,
-    }),
-  );
+  const { shieldERC20Recipients, shieldNFTRecipients } =
+    createShieldRecipients(recipeOutput);
 
   // The test signer sponsors the type-4 transaction, so there is no broadcaster
   // fee. Unlike the relay-adapt harness we do not opt into one to get richer

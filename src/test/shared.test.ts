@@ -8,8 +8,6 @@ import {
   EVMGasType,
   NetworkName,
   RailgunERC20AmountRecipient,
-  RailgunERC20Recipient,
-  RailgunNFTAmountRecipient,
   TXIDVersion,
   TransactionGasDetails,
   isDefined,
@@ -17,6 +15,7 @@ import {
 import { ContractTransaction, JsonRpcProvider, Wallet } from 'ethers';
 import { testConfig } from './test-config.test';
 import { RecipeInput, RecipeOutput } from '../models';
+import { createShieldRecipients } from '../utils/shield-recipients';
 import { AbstractWallet } from '@railgun-community/engine';
 
 export let testRPCProvider: Optional<JsonRpcProvider>;
@@ -104,24 +103,10 @@ export const createCrossContractCallsForTest = async (
     recipeInput;
   const { minGasLimit } = recipeOutput;
 
-  const { crossContractCalls, erc20AmountRecipients, nftRecipients } =
-    recipeOutput;
+  const { crossContractCalls } = recipeOutput;
 
-  const shieldERC20Recipients: RailgunERC20Recipient[] =
-    erc20AmountRecipients.map(erc20AmountRecipient => ({
-      tokenAddress: erc20AmountRecipient.tokenAddress,
-      recipientAddress: erc20AmountRecipient.recipient,
-    }));
-
-  const shieldNFTRecipients: RailgunNFTAmountRecipient[] = nftRecipients.map(
-    nftRecipient => ({
-      nftAddress: nftRecipient.nftAddress,
-      nftTokenType: nftRecipient.nftTokenType,
-      tokenSubID: nftRecipient.tokenSubID,
-      amount: nftRecipient.amount,
-      recipientAddress: nftRecipient.recipient,
-    }),
-  );
+  const { shieldERC20Recipients, shieldNFTRecipients } =
+    createShieldRecipients(recipeOutput);
 
   // Proof/transaction requires broadcaster fee in order to parse the relay adapt error for testing.
   // Ie. RelayAdapt transaction must continue after revert, and emit event with error details.

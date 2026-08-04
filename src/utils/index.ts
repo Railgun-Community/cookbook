@@ -3,5 +3,6 @@ export * from './address';
 export * from './filters';
 export * from './nft';
 export * from './no-action-output';
+export * from './shield-recipients';
 export * from './token';
 export * from './wrap-util';
