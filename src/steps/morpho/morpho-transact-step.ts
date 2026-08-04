@@ -18,6 +18,16 @@ import { MorphoBundle } from '../../api/morpho';
  *
  * Pure step: pulled tokens are consumed (approvals are added by the recipe),
  * delivered tokens become `[min, expected]` outputs, and any change reshields.
+ *
+ * **Failure semantics (7702). THE BUNDLE IS NOT ATOMIC.** It contributes N entries
+ * to the multicall array, and relay-adapt runs that array with
+ * `requireSuccess = false`, which CONTINUES past a failing call. So calls after a
+ * failing one still execute — against state the bundle compiler assumed would
+ * exist. A Morpho SDK bundle is authored on the assumption that it reverts as a
+ * unit; on this path it does not. Pulled tokens that were never pulled are at the
+ * executor and are swept back, but a half-applied bundle can leave protocol state
+ * the bundle's own accounting does not model. Treat every `CallError` index inside
+ * a bundle as unexplained until read back on chain. See `steps/failure-modes.ts`.
  */
 export class MorphoTransactStep extends Step {
   readonly config: StepConfig = {

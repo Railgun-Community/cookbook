@@ -22,6 +22,11 @@ import { MORPHO_BLUE_ADDRESS } from './morpho-blue-util';
  * no-op if drift exceeds the slippage buffer, never a loss) and reshields the
  * remainder. The caller must unshield at least `maxRepaidAssets` of the loan
  * token.
+ *
+ * **Failure semantics (7702).** Benign, and revert-safe by construction:
+ * `repay(0, shares)` burns all the shares or none, so interest drift beyond the
+ * `maxRepaidAssets` buffer is a no-op rather than a partial burn. The loan token
+ * is untouched at the executor and reshields.
  */
 export class MorphoBlueRepaySharesStep extends Step {
   readonly config: StepConfig = {

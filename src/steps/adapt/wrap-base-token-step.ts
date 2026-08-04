@@ -15,6 +15,13 @@ import {
 } from '../../utils/7702';
 import { ContractTransaction } from 'ethers';
 
+/**
+ * **Failure semantics (7702).** `wrapBase(0)` wraps the executor's ENTIRE ETH
+ * balance. If the call fails the ETH stays native, and native ETH is the one
+ * asset the shield epilogue cannot sweep (`shield` handles ERC-20/ERC-721 only),
+ * so it strands publicly at the ephemeral EOA. Wrapping is what makes base-token
+ * value recoverable at all. See `steps/failure-modes.ts`.
+ */
 export class WrapBaseTokenStep extends Step {
   readonly config: StepConfig = {
     name: 'Wrap Base Token',

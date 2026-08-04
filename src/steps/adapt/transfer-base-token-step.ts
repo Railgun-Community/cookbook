@@ -14,6 +14,14 @@ import {
 } from '../../utils/7702';
 import { ContractTransaction } from 'ethers';
 
+/**
+ * **Failure semantics (7702).** On failure the ETH stays native at the executor
+ * and is not sweepable by the shield epilogue. On success it has left the batch
+ * for an external address and nothing later can pull it back. The base-token
+ * branch of `RelayAdapt7702.transfer` is a raw `.call` guarded by
+ * `require(success, "RelayAdapt: ETH transfer failed")`, so a recipient that
+ * rejects ETH fails the whole `transfer` call rather than just its own entry.
+ */
 export class TransferBaseTokenStep extends Step {
   readonly config: StepConfig = {
     name: 'Transfer Base Token',

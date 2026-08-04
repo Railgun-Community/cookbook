@@ -16,6 +16,16 @@ import {
 import { NetworkName, isDefined } from '@railgun-community/shared-models';
 import { ContractTransaction } from 'ethers';
 
+/**
+ * **Failure semantics (7702).** A failed approve cascades harmlessly: the
+ * protocol call that needed the allowance also fails, and the batch degrades into
+ * a no-op with everything reshielded. A SUCCESSFUL approve is what persists — the
+ * allowance survives a failed batch and the shield epilogue cannot sweep an
+ * allowance. Note `approveAmount = amount ?? maxBigNumberForTransaction()`, so the
+ * call sites that omit the amount (`ZeroXV2SwapRecipe`, and the f(x) open /
+ * top-up recipes) leave an UNLIMITED allowance behind — a standing grant, not a
+ * per-batch artifact, on a reusable executor. See `steps/failure-modes.ts`.
+ */
 export class ApproveERC20SpenderStep extends Step {
   readonly config: StepConfig = {
     name: 'Approve ERC20 Spender',

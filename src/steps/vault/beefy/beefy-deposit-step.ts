@@ -12,6 +12,13 @@ import { BEEFY_VAULT_ERC20_DECIMALS, BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy/beefy-vault-contract';
 import { calculateOutputsForBeefyDeposit } from './beefy-util';
 
+/**
+ * **Failure semantics (7702).** Benign. On failure `depositAll()` moved nothing
+ * and the deposit token reshields. On success the vault receipt is an ERC-20 at
+ * the executor and is a declared output, so a later failure reshields the position
+ * itself — the tokenized-vault case, where the epilogue can re-privatise what was
+ * built. See `steps/failure-modes.ts`.
+ */
 export class BeefyDepositStep extends Step {
   readonly config: StepConfig = {
     name: 'Beefy Vault Deposit',

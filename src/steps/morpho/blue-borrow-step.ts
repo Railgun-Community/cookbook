@@ -18,6 +18,14 @@ import { MorphoBorrowQuote } from '../../api/morpho';
  * Non-atomic: the collateral may have been supplied in an earlier `execute()`
  * batch by the same EOA. The executor identity MUST match, else `onBehalf`
  * points at an empty position and the borrow reverts.
+ *
+ * **Failure semantics (7702).** Safe to fail, dangerous to half-finish. A failed
+ * borrow draws no debt and produces no token, and the batch reshields everything.
+ * A SUCCESSFUL borrow followed by a later failure splits in two: the loan token is
+ * a declared output at the executor and IS swept back shielded, while the DEBT is
+ * booked against `onBehalf` inside Blue and is not — it stays, accrues, and can be
+ * liquidated by anyone at any time with no wallet involvement. Read it back with
+ * `MorphoBlueAPI.getPositionRisk`. See `steps/failure-modes.ts`.
  */
 export class MorphoBlueBorrowStep extends Step {
   readonly config: StepConfig = {

@@ -7,6 +7,11 @@ import {
 import { Step } from '../step';
 import { compareERC20Info } from '../../utils/token';
 
+/**
+ * **Failure semantics (7702).** Emits no cross-contract call and cannot fail on
+ * chain. It does still apply to a FAILED batch: the shield epilogue reshields
+ * the swept balance to the designated address, not to the batch originator.
+ */
 export class DesignateShieldERC20RecipientStep extends Step {
   readonly config: StepConfig = {
     name: 'Designate Shield ERC20s Recipient',

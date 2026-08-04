@@ -7,6 +7,10 @@ import { Step } from '../step';
 import { ZERO_ADDRESS } from '../../models/constants';
 import { ContractTransaction } from 'ethers';
 
+/**
+ * **Failure semantics (7702).** Cannot fail — a 0-value, 0-data call to the zero
+ * address always succeeds (codeless account). Leaves no residue.
+ */
 export class EmptyTransferBaseTokenStep extends Step {
   readonly config: StepConfig = {
     name: 'Empty Transfer Base Token',

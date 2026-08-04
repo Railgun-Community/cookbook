@@ -19,6 +19,10 @@ import { MetaMorphoRedeemQuote } from '../../../api/vault/morpho';
  * 7702, so it is always authorised to burn its own shares. Asset output is
  * non-deterministic across blocks, so the step declares `[minAssets,
  * expectedAssets]`.
+ *
+ * **Failure semantics (7702).** Benign: shares are untouched at the executor and
+ * reshield (the usual cause, vault illiquidity, is transient); on success the
+ * redeemed asset is a declared output and reshields.
  */
 export class MetaMorphoWithdrawStep extends Step {
   readonly config: StepConfig = {

@@ -9,6 +9,14 @@ import { Step } from '../step';
 import { NetworkName } from '@railgun-community/shared-models';
 import { getUnshieldFee, getUnshieldedAmountAfterFee } from '../../utils/fee';
 
+/**
+ * **Failure semantics (7702).** Not in the multicall `calls` array at all: the
+ * unshield is `railgun.transact()` inside `RelayAdapt7702.execute`, before
+ * `_multicall`. A failing unshield therefore reverts the ENTIRE transaction
+ * (`status 0`) and nothing is spent — the only leg of a recipe with
+ * all-or-nothing semantics. Every step after it can fail while the batch still
+ * mines. Full model: `steps/failure-modes.ts`.
+ */
 export class UnshieldDefaultStep extends Step {
   readonly config: StepConfig = {
     name: 'Unshield (Default)',

@@ -118,6 +118,12 @@ export type FxMintAdjustPositionStepData = {
  *   - debtDelta < 0: declares spentERC20Amounts for the debt token consumed
  *     (`fxDebtRepaySpend` — principal PLUS fee; PoolManager pulls both via the
  *     recipe's preceding approve step).
+ *
+ * **Failure semantics (7702).** Benign, and materially safer than open: the
+ * position NFT was unshielded INTO the executor, so the executor genuinely owns
+ * the id declared in `outputNFTs` whether or not `operate()` succeeded. A failed
+ * adjust reshields the NFT and sweeps the untouched collateral or debt token, and
+ * the position is unchanged. See `steps/failure-modes.ts`.
  */
 export class FxMintAdjustPositionStep extends Step {
   readonly config: StepConfig = {

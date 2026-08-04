@@ -14,6 +14,13 @@ import {
   resolveExecutorAddress,
 } from '../../../utils/7702';
 
+/**
+ * **Failure semantics (7702).** On failure the token is untouched at the executor
+ * and the shield epilogue sweeps it back. On success it is gone to an external
+ * address: the only ERC-20 step whose success a later failure cannot undo, so it
+ * belongs last among the value-moving steps. An unspecified `amount` encodes
+ * `value: 0`, which sends the ENTIRE balance.
+ */
 export class TransferERC20Step extends Step {
   readonly config: StepConfig = {
     name: 'Transfer ERC20',

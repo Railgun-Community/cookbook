@@ -9,6 +9,21 @@ import { Step } from '../step';
 import { NetworkName } from '@railgun-community/shared-models';
 import { getShieldFee, getShieldedAmountAfterFee } from '../../utils/fee';
 
+/**
+ * **Failure semantics (7702).** This step emits no call of its own; the wallet
+ * SDK appends the single trailing `shield(...)` self-call it models, and that
+ * call sweeps the executor's ENTIRE balance per requested token
+ * (`preimage.value = 0`). Because relay-adapt builds every 7702 batch with
+ * `requireSuccess = false` — which CONTINUES past a failing call rather than
+ * breaking — the shield still runs after an earlier step fails, which is what
+ * makes a mid-batch failure recoverable and still private.
+ *
+ * The converse is the catastrophic case. The shield reverts as a unit, so if IT
+ * fails, NOTHING is shielded: gas starvation (empty revert data, the §4.1
+ * mainnet loss) or a single ERC-721 request the executor does not own strands
+ * every token in the batch at the ephemeral EOA in the clear — with the
+ * transaction still mining `status 1`. Full model: `steps/failure-modes.ts`.
+ */
 export class ShieldDefaultStep extends Step {
   readonly config: StepConfig = {
     name: 'Shield (Default)',

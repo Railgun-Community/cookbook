@@ -14,6 +14,12 @@ import { UniV2LikeSDK } from '../../../api/uni-v2-like/uni-v2-like-sdk';
 import { minBalanceAfterSlippage } from '../../../utils/number';
 import { UniV2LikeRouterContract } from '../../../contract/liquidity/uni-v2-like-router-contract';
 
+/**
+ * **Failure semantics (7702).** Benign: both input tokens stay at the executor
+ * and are swept back by the shield epilogue; no LP token is minted. On success the
+ * LP token is minted to the executor and is itself a declared output, so a later
+ * failure reshields it. See `steps/failure-modes.ts`.
+ */
 export class UniV2LikeAddLiquidityStep extends Step {
   readonly config: StepConfig = {
     name: '[Name] Add Liquidity',

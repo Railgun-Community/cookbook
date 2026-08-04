@@ -19,6 +19,15 @@ import { MetaMorphoDepositQuote } from '../../../api/vault/morpho';
  * recipe (which does the on-chain preview + 7702 receiver resolution). Share
  * output is non-deterministic across blocks, so the step declares
  * `[minShares, expectedShares]` and marks itself non-deterministic.
+ *
+ * **Failure semantics (7702).** A failed deposit leaves the asset at the executor,
+ * swept back by the shield epilogue — no loss. The hazard is a SUCCESSFUL deposit
+ * into a share-GATED vault: the shield leg is
+ * `transferFrom(executor -> RAILGUN proxy)`, gate-checked on both endpoints
+ * (`canSendShares` / `canReceiveShares`), and the proxy is a fixed third party no
+ * curator allowlist contains. The gate therefore makes the shield call itself
+ * revert, stranding every other token in the batch with it. `assertVaultNotGated`
+ * exists to turn that into a build-time diagnosis. See `steps/failure-modes.ts`.
  */
 export class MetaMorphoDepositStep extends Step {
   readonly config: StepConfig = {

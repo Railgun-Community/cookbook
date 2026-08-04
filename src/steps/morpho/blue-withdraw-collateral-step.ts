@@ -15,6 +15,12 @@ import { MorphoWithdrawCollateralQuote } from '../../api/morpho';
  * un-tokenized position and arrives as a deterministic token amount at the EOA
  * (`receiver`). Any inputs pass through untouched. Reverts if the withdrawal
  * would make the position unhealthy.
+ *
+ * **Failure semantics (7702).** Nothing is lost on failure — the collateral stays
+ * inside Blue keyed to `onBehalf` — but the position is still public and still
+ * there. The usual cause is the health check refusing the withdrawal, which means
+ * the debt leg of the same batch did not do what the quote assumed. On success the
+ * collateral lands at the executor and reshields.
  */
 export class MorphoBlueWithdrawCollateralStep extends Step {
   readonly config: StepConfig = {

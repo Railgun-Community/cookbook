@@ -21,6 +21,11 @@ import { MetaMorphoWithdrawQuote } from '../../../api/vault/morpho';
  * upper bound on consumption, so the caller must unshield >= `maxShares` shares;
  * whatever is not burned reshields. No approval leg — `owner` is the EOA and
  * `msg.sender`.
+ *
+ * **Failure semantics (7702).** Benign. On failure the shares are untouched and
+ * reshield — and because the step over-declares consumption at `maxShares`, MORE
+ * is left at the executor than declared, which the epilogue handles because the
+ * sweep reads the real balance rather than the declared amount.
  */
 export class MetaMorphoWithdrawByAssetsStep extends Step {
   readonly config: StepConfig = {

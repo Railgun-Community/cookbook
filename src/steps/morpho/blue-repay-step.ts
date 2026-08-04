@@ -17,6 +17,12 @@ import { MORPHO_BLUE_ADDRESS } from './morpho-blue-util';
  * (EIP-7702). Assets-denominated partial repay: consumes exactly `repayAssets`
  * of the loan token (which must be <= the current debt, else Morpho reverts).
  * Pure step consuming a {@link MorphoRepayQuote}.
+ *
+ * **Failure semantics (7702).** Benign: the loan token is untouched at the
+ * executor and reshields, the debt is unchanged, and any `withdrawCollateral`
+ * after it fails its health check and also no-ops — a failed close is a clean
+ * close-nothing. The exact-amount Blue allowance from the preceding approve
+ * survives.
  */
 export class MorphoBlueRepayStep extends Step {
   readonly config: StepConfig = {

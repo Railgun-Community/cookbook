@@ -12,6 +12,11 @@ import { BEEFY_VAULT_ERC20_DECIMALS, BeefyVaultData } from '../../../api/beefy';
 import { BeefyVaultContract } from '../../../contract/vault/beefy/beefy-vault-contract';
 import { calculateOutputsForBeefyWithdraw } from './beefy-util';
 
+/**
+ * **Failure semantics (7702).** Benign: on failure the vault token is untouched
+ * and reshields; on success the withdrawn deposit token is a declared output and
+ * reshields. See `steps/failure-modes.ts`.
+ */
 export class BeefyWithdrawStep extends Step {
   readonly config: StepConfig = {
     name: 'Beefy Vault Withdraw',

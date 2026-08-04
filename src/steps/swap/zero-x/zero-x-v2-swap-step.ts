@@ -10,6 +10,14 @@ import {
 import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
 import { Step } from '../../step';
 
+/**
+ * **Failure semantics (7702).** Benign. The sell token is untouched at the
+ * executor and is in the shield request list, so it comes back; downstream steps
+ * that wanted the buy token fail harmlessly too. A stale or slippage-busted quote
+ * therefore costs the unshield + shield fees and nothing else. What does survive
+ * is the unlimited allowance the preceding `ApproveERC20SpenderStep` grants to
+ * `quote.spender`. See `steps/failure-modes.ts`.
+ */
 export class ZeroXV2SwapStep extends Step {
   readonly config: StepConfig = {
     name: '0x V2 Exchange Swap',

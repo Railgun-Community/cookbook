@@ -18,6 +18,16 @@ import { MORPHO_BLUE_ADDRESS } from './morpho-blue-util';
  * — there is no ERC-20 or NFT output for it, so the position it creates is
  * declared in `outputPositions`. Pure step consuming a
  * {@link MorphoSupplyCollateralQuote}.
+ *
+ * **Failure semantics (7702).** Asymmetric, and this is the canonical
+ * "recoverable but no longer private" step. A FAILED supply leaves the collateral
+ * at the executor, swept back by the shield epilogue — a clean no-op, and any
+ * borrow after it fails too for lack of collateral. A SUCCESSFUL supply followed
+ * by any later failure leaves the collateral as `position[id][onBehalf].collateral`
+ * inside the Blue singleton: un-tokenized, so the epilogue cannot sweep it and
+ * this batch cannot re-privatise it. Recovery is a second batch running as (or
+ * authorized by) `onBehalf`; the association between that address and the
+ * collateral is public and permanent. See `steps/failure-modes.ts`.
  */
 export class MorphoBlueSupplyCollateralStep extends Step {
   readonly config: StepConfig = {

@@ -89,6 +89,21 @@ export type FxMintOpenPositionStepData = {
  * Works for both sides unchanged — a long deposits wstETH/WBTC and receives
  * fxUSD, a short deposits fxUSD and receives wstETH/WBTC. The step never names
  * either token; it reads both off the descriptor.
+ *
+ * **Failure semantics (7702) — worse than the collateral suggests.** A failed
+ * `operate()` leaves the collateral untouched at the executor, which would
+ * normally be swept back by the shield epilogue. It is not, because this step has
+ * already declared the position NFT in `outputNFTs` at `predictedPositionId`: the
+ * epilogue therefore carries an ERC-721 shield request for a token that was never
+ * minted, `RelayAdapt7702.shield` calls `approve(railgun, id)` on it before any
+ * ERC-20 work, and that revert takes the WHOLE shield call with it. Net result:
+ * `operate()` failed AND nothing was reshielded — the collateral sits at the
+ * ephemeral EOA in the clear, recoverable only with the ephemeral key.
+ *
+ * The same shape applies when the id race is lost (see `predictedPositionId`
+ * above): the position exists at a different id, so the declared one is still
+ * unowned and the shield still reverts. Read the id as late as possible. See
+ * `steps/failure-modes.ts`.
  */
 export class FxMintOpenPositionStep extends Step {
   readonly config: StepConfig = {

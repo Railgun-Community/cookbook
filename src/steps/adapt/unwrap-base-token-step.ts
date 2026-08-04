@@ -15,6 +15,13 @@ import {
 } from '../../utils/7702';
 import { ContractTransaction } from 'ethers';
 
+/**
+ * **Failure semantics (7702).** Failing is the safe direction: the WETH is
+ * untouched at the executor and the shield epilogue sweeps it back. SUCCEEDING
+ * carries the risk — `unwrapBase(0)` unwraps the entire balance, converting a
+ * sweepable ERC-20 into native ETH that no shield can reclaim, so any later
+ * failure in the batch strands it publicly. See `steps/failure-modes.ts`.
+ */
 export class UnwrapBaseTokenStep extends Step {
   readonly config: StepConfig = {
     name: 'Unwrap Base Token',

@@ -67,6 +67,17 @@ export type FxMintClosePositionStepData = {
  * For partial close the NFT survives and is shielded back. For full close
  * (repayAmount == position's full debt) f(x) burns the NFT inside operate
  * and `outputNFTs` stays empty.
+ *
+ * **Failure semantics (7702) — depends on `partialClose`, and the FULL-close
+ * branch is the dangerous one.** Partial close re-declares the NFT in
+ * `outputNFTs`, the executor owns it, and a failed `operate()` reshields it along
+ * with the debt token: benign. Full close declares `outputNFTs: []` and puts the
+ * NFT in `spentNFTs` on the assumption that f(x) burns it, so the epilogue carries
+ * NO shield request for it. If `operate()` then fails, the NFT is neither burned
+ * nor reshielded — the bearer token for the whole position is left at a public
+ * ephemeral EOA while the debt token is swept back around it. Whoever holds the
+ * ephemeral key holds the position; if that key is genuinely single-use, the
+ * position is unrecoverable. See `steps/failure-modes.ts`.
  */
 export class FxMintClosePositionStep extends Step {
   readonly config: StepConfig = {
