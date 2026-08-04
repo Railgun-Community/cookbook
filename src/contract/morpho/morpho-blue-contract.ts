@@ -108,9 +108,32 @@ export class MorphoBlueContract {
     );
   }
 
-  async position(id: string, user: string): Promise<MorphoBluePosition> {
+  /**
+   * `position[id][user]` — the authoritative state of an address-bound position.
+   *
+   * @param blockTag Pin the read to a specific block. Optional and defaulting to
+   *   the node's latest, so every existing caller is unaffected.
+   *
+   *   A rediscovery scan needs it: the scan enumerates `(market, owner)` pairs
+   *   over a block *range*, and confirming those pairs at whatever height the
+   *   node happens to be at answers a different question than the one asked —
+   *   it reports state the range never covered, and does so inconsistently
+   *   across pairs when a load-balanced pool serves the reads from nodes at
+   *   different heights. Passing the scan's `toBlock` makes the answer a
+   *   snapshot rather than a smear.
+   *
+   *   Note this needs an **archive** node for any block outside the recent
+   *   window; a pruning node rejects it rather than answering wrongly.
+   */
+  async position(
+    id: string,
+    user: string,
+    blockTag?: number | string,
+  ): Promise<MorphoBluePosition> {
     const [supplyShares, borrowShares, collateral] =
-      await this.contract.position(id, user);
+      blockTag === undefined
+        ? await this.contract.position(id, user)
+        : await this.contract.position(id, user, { blockTag });
     return { supplyShares, borrowShares, collateral };
   }
 

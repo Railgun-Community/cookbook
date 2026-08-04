@@ -46,6 +46,23 @@ import {
   // positionId but shipped no way to obtain one, so consumers hand-rolled the
   // ABI fragment.
   getNextFxPositionId,
+  // Rediscovery — the recovery path for a position whose local record is lost.
+  // The bundled Morpho Blue ABI has 13 entries and no events, so before these
+  // there was nothing in the package that could even decode the trail. Useless
+  // if a consumer cannot reach them from the package root.
+  MORPHO_BLUE_EVENTS_ABI,
+  MORPHO_BLUE_POSITION_EVENTS,
+  MORPHO_BLUE_SET_AUTHORIZATION_TOPIC0,
+  decodeMorphoBluePositionLog,
+  morphoBluePositionLogTopicFilters,
+  scanMorphoBluePositionLogs,
+  rediscoverMorphoBluePositions,
+  scanMorphoBlueAuthorizations,
+  assertMorphoBlueRediscoveryComplete,
+  ERC721_TRANSFER_TOPIC0,
+  scanFxPositionTransfers,
+  rediscoverFxPositions,
+  assertFxRediscoveryComplete,
   // Gas floors — see the two assertions at the bottom of this file.
   MIN_GAS_LIMIT_COMBO_MEAL,
   MIN_GAS_LIMIT_EMPTY,
@@ -53,7 +70,15 @@ import {
   MIN_GAS_LIMIT_FXMINT_ADJUST,
   MIN_GAS_LIMIT_FXMINT_CLOSE,
 } from '../index';
-import type { MorphoVaultVersion, PositionOwner } from '../index';
+import type {
+  FxRediscoveredPosition,
+  MorphoBluePositionSighting,
+  MorphoBlueRediscoveredPosition,
+  MorphoVaultVersion,
+  PositionOwner,
+  RecipePositionKind,
+  RecipePositionProtocol,
+} from '../index';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -122,6 +147,41 @@ describe('index', () => {
     // The preflight that makes owner !== receiver safe to express.
     expect(MorphoBlueAPI.getAuthorization).to.be.a('function');
     expect(MorphoBlueAPI.assertAuthorized).to.be.a('function');
+  });
+
+  it('Should expose the rediscovery readers from the root barrel', () => {
+    // Address-bound (Morpho Blue): fragments, filters, decoder, both layers.
+    expect(MORPHO_BLUE_EVENTS_ABI.length).to.equal(8);
+    expect(MORPHO_BLUE_POSITION_EVENTS.length).to.equal(7);
+    expect(MORPHO_BLUE_SET_AUTHORIZATION_TOPIC0).to.be.a('string');
+    expect(decodeMorphoBluePositionLog).to.be.a('function');
+    expect(morphoBluePositionLogTopicFilters).to.be.a('function');
+    expect(scanMorphoBluePositionLogs).to.be.a('function');
+    expect(rediscoverMorphoBluePositions).to.be.a('function');
+    expect(scanMorphoBlueAuthorizations).to.be.a('function');
+    expect(assertMorphoBlueRediscoveryComplete).to.be.a('function');
+    // Bearer (f(x)): the ERC-721 Transfer fragment plays the same role.
+    expect(ERC721_TRANSFER_TOPIC0).to.be.a('string');
+    expect(scanFxPositionTransfers).to.be.a('function');
+    expect(rediscoverFxPositions).to.be.a('function');
+    expect(assertFxRediscoveryComplete).to.be.a('function');
+  });
+
+  it('Should expose the type vocabulary rediscovery shares with outputPositions', () => {
+    // A rediscovered position and a build-time `RecipePositionInfo` join on
+    // these. Naming them in a value position is the assertion (they are types).
+    const protocol: RecipePositionProtocol = 'morpho-blue';
+    const kind: RecipePositionKind = 'collateral';
+    expect(protocol).to.equal('morpho-blue');
+    expect(kind).to.equal('collateral');
+    const sighting: MorphoBluePositionSighting | undefined = undefined;
+    const held: MorphoBlueRediscoveredPosition | undefined = undefined;
+    const bearer: FxRediscoveredPosition | undefined = undefined;
+    expect([sighting, held, bearer]).to.deep.equal([
+      undefined,
+      undefined,
+      undefined,
+    ]);
   });
 
   it('Should expose the MIN_GAS_LIMIT_* floors from the root barrel', () => {
