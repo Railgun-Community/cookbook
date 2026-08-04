@@ -50,7 +50,15 @@ export type FxMintClosePositionStepData = {
    * withdraws collateral — so the requirement is carried by the type here.
    */
   withdrawFeeRatio: bigint;
-  /** True if position survives (NFT shields back); false if full close (NFT burns). */
+  /**
+   * True when `repayAmount` is less than the position's full debt.
+   *
+   * Informational only — it no longer gates NFT handling, and it never should
+   * have. It used to select between "NFT shields back" and "NFT burns", but
+   * f(x) does not burn on close (see `spentNFTs` below), so the NFT shields
+   * back either way. Retained because "is this a full close" is still a real
+   * fact about the operation and `computeFxClose` already derives it.
+   */
   partialClose: boolean;
 };
 
@@ -64,20 +72,19 @@ export type FxMintClosePositionStepData = {
  * Side-agnostic: a long repays fxUSD to release wstETH/WBTC, a short repays
  * wstETH/WBTC to release fxUSD. Both tokens come off the descriptor.
  *
- * For partial close the NFT survives and is shielded back. For full close
- * (repayAmount == position's full debt) f(x) burns the NFT inside operate
- * and `outputNFTs` stays empty.
+ * The NFT survives every close and is always shielded back. f(x) does not burn
+ * a position on close — a closed position is a live NFT holding nothing.
  *
- * **Failure semantics (7702) — depends on `partialClose`, and the FULL-close
- * branch is the dangerous one.** Partial close re-declares the NFT in
- * `outputNFTs`, the executor owns it, and a failed `operate()` reshields it along
- * with the debt token: benign. Full close declares `outputNFTs: []` and puts the
- * NFT in `spentNFTs` on the assumption that f(x) burns it, so the epilogue carries
- * NO shield request for it. If `operate()` then fails, the NFT is neither burned
- * nor reshielded — the bearer token for the whole position is left at a public
- * ephemeral EOA while the debt token is swept back around it. Whoever holds the
- * ephemeral key holds the position; if that key is genuinely single-use, the
- * position is unrecoverable. See `steps/failure-modes.ts`.
+ * **Failure semantics (7702): benign, on both branches.** The executor owns the
+ * NFT going in and still owns it whatever `operate()` does, so the epilogue's
+ * shield request always resolves and a failed `operate()` reshields the position
+ * alongside the debt token — the batch degrades to a no-op.
+ *
+ * This was not true before. The full-close branch declared `outputNFTs: []` and
+ * put the NFT in `spentNFTs`, assuming `operate()` burned it. It does not, so
+ * the epilogue carried no request for a token that still existed and every
+ * successful full close left the position NFT public at the ephemeral EOA. See
+ * `steps/failure-modes.ts`.
  */
 export class FxMintClosePositionStep extends Step {
   readonly config: StepConfig = {
@@ -206,16 +213,18 @@ export class FxMintClosePositionStep extends Step {
           },
         ],
       }),
-      spentNFTs: partialClose
-        ? [] // partial: NFT stays with executing account (ephemeral EOA) for shield-back
-        : [
-            {
-              nftAddress: poolAddress,
-              tokenSubID: fxPositionTokenSubID(positionId),
-              nftTokenType: NFTTokenType.ERC721,
-              amount: 1n,
-            },
-          ],
+      // Never spent. f(x) does NOT burn a position NFT on close — measured
+      // across all four pools over 200,000 blocks: 1,097 transfers, 33 mints,
+      // ZERO burns, and 19 of 51 sampled positions read `(0, 0)` while
+      // `ownerOf` still returns a live holder. A closed f(x) position is a live
+      // NFT holding nothing.
+      //
+      // This branch used to declare the NFT spent on a full close and emit no
+      // output for it, on the assumption that `operate()` burned it. Since it
+      // does not, a SUCCESSFUL full close left the position NFT owned by the
+      // ephemeral EOA with no shield request covering it — public, on every
+      // full close, not merely on failure.
+      spentNFTs: [],
       outputERC20Amounts: [
         {
           tokenAddress: collateralToken,
@@ -236,16 +245,19 @@ export class FxMintClosePositionStep extends Step {
         },
         ...orphanDebt,
       ],
-      outputNFTs: partialClose
-        ? [
-            {
-              nftAddress: poolAddress,
-              tokenSubID: fxPositionTokenSubID(positionId),
-              nftTokenType: NFTTokenType.ERC721,
-              amount: 1n,
-            },
-          ]
-        : [],
+      // Declared unconditionally, which also removes the stranding case: the
+      // token always exists, so the epilogue's `approve(railgun, id)` cannot
+      // revert on it and take the whole shield down. Both outcomes now reshield
+      // the handle — a successful close returns an emptied position, a failed
+      // one returns the position untouched.
+      outputNFTs: [
+        {
+          nftAddress: poolAddress,
+          tokenSubID: fxPositionTokenSubID(positionId),
+          nftTokenType: NFTTokenType.ERC721,
+          amount: 1n,
+        },
+      ],
       // Both legs shrink, and both use the GROSS `operate()` argument rather
       // than the caller-facing figure:
       //
@@ -258,10 +270,12 @@ export class FxMintClosePositionStep extends Step {
       //                caller receives `withdrawnNet`, which is that minus the
       //                withdraw fee (0 on longs, 0.1% on shorts).
       //
-      // On a FULL close the NFT is burned (`spentNFTs` above) and these two
-      // records are the position's epitaph — the only description of what the
-      // batch retired. The validator accepts the bearer handle from either NFT
-      // channel for exactly this case.
+      // On a FULL close these two records are the position's epitaph — the only
+      // description of what the batch retired. The NFT itself is not evidence
+      // of closure: it outlives the position and reads `(0, 0)`, so a reader
+      // that treats "still owned" as "still open" is wrong. That is why these
+      // records matter more here than on a partial close, and why
+      // `rediscoverFxPositions` classifies rather than filters.
       outputPositions: [
         fxPositionInfo({
           pool,

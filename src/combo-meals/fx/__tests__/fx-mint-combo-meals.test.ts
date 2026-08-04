@@ -340,7 +340,7 @@ describe('fx combo meals', () => {
       ).to.include(USDC.toLowerCase());
     });
 
-    it('Should keep the NFT on a partial close and burn it on a full close', async () => {
+    it('Should shield the NFT back on both a partial and a full close', async () => {
       stub0xQuote = stubExitQuote();
 
       const partial = new FxMintClose_ZeroXSwap_ComboMeal({
@@ -376,8 +376,9 @@ describe('fx combo meals', () => {
       const fullOut = await full.getComboMealOutput(
         comboInput(fxUSDInput(), [positionNFT(wstETHPool.address)]),
       );
+      // Both branches shield the handle back: f(x) never burns on close.
       expect(fullOut.nftRecipients).to.have.length(1);
-      expect(fullOut.nftRecipients[0].amount).to.equal(0n);
+      expect(fullOut.nftRecipients[0].amount).to.equal(1n);
     });
 
     it('Should reshield the unspent fxUSD orphaned by the close', async () => {
@@ -482,9 +483,7 @@ describe('fx combo meals', () => {
       const output = await combo.getComboMealOutput(comboInput(usdcInput()));
 
       const targets = output.crossContractCalls.map(c => c.to?.toLowerCase());
-      expect(targets).to.include(
-        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
-      );
+      expect(targets).to.include(FX_ADDRESSES.fxShortPoolManager.toLowerCase());
       expect(targets).to.not.include(FX_ADDRESSES.fxPoolManager.toLowerCase());
 
       // Same conservative-seam behaviour as a long: the GUARANTEED minimum is
@@ -559,9 +558,7 @@ describe('fx combo meals', () => {
       );
 
       const targets = output.crossContractCalls.map(c => c.to?.toLowerCase());
-      expect(targets).to.include(
-        FX_ADDRESSES.fxShortPoolManager.toLowerCase(),
-      );
+      expect(targets).to.include(FX_ADDRESSES.fxShortPoolManager.toLowerCase());
 
       // The swap sells fxUSD net of the withdraw fee. If the combo sold the
       // gross it would try to move 1 fxUSD it never received.

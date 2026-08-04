@@ -818,27 +818,27 @@ const modes: readonly StepFailureMode[] = [
     calls: 1,
     onOwnFailure: {
       residue: 'executor',
-      recovery: 'public-recoverable',
+      recovery: 'reshielded',
       detail:
-        'Depends on `partialClose`, and the FULL-close branch is the dangerous ' +
-        'one. Partial close re-declares the NFT in `outputNFTs`, the executor ' +
-        'owns it, and a failed `operate()` reshields it along with the debt ' +
-        'token — benign. Full close declares `outputNFTs: []` and puts the NFT in ' +
-        '`spentNFTs` on the assumption that f(x) burns it, so there is NO shield ' +
-        'request for it. If `operate()` then fails, the NFT is NOT burned and is ' +
-        'NOT reshielded: the bearer token for the whole position is left sitting ' +
-        'at a public ephemeral EOA, with the debt token swept back around it. ' +
-        'Whoever holds the ephemeral key holds the position; if that key is ' +
-        'genuinely single-use, the position is unrecoverable.',
+        'Benign on both branches. The executor owns the NFT going in and still ' +
+        'owns it whatever `operate()` does — f(x) does not burn on close — so ' +
+        'the epilogue always has a resolvable shield request for it and the ' +
+        'batch degrades to a no-op with the position and debt token reshielded. ' +
+        'Until the close step declared the NFT unconditionally this was the ' +
+        'worst entry in this table: the full-close branch emitted ' +
+        '`outputNFTs: []` and claimed the NFT in `spentNFTs`, so a SUCCESSFUL ' +
+        'full close left the position handle public at the ephemeral EOA, and a ' +
+        'failed one did the same with the debt token swept back around it.',
     },
     onLaterFailure: {
       residue: 'executor',
       recovery: 'reshielded',
       detail:
-        'The released collateral is a declared output and is swept. On a full ' +
-        'close the NFT is genuinely burned, which is correct and irreversible — ' +
-        'the `outputPositions` records are the only description of what was ' +
-        'retired.',
+        'The released collateral is a declared output and is swept, and the NFT ' +
+        'is reshielded on both branches. A closed position is a live NFT ' +
+        'holding nothing, so the surviving handle is NOT evidence the close ' +
+        'failed — the `outputPositions` records are the only description of what ' +
+        'was retired.',
     },
     shieldRisk: false,
   },

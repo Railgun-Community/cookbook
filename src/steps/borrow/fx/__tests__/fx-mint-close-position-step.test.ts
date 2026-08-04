@@ -139,14 +139,15 @@ describe('FxMintClosePositionStep', () => {
       expect(line.decimals).to.equal(8n);
     }
 
-    // Full close: PoolManager.operate burns the NFT inside the call, so
-    // the step must declare the NFT as spent (consumed) and outputNFTs is
-    // empty. Tightened from Task 5's `length > 0` smoke check.
-    expect(output.outputNFTs ?? []).to.have.length(0);
-    const spentNFTs = output.spentNFTs ?? [];
-    expect(spentNFTs).to.have.length(1);
-    expect(spentNFTs[0]?.nftAddress).to.equal(wbtcPool.address);
-    expect(spentNFTs[0]?.tokenSubID).to.equal('0x' + positionId.toString(16));
+    // Full close does NOT burn: f(x) leaves the position NFT alive and owned,
+    // holding nothing. So the handle is an output on both branches and is never
+    // spent. This asserted the reverse when written, which is why a successful
+    // full close carried no shield request for a token that still existed.
+    const outputNFTs = output.outputNFTs ?? [];
+    expect(outputNFTs).to.have.length(1);
+    expect(outputNFTs[0]?.nftAddress).to.equal(wbtcPool.address);
+    expect(outputNFTs[0]?.tokenSubID).to.equal('0x' + positionId.toString(16));
+    expect(output.spentNFTs ?? []).to.have.length(0);
   });
 
   describe('short pools (f(x) v2.1)', () => {

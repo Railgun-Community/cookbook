@@ -337,7 +337,7 @@ describe('f(x) outputPositions — close', () => {
     nfts: [positionNFT(wbtcShort.address)],
   });
 
-  it('Should retire both legs on a full close, keyed to the burned NFT', async () => {
+  it('Should retire both legs on a full close, keyed to the surviving NFT', async () => {
     const repayAmount = 100_000_000n;
     const withdrawColl = 1_000_000_000_000_000_000_000n;
 
@@ -358,10 +358,11 @@ describe('f(x) outputPositions — close', () => {
       expect(position.direction).to.equal('decrease');
     });
 
-    // The NFT is burned, so the handle only exists in spentNFTs — the case the
-    // validator has to accept from either channel.
-    expect(output.outputNFTs).to.deep.equal([]);
-    expect(output.spentNFTs?.[0]?.tokenSubID).to.equal(TOKEN_SUB_ID);
+    // The NFT is not burned, so the handle comes back as an output. The
+    // position records above are what describe the retirement — the surviving
+    // NFT does not, since it reads (0, 0) and outlives the position.
+    expect(output.outputNFTs?.[0]?.tokenSubID).to.equal(TOKEN_SUB_ID);
+    expect(output.spentNFTs ?? []).to.deep.equal([]);
   });
 
   it('Should keep the collateral record gross of the withdraw fee', async () => {
