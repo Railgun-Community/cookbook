@@ -139,6 +139,17 @@ export type StepFailureRecovery =
    */
   | 'public-recoverable'
   /**
+   * Survives as protocol-side STATE rather than as value, so no sweep reaches
+   * it and no re-run clears it. Removing it takes a deliberate, different
+   * transaction that nothing prompts the caller to send.
+   *
+   * Distinct from `public-recoverable` on purpose. That one is recovered by
+   * controlling the address — the wallet holds the ephemeral key, so it can
+   * always collect what is sitting there. This one is not about custody at all:
+   * you can control the account completely and the residue is still live.
+   */
+  | 'revoke-required'
+  /**
    * Not recoverable by any party to the batch — the value left the system, or
    * the artifact was destroyed.
    */
@@ -711,14 +722,19 @@ const modes: readonly StepFailureMode[] = [
     },
     onLaterFailure: {
       residue: 'protocol',
-      recovery: 'public-recoverable',
+      recovery: 'revoke-required',
       detail:
         'The grant survives. `isAuthorized[executor][authorized] = true` inside ' +
         'Blue is standing authority over EVERY position that executor holds, now ' +
         'and in future — not value, so the shield cannot sweep it, and not ' +
-        'balance, so re-running the recipe does not clear it. If the batch that ' +
-        'was meant to revoke it is the one that failed, the grant is simply still ' +
-        'live. Revoking is its own transaction.',
+        'balance, so re-running the recipe does not clear it. This is the only ' +
+        'residue here that holding the ephemeral key does not solve: everything ' +
+        'else left on the executor can be collected in a follow-up transaction, ' +
+        'and this cannot. Wrap the grant in ' +
+        '`withScopedMorphoBlueAuthorization` when it is a means to something ' +
+        'else in the same batch — the trailing revoke still runs when the ' +
+        'wrapped steps fail, because continue-semantics do not skip it. Use the ' +
+        'step bare only when the grant is meant to outlive the batch.',
     },
     shieldRisk: false,
   },
@@ -882,5 +898,6 @@ export const stepsWithDurableResidueOnLaterFailure =
     modes.filter(
       mode =>
         mode.onLaterFailure.recovery === 'public-recoverable' ||
+        mode.onLaterFailure.recovery === 'revoke-required' ||
         mode.onLaterFailure.recovery === 'unrecoverable',
     );

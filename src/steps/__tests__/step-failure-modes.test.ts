@@ -109,12 +109,23 @@ describe('step-failure-modes', () => {
         }
         if (outcome.residue === 'protocol') {
           // A protocol residue is never swept — there is no token at the
-          // executor for the shield epilogue to find. It is either the
-          // direction the user wanted (a repay) or a public leftover.
+          // executor for the shield epilogue to find. It is the direction the
+          // user wanted (a repay), a public leftover, or protocol-side state
+          // that only an explicit revoke removes.
           expect(
-            ['reshielded', 'public-recoverable'],
+            ['reshielded', 'public-recoverable', 'revoke-required'],
             `${where}: protocol residue`,
           ).to.include(outcome.recovery);
+        }
+
+        // `revoke-required` is the one outcome holding the ephemeral key does
+        // not solve, so it must never be claimed for a residue sitting at the
+        // executor — that IS recoverable by sweeping.
+        if (outcome.recovery === 'revoke-required') {
+          expect(
+            outcome.residue,
+            `${where}: revoke-required means protocol-side state, not value at an address`,
+          ).to.equal('protocol');
         }
       });
 

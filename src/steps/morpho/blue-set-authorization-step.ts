@@ -18,9 +18,21 @@ import { resolveExecutorAddress } from '../../utils/7702';
  * **Failure semantics (7702).** Fails closed and harmlessly: no grant, so
  * whatever needed it fails too. What matters is a SUCCESSFUL grant in a batch that
  * then fails — `isAuthorized[executor][authorized] = true` inside Blue is standing
- * authority over every position that executor holds, now and in future. It is not
- * value, so the shield cannot sweep it, and not balance, so re-running the recipe
- * does not clear it. Revoking is its own transaction. See `steps/failure-modes.ts`.
+ * authority over every position that executor holds, now and in future.
+ *
+ * This is the only residue in the package that a follow-up transaction from the
+ * ephemeral account does not clean up on its own. Value left on the executor is
+ * recoverable, because the wallet holds that key and can sweep it later.
+ * Authority is not value and not balance: the shield has nothing to collect,
+ * re-running the recipe does not clear it, and removing it takes a deliberate
+ * revoke that nothing prompts you to send.
+ *
+ * When the grant is a means to something else in the SAME batch, use
+ * `withScopedMorphoBlueAuthorization` instead of this step directly — it pairs
+ * the grant with a trailing revoke, which still runs when the wrapped steps
+ * fail, because `requireSuccess = false` continues rather than breaks. Use this
+ * step bare only when the grant is meant to outlive the batch (retained-account
+ * and Bundler3 models). See `steps/failure-modes.ts`.
  */
 export class MorphoBlueSetAuthorizationStep extends Step {
   readonly config: StepConfig = {

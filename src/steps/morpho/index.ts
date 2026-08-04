@@ -5,4 +5,5 @@ export * from './blue-repay-step';
 export * from './blue-repay-shares-step';
 export * from './blue-withdraw-collateral-step';
 export * from './blue-set-authorization-step';
+export * from './scoped-authorization';
 export * from './morpho-transact-step';
