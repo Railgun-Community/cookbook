@@ -295,15 +295,26 @@ export type MorphoBluePositionRisk = {
    * `min(borrowCapacityRemaining, market.liquidityAssets)` — the collateral
    * bound and the market-liquidity bound together.
    *
-   * Treat it as a tight upper bound rather than a guarantee. `Morpho.borrow`
-   * mints shares with `toSharesUp` and `_isHealthy` converts back with
-   * `toAssetsUp`, and upstream notes on `_isHealthy` that this "[r]ounds in
-   * favor of the protocol, so one might not be able to borrow exactly
-   * `maxBorrow` but one unit less". Fuzzing the full borrow-then-health path
-   * over ~259k reachable market states found no shape where drawing exactly
-   * this amount reverts, so it is not de-rated here — de-rating would make the
-   * number wrong in every ordinary case. A caller that cannot tolerate a
-   * revert should still back off by one unit.
+   * **Do not borrow exactly this amount.** `Morpho.borrow` mints shares with
+   * `toSharesUp` and `_isHealthy` converts back with `toAssetsUp`, and upstream
+   * notes on `_isHealthy` that this "[r]ounds in favor of the protocol, so one
+   * might not be able to borrow exactly `maxBorrow` but one unit less".
+   *
+   * An earlier version of this comment said a ~259k-state fuzz "found no shape
+   * where drawing exactly this amount reverts". That is wrong, and it was wrong
+   * in the dangerous direction. Measured live on two mainnet markets against a
+   * position carrying NO prior debt: `borrow(borrowableAssets)` reverts
+   * `insufficient collateral` and `borrow(borrowableAssets - 1)` succeeds, on
+   * both. The fuzz presumably never generated the zero-prior-debt shape, which
+   * is precisely the shape a first borrow has — so the reassurance covered
+   * every case except the common one.
+   *
+   * The figure is still reported un-de-rated, because subtracting a unit
+   * unconditionally would make it wrong for a position that already carries
+   * debt (where the gap measures zero). `morphoBlueBorrowCeiling` in
+   * `src/combo-meals/morpho/util.ts` applies the de-rate where it belongs — at
+   * the point a borrow is actually sized. Under `requireSuccess = false` the
+   * revert this causes is swallowed, so the batch mines having drawn nothing.
    */
   borrowableAssets: bigint;
 
