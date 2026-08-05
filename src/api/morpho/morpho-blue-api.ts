@@ -3,6 +3,7 @@ import { Contract, Provider, ZeroAddress } from 'ethers';
 import {
   MorphoBlueContract,
   MorphoBluePosition,
+  type MorphoBlueMarketState,
 } from '../../contract/morpho/morpho-blue-contract';
 import { ERC20Contract } from '../../contract/token/erc20-contract';
 import {
@@ -71,6 +72,56 @@ export type MorphoRepaySharesQuote = {
   maxRepaidAssets: bigint;
   slippageBasisPoints: bigint;
   onBehalf: string;
+};
+
+/**
+ * Lend side. Named for the ASSET each moves rather than mirroring Blue's bare
+ * `supply` / `withdraw`, because `getSupplyQuote` sitting next to
+ * `getSupplyCollateralQuote` reads like a supertype of it when the two move
+ * different tokens into different position legs. These encode Blue's `supply`
+ * and `withdraw`; the collateral pair encodes `supplyCollateral` and
+ * `withdrawCollateral`.
+ */
+export type MorphoSupplyLoanQuote = {
+  params: MarketParams;
+  marketId: string;
+  loanToken: string;
+  loanDecimals: bigint;
+  supplyAssets: bigint;
+  onBehalf: string;
+};
+
+export type MorphoWithdrawLoanQuote = {
+  params: MarketParams;
+  marketId: string;
+  loanToken: string;
+  loanDecimals: bigint;
+  /**
+   * Assets-denominated withdrawal. Zero when the quote is shares-denominated —
+   * exactly one of this and {@link withdrawShares} is non-zero, mirroring Blue's
+   * own requirement.
+   */
+  withdrawAssets: bigint;
+  /**
+   * Shares-denominated withdrawal, for a full exit. Interest accrues between
+   * building and inclusion, so an assets-denominated "withdraw everything" is
+   * stale on arrival and leaves a share residue nothing later looks for.
+   */
+  withdrawShares: bigint;
+  /**
+   * What `withdrawShares` is expected to realise, for the step's declared
+   * output. Absent on an assets-denominated quote, where the figure is exact.
+   */
+  expectedWithdrawnAssets: bigint;
+  /**
+   * Free liquidity at quote time: `totalSupplyAssets - totalBorrowAssets`,
+   * interest-accrued. Surfaced because it is the constraint that actually bites
+   * on the lend side and has no analogue on the collateral side — collateral is
+   * never lent out, so withdrawing it only faces a health check.
+   */
+  availableLiquidity: bigint;
+  onBehalf: string;
+  receiver: string;
 };
 
 export type MorphoWithdrawCollateralQuote = {
@@ -697,6 +748,203 @@ export class MorphoBlueAPI {
    * would otherwise throw "no collateral to withdraw" against a funded
    * position).
    */
+  /**
+   * Lend the loan asset into a market on `owner`'s behalf, earning
+   * `supplyShares`.
+   *
+   * No authorization gate: Blue lets anyone supply on anyone's behalf, the same
+   * asymmetry that makes `supplyCollateral` and `repay` ungated. The account
+   * that ends up owning the claim is `owner`, not whoever paid — so passing the
+   * wrong one hands the position to a stranger, and no revert will tell you.
+   *
+   * @param owner Blue `onBehalf` — the account whose `supplyShares` grow.
+   */
+  static async getSupplyLoanQuote(params: {
+    market: MarketParams;
+    supplyAssets: bigint;
+    owner: PositionOwner;
+    provider: Provider;
+  }): Promise<MorphoSupplyLoanQuote> {
+    if (params.supplyAssets <= 0n) {
+      throw new Error('morpho: supply assets must be > 0');
+    }
+    const onBehalf = resolvePositionOwnerAddress(
+      params.owner,
+      'Morpho supply-loan onBehalf',
+    );
+    const loanDecimals = await this.decimalsOf(
+      params.market.loanToken,
+      params.provider,
+    );
+    return {
+      params: params.market,
+      marketId: getMarketId(params.market),
+      loanToken: params.market.loanToken,
+      loanDecimals,
+      supplyAssets: params.supplyAssets,
+      onBehalf,
+    };
+  }
+
+  /**
+   * Withdraw lent loan asset from `owner`'s supply position to `receiver`.
+   *
+   * **Free liquidity is the constraint here, and it has no collateral-side
+   * analogue.** Lent assets are borrowed by other people; Blue reverts
+   * `InsufficientLiquidity` when `totalSupplyAssets - totalBorrowAssets` is
+   * below the withdrawal. Collateral is never lent out, so withdrawing it only
+   * faces a health check. A fully-utilized market therefore locks lenders out
+   * entirely, and under `requireSuccess = false` that revert is swallowed — the
+   * batch mines having done nothing. This checks at build time instead.
+   *
+   * No interest accrual is needed for the check, which is worth stating because
+   * the opposite is the natural assumption. Blue's `_accrueInterest` adds the
+   * same `interest` to BOTH `totalBorrowAssets` and `totalSupplyAssets`, so
+   * their difference is invariant under accrual — free liquidity read raw is
+   * already the accrued figure. Every other lend-side number here does drift,
+   * which is why the full-exit quote is denominated in shares.
+   *
+   * @param owner Blue `onBehalf` — the account whose `supplyShares` shrink.
+   *   Authorization-gated when it is not the receiver.
+   * @param receiver The account this batch runs as, which the loan token is
+   *   delivered to and shielded from.
+   */
+  static async getWithdrawLoanQuote(params: {
+    market: MarketParams;
+    withdrawAssets: bigint;
+    owner: PositionOwner;
+    receiver: EphemeralExecutor | string;
+    provider: Provider;
+  }): Promise<MorphoWithdrawLoanQuote> {
+    if (params.withdrawAssets <= 0n) {
+      throw new Error('morpho: withdraw assets must be > 0');
+    }
+    const receiver = resolveExecutorAddress(
+      params.receiver,
+      'Morpho withdraw-loan receiver',
+    );
+    const { owner: onBehalf } = await this.assertAuthorized({
+      owner: params.owner,
+      executor: receiver,
+      provider: params.provider,
+      operation: 'withdraw',
+    });
+    const marketId = getMarketId(params.market);
+    const blue = new MorphoBlueContract(undefined, params.provider);
+    const [marketState, loanDecimals] = await Promise.all([
+      blue.market(marketId),
+      this.decimalsOf(params.market.loanToken, params.provider),
+    ]);
+
+    const availableLiquidity = this.freeLiquidity(marketState);
+    if (params.withdrawAssets > availableLiquidity) {
+      throw new Error(
+        `morpho: withdraw of ${params.withdrawAssets} exceeds the market's free ` +
+          `liquidity ${availableLiquidity} (supplied ` +
+          `${marketState.totalSupplyAssets}, borrowed ` +
+          `${marketState.totalBorrowAssets}). Lent assets are out on loan — ` +
+          `withdraw less, or wait for borrowers to repay. Building anyway ` +
+          `produces a batch that mines having done nothing.`,
+      );
+    }
+
+    return {
+      params: params.market,
+      marketId,
+      loanToken: params.market.loanToken,
+      loanDecimals,
+      withdrawAssets: params.withdrawAssets,
+      withdrawShares: 0n,
+      expectedWithdrawnAssets: params.withdrawAssets,
+      availableLiquidity,
+      onBehalf,
+      receiver,
+    };
+  }
+
+  /**
+   * Exit a supply position entirely, denominated in SHARES.
+   *
+   * Shares rather than assets for the same reason `getRepaySharesQuote` uses
+   * them: interest accrues between building and inclusion, so an
+   * assets-denominated "withdraw everything" is stale on arrival and leaves a
+   * share residue that no later batch is looking for. Shares withdraw the whole
+   * claim whatever it has grown to.
+   *
+   * Still liquidity-bound. `expectedWithdrawnAssets` is what the shares are
+   * worth now; the realised figure drifts up with accrual, so the check uses the
+   * expected value and a market at the edge of full utilization can still refuse.
+   */
+  static async getWithdrawAllLoanQuote(params: {
+    market: MarketParams;
+    owner: PositionOwner;
+    receiver: EphemeralExecutor | string;
+    provider: Provider;
+  }): Promise<MorphoWithdrawLoanQuote> {
+    const receiver = resolveExecutorAddress(
+      params.receiver,
+      'Morpho withdraw-all-loan receiver',
+    );
+    const { owner: onBehalf } = await this.assertAuthorized({
+      owner: params.owner,
+      executor: receiver,
+      provider: params.provider,
+      operation: 'withdraw',
+    });
+    const marketId = getMarketId(params.market);
+    const blue = new MorphoBlueContract(undefined, params.provider);
+    const [position, marketState, loanDecimals] = await Promise.all([
+      blue.position(marketId, onBehalf),
+      blue.market(marketId),
+      this.decimalsOf(params.market.loanToken, params.provider),
+    ]);
+
+    if (position.supplyShares <= 0n) {
+      throw new Error('morpho: no supply position to withdraw');
+    }
+
+    const expectedWithdrawnAssets = supplyAssetsForShares(
+      position.supplyShares,
+      marketState.totalSupplyAssets,
+      marketState.totalSupplyShares,
+    );
+    const availableLiquidity = this.freeLiquidity(marketState);
+    if (expectedWithdrawnAssets > availableLiquidity) {
+      throw new Error(
+        `morpho: the position is worth ${expectedWithdrawnAssets} but only ` +
+          `${availableLiquidity} is free in the market — the rest is out on ` +
+          `loan. Use getWithdrawLoanQuote for a partial exit up to the free ` +
+          `liquidity.`,
+      );
+    }
+
+    return {
+      params: params.market,
+      marketId,
+      loanToken: params.market.loanToken,
+      loanDecimals,
+      withdrawAssets: 0n,
+      withdrawShares: position.supplyShares,
+      expectedWithdrawnAssets,
+      availableLiquidity,
+      onBehalf,
+      receiver,
+    };
+  }
+
+  /**
+   * `totalSupplyAssets - totalBorrowAssets`, floored at zero.
+   *
+   * Exact without accruing first: `_accrueInterest` increments both totals by
+   * the same `interest`, so the difference does not move. Floored anyway
+   * because a bad-debt realisation can invert the two, and a negative
+   * "available" would compare wrongly against an unsigned withdrawal.
+   */
+  private static freeLiquidity(state: MorphoBlueMarketState): bigint {
+    const free = state.totalSupplyAssets - state.totalBorrowAssets;
+    return free > 0n ? free : 0n;
+  }
+
   static async getWithdrawAllCollateralQuote(params: {
     market: MarketParams;
     owner: PositionOwner;

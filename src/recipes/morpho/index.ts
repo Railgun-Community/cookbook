@@ -5,3 +5,5 @@ export * from './blue-repay-recipe';
 export * from './blue-close-position-recipe';
 export * from './blue-set-authorization-recipe';
 export * from './morpho-transact-recipe';
+export * from './blue-supply-loan-recipe';
+export * from './blue-withdraw-loan-recipe';

@@ -128,9 +128,21 @@ describe('7702 shipped approval residue policy', () => {
       acc[entry.residue] = (acc[entry.residue] ?? 0) + entry.approvalCallSites;
       return acc;
     }, {});
-    // Locks the headline finding: HALF the shipped approval call sites — 8 of
-    // 16, across 7 recipe files — grant an infinite allowance. Update
-    // deliberately, alongside a fix.
-    expect(counts).to.deep.equal({ none: 7, bounded: 1, unbounded: 8 });
+    // Locks the shape of the shipped surface. The headline finding was that
+    // eight of sixteen call sites passed no amount and therefore granted
+    // `type(uint256).max`. Those eight are now `bounded-when-deterministic`:
+    // the call sites are unchanged — they still pass no amount — but the step's
+    // fallback is the matched input balance rather than max, which covers every
+    // standalone use. They stay a separate class from `bounded` because putting
+    // one downstream of a swap in a combo makes the balance unknowable at proof
+    // time and the approval max again.
+    //
+    // `unbounded` is now zero and should stay there. A new entry in that class
+    // is a regression, not a tally to update.
+    expect(counts).to.deep.equal({
+      none: 8,
+      bounded: 1,
+      'bounded-when-deterministic': 8,
+    });
   });
 });

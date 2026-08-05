@@ -961,7 +961,26 @@ export const assertExecutorResidue = async (opts: {
  *   executor keeps receiving unshielded value the spender may then pull.
  *   Recorded here rather than silently exempted.
  */
-export type ApprovalResidueClass = 'none' | 'bounded' | 'unbounded';
+export type ApprovalResidueClass =
+  /** The spender pulls exactly the approved amount; the allowance hits zero. */
+  | 'none'
+  /** Survives, but at a stated finite figure the caller chose. */
+  | 'bounded'
+  /**
+   * The call site passes no amount. That USED to mean `type(uint256).max`
+   * unconditionally; `ApproveERC20SpenderStep` now falls back to the matched
+   * input's balance when that input is deterministic — true whenever the token
+   * arrives straight from an unshield, i.e. every standalone use of these
+   * recipes. It is still unbounded when the recipe sits downstream of a
+   * non-deterministic producer in a combo, because the runtime balance is not
+   * knowable when the proof is built.
+   *
+   * Kept as its own class rather than folded into `bounded`, because which one
+   * you get depends on the CALLER's composition, not on the recipe.
+   */
+  | 'bounded-when-deterministic'
+  /** Survives at `type(uint256).max` regardless of composition. */
+  | 'unbounded';
 
 export type ShippedApprovalResiduePolicy = {
   /** Path under `src/`, used by the drift test to prove the table is complete. */
@@ -986,11 +1005,18 @@ export type ShippedApprovalResiduePolicy = {
  * file or call site is missing from this table. A new approving recipe
  * therefore cannot land without stating what it leaves behind.
  *
- * Note the split: of sixteen approval call sites, seven approve an exact
- * amount, one approves a stated upper bound, and **eight approve
- * `type(uint256).max`**. So "the cookbook approves exact amounts" holds for the
- * Morpho family and the two f(x) repay paths, and fails for f(x) collateral
- * supply, 0x, Beefy and Uniswap v2 — half the surface.
+ * The split, and how it moved. Eight of sixteen call sites pass no amount, and
+ * when this table was first written every one of those granted
+ * `type(uint256).max` — so "the cookbook approves exact amounts" was true for
+ * the Morpho family and the two f(x) repay paths and false for f(x) collateral
+ * supply, 0x, Beefy and Uniswap v2. Half the surface.
+ *
+ * Those eight are now `bounded-when-deterministic`: the step falls back to the
+ * matched input's balance instead of max, which covers every standalone use.
+ * They are still listed separately from `bounded` because the guarantee depends
+ * on how the CALLER composes them — put one downstream of a swap in a combo and
+ * the balance is not knowable at proof time, so the approval is unbounded again.
+ * The call sites themselves are unchanged; what changed is the fallback.
  */
 export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePolicy[] =
   [
@@ -1003,6 +1029,16 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       residue: 'none',
       reason:
         'supplyCollateral pulls exactly collateralAssets, so the allowance reaches zero on success. The borrow leg needs no allowance.',
+    },
+    {
+      recipeFile: 'recipes/morpho/blue-supply-loan-recipe.ts',
+      approvalCallSites: 1,
+      approvedAssetRole: 'market loan asset',
+      spenderRole: 'Morpho Blue singleton',
+      approvedAmountExpression: 'supplyQuote.supplyAssets',
+      residue: 'none',
+      reason:
+        'assets-mode supply(assets, 0) pulls exactly supplyAssets, so the allowance reaches zero on success. Sized from the unshielded input, so it cannot exceed what arrived.',
     },
     {
       recipeFile: 'recipes/morpho/blue-repay-recipe.ts',
@@ -1088,11 +1124,11 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'pool collateral asset',
       spenderRole: 'f(x) PoolManager',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT. No amount is passed, so the executor grants PoolManager an infinite allowance on the collateral ' +
-        'asset that nothing later revokes. The supplied amount is known at build time (collInput.expectedBalance), ' +
-        'so an exact approval is available.',
+        'No amount is passed. The step now bounds it to the matched input balance, which is exact whenever the ' +
+        'collateral arrives straight from an unshield. Downstream of a swap in a combo the balance is not known at ' +
+        'proof time, so the approval is max there and survives the batch.',
     },
     {
       recipeFile: 'recipes/borrow/fx/fx-mint-topup-recipe.ts',
@@ -1100,10 +1136,9 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'pool collateral asset',
       spenderRole: 'f(x) PoolManager',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT, same shape as fx-mint-open-recipe. The top-up amount is collInput.expectedBalance and is known at ' +
-        'build time.',
+        'Same shape as fx-mint-open-recipe: bounded to the input balance when deterministic, max behind a swap.',
     },
     {
       recipeFile: 'recipes/borrow/fx/fx-mint-topup-and-borrow-recipe.ts',
@@ -1111,9 +1146,9 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'pool collateral asset',
       spenderRole: 'f(x) PoolManager',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT, same shape as fx-mint-open-recipe. The borrow leg needs no allowance; only the collateral supply ' +
+        'Same shape as fx-mint-open-recipe. The borrow leg needs no allowance; only the collateral supply ' +
         'does, and its amount is known.',
     },
     {
@@ -1122,9 +1157,9 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'sell asset',
       spenderRole: 'quote.spender — the 0x v2 allowance target',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT. sellERC20Amount is passed as the tokenInfo argument, not as the amount, so the third parameter is ' +
+        'sellERC20Amount is passed as the tokenInfo argument, not as the amount, so the third parameter is ' +
         'undefined and the approval is max. The sell amount is exact and already in hand. This is the widest of ' +
         'the seven: the spender is a third-party aggregator contract and every combo in the repo routes through it.',
     },
@@ -1134,9 +1169,9 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'vault deposit asset',
       spenderRole: 'Beefy vault',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT. depositERC20Info is the tokenInfo argument and no amount is supplied, so the vault keeps an ' +
+        'depositERC20Info is the tokenInfo argument and no amount is supplied, so the vault keeps an ' +
         'infinite allowance.',
     },
     {
@@ -1146,9 +1181,9 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'both pair assets',
       spenderRole: 'Uniswap-v2-like router',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT, twice. addLiquidity pulls at most the two desired amounts, both known at build time, so the ' +
+        'Twice. addLiquidity pulls at most the two desired amounts, both known at build time, so the ' +
         'correct approval is the desired amount and the unpulled remainder simply stays unapproved.',
     },
     {
@@ -1158,8 +1193,8 @@ export const SHIPPED_APPROVAL_RESIDUE_POLICY: readonly ShippedApprovalResiduePol
       approvedAssetRole: 'pair LP asset',
       spenderRole: 'Uniswap-v2-like router',
       approvedAmountExpression: 'undefined -> type(uint256).max',
-      residue: 'unbounded',
+      residue: 'bounded-when-deterministic',
       reason:
-        'DEFECT. removeLiquidity burns exactly lpERC20Amount.amount, which is known at build time.',
+        'removeLiquidity burns exactly lpERC20Amount.amount, which is known at build time; the step bounds to it.',
     },
   ];

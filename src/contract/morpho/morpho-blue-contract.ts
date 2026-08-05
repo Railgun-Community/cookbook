@@ -76,6 +76,45 @@ export class MorphoBlueContract {
     );
   }
 
+  createSupply(
+    params: MarketParams,
+    assets: bigint,
+    shares: bigint,
+    onBehalf: string,
+  ): Promise<ContractTransaction> {
+    // Blue requires EXACTLY one of assets/shares to be non-zero. Supplying is
+    // assets-denominated in every sane case — you know what you are lending —
+    // but the shares form is kept reachable so a caller mirroring a withdrawal
+    // can round-trip without a unit conversion.
+    return this.contract.supply.populateTransaction(
+      params,
+      assets,
+      shares,
+      onBehalf,
+      EMPTY_MORPHO_CALLBACK_DATA,
+    );
+  }
+
+  createWithdraw(
+    params: MarketParams,
+    assets: bigint,
+    shares: bigint,
+    onBehalf: string,
+    receiver: string,
+  ): Promise<ContractTransaction> {
+    // Exactly one of assets/shares is non-zero. Shares are what a FULL exit
+    // must use: interest accrues between quoting and execution, so an
+    // assets-denominated "withdraw everything" is stale the moment it is built
+    // and leaves a shares residue that no later batch is looking for.
+    return this.contract.withdraw.populateTransaction(
+      params,
+      assets,
+      shares,
+      onBehalf,
+      receiver,
+    );
+  }
+
   createBorrow(
     params: MarketParams,
     assets: bigint,

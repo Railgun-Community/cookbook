@@ -711,6 +711,59 @@ const modes: readonly StepFailureMode[] = [
     shieldRisk: false,
   },
   {
+    step: 'MorphoBlueSupplyLoanStep',
+    calls: 1,
+    onOwnFailure: {
+      residue: 'executor',
+      recovery: 'reshielded',
+      detail:
+        'The loan token stays at the executor and the shield epilogue sweeps ' +
+        'it — a clean no-op. Nothing downstream depends on a supply, so the ' +
+        'batch simply lends nothing.',
+    },
+    onLaterFailure: {
+      residue: 'protocol',
+      recovery: 'public-recoverable',
+      detail:
+        'The claim survives as `position[id][onBehalf].supplyShares` inside the ' +
+        'Blue singleton: un-tokenized, so the epilogue cannot sweep it and this ' +
+        'batch cannot re-privatise it. Same shape as supplying collateral, with ' +
+        'one difference that matters to a reader — the claim is denominated in ' +
+        'SHARES and grows with borrower interest, so the assets figure this step ' +
+        'declared is a snapshot, not the recoverable amount. Recovery is a ' +
+        'second batch running as (or authorized by) `onBehalf`; the association ' +
+        'is public and permanent.',
+    },
+    shieldRisk: false,
+  },
+  {
+    step: 'MorphoBlueWithdrawLoanStep',
+    calls: 1,
+    onOwnFailure: {
+      residue: 'protocol',
+      recovery: 'public-recoverable',
+      detail:
+        'Nothing is lost — the claim stays inside Blue keyed to `onBehalf` — but ' +
+        'the position remains public and remains there. The characteristic cause ' +
+        'is NOT a health check but free liquidity: lent assets are out on loan, ' +
+        'and Blue reverts `InsufficientLiquidity` when ' +
+        '`totalSupplyAssets - totalBorrowAssets` is below the withdrawal, so a ' +
+        'fully utilized market locks lenders out however healthy their position. ' +
+        'Collateral has no equivalent constraint. The quote builder checks free ' +
+        'liquidity at build time precisely because this revert is swallowed.',
+    },
+    onLaterFailure: {
+      residue: 'executor',
+      recovery: 'reshielded',
+      detail:
+        'The withdrawn loan token is a declared output and is swept by the ' +
+        'epilogue. A shares-mode exit realises slightly MORE than declared as ' +
+        'interest accrues; relay-adapt shields the executor balance rather than ' +
+        'the declared figure, so the surplus is swept too.',
+    },
+    shieldRisk: false,
+  },
+  {
     step: 'MorphoBlueSetAuthorizationStep',
     calls: 1,
     onOwnFailure: {
