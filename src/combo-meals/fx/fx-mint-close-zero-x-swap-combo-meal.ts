@@ -24,15 +24,16 @@ export type FxMintClose_ZeroXSwap_ComboMealOpts = FxMintCloseRecipeOpts & {
  *
  * ```
  * unshield debtToken + NFT → operate(close) → 0x swap (collateral → desired)
- *   → shield asset (+ NFT on partial close, + unspent debt token)
+ *   → shield asset + NFT + unspent debt token
  * ```
  *
  * The sell side is derived from the pool, never passed in — the swap can only
  * ever sell what the close actually withdraws.
  *
  * Two outputs beyond the obvious one:
- *   - **partial close** keeps the position NFT, which transits the swap leg
- *     untouched and shields back to the user; a full close burns it (`0n`).
+ *   - **the position NFT** transits the swap leg untouched and shields back on
+ *     BOTH branches. f(x) does not burn on close, so a full close returns an
+ *     emptied position rather than retiring the handle.
  *   - **unspent debt token** from the close (see FxMintClosePositionStep's orphan
  *     pass-through) rides the seam as a second ERC-20. The swap recipe does not
  *     handle it, so the recipe engine's epilogue reshields it.

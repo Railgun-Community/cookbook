@@ -24,6 +24,24 @@ export const fxCollateralERC20Info = (
 };
 
 /**
+ * The pool's DEBT token, as a `RecipeERC20Info` for the 0x leg — fxUSD on a
+ * long, wstETH/WBTC on a short.
+ *
+ * The mirror of {@link fxCollateralERC20Info}, and load-bearing for the same
+ * reason: a debt can only ever be repaid in the debt token, so an entry combo
+ * that lets the caller name the buy side could quote a token `operate()` will
+ * not accept. Derived from the pool, never passed in.
+ */
+export const fxDebtERC20Info = (pool: FxMintPoolRef): RecipeERC20Info => {
+  const resolved = resolvePool(pool);
+  return {
+    tokenAddress: resolved.debtToken,
+    decimals: resolved.debtDecimals,
+    isBaseToken: false,
+  };
+};
+
+/**
  * Reject a combo whose swap leg would be a no-op self-swap.
  *
  * 0x would either fail the quote or route through a pointless pair; either way
@@ -36,17 +54,25 @@ export const fxCollateralERC20Info = (
  */
 export const assertSwapTokenIsNotCollateral = (
   callerERC20Info: RecipeERC20Info,
-  collateralERC20Info: RecipeERC20Info,
+  poolERC20Info: RecipeERC20Info,
   role: 'sell' | 'buy',
   comboName: string,
   recipeName: string,
+  /**
+   * Which side of the pool `poolERC20Info` is. Only the error text changes —
+   * but naming the wrong one sends the caller looking at the wrong argument,
+   * and on a short pool the collateral and debt tokens are each other's
+   * opposite, so "already the pool collateral" is actively misleading when the
+   * clash was with the debt token.
+   */
+  poolTokenRole: 'collateral' | 'debt' = 'collateral',
 ): void => {
   if (
     callerERC20Info.tokenAddress.toLowerCase() ===
-    collateralERC20Info.tokenAddress.toLowerCase()
+    poolERC20Info.tokenAddress.toLowerCase()
   ) {
     throw new Error(
-      `${comboName}: ${role} token is already the pool collateral (${collateralERC20Info.tokenAddress}) — use ${recipeName} directly, no swap is needed`,
+      `${comboName}: ${role} token is already the pool ${poolTokenRole} (${poolERC20Info.tokenAddress}) — use ${recipeName} directly, no swap is needed`,
     );
   }
 };
