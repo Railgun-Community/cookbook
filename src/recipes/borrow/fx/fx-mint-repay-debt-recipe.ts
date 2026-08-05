@@ -47,9 +47,14 @@ export type FxMintRepayDebtRecipeOpts = {
  * (cookbook's recipe-engine epilogue handles unconsumed input ERC-20s
  * automatically).
  *
- * Pool-agnostic: debt-axis only, no collateral movement. Like
- * FxMintBorrowMoreRecipe, it has no ComboMeal variant — there is no collateral
- * leg to swap into or out of.
+ * Pool-agnostic: debt-axis only, no collateral movement.
+ *
+ * It DOES have a combo variant — `ZeroXSwap_FxMintRepay_ComboMeal`. An earlier
+ * version of this comment said otherwise, reasoning that there is no collateral
+ * leg to swap into or out of. That is the wrong axis: what constrains a repay is
+ * that f(x) accepts only the debt token, so a holder of anything else cannot
+ * repay at all and the swap belongs on the DEBT side. The absent collateral leg
+ * makes the combo simpler than the close one, not unnecessary.
  *
  * Use case: position's CR is deteriorating from collateral price drop —
  * caller computes computeFxRepay({ debt, availableDebtToken,
