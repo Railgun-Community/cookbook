@@ -27,7 +27,22 @@ export const MIN_GAS_LIMIT_BEEFY_VAULT_DEPOSIT: bigint = 3_100_000n; // 2.667 (3
 export const MIN_GAS_LIMIT_BEEFY_VAULT_WITHDRAW: bigint = 3_000_000n; // 2.603 (3.012 for a different vault...)
 export const MIN_GAS_LIMIT_METAMORPHO_DEPOSIT: bigint = 2_900_000n;
 export const MIN_GAS_LIMIT_METAMORPHO_WITHDRAW: bigint = 2_800_000n;
-export const MIN_GAS_LIMIT_MORPHO_BLUE_SUPPLY_BORROW: bigint = 3_100_000n;
+// MEASURED on the 7702 path, 2026-08-05, wstETH/USDC 86% market (0.05 wstETH
+// collateral, 50 USDC drawn). Same derivation as the fx constants:
+//
+//   cost floor          2_093_750   (max failing probe 2_078_125)
+//   pre-check overhead     93_750
+//   K                   2_000_000
+//
+// The old 3_100_000 over-constrained by ~1.1M — the largest error in this file,
+// and in the harmful direction: an excessive floor makes every supply+borrow
+// batch carry gas it cannot use and can revert on the floor check itself.
+//
+// Note it lands BELOW every fx leg. That is not suspicious: Blue's
+// supplyCollateral + borrow is two calls against a singleton with no NFT to
+// mint and no position token to shield, where fx open mints an ERC-721 and
+// shields it.
+export const MIN_GAS_LIMIT_MORPHO_BLUE_SUPPLY_BORROW: bigint = 2_000_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW: bigint = 3_000_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_BORROW: bigint = 2_700_000n;
 export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY: bigint = 2_700_000n;
@@ -81,13 +96,37 @@ export const MIN_GAS_LIMIT_MORPHO_TRANSACT: bigint = 3_100_000n;
 // carrying prior shields), so K is derived from the COLD figure; a value tuned
 // to the warm one under-provisions a position opened against a fresh subtree.
 export const MIN_GAS_LIMIT_FXMINT_OPEN: bigint = 2_690_000n;
-// STILL UNMEASURED. Both are adjust-family ops and are probably nearer OPEN's
-// measured cost than these inherited guesses, but neither has been bisected —
-// they need a fixture that opens a position first, since open is the only fx leg
-// expressible without one. Left high deliberately: over-provisioning is the
-// safer error while the number is unknown.
-export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 3_000_000n;
-export const MIN_GAS_LIMIT_FXMINT_CLOSE: bigint = 3_100_000n;
+// MEASURED on the 7702 path, 2026-08-05, against a fixture that opens a
+// wstETH-Long position first (adjust and close are not expressible without one).
+// Same derivation as the two above: K = cost floor - pre-check overhead.
+//
+//   ADJUST (topup + borrow, the dearest member of the family)
+//     cost floor          2_992_187   (max failing probe 2_953_125)
+//     pre-check overhead    112_500   (measured, require-bound re-bisection)
+//     K                   2_879_687   -> 2_880_000
+//
+// The old 3_000_000 over-constrained by ~120k. Sized on topup+borrow because it
+// is the only member that moves BOTH axes of operate() and shields an ERC20 and
+// the NFT back; one constant has to clear topup, borrow-more and repay-debt too.
+export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 2_880_000n;
+//   CLOSE (partial — the dearer branch, since the position survives and the NFT
+//   is shielded back)
+//     cost floor          3_109_375   (max failing probe 3_070_312)
+//     pre-check overhead    NOT MEASURED — the re-bisection died when the squid
+//                           returned 502 mid-run and wedged the TXID sync.
+//
+// So K is bounded, not pinned: K = 3_109_375 - overhead, and overhead is
+// strictly positive. Using ADJUST's measured 112_500 gives 2_996_875. That is
+// the LARGER of the two sibling overheads (OPEN measured 87_377), and using the
+// larger one is deliberate — it yields the SMALLER K, and over-provisioning is
+// the harmful direction here: an excessive floor makes the batch carry gas it
+// cannot use and can revert on the floor check itself.
+//
+// Re-measure the close overhead to replace this bound with a measurement. Until
+// then the assumption is stated rather than hidden: close carries at least as
+// much calldata as adjust, so its overhead should be >= 112_500, which would
+// make this value slightly conservative rather than slightly high.
+export const MIN_GAS_LIMIT_FXMINT_CLOSE: bigint = 3_000_000n;
 export const MIN_GAS_LIMIT_LP_V2_ADD_LIQUIDITY: bigint = 2_700_000n; // 2.588
 export const MIN_GAS_LIMIT_LP_V2_REMOVE_LIQUIDITY: bigint = 2_300_000n; // 2.194
 export const MIN_GAS_LIMIT_TRANSFER: bigint = 1_900_000n; // 1.817

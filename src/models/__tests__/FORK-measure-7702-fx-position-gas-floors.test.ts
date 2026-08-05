@@ -110,9 +110,14 @@ const OPEN_DEBT = 5_000_000_000_000_000_000n; // 5 fxUSD
 const ADJUST_COLLATERAL_UNSHIELD = 10_000_000_000_000_000n; // 0.01 wstETH
 const ADJUST_ADDITIONAL_DEBT = 1_000_000_000_000_000_000n; // 1 fxUSD
 
-// Close leg, partial: repay ~2 of the 5 fxUSD. The position survives, so the
-// NFT is shielded back — which is what makes a partial close dearer than a full
-// one (a full close burns the NFT inside operate() and has no NFT shield leg).
+// Close leg, partial: repay ~2 of the 5 fxUSD.
+//
+// NOTE the original rationale here was wrong and the correction matters for
+// reading the numbers: it said a partial close is dearer because a full close
+// "burns the NFT inside operate() and has no NFT shield leg". f(x) does NOT burn
+// on close — measured, 0 burns in 200k blocks — and the step now declares the
+// NFT unconditionally, so BOTH branches shield it back and carry that leg. Any
+// remaining gap between the two is the repay size, not the NFT.
 const CLOSE_PARTIAL_DEBT_UNSHIELD = 2_000_000_000_000_000_000n; // 2 fxUSD
 
 // Close leg, full: enough fxUSD to repay the entire debt after the 25bp unshield
@@ -608,11 +613,9 @@ describe('FORK-measure-7702-fx-position-gas-floors', function run() {
     });
     reportCostFloor(name, measurement, MIN_GAS_LIMIT_FXMINT_CLOSE);
 
-    // The constant is sized on the PARTIAL close, which carries the extra NFT
-    // shield leg a full close does not. This figure exists to prove that
-    // assumption rather than assert it — and to prove a full close can complete
-    // its shield epilogue at all, given the recipe still emits a shield request
-    // for the NFT that operate() has just burned.
+    // The constant is sized on the PARTIAL close. Both branches now shield the
+    // NFT back (f(x) does not burn on close), so this figure exists to show
+    // where a full close actually lands rather than to assert it is cheaper.
     expect(
       measurement.minSuccessfulGasLimit > MIN_GAS_LIMIT_FXMINT_OPEN,
     ).to.equal(

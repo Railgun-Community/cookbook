@@ -200,6 +200,20 @@ export const setupForkTests = async () => {
 
     // Stamp the DB with a block this fork actually has, so the next run can
     // tell "same anvil, moved forward" from "restarted anvil, DB now stale".
+    //
+    // WARM-REUSE HAZARD, learned the expensive way: this marker says the DB is
+    // consistent with the CHAIN, and says nothing about whether the shielded
+    // BALANCES are still what a fresh setup would produce. A run that SPENDS a
+    // shielded balance — any fixture that opens a position, so every
+    // `FORK-measure-*-position-*` file — writes a marker that the next run
+    // happily matches, then fails in `waitForShieldedTokenBalances` with
+    // "Could not find shielded balance for <token>". That reads like a broken
+    // fork or a bad RPC and is neither.
+    //
+    // So: warm reuse is safe for repeated runs of a read-only or
+    // self-reverting suite, and unsafe after any run whose fixture consumed a
+    // balance. Wipe `test.db` (and `test.db.fork.json`) between suites that
+    // spend, and pay the cold scan.
     await recordTestDBFork(getTestProvider());
   } catch (error) {
     console.error("Setup Fork tests error: ", error);
