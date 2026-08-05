@@ -7,3 +7,5 @@ export * from './zero-x-swap-fx-mint-close-combo-meal';
 export * from './quote-fx-swap-close';
 export * from './zero-x-swap-fx-mint-repay-combo-meal';
 export * from './quote-fx-swap-repay';
+export * from './fx-mint-borrow-more-zero-x-swap-combo-meal';
+export * from './fx-mint-topup-and-borrow-zero-x-swap-combo-meal';

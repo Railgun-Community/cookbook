@@ -1,5 +1,7 @@
 import { RecipeERC20Info } from '../../models/export-models';
 import {
+  FEE_DENOM,
+  fxDebtBorrowOutput,
   resolvePool,
   type FxMintPoolRef,
 } from '../../steps/borrow/fx/fx-mint-util';
@@ -12,9 +14,7 @@ import {
  * shape validation. A quote can no longer name a buy token that disagrees with
  * the collateral the position actually needs.
  */
-export const fxCollateralERC20Info = (
-  pool: FxMintPoolRef,
-): RecipeERC20Info => {
+export const fxCollateralERC20Info = (pool: FxMintPoolRef): RecipeERC20Info => {
   const resolved = resolvePool(pool);
   return {
     tokenAddress: resolved.collateralToken,
@@ -75,4 +75,47 @@ export const assertSwapTokenIsNotCollateral = (
       `${comboName}: ${role} token is already the pool ${poolTokenRole} (${poolERC20Info.tokenAddress}) — use ${recipeName} directly, no swap is needed`,
     );
   }
+};
+
+/**
+ * How much debt token a borrow-exit combo's swap leg will actually be handed:
+ * `additionalDebt` NET of f(x)'s borrow fee.
+ *
+ * The gross never reaches the executing account. Measured on mainnet
+ * (`0x09a3bd9d…`, block 25078146, `wstETH-Long`): `operate(pool, 1912, 0, +1e18)`
+ * minted 0.995 fxUSD to the caller and 0.005 to f(x)'s fee recipient — the
+ * pool's 0.5% borrow fee, still live at block 25688619 as
+ * `borrowFeeRatio = 5e6 / 1e9`. A swap sized at the gross therefore orders 0.5%
+ * more than exists; 0x's `transferFrom` reverts, and under
+ * `requireSuccess = false` the batch mines regardless — full gas, nothing
+ * swapped. This is the exact mirror of `withdrawFeeRatio` on the close-then-swap
+ * combo, and the reason neither combo lets the caller name the swap amount.
+ *
+ * `FxMintAdjustPositionStep` already declares this figure, so the seam carries
+ * it without help; this is here so the combo can expose it to the caller (who
+ * would otherwise re-derive the fee direction by hand) and so a fee ratio in the
+ * wrong units is rejected at BUILD time rather than mining a no-op.
+ *
+ * Shorts charge nothing on the debt axis — `borrowFeeRatio = 0` on both, same
+ * read — so there net == gross and this is the identity. Do not "simplify" on
+ * the strength of a short-pool test.
+ *
+ * Callers must validate `additionalDebt > 0` first; both borrow recipes do it in
+ * their constructors, so construct the fx recipe before calling this.
+ */
+export const fxBorrowSwapSeamAmount = (
+  additionalDebt: bigint,
+  borrowFeeRatio: bigint,
+  comboName: string,
+): bigint => {
+  // The one misuse that is detectable without chain access. A ratio in basis
+  // points (50 for 0.5%) sails through — it is inside the range and merely
+  // 100,000x too small — which is why the recipes tell callers to read
+  // `getFxPool(...).borrowFeeRatio` rather than write a literal.
+  if (borrowFeeRatio < 0n || borrowFeeRatio >= FEE_DENOM) {
+    throw new Error(
+      `${comboName}: borrowFeeRatio ${borrowFeeRatio} is outside [0, ${FEE_DENOM}) — it is 1e9-denominated, from getFxPool(...).borrowFeeRatio`,
+    );
+  }
+  return fxDebtBorrowOutput(additionalDebt, borrowFeeRatio);
 };
