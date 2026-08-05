@@ -798,14 +798,23 @@ const modes: readonly StepFailureMode[] = [
       residue: 'executor',
       recovery: 'reshielded',
       detail:
-        'THE BUNDLE IS NOT ATOMIC. It contributes N calls to the array and ' +
-        '`_multicall` continues past each failure, so calls after a failing one ' +
-        'still run — against state the bundle compiler assumed would exist. A ' +
-        'Morpho SDK bundle is authored under the assumption that it reverts as a ' +
-        'unit; on this path it does not. Pulled tokens that were never pulled are ' +
-        'at the executor and are swept, but a half-applied bundle can leave ' +
-        'protocol state the bundle\'s own accounting does not model. Treat every ' +
-        '`CallError` index inside a bundle as unexplained until read back on chain.',
+        'THE BUNDLE IS NOT ATOMIC by default. It contributes N calls to the ' +
+        'array and `_multicall` continues past each failure, so calls after a ' +
+        'failing one still run — against state the bundle compiler assumed would ' +
+        'exist. A Morpho SDK bundle is authored under the assumption that it ' +
+        'reverts as a unit; on this path it does not. Pulled tokens that were ' +
+        'never pulled are at the executor and are swept, but a half-applied ' +
+        'bundle can leave protocol state the bundle\'s own accounting does not ' +
+        'model. Treat every `CallError` index inside a bundle as unexplained ' +
+        'until read back on chain. ' +
+        'REMEDY: `MorphoTransactRecipe` accepts `atomicEnvelope`, which compiles ' +
+        'the composition into a single `Bundler3.multicall`. Bundler3 bubbles an ' +
+        'inner revert (measured: with `skipRevert: false` the inner returndata ' +
+        'is returned verbatim; with `skipRevert: true` the success flag is ' +
+        'discarded outright), so one entry is all-or-nothing and this whole ' +
+        'paragraph stops applying — relay-adapt records a single `CallError` and ' +
+        'nothing was half-applied. Off by default because it changes what ' +
+        'reaches the chain.',
     },
     onLaterFailure: {
       residue: 'protocol',
