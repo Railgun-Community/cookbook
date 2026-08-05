@@ -134,6 +134,78 @@ describe('preflightFxOpen', function run() {
     expect(result.unchecked).to.contain('same-block-guarantee');
   });
 
+  it('Should check the debt ratio when given a collateral amount', async () => {
+    // 1 wstETH backing 100 fxUSD is far under the 86.67% ceiling.
+    const result = await preflightFxOpen({
+      pool: 'wstETH-Long',
+      targetDebt: 100_000_000_000_000_000_000n,
+      collateralAmount: 1_000_000_000_000_000_000n,
+      provider,
+    });
+
+    expect(result.blockers.map(b => b.code)).to.not.contain('debt-ratio');
+    // And the check is now REPORTED as done, not silently absent.
+    expect(result.unchecked).to.not.contain('resulting-debt-ratio');
+  });
+
+  it('Should block an open that would exceed the pool debt ratio', async () => {
+    // Sizing this correctly requires knowing which unit the oracle prices in,
+    // and getting it wrong makes the test vacuous. The anchor price is per RAW
+    // collateral unit, and wstETH raw is stETH-denominated — so 1 wstETH is
+    // ~1.24 raw units, worth ~$2,330 rather than the ~$1,880 the raw price
+    // alone suggests. An earlier version of this test borrowed 1,700 against
+    // 1 wstETH expecting a rejection; that is ~73%, comfortably legal, and the
+    // test passed a build it was meant to reject.
+    //
+    // 2,400 fxUSD against 1 wstETH is ~103%, unambiguously over the 86.67%
+    // ceiling f(x) enforces. This is the check that catches an open refused on
+    // RISK grounds rather than capacity or permissions.
+    const result = await preflightFxOpen({
+      pool: 'wstETH-Long',
+      targetDebt: 2_400_000_000_000_000_000_000n,
+      collateralAmount: 1_000_000_000_000_000_000n,
+      provider,
+    });
+
+    expect(result.ok).to.equal(false);
+    expect(result.blockers.map(b => b.code)).to.contain('debt-ratio');
+    const blocker = result.blockers.find(b => b.code === 'debt-ratio');
+    // The message must carry the actual figures, since the caller's next move
+    // is to pick a smaller debt or more collateral.
+    expect(blocker?.detail).to.match(/debt ratio of \d+/);
+    expect(blocker?.detail).to.match(/maximum of \d+/);
+  });
+
+  it('Should report the ratio as unchecked when no collateral is given', async () => {
+    const result = await preflightFxOpen({
+      pool: 'wstETH-Long',
+      targetDebt: 1n,
+      provider,
+    });
+
+    // Absence of a blocker must not read as a pass. Without a collateral amount
+    // there is nothing to compute a ratio from, and the caller has to be able
+    // to tell that apart from "checked and fine".
+    expect(result.unchecked).to.contain('resulting-debt-ratio');
+  });
+
+  it('Should not claim a ratio check it could not perform', async () => {
+    const dead = new JsonRpcProvider('http://127.0.0.1:1');
+    try {
+      const result = await preflightFxOpen({
+        pool: 'wstETH-Long',
+        targetDebt: 1n,
+        collateralAmount: 1_000_000_000_000_000_000n,
+        provider: dead,
+      });
+      // A ratio that could not be computed is not a ratio that is fine.
+      expect(result.ok).to.equal(false);
+      expect(result.unchecked).to.contain('resulting-debt-ratio');
+    } finally {
+      dead.destroy();
+    }
+  });
+
   it('Should raise from the asserting form, naming the blocker', async () => {
     await expect(
       assertFxOpenViable({

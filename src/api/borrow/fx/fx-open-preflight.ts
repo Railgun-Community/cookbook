@@ -1,10 +1,35 @@
-import type { Provider } from 'ethers';
-import type { FxMintPoolRef } from '../../../steps/borrow/fx/fx-mint-util';
+import { Contract, type Provider } from 'ethers';
 import {
+  resolvePool,
+  type FxMintPoolRef,
+  type FxPoolSide,
+} from '../../../steps/borrow/fx/fx-mint-util';
+import {
+  getFxDebtScalingFactor,
   getFxPool,
   getFxTopLevelCallGate,
   getNextFxPositionId,
 } from './fx-position-reader';
+
+/**
+ * The two reads the debt-ratio check needs, declared here rather than added to
+ * the shared pool ABI so this module states exactly what it decodes.
+ *
+ * `getDebtRatioRange()` returns `(min, max)`, 1e18-scaled. The max is the
+ * ceiling an open must sit under — 0.8666e18 on `wstETH-Long`, measured.
+ * `priceOracle()` returns the oracle the pool prices collateral with; that
+ * oracle's `getPrice()` returns `(anchor, min, max)`.
+ */
+const FX_POOL_RATIO_ABI = [
+  'function getDebtRatioRange() view returns (uint256 minRatio, uint256 maxRatio)',
+  'function priceOracle() view returns (address)',
+] as const;
+
+const FX_PRICE_ORACLE_ABI = [
+  'function getPrice() view returns (uint256 anchorPrice, uint256 minPrice, uint256 maxPrice)',
+] as const;
+
+const WAD = 10n ** 18n;
 
 /**
  * Why a build should not proceed. `code` is stable enough to branch on; `detail`
@@ -14,6 +39,7 @@ export type FxOpenBlocker = {
   readonly code:
     | 'top-level-call-gate'
     | 'debt-capacity'
+    | 'debt-ratio'
     | 'position-id-stale'
     | 'unreadable';
   readonly detail: string;
@@ -35,12 +61,7 @@ export type FxOpenPreflight = {
 };
 
 /** Named so the omission is legible at the call site rather than implied. */
-const UNCHECKED = Object.freeze([
-  // Would need a collateral price. f(x) exposes debt ratio only for an
-  // EXISTING position (`getPositionDebtRatio`), and there is no oracle read in
-  // this package to price a hypothetical one. This is the largest gap: an open
-  // that lands above the rebalance threshold still passes this preflight.
-  'resulting-debt-ratio',
+const BASE_UNCHECKED = Object.freeze([
   // Requires simulating `operate()` with the collateral already at the
   // executor, which needs ERC-20 balance and allowance state overrides and so
   // per-token storage slots.
@@ -49,6 +70,9 @@ const UNCHECKED = Object.freeze([
   // landing. Nothing read here is a guarantee about the next block.
   'same-block-guarantee',
 ]);
+
+/** Added when the caller supplies no collateral amount to check the ratio against. */
+const UNCHECKED_RATIO = 'resulting-debt-ratio';
 
 /**
  * Check, before building an f(x) open, the conditions that would otherwise make
@@ -89,10 +113,19 @@ export async function preflightFxOpen(params: {
   targetDebt: bigint;
   provider: Provider;
   predictedPositionId?: bigint;
+  /**
+   * Collateral being supplied, in native `collateralToken` units. Supplying it
+   * enables the debt-ratio check — the one that catches an open f(x) will
+   * refuse on risk grounds rather than on capacity or permissions. Omit it and
+   * `resulting-debt-ratio` appears in {@link FxOpenPreflight.unchecked}.
+   */
+  collateralAmount?: bigint;
 }): Promise<FxOpenPreflight> {
-  const { pool, targetDebt, provider, predictedPositionId } = params;
+  const { pool, targetDebt, provider, predictedPositionId, collateralAmount } =
+    params;
 
   const blockers: FxOpenBlocker[] = [];
+  const uncheckedList: string[] = [...BASE_UNCHECKED];
 
   // Read together so a slow call cannot straddle a block boundary and pair a
   // fresh id with stale capacity. The block number is settled alongside the
@@ -161,6 +194,33 @@ export async function preflightFxOpen(params: {
     }
   }
 
+  // Debt ratio. Only reachable with a collateral amount to compute it from, and
+  // only meaningful with the pool read that carries the raw/native conversion
+  // terms.
+  if (collateralAmount === undefined || collateralAmount <= 0n) {
+    uncheckedList.push(UNCHECKED_RATIO);
+  } else if (poolResult.status !== 'fulfilled') {
+    // The pool read already produced an `unreadable` blocker above; record that
+    // the ratio went unchecked too rather than letting its absence read as a pass.
+    uncheckedList.push(UNCHECKED_RATIO);
+  } else {
+    const ratioCheck = await checkFxOpenDebtRatio({
+      pool,
+      provider,
+      collateralAmount,
+      targetDebt,
+      totalRawColls: poolResult.value.totalRawColls,
+      collateralBalance: poolResult.value.collateralBalance,
+      side: poolResult.value.side,
+    });
+    if (ratioCheck.blocker !== undefined) {
+      blockers.push(ratioCheck.blocker);
+    }
+    if (!ratioCheck.checked) {
+      uncheckedList.push(UNCHECKED_RATIO);
+    }
+  }
+
   if (nextIdResult.status === 'rejected') {
     return {
       predictedPositionId: predictedPositionId ?? 0n,
@@ -174,7 +234,7 @@ export async function preflightFxOpen(params: {
           )}`,
         },
       ],
-      unchecked: UNCHECKED,
+      unchecked: uncheckedList,
       checkedAtBlock,
     };
   }
@@ -196,7 +256,7 @@ export async function preflightFxOpen(params: {
     predictedPositionId: nextId,
     ok: blockers.length === 0,
     blockers,
-    unchecked: UNCHECKED,
+    unchecked: uncheckedList,
     checkedAtBlock,
   };
 }
@@ -221,4 +281,128 @@ export async function assertFxOpenViable(params: {
     );
   }
   return preflight;
+}
+
+/**
+ * Project the debt ratio an open would land at, and compare it to the pool's
+ * ceiling.
+ *
+ * **The formula is measured, not inferred.** `rawDebts * 1e36 / (rawColls *
+ * anchorPrice)` reproduces `Pool.getPositionDebtRatio` EXACTLY — zero
+ * difference, on four live mainnet positions spanning 26% to 64%. The oracle's
+ * `minPrice` and `maxPrice` both miss by ~1e15, so the anchor is the one f(x)
+ * prices positions with and substituting either of the others would put this
+ * check wrong by a fraction of a percent in an unpredictable direction.
+ *
+ * Both figures must be RAW, which is where this could go wrong quietly. The
+ * caller passes native units, and raw and native diverge on the short pools —
+ * the same trap that produced a shipped bug at the close/repay boundary. The
+ * collateral conversion inverts the pool-level ratio `getFxPosition` uses
+ * (`native = raw * collateralBalance / totalRawColls`), and the debt conversion
+ * uses the manager's own scaling factor.
+ *
+ * Returns `checked: false` rather than a pass when any input could not be read.
+ * A ratio that could not be computed is not a ratio that is fine.
+ */
+async function checkFxOpenDebtRatio(args: {
+  pool: FxMintPoolRef;
+  provider: Provider;
+  collateralAmount: bigint;
+  targetDebt: bigint;
+  totalRawColls: bigint;
+  collateralBalance: bigint;
+  side: FxPoolSide;
+}): Promise<{ checked: boolean; blocker?: FxOpenBlocker }> {
+  const {
+    pool,
+    provider,
+    collateralAmount,
+    targetDebt,
+    totalRawColls,
+    collateralBalance,
+    side,
+  } = args;
+
+  const resolved = resolvePool(pool);
+  const poolContract = new Contract(
+    resolved.address,
+    FX_POOL_RATIO_ABI as unknown as string[],
+    provider,
+  );
+
+  let maxRatio: bigint;
+  let anchorPrice: bigint;
+  let debtScalingFactor: bigint;
+  try {
+    const [range, oracleAddress, scaling] = await Promise.all([
+      poolContract.getDebtRatioRange() as Promise<[bigint, bigint]>,
+      poolContract.priceOracle() as Promise<string>,
+      // Long pools report debt NATIVELY, so there is no `tokenRates` entry to
+      // find and `getFxDebtScalingFactor` throws rather than returning
+      // identity. Asking anyway would make every long-pool check silently
+      // report itself unchecked — which is exactly how this asymmetry bit the
+      // close/repay boundary before it was a documented hazard.
+      side === 'short'
+        ? getFxDebtScalingFactor(pool, provider)
+        : Promise.resolve(WAD),
+    ]);
+    maxRatio = range[1];
+    debtScalingFactor = scaling;
+    const oracle = new Contract(
+      oracleAddress,
+      FX_PRICE_ORACLE_ABI as unknown as string[],
+      provider,
+    );
+    const price = (await oracle.getPrice()) as [bigint, bigint, bigint];
+    anchorPrice = price[0];
+  } catch {
+    // Unreadable, not fine. The caller sees `resulting-debt-ratio` in
+    // `unchecked` and can decide whether to proceed.
+    return { checked: false };
+  }
+
+  if (
+    collateralBalance <= 0n ||
+    totalRawColls <= 0n ||
+    anchorPrice <= 0n ||
+    maxRatio <= 0n
+  ) {
+    // An empty pool has no ratio to project against, and a zero price would
+    // divide by zero. Neither is a pass.
+    return { checked: false };
+  }
+
+  // native -> raw, inverting `getFxPosition`'s conversion.
+  const rawColls = (collateralAmount * totalRawColls) / collateralBalance;
+  // native -> raw for debt: the manager's scaling factor is 1e18-composed, so
+  // multiplying and dividing by WAD keeps the units honest. It is identity on
+  // the long pools and 1e10 on `WBTC-Short`.
+  const rawDebts = (targetDebt * debtScalingFactor) / WAD;
+
+  if (rawColls <= 0n) {
+    return { checked: false };
+  }
+
+  const projectedRatio = (rawDebts * WAD * WAD) / (rawColls * anchorPrice);
+  if (projectedRatio > maxRatio) {
+    return {
+      checked: true,
+      blocker: {
+        code: 'debt-ratio',
+        detail:
+          `the open would land at a debt ratio of ${projectedRatio} ` +
+          `(${(Number(projectedRatio) / 1e16).toFixed(
+            2,
+          )}%), above the pool's ` +
+          `maximum of ${maxRatio} ` +
+          `(${(Number(maxRatio) / 1e16).toFixed(2)}%). f(x) refuses it. ` +
+          `Borrow less against this collateral, or supply more collateral. ` +
+          `Priced at ${anchorPrice} per collateral unit from the pool's own ` +
+          `oracle — the same anchor price f(x) uses, so this is the figure the ` +
+          `protocol will apply, not an approximation of it.`,
+      },
+    };
+  }
+
+  return { checked: true };
 }
