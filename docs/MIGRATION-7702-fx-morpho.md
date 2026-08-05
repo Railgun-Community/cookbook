@@ -225,14 +225,18 @@ outright; the third is narrowed and named.
   something else in the same batch — the trailing revoke still runs when the
   wrapped steps fail, precisely because continue-semantics do not skip it. Use the
   bare step only when the grant is meant to outlive the batch.
-- **`FxMintOpenPositionStep` — narrowed, not closed.** It declares
+- **`FxMintOpenPositionStep` — a privacy cost, not a loss.** It declares
   `predictedPositionId` in `outputNFTs` unconditionally, so a failed `operate()`
   leaves an ERC-721 shield request for a token never minted; `RelayAdapt7702.shield`
   approves every NFT request **before any ERC-20 work**, that reverts, and the
-  whole shield goes with it. Same shape when the predicted id races. This cannot
-  be fixed from the cookbook: the shield request list is fixed when the proof is
-  built, so it cannot depend on what `operate()` did. Closing it needs the
-  relay-adapt contract to tolerate an unapprovable NFT request. Until then, run
+  whole shield goes with it. Same shape when the predicted id races.
+  The collateral is then public at the ephemeral account — and recoverable, since
+  the wallet holds that key. Budget for a follow-up sweep and a permanent link
+  between the unshield and that address; nothing is stranded and nothing is lost.
+  It cannot be removed from the cookbook side (the shield request list is fixed
+  when the proof is built, so it cannot depend on what `operate()` did); a
+  relay-adapt change that skipped an unapprovable NFT request would remove it, but
+  nothing waits on that. Meanwhile run
   `preflightFxOpen` immediately before building and pass its id straight through
   — it reports the gate, the pool's debt capacity and a stale id, and names what
   it does not check (`resulting-debt-ratio`, `operate-simulation`,
@@ -326,9 +330,14 @@ the Blue lend side was unreachable.
   `CallError` and fails identically at 60M gas, so it is not a gas problem —
   suspected to be a 0x quote fetched at mainnet head and executed against a
   pinned fork.
-- **The f(x) open stranding case is narrowed, not closed**, and closing it needs
-  a contract change rather than a cookbook one — see §4. Run `preflightFxOpen`
-  immediately before building and pass its id straight through.
+- **A failed f(x) open leaves the collateral public at the ephemeral account**,
+  because the epilogue's NFT approve reverts and takes the whole shield with it.
+  This is a privacy and convenience cost, NOT a loss and NOT a blocker: the
+  wallet holds the ephemeral key, so the collateral is swept in a follow-up
+  transaction. What is spent is the linkage between the unshield and that
+  address, one extra transaction, and the gas. `preflightFxOpen` makes it rarer;
+  a relay-adapt change that skipped an unapprovable NFT request instead of
+  reverting would remove it entirely, but nothing waits on that.
 - **`preflightFxOpen` does not check the resulting debt ratio.** That needs a
   collateral price, and f(x) exposes the ratio only for a position that already
   exists. An open landing above the rebalance threshold still passes preflight.

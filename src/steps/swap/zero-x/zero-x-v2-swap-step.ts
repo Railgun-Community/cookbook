@@ -9,6 +9,11 @@ import {
 } from '../../../models/export-models';
 import { compareERC20Info, isApprovedForSpender } from '../../../utils/token';
 import { Step } from '../../step';
+import {
+  ZERO_X_V2_EXCHANGE_LABEL,
+  ZERO_X_V2_SWAP_DESCRIPTION,
+  ZERO_X_V2_SWAP_STEP_NAME,
+} from '../../../api/swap/zero-x-v2-swap-provider';
 
 /**
  * **Failure semantics (7702).** Benign. The sell token is untouched at the
@@ -19,9 +24,12 @@ import { Step } from '../../step';
  * `quote.spender`. See `steps/failure-modes.ts`.
  */
 export class ZeroXV2SwapStep extends Step {
+  // Taken from the provider rather than repeated. `SwapRecipe`'s output
+  // introspection locates the swap step by matching this name, so the two
+  // drifting apart breaks quote read-back silently rather than loudly.
   readonly config: StepConfig = {
-    name: '0x V2 Exchange Swap',
-    description: 'Swaps two ERC20 tokens using 0x V2 Exchange DEX Aggregator.',
+    name: ZERO_X_V2_SWAP_STEP_NAME,
+    description: ZERO_X_V2_SWAP_DESCRIPTION,
     hasNonDeterministicOutput: true,
   };
 
@@ -59,7 +67,7 @@ export class ZeroXV2SwapStep extends Step {
     const sellERC20AmountRecipient: RecipeERC20AmountRecipient = {
       ...this.sellERC20Info,
       amount: erc20AmountForStep.expectedBalance,
-      recipient: '0x V2 Exchange',
+      recipient: ZERO_X_V2_EXCHANGE_LABEL,
     };
     const outputBuyERC20Amount: StepOutputERC20Amount = {
       tokenAddress: buyERC20Amount.tokenAddress,

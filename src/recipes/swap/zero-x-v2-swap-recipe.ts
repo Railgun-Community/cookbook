@@ -25,15 +25,22 @@ import {
   ZeroXV2SwapStep,
 } from '../../steps';
 import { DesignateShieldERC20RecipientStep } from '../../steps/railgun/designate-shield-erc20-recipient-step';
-import { 
-  ZeroXV2Quote } from '../../api/zero-x-v2';
+import { ZeroXV2Quote } from '../../api/zero-x-v2';
+import {
+  ZERO_X_V2_SWAP_PROVIDER,
+  ZERO_X_V2_SWAP_DESCRIPTION,
+  ZERO_X_V2_SWAP_STEP_NAME,
+} from '../../api/swap/zero-x-v2-swap-provider';
+import type { SwapProvider } from '../../api/swap/swap-provider';
 
 export class ZeroXV2SwapRecipe extends SwapRecipe {
   readonly config: RecipeConfig = {
-    name: '0x V2 Exchange Swap',
-    description: 'Swaps two ERC20 tokens using 0x V2 Exchange DEX Aggregator.',
+    name: ZERO_X_V2_SWAP_STEP_NAME,
+    description: ZERO_X_V2_SWAP_DESCRIPTION,
     minGasLimit: MIN_GAS_LIMIT_0X_SWAP,
   };
+
+  protected readonly swapProvider: SwapProvider = ZERO_X_V2_SWAP_PROVIDER;
 
   protected readonly sellERC20Info: RecipeERC20Info;
   protected readonly buyERC20Info: RecipeERC20Info;

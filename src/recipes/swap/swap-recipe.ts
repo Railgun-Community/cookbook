@@ -10,9 +10,20 @@ import {
 import { compareERC20Info, isPrefixedRailgunAddress } from '../../utils';
 import { Recipe } from '../recipe';
 import { CookbookDebug } from '../../utils/cookbook-debug';
+import type { SwapProvider } from '../../api/swap/swap-provider';
 
 export abstract class SwapRecipe extends Recipe {
   protected quote: Optional<SwapQuoteData>;
+
+  /**
+   * The aggregator this recipe swaps through, when it has one.
+   *
+   * Optional so existing subclasses that predate the seam keep working: absent,
+   * output introspection accepts whatever the swap step called itself, which is
+   * the behaviour before this field existed. A subclass that sets it gets the
+   * name checked instead.
+   */
+  protected readonly swapProvider?: SwapProvider;
 
   protected abstract readonly sellERC20Info: RecipeERC20Info;
   protected abstract readonly buyERC20Info: RecipeERC20Info;
@@ -57,8 +68,15 @@ export abstract class SwapRecipe extends Recipe {
       }
 
       const swapStepOutput = recipeOutput.stepOutputs[2];
-      if (swapStepOutput.name !== '0x V2 Exchange Swap') {
-        throw new Error('Expected step output 3 to be 0x V2 Exchange Swap.');
+      // Match against the provider's declared name rather than a literal. A
+      // second aggregator's recipe reports its own name here, and hardcoding
+      // 0x's would make this throw for every provider except one — the exact
+      // coupling that made "add another aggregator" look structural.
+      const expectedSwapStepName = this.swapProvider?.name ?? swapStepOutput.name;
+      if (swapStepOutput.name !== expectedSwapStepName) {
+        throw new Error(
+          `Expected step output 3 to be ${expectedSwapStepName}.`,
+        );
       }
 
       let buyOutput: Optional<StepOutputERC20Amount>;

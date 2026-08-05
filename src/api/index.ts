@@ -4,3 +4,4 @@ export * from './beefy';
 export * from './borrow';
 export * from './vault/morpho';
 export * from './morpho';
+export * from './swap';
