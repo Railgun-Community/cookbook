@@ -260,8 +260,12 @@ batch and **cannot protect the shield epilogue specifically**.
 | Preflight an f(x) open before building it | `preflightFxOpen` / `assertFxOpenViable` |
 | Preflight f(x)'s `onlyTopLevelCall` whitelist | in the f(x) API |
 | Shield-args adapter (previously duplicated in two test files) | root barrel |
+| Close an f(x) position holding none of the debt token | `ZeroXSwap_FxMintClose_ComboMeal` + `quoteFxSwapClose` |
+| Repay f(x) debt holding none of the debt token | `ZeroXSwap_FxMintRepay_ComboMeal` + `quoteFxSwapRepay` |
+| Lend into a Blue market, and exit a lend position | `MorphoBlueSupplyLoanRecipe` / `MorphoBlueWithdrawLoanRecipe` |
+| Enumerate Blue markets with no prior knowledge of an id | `scanMorphoBlueMarkets` + `filterMorphoBlueMarkets` |
 
-Two of these are worth adopting deliberately rather than eventually:
+Four of these are worth adopting deliberately rather than eventually:
 
 **Rediscovery is load-bearing for f(x), not a convenience.** f(x) pools are not
 `ERC721Enumerable`, so `balanceOf` says you hold three positions and nothing on
@@ -270,6 +274,28 @@ chain says *which*. Logs are the only enumeration path. Note also that
 does **not** burn on close (a closed position is a live NFT holding nothing), and
 a correctly shielded position looks like absence to a "tokens you hold" reader —
 the relay adapter owns it. `custodyStatus` classifies rather than filters.
+
+**Size a swap-then-close or swap-then-repay against the GUARANTEED fill.** 0x V2
+quotes here are sell-amount only — `BaseAPIParamsV2` has no `buyAmount` — so no
+quote can promise an exact output, while `operate()` is built with an exact
+`repayAmount`. Sizing against the expected fill leaves the close short whenever
+the fill is merely average, which is most of the time. `quoteFxSwapClose` and
+`quoteFxSwapRepay` exist so you do not have to get this right by hand; both pass
+`railgunUnshieldFeeBps: 0n` deliberately, because the unshield fee was already
+charged on the *sell* token and the debt token never passes through an unshield.
+An oversized build fails at build time rather than mining a no-op.
+
+**On the Blue lend side, free liquidity — not health — is what refuses a
+withdrawal.** Lent assets are out on loan, so Blue reverts
+`InsufficientLiquidity` when `totalSupplyAssets - totalBorrowAssets` falls below
+the withdrawal, and a fully utilized market locks lenders out however healthy
+their position. Collateral has no equivalent constraint. Two consequences worth
+carrying into a UI: a full exit must be denominated in **shares**, since interest
+accrues between building and inclusion and an assets-denominated "withdraw
+everything" leaves a residue; and market discovery flags **idle** markets, of
+which mainnet has 51 fully idle and 73 with a zero IRM — a zero-IRM market
+accrues nothing, so a lender routed there earns zero forever while the market
+looks entirely normal.
 
 **Gated vaults have four gates, not two.** Vaults V2 checks
 `canReceiveShares`/`canSendAssets` on enter, `canSendShares`/`canReceiveAssets`
@@ -292,12 +318,22 @@ and rediscovery are the groundwork those need, so the deferral costs nothing.
 
 ## 7. Known gaps
 
-- **fx swap-then-close does not exist.** A debt can only be repaid in the debt
-  token, so a holder of anything else cannot close — and closing a **short**
-  needs wstETH or WBTC in hand. This is the one gap that blocks a user action
-  outright.
-- **Blue has no supply-loan-asset step**, so the lend side is unreachable.
+Nothing here blocks a user action outright. The two that did are closed:
+f(x) could not be closed or repaid without already holding the debt token, and
+the Blue lend side was unreachable.
+
 - **The fx-open combo floor is unmeasured.** It mines with a swallowed
   `CallError` and fails identically at 60M gas, so it is not a gas problem —
   suspected to be a 0x quote fetched at mainnet head and executed against a
   pinned fork.
+- **The f(x) open stranding case is narrowed, not closed**, and closing it needs
+  a contract change rather than a cookbook one — see §4. Run `preflightFxOpen`
+  immediately before building and pass its id straight through.
+- **`preflightFxOpen` does not check the resulting debt ratio.** That needs a
+  collateral price, and f(x) exposes the ratio only for a position that already
+  exists. An open landing above the rebalance threshold still passes preflight.
+- **Market discovery cannot be server-filtered.** `CreateMarket` indexes only
+  `id`, so finding "every USDC market" means fetching all ~1,700 logs and
+  filtering locally. Cache the scan; markets are append-only, so a later pass
+  need only cover `[lastToBlock + 1, head]`. Note many public RPC endpoints
+  refuse `eth_getLogs` outright.
