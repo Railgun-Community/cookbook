@@ -101,17 +101,88 @@ const MARKET_ID =
 const SUPPLY_COLLATERAL = 50_000_000_000_000_000n;
 const BORROW_ASSETS = 50_000_000n; // 6dp USDC
 
-/** Partial repay for the repay-only leg. */
-const REPAY_UNSHIELD = 20_000_000n;
+/**
+ * MORE than the ~50 USDC the fixture borrowed, and that excess is load-bearing.
+ *
+ * The bisection's success oracle is a SHIELD EVENT — the only observable that
+ * distinguishes a batch that worked from one that merely mined, given
+ * `requireSuccess = false`. A repay sized at or below the debt consumes its
+ * entire input and outputs nothing, so there is nothing to shield and the oracle
+ * can never fire: the first attempt reported "MINED BUT NO SHIELD EVENT" even at
+ * the 5M ceiling, which reads like a broken recipe and is not.
+ *
+ * `getRepayQuote` caps `repayAssets` at the owed debt and the approve step is
+ * given exactly that, so the surplus falls out as change and shields back.
+ */
+const REPAY_UNSHIELD = 70_000_000n;
 /** Collateral withdrawn on the repay+withdraw leg. */
 const WITHDRAW_COLLATERAL = 10_000_000_000_000_000n;
 /** Lend-side leg: supply loan asset. */
 const SUPPLY_LOAN = 25_000_000n;
 
+/**
+ * An inert second token on the supply-loan leg, purely so the shield epilogue
+ * has something to emit.
+ *
+ * Unlike repay, `MorphoBlueSupplyLoanRecipe` supplies the WHOLE loan-token input
+ * with no cap, so no amount of over-supplying produces change. A token the
+ * recipe does not touch passes through as an unused amount and is shielded,
+ * which gives the oracle its event without altering what is being measured — the
+ * pass-through costs one extra shield entry, so the figure is a slight
+ * over-estimate of a bare supply. Stated rather than hidden.
+ */
+const SUPPLY_LOAN_PASSTHROUGH = 1_000_000_000_000_000n; // 0.001 wstETH
+
 // Same window as the fx position file. A FAILING probe burns real EVM gas up to
 // the ceiling, so a needlessly high `hi` makes every failed probe slow.
 const BISECT_LO = 1_000_000n;
+// NOTE: 5_000_000 is demonstrably too low for the repay legs. See the block
+// comment below.
 const BISECT_HI = 5_000_000n;
+
+/**
+ * ## Status: supply+borrow measured; the repay legs are NOT
+ *
+ * `blue supply collateral + borrow` measured cleanly (cost 2_093_750, overhead
+ * 93_750, K 2_000_000) and its constant is updated. The other three legs did
+ * not, and the reasons are worth writing down because two of them cost a run
+ * each and neither is a code defect.
+ *
+ * **1. The oracle needs something to shield.** The bisection's success signal is
+ * a shield EVENT, because `requireSuccess = false` makes "the transaction mined"
+ * worthless. A leg that consumes its whole input and outputs nothing therefore
+ * can never signal success: the first repay attempt reported "MINED BUT NO
+ * SHIELD EVENT" at every gas limit including the ceiling, which reads like a
+ * broken recipe and is not. Fixed by unshielding MORE than the debt (the quote
+ * caps the repay at what is owed, so the surplus falls out as change) and, for
+ * supply-loan, by adding an inert pass-through token. Both are in the constants
+ * above.
+ *
+ * **2. `blue repay` then converged ON the ceiling** — floor reported as
+ * 5_000_000 with the highest failing probe at 4_984_375. That is the harness
+ * saying "at or above `hi`", not a measurement, and it cannot be right in the
+ * obvious reading: repay is one approve plus one Blue call and supply+borrow,
+ * which does strictly more, measured 2_093_750.
+ *
+ * Every sub-ceiling probe failed with a relay-adapt subcall revert whose decoded
+ * text is mojibake (`NH{q`, which is the `Panic(uint256)` selector 0x4e487b71
+ * read as UTF-8). So the reported reason may be mis-decoded returndata rather
+ * than a genuine arithmetic panic, and the two possibilities imply opposite
+ * fixes:
+ *   - a real panic => an over-repay rounding underflow, the mirror of the
+ *     one-unit borrow de-rate already measured for the ceiling in
+ *     `combo-meals/morpho/util.ts`. Fix is to repay `owed - 1`.
+ *   - mis-decoded OOG => `hi` is simply too low. Fix is to raise it.
+ *
+ * Distinguishing them needs the raw revert bytes rather than the UTF-8 attempt.
+ * Do that before touching either constant — guessing has a 50% chance of moving
+ * the number in the wrong direction, and a floor that is too LOW silently
+ * removes the protection it exists to provide.
+ *
+ * `blue repay + withdraw collateral` failed the same way at the ceiling, and
+ * `supply loan` never ran. MIN_GAS_LIMIT_MORPHO_BLUE_REPAY,
+ * _REPAY_WITHDRAW and _BORROW therefore remain inherited guesses.
+ */
 const BISECT_TOLERANCE = 25_000n;
 
 /** Forced above every plausible Blue floor, so the require binds, not the work. */
@@ -357,6 +428,12 @@ const buildSupplyLoan = async () => {
         decimals: 6n,
         isBaseToken: false,
         amount: SUPPLY_LOAN,
+      },
+      {
+        tokenAddress: market.collateralToken,
+        decimals: 18n,
+        isBaseToken: false,
+        amount: SUPPLY_LOAN_PASSTHROUGH,
       },
     ],
     nfts: [],
