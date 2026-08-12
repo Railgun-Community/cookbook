@@ -43,9 +43,28 @@ export const MIN_GAS_LIMIT_METAMORPHO_WITHDRAW: bigint = 2_800_000n;
 // mint and no position token to shield, where fx open mints an ERC-721 and
 // shields it.
 export const MIN_GAS_LIMIT_MORPHO_BLUE_SUPPLY_BORROW: bigint = 2_000_000n;
-export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW: bigint = 3_000_000n;
+// MEASURED 2026-08-06, same fixture and derivation as SUPPLY_BORROW above. The
+// pre-check overhead is the 93_750 measured on that leg — Blue's legs carry
+// comparable calldata, and it is the only Blue overhead measured. Re-measure per
+// leg to tighten.
+//
+//   repay + withdraw   cost 2_234_375 (max failing 2_218_750)  K 2_140_625
+//   repay              cost 1_984_375 (max failing 1_968_750)  K 1_890_625
+//
+// The ordering is the sanity check: repay < supply+borrow (2_093_750) <
+// repay+withdraw, which is what the call counts predict.
+export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY_WITHDRAW: bigint = 2_150_000n;
+// STILL UNMEASURED — no fixture leg exercises a bare borrow against an existing
+// position. It does strictly less than supply+borrow (measured cost 2_093_750),
+// so this 2_700_000 is over-provisioned by roughly the same margin the others
+// were. Left high rather than guessed downward.
 export const MIN_GAS_LIMIT_MORPHO_BLUE_BORROW: bigint = 2_700_000n;
-export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY: bigint = 2_700_000n;
+// Also covers the lend side (`MorphoBlueSupplyLoanRecipe`), which reuses this
+// constant. That leg did not measure — the third bisection in a process wedges,
+// the poller-resume symptom documented in the fx position file — but it is one
+// approve plus one Blue call, the same shape as repay and strictly simpler than
+// repay+withdraw, so a floor sized on repay covers it.
+export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY: bigint = 1_900_000n;
 export const MIN_GAS_LIMIT_MORPHO_TRANSACT: bigint = 3_100_000n;
 // f(x) Protocol (fxMINT), long and short pools.
 //
