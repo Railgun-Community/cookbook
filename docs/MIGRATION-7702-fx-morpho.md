@@ -158,7 +158,83 @@ position on seeing `spentNFTs`, or a reader that treats a surviving NFT as a
 failed close — invert it. A closed position is a live NFT reading `(0, 0)`; the
 `outputPositions` records, not the NFT, are what describe the retirement.
 
-### 3.3 A combo's gas floor is now its dearest constituent recipe
+### 3.3 A full f(x) close encodes f(x)'s sentinel, not the computed amounts
+
+`FxMintClosePositionStep` now passes `type(int256).min` on **both** legs of
+`operate()` when `partialClose === false`. A partial close is unchanged.
+
+You need no code change, but you should know why, because it moves where a
+close can fail. f(x) stores a position in shares and `_operate` converts an
+explicit amount back rounding **up**, so a figure read from `getPosition()`
+overshoots the position by one share whenever the index is not the identity.
+Measured at head against live positions:
+
+| pool | explicit amounts | sentinel |
+| --- | --- | --- |
+| `wstETH-Long` #1983 | `ErrorWithdrawExceedSupply()` | ok |
+| `WBTC-Long` #901 | `ErrorWithdrawExceedSupply()` | ok |
+| `stETH-Short` #167 | ok | ok |
+| `WBTC-Short` #94 | `Panic(0x11)` | ok |
+
+`WBTC-Short` is the one to hold on to: it passed the explicit encoding on
+2026-08-12 and panics on it now, against the *same* position. Whether an
+explicit amount lands is a property of the collateral and debt indices at mine
+time, not of the pool or the side. So this is unconditional, and narrowing it
+to "longs only" on the strength of a green run would regress.
+
+**One consequence for amount accounting.** On a full close the pool now decides
+the withdrawal, from `positionColl` and the index at mine time, so the step's
+declared collateral output is an estimate rather than a guarantee. It is still
+declared deterministic (`min == expected`) on purpose — widening it would fail
+the non-deterministic-input gate and take the swap-back combos with it. A
+surplus reshields, because relay shields sweep `balanceOf`; a shortfall fails
+the downstream swap's `transferFrom` and, under continue-semantics, still
+reaches the shield and returns the collateral whole.
+
+### 3.4 A full f(x) repay is not expressible, and never was
+
+`FxMintRepayDebtRecipe` leaves the collateral in place, so f(x)'s final check —
+`rawDebts x P x P < minDebtRatio x rawColls x price` — bounds how far the debt
+can fall. A repay that clears the whole debt reverts `ErrorDebtRatioTooSmall()`
+on every pool. This is not new behaviour; it is newly *visible*, and previously
+such a batch mined with the repay swallowed by `requireSuccess = false`.
+
+The headroom is not a rounding detail. Measured at head:
+
+| pool | `minDebtRatio` | largest accepted repay |
+| --- | --- | --- |
+| `wstETH-Long` | 0.0001e18 | 99.97% of debt |
+| `stETH-Short` | 0.0909e18 | **89.16%** of debt |
+
+A 99% repay is fine on a long and reverts on a short.
+
+**What to do.** Read `getFxRepayCeiling(positionId, pool, provider)` and pass
+its `minRemainingDebt` into `computeFxRepay` (and into `quoteFxSwapRepay`,
+which now accepts it). `computeFxRepay` then caps the repay and sets
+`boundByMinDebtRatio` so you can tell "the protocol refused" from "you could
+not afford more" — different messages, different next actions. It throws when
+the floor is at or above the whole debt, rather than building a batch that
+cannot succeed.
+
+To clear a debt **completely**, close the position instead. A close takes both
+legs to zero in the same call, so the ratio check reads `0 < minDebtRatio x 0 x
+price` and does not bind.
+
+### 3.5 `getFxDebtScalingFactor` no longer throws on a long pool
+
+It threw on both long pools, because a long owes fxUSD and the manager holds no
+`tokenRates` entry for a token that is not rate-bearing. It now returns
+`FX_SCALE_PRECISION`, the identity — which is what scaling a natively
+denominated figure means, and what `getFxPosition` already relied on.
+
+A **short** with no entry still throws. There the debt is the rate-bearing
+asset, and reading a missing entry as identity would understate a `WBTC-Short`
+debt by 10^10 silently, in the direction that under-repays.
+
+If you wrapped this call in a try/catch to work around the long-side throw, the
+catch is now dead on that path.
+
+### 3.6 A combo's gas floor is now its dearest constituent recipe
 
 Five of seven shipped combos declared a floor *below* their own worst leg, all
 taking the generic `MIN_GAS_LIMIT_COMBO_MEAL` while wrapping recipes sized
@@ -166,7 +242,7 @@ higher. The floor is enforced in-contract as a `gasleft()` require. A combo's ow
 config still wins when it is the larger number; this can only raise a floor,
 never lower one.
 
-### 3.4 Two gas-floor constants moved, from measurement
+### 3.7 Two gas-floor constants moved, from measurement
 
 | constant | was | now |
 |---|---|---|
@@ -268,6 +344,9 @@ batch and **cannot protect the shield epilogue specifically**.
 | Repay f(x) debt holding none of the debt token | `ZeroXSwap_FxMintRepay_ComboMeal` + `quoteFxSwapRepay` |
 | Lend into a Blue market, and exit a lend position | `MorphoBlueSupplyLoanRecipe` / `MorphoBlueWithdrawLoanRecipe` |
 | Enumerate Blue markets with no prior knowledge of an id | `scanMorphoBlueMarkets` + `filterMorphoBlueMarkets` |
+| The largest f(x) repay a position can actually take | `getFxRepayCeiling` |
+| The debt a position must retain, as pure math | `fxMinRemainingDebt` |
+| Replay a full close against mainnet, no funds, no keys | `RUN_MAINNET_SIM=1 npm test` |
 
 Four of these are worth adopting deliberately rather than eventually:
 
