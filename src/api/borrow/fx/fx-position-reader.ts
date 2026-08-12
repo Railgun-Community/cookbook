@@ -8,8 +8,12 @@ import {
   FX_RATE_PROVIDER_ABI,
   FX_SMART_WALLET_CHECKER_ABI,
   FX_TOP_LEVEL_CALL_ABI,
+  FX_POOL_RATIO_ABI,
+  FX_PRICE_ORACLE_ABI,
+  FX_SCALE_PRECISION,
   DEFAULT_FXMINT_OPERATOR,
   fxComposeScalingFactor,
+  fxMinRemainingDebt,
   fxScaleDownRawDebt,
   resolvePool,
   type Address,
@@ -430,9 +434,14 @@ export type FxPool = {
  * Read a short pool's debt-token scaling factor from its manager, composing it
  * the same way `_getTokenScalingFactor` does.
  *
- * Two on-chain reads (one, when no rate provider is set). Only meaningful for
- * short pools: on a long pool the debt is fxUSD and the manager reports debt
- * figures already in native units.
+ * Two on-chain reads (one, when no rate provider is set).
+ *
+ * Defined on BOTH sides, but only interesting on a short. A long pool's debt is
+ * fxUSD, which is not rate-bearing, so its manager holds no `tokenRates` entry
+ * and this returns {@link FX_SCALE_PRECISION} — the identity, which is what
+ * scaling a natively-denominated figure means. A short with no entry still
+ * throws, because there the debt IS the rate-bearing asset and identity would
+ * be a silent 10^10 understatement on WBTC-Short.
  */
 export async function getFxDebtScalingFactor(
   poolRef: FxMintPoolRef,
@@ -450,6 +459,19 @@ export async function getFxDebtScalingFactor(
   const [scalar, rateProvider] = rate;
 
   if (scalar === 0n) {
+    // No `tokenRates` entry. On a LONG that is the ordinary case, not an
+    // error: the debt is fxUSD, which is not rate-bearing, so the manager holds
+    // no rate for it and reports debt figures already in native units —
+    // `getPosition()[1]` comes back with `rawDebts === debt`. Identity is the
+    // correct factor and is what the rest of the reader already assumes on that
+    // side; throwing here made an exported helper unusable on half the pools it
+    // ships descriptors for.
+    if (resolved.side === 'long') {
+      return FX_SCALE_PRECISION;
+    }
+    // On a SHORT the debt IS the rate-bearing asset, so a missing entry is
+    // genuinely uncomputable — reading identity there would understate a
+    // WBTC-Short debt by 10^10. Keep failing loudly.
     throw new Error(
       `fxmint: manager ${resolved.poolManager} has no tokenRates entry for debt token ${resolved.debtToken} — cannot scale raw debt`,
     );
@@ -832,5 +854,116 @@ export async function getFxPosition(
     debtDecimals: resolved.debtDecimals,
     side: resolved.side,
     debtRatio,
+  };
+}
+
+/**
+ * What {@link getFxRepayCeiling} answers: how much of a position's debt f(x)
+ * will actually let a collateral-preserving repay clear.
+ */
+export type FxRepayCeiling = {
+  /** The position's debt, native units — the same figure `getFxPosition` reports. */
+  debt: bigint;
+  /**
+   * Debt the position must RETAIN, native units. Zero only when the position
+   * holds no collateral.
+   */
+  minRemainingDebt: bigint;
+  /**
+   * `debt - minRemainingDebt`. The largest repay `operate()` accepts while
+   * leaving the collateral in place. Feed it to `computeFxRepay`'s
+   * `minRemainingDebt`, or compare against a desired amount directly.
+   */
+  maxRepayAmount: bigint;
+  /**
+   * `maxRepayAmount / debt`, 1e18-scaled, for display. Measured at head:
+   * ~0.9997e18 on `wstETH-Long`, ~0.8916e18 on `stETH-Short`.
+   */
+  maxRepayFraction: bigint;
+};
+
+/**
+ * Read the largest debt repayment a position can take without withdrawing
+ * collateral.
+ *
+ * f(x) refuses to leave a collateral-bearing position below `minDebtRatio`, so
+ * "repay everything" is not expressible as a repay — it reverts
+ * `ErrorDebtRatioTooSmall()` (`0xe91ee887`), and under a relay-adapt batch's
+ * `requireSuccess = false` that revert is swallowed: the batch mines, the debt
+ * is untouched, and the user is told the batch did not complete.
+ *
+ * Measured at head against live positions:
+ *
+ * | pool          | minDebtRatio | largest accepted repay |
+ * |---------------|--------------|------------------------|
+ * | `wstETH-Long` | 0.0001e18    | 99.97% of debt          |
+ * | `stETH-Short` | 0.0909e18    | **89.16%** of debt      |
+ *
+ * The shorts are the reason this is worth a read rather than a rule of thumb:
+ * a 99% repay is fine on a long and reverts on a short.
+ *
+ * To clear a debt COMPLETELY, close the position instead — a close takes both
+ * legs to zero in one call, and the ratio check reads `0 < minDebtRatio × 0 ×
+ * price`, which is false.
+ *
+ * Four reads, batched: position, ratio range, oracle address, oracle price
+ * (plus the debt scaling factor on a short).
+ */
+export async function getFxRepayCeiling(
+  positionId: bigint,
+  poolRef: FxMintPoolRef,
+  provider: Provider,
+): Promise<FxRepayCeiling> {
+  const resolved = resolvePool(poolRef);
+  const poolContract = new Contract(
+    resolved.address,
+    FX_POOL_RATIO_ABI as unknown as string[],
+    provider,
+  );
+
+  const [position, range, oracleAddress] = await Promise.all([
+    getFxPosition(positionId, poolRef, provider),
+    poolContract.getDebtRatioRange() as Promise<[bigint, bigint]>,
+    poolContract.priceOracle() as Promise<string>,
+  ]);
+
+  const oracle = new Contract(
+    oracleAddress,
+    FX_PRICE_ORACLE_ABI as unknown as string[],
+    provider,
+  );
+  // Index 1, the MIN price. `BasePool._operate` reads `(, op.price, )` and the
+  // ratio check this bounds is the one inside that function — the anchor at
+  // index 0 is a different number and would put the ceiling on the wrong side
+  // of the boundary.
+  const [, minPrice] = (await oracle.getPrice()) as [bigint, bigint, bigint];
+
+  // The check is in RAW debt units, so compute there and scale down after.
+  // Doing it the other way round is the same raw/native confusion that made
+  // the close boundary wrong on the shorts.
+  const rawMinRemaining = fxMinRemainingDebt({
+    rawColls: position.rawColls,
+    minDebtRatio: range[0],
+    price: minPrice,
+  });
+  const minRemainingDebt =
+    resolved.side === 'short'
+      ? fxScaleDownRawDebt(
+          rawMinRemaining,
+          await getFxDebtScalingFactor(resolved, provider),
+        )
+      : rawMinRemaining;
+
+  const maxRepayAmount =
+    minRemainingDebt >= position.debt ? 0n : position.debt - minRemainingDebt;
+
+  return {
+    debt: position.debt,
+    minRemainingDebt,
+    maxRepayAmount,
+    maxRepayFraction:
+      position.debt === 0n
+        ? 0n
+        : (maxRepayAmount * FX_SCALE_PRECISION) / position.debt,
   };
 }

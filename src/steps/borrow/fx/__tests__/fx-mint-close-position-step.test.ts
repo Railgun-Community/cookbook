@@ -1,6 +1,12 @@
 import chai from 'chai';
+import { Interface } from 'ethers';
 import { FxMintClosePositionStep } from '../fx-mint-close-position-step';
-import { FX_ADDRESSES, resolvePool } from '../fx-mint-util';
+import {
+  FX_ADDRESSES,
+  FX_OPERATE_FULL_SENTINEL,
+  FX_POOL_MANAGER_ABI,
+  resolvePool,
+} from '../fx-mint-util';
 import { NetworkName, NFTTokenType } from '@railgun-community/shared-models';
 import type { StepInput } from '../../../../models/export-models';
 
@@ -272,6 +278,116 @@ describe('FxMintClosePositionStep', () => {
         throw new Error('expected an fxUSD collateral output');
       }
       expect(collOut.expectedBalance).to.equal(shortWithdrawGross);
+    });
+  });
+
+  // The `operate()` ARGUMENTS, decoded. Nothing in this file asserted them
+  // before, which is how a full close shipped encoding amounts the pool
+  // rejects: every existing test checked the output declarations and the call
+  // TARGET, and the calldata itself went unread.
+  //
+  // Reproduced on mainnet at head via state-overridden eth_call, full close
+  // against live positions:
+  //
+  //   wstETH-Long #1983  explicit -> ErrorWithdrawExceedSupply()  sentinel -> ok
+  //   WBTC-Long   #901   explicit -> ErrorWithdrawExceedSupply()  sentinel -> ok
+  //   stETH-Short #167   explicit -> ok                           sentinel -> ok
+  //   WBTC-Short  #94    explicit -> Panic(0x11)                  sentinel -> ok
+  //
+  // WBTC-Short is the one to keep in mind before ever narrowing this to
+  // `side === 'long'`: the same position passed the explicit encoding on
+  // 2026-08-12 and panics on it now. Whether an explicit amount lands is a
+  // property of the index at mine time, not of the pool.
+  describe('operate() encoding', () => {
+    const decodeOperate = (callData: string) =>
+      new Interface(FX_POOL_MANAGER_ABI).decodeFunctionData(
+        'operate',
+        callData,
+      );
+
+    it('a PARTIAL close encodes the computed amounts, negated', async () => {
+      const pool = resolvePool('WBTC-Long');
+      const step = new FxMintClosePositionStep({
+        pool,
+        positionId,
+        repayAmount,
+        withdrawColl,
+        withdrawFeeRatio: 0n,
+        partialClose: true,
+      });
+
+      const output = await step.getValidStepOutput(makeStepInput(pool.address));
+      const [poolArg, idArg, collArg, debtArg] = decodeOperate(
+        output.crossContractCalls[0].data as string,
+      );
+
+      expect((poolArg as string).toLowerCase()).to.equal(
+        pool.address.toLowerCase(),
+      );
+      expect(idArg).to.equal(positionId);
+      expect(collArg).to.equal(-withdrawColl);
+      expect(debtArg).to.equal(-repayAmount);
+    });
+
+    it('a FULL close encodes the sentinel on BOTH legs', async () => {
+      const pool = resolvePool('WBTC-Long');
+      const step = new FxMintClosePositionStep({
+        pool,
+        positionId,
+        repayAmount,
+        withdrawColl,
+        withdrawFeeRatio: 0n,
+        partialClose: false,
+      });
+
+      const output = await step.getValidStepOutput(makeStepInput(pool.address));
+      const [, , collArg, debtArg] = decodeOperate(
+        output.crossContractCalls[0].data as string,
+      );
+
+      // Both, not just the collateral leg. An explicit debt amount is converted
+      // back to shares rounding UP and underflows `positionDebt -= shares`,
+      // which is an unguarded subtraction — Panic(0x11), measured on
+      // WBTC-Short.
+      expect(collArg).to.equal(FX_OPERATE_FULL_SENTINEL);
+      expect(debtArg).to.equal(FX_OPERATE_FULL_SENTINEL);
+    });
+
+    it('the sentinel is exactly type(int256).min', () => {
+      // Not "a very negative number". BasePool compares for EQUALITY with
+      // type(int256).min; anything else takes the partial branch and reverts.
+      expect(FX_OPERATE_FULL_SENTINEL).to.equal(-(2n ** 255n));
+      expect(FX_OPERATE_FULL_SENTINEL).to.equal(
+        BigInt(
+          '-57896044618658097711785492504343953926634992332820282019728792003956564819968',
+        ),
+      );
+    });
+
+    it('a FULL close still declares the computed collateral as its output', async () => {
+      // The sentinel changes the CALLDATA only. The declaration stays as
+      // computed, because the batch's amount accounting and the downstream
+      // swap's non-deterministic-input gate are both built on it.
+      const pool = resolvePool('WBTC-Long');
+      const step = new FxMintClosePositionStep({
+        pool,
+        positionId,
+        repayAmount,
+        withdrawColl,
+        withdrawFeeRatio: 0n,
+        partialClose: false,
+      });
+
+      const output = await step.getValidStepOutput(makeStepInput(pool.address));
+      const collOut = output.outputERC20Amounts.find(
+        o =>
+          o.tokenAddress.toLowerCase() === pool.collateralToken.toLowerCase(),
+      );
+      if (!collOut) {
+        throw new Error('expected a WBTC collateral output');
+      }
+      expect(collOut.expectedBalance).to.equal(withdrawColl);
+      expect(collOut.minBalance).to.equal(withdrawColl);
     });
   });
 });

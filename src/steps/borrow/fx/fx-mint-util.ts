@@ -515,6 +515,74 @@ export const FX_RATE_PROVIDER_ABI = [
 export const FX_SCALE_PRECISION = 10n ** 18n;
 
 /**
+ * The pool reads behind every debt-ratio check.
+ *
+ * `getDebtRatioRange()` returns `(min, max)`, 1e18-scaled. The max is the
+ * ceiling an OPEN must sit under (0.8666e18 on `wstETH-Long`); the min is the
+ * floor a REPAY must stay above (0.0001e18 long, 0.0909e18 short — two orders
+ * of magnitude apart, so a repay ceiling derived from one side is badly wrong
+ * on the other).
+ */
+export const FX_POOL_RATIO_ABI = [
+  'function getDebtRatioRange() view returns (uint256 minRatio, uint256 maxRatio)',
+  'function priceOracle() view returns (address)',
+] as const;
+
+/**
+ * `getPrice()` returns `(anchor, min, max)`. Which one to use is per call site
+ * and the contract comments say so explicitly: `_operate` takes the **min**
+ * (index 1), the rebalance path takes the max. They sit within ~0.1% of each
+ * other, so picking the wrong one passes every test that is not at a boundary.
+ */
+export const FX_PRICE_ORACLE_ABI = [
+  'function getPrice() view returns (uint256 anchorPrice, uint256 minPrice, uint256 maxPrice)',
+] as const;
+
+/**
+ * `type(int256).min` — f(x)'s "take ALL of it" sentinel for either leg of
+ * `operate()`. Retires the whole position leg exactly; anything else is
+ * share-rounded and can miss.
+ *
+ * `BasePool._operate` branches on this value before doing any conversion
+ * (verified against the deployed source, `contracts/core/pool/BasePool.sol`):
+ *
+ * ```solidity
+ * } else if (newRawColl < 0) {
+ *   if (newRawColl == type(int256).min) {          // max withdraw
+ *     newRawColl = -int256(_convertToRawColl(op.positionColl, ..., Rounding.Down));
+ *     op.newColl = -int256(op.positionColl);       // exact, no conversion
+ *   } else {                                       // partial withdraw
+ *     op.newColl = -int256(_convertToCollShares(uint256(-newRawColl), ..., Rounding.Up));
+ *     if (uint256(-op.newColl) > op.positionColl) revert ErrorWithdrawExceedSupply();
+ *   }
+ * ```
+ *
+ * The partial branch is why naming an explicit amount cannot express a full
+ * exit. A position is stored in SHARES; `getPosition()` reports raw token
+ * amounts converted DOWN. Converting the reported figure back UP returns
+ * `positionColl + 1` whenever the index is not the identity, which trips
+ * `ErrorWithdrawExceedSupply()` (`0x1daef163`). The debt leg has the same
+ * round-up (`Rounding.Up` at the partial-repay branch) and no guard at all, so
+ * it underflows `op.positionDebt -= shares` and reverts `Panic(0x11)` instead.
+ *
+ * Measured on mainnet at head, full close against live positions:
+ *
+ * | pool          | explicit both legs      | sentinel both legs |
+ * |---------------|-------------------------|--------------------|
+ * | `wstETH-Long` | `ErrorWithdrawExceedSupply` | ok, 550,485 gas |
+ * | `WBTC-Long`   | `ErrorWithdrawExceedSupply` | ok, 440,088 gas |
+ * | `stETH-Short` | ok                      | ok, 569,954 gas    |
+ * | `WBTC-Short`  | `Panic(0x11)`           | ok, 476,485 gas    |
+ *
+ * Note the shorts disagree with each other, and that `WBTC-Short` passed the
+ * same test on 2026-08-12 and fails it now against the SAME position — the
+ * index accrued in between. Whether an explicit amount happens to land is a
+ * property of the index at mine time, not of the pool or the side, which is why
+ * this is unconditional rather than gated on `side === 'long'`.
+ */
+export const FX_OPERATE_FULL_SENTINEL = -(2n ** 255n);
+
+/**
  * Compose a token's scaling factor exactly as the manager's
  * `_getTokenScalingFactor` does:
  *
@@ -1093,6 +1161,30 @@ export type FxRepayInputs = {
   repayFeeRatio: bigint;
   // Railgun's unshield fee in basis points (mainnet = 25).
   railgunUnshieldFeeBps: bigint;
+  /**
+   * The debt this position must RETAIN, in native `debtToken` units, so it
+   * stays above the pool's `minDebtRatio`. From
+   * {@link fxMinRemainingDebt} — or, end to end from chain state,
+   * `getFxRepayCeiling()`.
+   *
+   * Optional, and omitting it is a real risk rather than a default. f(x)'s
+   * final check in `_operate` is
+   *
+   * ```solidity
+   * if (rawDebts * PRECISION * PRECISION < minDebtRatio * rawColls * op.price)
+   *   revert ErrorDebtRatioTooSmall();
+   * ```
+   *
+   * which a repay that does not touch collateral can trip from below. Measured
+   * at head against live positions: a FULL repay reverts on every pool, and the
+   * largest accepted repay is **99.97%** of debt on `wstETH-Long` but only
+   * **89.16%** on `stETH-Short` — the shorts' `minDebtRatio` is 0.0909e18
+   * against the longs' 0.0001e18, so on a short even a 99% repay reverts.
+   *
+   * Leave it undefined only when the caller has already bounded the repay some
+   * other way. A batch that trips this mines with the repay swallowed.
+   */
+  minRemainingDebt?: bigint;
 };
 
 export type FxRepayAmounts = {
@@ -1103,8 +1195,19 @@ export type FxRepayAmounts = {
   // given the f(x) repay fee uplift on PoolManager.transferFrom.
   maxRepayUnderFee: bigint;
   // The actual debt reduction f(x)'s operate() will perform. Capped at
-  // min(maxRepayUnderFee, debt, desiredRepayAmount).
+  // min(maxRepayUnderFee, debt, desiredRepayAmount) and, when
+  // `minRemainingDebt` is supplied, at `debt - minRemainingDebt`.
   repayAmount: bigint;
+  /**
+   * True when the min-debt-ratio floor is what bound `repayAmount` — the caller
+   * could afford more and the position holds more, but f(x) will not let a
+   * collateral-bearing position go that low.
+   *
+   * Surface it. "You asked to clear the debt and we repaid 89% of it" is a
+   * result the user needs to see, and the alternative reading — that the wallet
+   * silently under-repaid — is worse.
+   */
+  boundByMinDebtRatio: boolean;
   // What PoolManager will pull from the executing account (ephemeral EOA), including the
   // f(x) repay fee uplift: repayAmount × (1e9 + repayFeeRatio) / 1e9.
   // The recipe's ApproveERC20SpenderStep needs this exact value.
@@ -1153,12 +1256,34 @@ export function computeFxRepay(input: FxRepayInputs): FxRepayAmounts {
   const maxRepayUnderFee =
     (debtTokenAfterUnshield * FEE_DENOM) / (FEE_DENOM + repayFeeRatio);
 
-  // Three-way min: fee ceiling, debt ceiling, user's intent. All three terms
-  // are native debt-token units — mixing a raw ceiling in here is what let
-  // repayAmount exceed the position's actual debt on the short pools.
+  // Four-way min: fee ceiling, debt ceiling, user's intent, and f(x)'s
+  // min-debt-ratio floor. All four terms are native debt-token units — mixing a
+  // raw ceiling in here is what let repayAmount exceed the position's actual
+  // debt on the short pools.
   let repayAmount = maxRepayUnderFee;
   if (debt < repayAmount) repayAmount = debt;
   if (desiredRepayAmount < repayAmount) repayAmount = desiredRepayAmount;
+
+  // The floor binds LAST, so `boundByMinDebtRatio` distinguishes "f(x) refused
+  // to go lower" from "you could not afford more" — different messages for the
+  // user and different next actions (close the position vs fund it).
+  let boundByMinDebtRatio = false;
+  const { minRemainingDebt } = input;
+  if (minRemainingDebt !== undefined) {
+    if (minRemainingDebt >= debt) {
+      throw new Error(
+        `fxmint: computeFxRepay — the position must retain ${minRemainingDebt} of ` +
+          `its ${debt} debt to stay above the pool's minDebtRatio, so no repay is ` +
+          'possible without withdrawing collateral. Close the position (which ' +
+          'takes both legs to zero at once and is exempt) or top up collateral first.',
+      );
+    }
+    const ceiling = debt - minRemainingDebt;
+    if (ceiling < repayAmount) {
+      repayAmount = ceiling;
+      boundByMinDebtRatio = true;
+    }
+  }
 
   const approveAmount = (repayAmount * (FEE_DENOM + repayFeeRatio)) / FEE_DENOM;
 
@@ -1167,5 +1292,48 @@ export function computeFxRepay(input: FxRepayInputs): FxRepayAmounts {
     maxRepayUnderFee,
     repayAmount,
     approveAmount,
+    boundByMinDebtRatio,
   };
 }
+
+/**
+ * The debt a position must RETAIN to stay above the pool's `minDebtRatio`,
+ * in the same RAW units `getPosition()` reports.
+ *
+ * Mirrors f(x)'s final check in `BasePool._operate` exactly, rounded UP so the
+ * caller stays on the accepting side of a `<`:
+ *
+ * ```solidity
+ * if (rawDebts * PRECISION * PRECISION < minDebtRatio * rawColls * op.price)
+ *   revert ErrorDebtRatioTooSmall();
+ * ```
+ *
+ * `price` must be the pool oracle's **min** price — `getPrice()[1]`, the second
+ * element. `_operate` reads that one (`(, op.price, ) = ...getPrice()`), not the
+ * anchor at index 0. The three are within ~0.1% of each other, which is exactly
+ * the margin that makes using the wrong one look correct in a test and revert
+ * at the boundary.
+ *
+ * Validated against mainnet by bisecting the largest accepted repay on live
+ * positions and comparing: the prediction matched on both `wstETH-Long` and
+ * `stETH-Short` to within the bisection's own resolution.
+ *
+ * A full CLOSE is exempt and does not need this — it takes collateral to zero
+ * in the same call, and the check reads `0 < minDebtRatio × 0 × price`, which is
+ * false. The constraint binds only when collateral SURVIVES the operation.
+ */
+export const fxMinRemainingDebt = (input: {
+  /** `getPosition()[0]` — raw collateral the position will still hold. */
+  rawColls: bigint;
+  /** `getDebtRatioRange()[0]`. */
+  minDebtRatio: bigint;
+  /** `priceOracle().getPrice()[1]` — the MIN price. */
+  price: bigint;
+}): bigint => {
+  const { rawColls, minDebtRatio, price } = input;
+  const numerator = minDebtRatio * rawColls * price;
+  const denominator = FX_SCALE_PRECISION * FX_SCALE_PRECISION;
+  // Ceiling division: the check is a strict `<`, so retaining exactly the
+  // quotient passes and rounding down by one wei would not.
+  return (numerator + denominator - 1n) / denominator;
+};

@@ -4,6 +4,7 @@ import {
   FX_ADDRESSES,
   KNOWN_POOLS,
   computeFxRepay,
+  fxMinRemainingDebt,
   computeFxClose,
   fxCollateralSupplySpend,
   fxCollateralWithdrawOutput,
@@ -285,6 +286,119 @@ describe('fx-mint-util — raw debt scaling (short pools)', () => {
     // returning 0 or Infinity here would mis-size a position.
     expect(() => fxScaleDownRawDebt(1_000n, 0n)).to.throw(
       /scaling factor is 0/,
+    );
+  });
+});
+
+describe('fx-mint-util — fxMinRemainingDebt', () => {
+  // Mirrors BasePool's final check:
+  //   rawDebts * P * P < minDebtRatio * rawColls * price -> ErrorDebtRatioTooSmall
+  // Values are the live wstETH-Long #1983 reading at head, which the on-chain
+  // bisection agreed with to within its own resolution.
+  const rawColls = 1_991_372_484_655_765_692n;
+  const minDebtRatio = 100_000_000_000_000n; // 1e14, the measured long floor
+  const price = 1_886_777_387_446_784_253_674n; // getPrice()[1], the MIN price
+
+  it('reproduces the measured floor on wstETH-Long', () => {
+    expect(fxMinRemainingDebt({ rawColls, minDebtRatio, price })).to.equal(
+      375_727_657_403_221_706n,
+    );
+  });
+
+  it('rounds UP, because the contract check is a strict <', () => {
+    // Retaining the exact quotient passes; one wei less reverts. Rounding down
+    // would put the caller on the reverting side at the boundary — which is the
+    // only place this function is ever consulted.
+    const exact = fxMinRemainingDebt({
+      rawColls: 10n ** 18n,
+      minDebtRatio: 10n ** 18n,
+      price: 10n ** 18n,
+    });
+    expect(exact).to.equal(10n ** 18n);
+
+    const rounded = fxMinRemainingDebt({
+      rawColls: 3n,
+      minDebtRatio: 1n,
+      price: 1n,
+    });
+    expect(rounded).to.equal(1n);
+  });
+
+  it('is zero for a position holding no collateral', () => {
+    // Which is why a full CLOSE is exempt: it takes collateral to zero in the
+    // same call, so the floor it must clear is also zero.
+    expect(
+      fxMinRemainingDebt({ rawColls: 0n, minDebtRatio, price }),
+    ).to.equal(0n);
+  });
+
+  it('is two orders of magnitude larger on a short', () => {
+    // The reason this cannot be a rule of thumb. Same collateral and price, the
+    // shorts' minDebtRatio of 0.0909e18 against the longs' 0.0001e18.
+    const shortFloor = fxMinRemainingDebt({
+      rawColls,
+      minDebtRatio: 90_909_090_909_090_909n,
+      price,
+    });
+    const longFloor = fxMinRemainingDebt({ rawColls, minDebtRatio, price });
+    expect(shortFloor > longFloor * 900n).to.equal(true);
+  });
+});
+
+describe('fx-mint-util — computeFxRepay minDebtRatio floor', () => {
+  const base = {
+    debt: 100_000_000_000_000_000_000n, // 100 fxUSD
+    availableDebtToken: 1_000_000_000_000_000_000_000n, // plenty
+    desiredRepayAmount: 100_000_000_000_000_000_000n, // "clear it all"
+    repayFeeRatio: 5_000_000n,
+    railgunUnshieldFeeBps: 25n,
+  };
+
+  it('caps a clear-everything request at debt - minRemainingDebt', () => {
+    const result = computeFxRepay({
+      ...base,
+      minRemainingDebt: 10_000_000_000_000_000_000n, // must retain 10
+    });
+    expect(result.repayAmount).to.equal(90_000_000_000_000_000_000n);
+    expect(result.boundByMinDebtRatio).to.equal(true);
+  });
+
+  it('does not bind when the caller already wanted less', () => {
+    const result = computeFxRepay({
+      ...base,
+      desiredRepayAmount: 5_000_000_000_000_000_000n,
+      minRemainingDebt: 10_000_000_000_000_000_000n,
+    });
+    expect(result.repayAmount).to.equal(5_000_000_000_000_000_000n);
+    // False matters: it distinguishes "the protocol refused" from "you asked
+    // for less", which are different messages and different next actions.
+    expect(result.boundByMinDebtRatio).to.equal(false);
+  });
+
+  it('is absent-by-default, so existing callers are unchanged', () => {
+    const result = computeFxRepay(base);
+    expect(result.repayAmount).to.equal(base.debt);
+    expect(result.boundByMinDebtRatio).to.equal(false);
+  });
+
+  it('throws when the floor is at or above the whole debt', () => {
+    // Nothing can be repaid without touching collateral. Failing at build time
+    // is the point: the alternative is a batch that mines having repaid nothing
+    // because requireSuccess = false swallowed the revert.
+    expect(() =>
+      computeFxRepay({ ...base, minRemainingDebt: base.debt }),
+    ).to.throw(/minDebtRatio/);
+  });
+
+  it('the approve is sized against the CAPPED repay, not the request', () => {
+    // Otherwise the batch approves for a repay that will not happen and the
+    // surplus is declared as an f(x) fee that the pool never takes.
+    const result = computeFxRepay({
+      ...base,
+      minRemainingDebt: 10_000_000_000_000_000_000n,
+    });
+    expect(result.approveAmount).to.equal(
+      (result.repayAmount * (1_000_000_000n + 5_000_000n)) / 1_000_000_000n,
     );
   });
 });

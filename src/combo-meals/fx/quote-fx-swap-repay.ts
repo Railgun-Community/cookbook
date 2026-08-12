@@ -34,6 +34,17 @@ export type QuoteFxSwapRepayParams = {
    * guaranteed fill allows, up to the whole debt.
    */
   desiredRepayAmount?: bigint;
+  /**
+   * Debt the position must RETAIN to stay above the pool's `minDebtRatio`, from
+   * `getFxRepayCeiling(...).minRemainingDebt`.
+   *
+   * Pass it. f(x) reverts `ErrorDebtRatioTooSmall()` on a repay that takes a
+   * collateral-bearing position below the floor, and the ceiling is far from
+   * academic on the shorts — measured at head, `stETH-Short` accepts at most
+   * **89.16%** of its debt. Without this the quote will happily size a repay
+   * the pool rejects, and the batch mines having repaid nothing.
+   */
+  minRemainingDebt?: bigint;
   isRailgun?: boolean;
 };
 
@@ -46,8 +57,21 @@ export type QuoteFxSwapRepayResult = {
   expectedDebtToken: bigint;
   /** Debt remaining after this repay, at the guaranteed fill. */
   remainingDebt: bigint;
-  /** True when the guaranteed fill retires the position's whole debt. */
+  /**
+   * True when the guaranteed fill retires the position's whole debt.
+   *
+   * Reachable only when the position holds no collateral. With collateral in
+   * place f(x)'s `minDebtRatio` floor forbids it — see `boundByMinDebtRatio`.
+   * To clear a debt completely, close the position: a close takes both legs to
+   * zero at once and the ratio check does not bind.
+   */
   clearsDebt: boolean;
+  /**
+   * True when the pool's min-debt-ratio floor is what limited the repay, rather
+   * than the swap fill or the caller's cap. Worth surfacing — the user asked to
+   * repay more and the protocol, not the batch, refused.
+   */
+  boundByMinDebtRatio: boolean;
 };
 
 /**
@@ -60,10 +84,13 @@ export type QuoteFxSwapRepayResult = {
  * it, but here the fee was already charged on the SELL token upstream and the
  * debt token is produced mid-batch by the swap. Charging it twice under-repays.
  *
- * **A full repay does NOT close the position.** `operate(positionId, 0, -debt)`
- * clears the debt and leaves the collateral where it is, so the holder keeps an
- * unlevered position rather than exiting. Use `quoteFxSwapClose` when the intent
- * is to get the collateral back.
+ * **A full repay does NOT close the position, and f(x) will not accept one.**
+ * `operate(positionId, 0, -debt)` clears the debt and leaves the collateral
+ * where it is — which is exactly the state the pool's `minDebtRatio` forbids, so
+ * it reverts `ErrorDebtRatioTooSmall()`. Pass `minRemainingDebt` (from
+ * `getFxRepayCeiling`) and the quote sizes under the floor instead of building
+ * a batch that mines having repaid nothing. Use `quoteFxSwapClose` when the
+ * intent is to get the collateral back.
  */
 export async function quoteFxSwapRepay(
   params: QuoteFxSwapRepayParams,
@@ -78,6 +105,7 @@ export async function quoteFxSwapRepay(
     debt,
     repayFeeRatio,
     desiredRepayAmount,
+    minRemainingDebt,
     isRailgun = false,
   } = params;
 
@@ -120,6 +148,7 @@ export async function quoteFxSwapRepay(
     // See the docblock: the unshield fee was charged on the sell token, and this
     // debt token never passes through an unshield.
     railgunUnshieldFeeBps: 0n,
+    minRemainingDebt,
   });
 
   if (amounts.repayAmount === 0n) {
@@ -152,5 +181,6 @@ export async function quoteFxSwapRepay(
     expectedDebtToken: quote.buyERC20Amount.amount,
     remainingDebt: debt - amounts.repayAmount,
     clearsDebt: amounts.repayAmount === debt,
+    boundByMinDebtRatio: amounts.boundByMinDebtRatio,
   };
 }

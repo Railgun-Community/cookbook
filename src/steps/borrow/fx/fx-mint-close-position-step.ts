@@ -7,6 +7,7 @@ import type {
   UnvalidatedStepOutput,
 } from '../../../models/export-models';
 import {
+  FX_OPERATE_FULL_SENTINEL,
   FX_POOL_MANAGER_ABI,
   fxCollateralWithdrawOutput,
   fxPositionInfo,
@@ -53,17 +54,29 @@ export type FxMintClosePositionStepData = {
   /**
    * True when `repayAmount` is less than the position's full debt.
    *
-   * Informational only — it no longer gates NFT handling, and it never should
-   * have. It used to select between "NFT shields back" and "NFT burns", but
-   * f(x) does not burn on close (see `spentNFTs` below), so the NFT shields
-   * back either way. Retained because "is this a full close" is still a real
-   * fact about the operation and `computeFxClose` already derives it.
+   * **Load-bearing: it selects the `operate()` encoding.** `false` encodes
+   * {@link FX_OPERATE_FULL_SENTINEL} on both legs (retire the position exactly);
+   * `true` encodes the computed amounts. Getting this wrong in the `false`
+   * direction reverts the close; in the `true` direction it retires a position
+   * the caller meant to keep open. `computeFxClose` derives it as
+   * `repayAmount < debt`, which is the same condition the collateral leg
+   * satisfies, because the withdraw is proportional to the repaid fraction.
+   *
+   * It does NOT gate NFT handling, and it never should have. It used to select
+   * between "NFT shields back" and "NFT burns", but f(x) does not burn on close
+   * (see `spentNFTs` below), so the NFT shields back either way.
    */
   partialClose: boolean;
 };
 
 /**
- * Encodes `PoolManager.operate(pool, positionId, -withdrawColl, -repayAmount)`.
+ * Encodes `PoolManager.operate(pool, positionId, coll, debt)`.
+ *
+ * A partial close passes `(-withdrawColl, -repayAmount)`. A FULL close passes
+ * {@link FX_OPERATE_FULL_SENTINEL} on both legs — an explicit amount cannot
+ * express a full exit, because the pool converts it back to shares rounding UP
+ * and overshoots the position. See that constant for the source and the
+ * measured matrix.
  *
  * Consumes `pool.debtToken` (the executing account (ephemeral EOA) must have
  * approved PoolManager for `repayAmount × (1 + repayFeeRatio/1e9)`) and the
@@ -180,11 +193,22 @@ export class FxMintClosePositionStep extends Step {
     // use Interface directly since we don't ship a typechain binding for
     // the f(x) PoolManager — just the ABI fragment in fx-mint-util).
     const iface = new Interface(FX_POOL_MANAGER_ABI);
+    // A FULL close is encoded with f(x)'s sentinel on BOTH legs, not with the
+    // computed amounts. See {@link FX_OPERATE_FULL_SENTINEL} for the deployed
+    // source and the mainnet matrix: an explicit amount is converted back to
+    // shares with `Rounding.Up`, so on a full exit it overshoots the position
+    // by one share and reverts — `ErrorWithdrawExceedSupply()` on the
+    // collateral leg, `Panic(0x11)` on the debt leg. The sentinel takes a
+    // separate branch that assigns `op.newColl = -positionColl` /
+    // `op.newDebt = -positionDebt` directly, with no conversion to round.
+    //
+    // A PARTIAL close keeps the computed amounts: the sentinel means "all of
+    // it", which is the opposite of what a partial close asks for.
     const callData = iface.encodeFunctionData('operate', [
       poolAddress,
       positionId,
-      -withdrawColl,
-      -repayAmount,
+      partialClose ? -withdrawColl : FX_OPERATE_FULL_SENTINEL,
+      partialClose ? -repayAmount : FX_OPERATE_FULL_SENTINEL,
     ]);
 
     const tx: ContractTransaction = {
@@ -235,9 +259,24 @@ export class FxMintClosePositionStep extends Step {
           // `withdrawColl - withdrawFee`. Zero-fee on longs, so this is
           // identity there and the long behaviour is unchanged.
           //
-          // Deterministic (min == expected) — operate() withdraws exactly this
-          // or reverts — which lets a downstream Approve(0x, ...) pass
-          // cookbook's "non-deterministic input" gate.
+          // Declared deterministic (min == expected), which is what lets a
+          // downstream Approve(0x, ...) pass cookbook's "non-deterministic
+          // input" gate.
+          //
+          // On a PARTIAL close that is exact: operate() withdraws this or
+          // reverts. On a FULL close the sentinel makes the pool decide, from
+          // `positionColl` and the collateral index at MINE time, so the figure
+          // is the caller's estimate rather than a guarantee — it drifts by
+          // whatever the index moves between quote and inclusion.
+          //
+          // It stays declared as deterministic anyway, deliberately. Widening
+          // it would fail the gate and take the swap-back combos down, and the
+          // drift is absorbed: RelayAdapt shields sweep `balanceOf`, so a
+          // surplus reshields to the user rather than stranding. A shortfall
+          // fails the downstream swap's transferFrom, which under
+          // `requireSuccess = false` continues to the shield and returns the
+          // collateral whole — the documented benign degradation, not a loss.
+
           expectedBalance: withdrawnNet,
           minBalance: withdrawnNet,
           isBaseToken: false,

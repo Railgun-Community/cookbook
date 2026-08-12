@@ -1,5 +1,7 @@
 import { Contract, type Provider } from 'ethers';
 import {
+  FX_POOL_RATIO_ABI,
+  FX_PRICE_ORACLE_ABI,
   resolvePool,
   type FxMintPoolRef,
   type FxPoolSide,
@@ -10,24 +12,6 @@ import {
   getFxTopLevelCallGate,
   getNextFxPositionId,
 } from './fx-position-reader';
-
-/**
- * The two reads the debt-ratio check needs, declared here rather than added to
- * the shared pool ABI so this module states exactly what it decodes.
- *
- * `getDebtRatioRange()` returns `(min, max)`, 1e18-scaled. The max is the
- * ceiling an open must sit under — 0.8666e18 on `wstETH-Long`, measured.
- * `priceOracle()` returns the oracle the pool prices collateral with; that
- * oracle's `getPrice()` returns `(anchor, min, max)`.
- */
-const FX_POOL_RATIO_ABI = [
-  'function getDebtRatioRange() view returns (uint256 minRatio, uint256 maxRatio)',
-  'function priceOracle() view returns (address)',
-] as const;
-
-const FX_PRICE_ORACLE_ABI = [
-  'function getPrice() view returns (uint256 anchorPrice, uint256 minPrice, uint256 maxPrice)',
-] as const;
 
 const WAD = 10n ** 18n;
 
@@ -338,10 +322,11 @@ async function checkFxOpenDebtRatio(args: {
       poolContract.getDebtRatioRange() as Promise<[bigint, bigint]>,
       poolContract.priceOracle() as Promise<string>,
       // Long pools report debt NATIVELY, so there is no `tokenRates` entry to
-      // find and `getFxDebtScalingFactor` throws rather than returning
-      // identity. Asking anyway would make every long-pool check silently
-      // report itself unchecked — which is exactly how this asymmetry bit the
-      // close/repay boundary before it was a documented hazard.
+      // find and the factor is the identity. `getFxDebtScalingFactor` now
+      // returns exactly that for a long, so this branch is an optimisation
+      // (it skips two RPC reads) rather than a workaround — it used to be
+      // load-bearing, because the helper threw and a throw inside this
+      // `Promise.all` would have reported every long-pool check as unchecked.
       side === 'short'
         ? getFxDebtScalingFactor(pool, provider)
         : Promise.resolve(WAD),

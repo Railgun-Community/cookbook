@@ -49,6 +49,21 @@ export type FxMintRepayDebtRecipeOpts = {
  *
  * Pool-agnostic: debt-axis only, no collateral movement.
  *
+ * **There is a ceiling, and it is not the debt.** Because this recipe leaves
+ * the collateral in place, f(x)'s final check —
+ * `rawDebts × P × P < minDebtRatio × rawColls × price` — bounds how far the debt
+ * can fall. A repay that clears the whole debt always reverts
+ * `ErrorDebtRatioTooSmall()`, and the headroom differs by two orders of
+ * magnitude between the sides. Measured at head against live positions:
+ * `wstETH-Long` accepts at most 99.97% of its debt, `stETH-Short` only 89.16%.
+ *
+ * So size with `getFxRepayCeiling()` and pass its `minRemainingDebt` into
+ * `computeFxRepay`. Without it a "repay everything" intent builds a batch that
+ * mines with the repay swallowed by `requireSuccess = false` — the user is told
+ * it did not complete, and the debt is untouched. To clear a debt completely,
+ * close the position: `FxMintCloseRecipe` takes both legs to zero in one call
+ * and the ratio check does not bind.
+ *
  * It DOES have a combo variant — `ZeroXSwap_FxMintRepay_ComboMeal`. An earlier
  * version of this comment said otherwise, reasoning that there is no collateral
  * leg to swap into or out of. That is the wrong axis: what constrains a repay is
