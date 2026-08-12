@@ -68,21 +68,19 @@ export const MIN_GAS_LIMIT_MORPHO_BLUE_REPAY: bigint = 1_900_000n;
 export const MIN_GAS_LIMIT_MORPHO_TRANSACT: bigint = 3_100_000n;
 // f(x) Protocol (fxMINT), long and short pools.
 //
-// STILL NOT MEASURED — no fx recipe has ever executed on a fork. But the
-// previous values (open 1.5M, adjust 1.5M, close 2.5M, carried verbatim from the
-// v0.1 per-recipe hardcodes) were provably too low, independent of measurement:
+// All three of open / adjust / close are now MEASURED on the 7702 path; the
+// per-constant blocks below carry the figures, the date, and the derivation.
+// This header said "STILL NOT MEASURED ... treat all three as upper-bounded
+// guesses" long after that stopped being true, which reads as a licence to
+// re-guess them. It is not — do not move these without re-running the bisection.
 //
-//   MIN_GAS_LIMIT_EMPTY is 1.8M, from a real measurement of 1.783M for a recipe
-//   that does nothing but unshield and shield. Every fx recipe does that PLUS an
-//   ERC20 approve PLUS a PoolManager.operate() that mints or burns an ERC-721.
-//   A floor of 1.5M was therefore below the cost of the empty case it strictly
-//   contains, and too-low floors under-provision the batch rather than merely
-//   failing the harness's [min-200k, min+50k] window.
-//
-// Re-anchored against the measured neighbours in this file rather than invented:
-// beefy deposit 3.1M, morpho blue supply+borrow 3.1M, 0x swap 2.4M — all
-// unshield + approve + one protocol call, the same shape as an fx op. The NFT
-// mint/burn puts fx at the top of that band, not the bottom.
+// The history is still worth keeping, because it explains the shape of the
+// error: the v0.1 hardcodes (open 1.5M, adjust 1.5M, close 2.5M) were provably
+// too low independent of measurement, since MIN_GAS_LIMIT_EMPTY covers a recipe
+// that only unshields and shields, and every fx recipe does that PLUS an approve
+// PLUS a PoolManager.operate() that mints or burns an ERC-721. Measurement then
+// moved them in BOTH directions — see the note on FXMINT_OPEN, which was ~421k
+// too high once measured. A uniform correction would have been wrong.
 //
 // Short pools are sized by the same constants deliberately. They are strictly
 // more expensive than longs: ShortPoolManager._handleBorrow calls into the LONG
@@ -90,10 +88,6 @@ export const MIN_GAS_LIMIT_MORPHO_TRANSACT: bigint = 3_100_000n;
 // token, so a short open/borrow carries an extra cross-contract hop. One set of
 // constants sized for the dearer side is safer than two sets where the cheaper
 // one can be applied to the dearer path by mistake.
-//
-// Treat all three as upper-bounded guesses pending the 7702 fork harness
-// (.claude/plans/7702-execute-fork-harness). They are deliberately generous:
-// over-provisioning costs allowance, under-provisioning reverts the batch.
 // MEASURED on the 7702 path, 2026-08-04 (wstETH-Long, 5 fxUSD against 0.02
 // wstETH). Same derivation as MIN_GAS_LIMIT_EMPTY — K is the cost minus the
 // pre-check overhead, not the cost itself:
