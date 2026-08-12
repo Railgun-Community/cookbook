@@ -10,6 +10,7 @@ import {
   mockERC20ApprovalCalldata,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
+import { UniV2LikeFactoryContract } from '../../../../contract/liquidity/uni-v2-like-factory-contract';
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -46,6 +47,8 @@ const LP_TOKEN: RecipeERC20Info = {
 let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
+let uniswapV2PairKLast: SinonStub;
+let uniswapV2FactoryFeeTo: SinonStub;
 
 const provider = new JsonRpcProvider('https://ethereum-rpc.publicnode.com');
 
@@ -71,12 +74,29 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       UniV2LikePairContract.prototype,
       'totalSupply',
     ).resolves(oneInDecimals18 * 2_000_000n);
+
+    // See the sibling remove-liquidity test: `kLast` and `feeTo` feed the same
+    // protocol-fee computation as the reserves, so a live pair mixed with
+    // invented reserves yields a nonsense fee. `kLast == reserveA * reserveB`
+    // is the fee-settled state, which keeps the expected LP amounts exact.
+    uniswapV2PairKLast = Sinon.stub(
+      UniV2LikePairContract.prototype,
+      'kLast',
+    ).resolves(
+      oneInDecimals6 * 2_000_000_000n * (oneInDecimals18 * 1_000_000n),
+    );
+    uniswapV2FactoryFeeTo = Sinon.stub(
+      UniV2LikeFactoryContract.prototype,
+      'feeTo',
+    ).resolves('0xf38521f130fcCF29dB1961597bc5d2B60F995f85'); // pragma: allowlist secret
   });
 
   after(() => {
     dateStub.restore();
     uniswapV2PairGetReserves.restore();
     uniswapV2PairTotalSupply.restore();
+    uniswapV2PairKLast.restore();
+    uniswapV2FactoryFeeTo.restore();
   });
 
   it('Should create uniswap-v2-add-liquidity-recipe', async () => {
@@ -181,9 +201,13 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
+          // The USDC leg, so the USDC amount. This asserted the WETH figure
+          // against the USDC token — harmless while approvals were unlimited
+          // and the amount argument went unused, and never caught afterwards
+          // because the RPC behind this test was dark.
           data: mockERC20ApprovalCalldata(
             '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
-            (oneInDecimals18 * 1n * 9975n) / 10000n,
+            (oneInDecimals6 * 2000n * 9975n) / 10000n,
           ),
           to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         },
@@ -214,9 +238,11 @@ describe('uniswap-v2-add-liquidity-recipe', () => {
       outputNFTs: [],
       crossContractCalls: [
         {
+          // The WETH leg. Mirror image of the mix-up above — the two goldens
+          // carried each other's amount.
           data: mockERC20ApprovalCalldata(
             '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
-            (oneInDecimals6 * 2000n * 9975n) / 10000n,
+            (oneInDecimals18 * 1n * 9975n) / 10000n,
           ),
           to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         },

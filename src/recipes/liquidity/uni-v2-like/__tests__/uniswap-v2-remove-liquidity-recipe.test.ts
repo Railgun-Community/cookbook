@@ -10,6 +10,7 @@ import {
   mockERC20ApprovalCalldata,
 } from '../../../../test/mocks.test';
 import { UniV2LikePairContract } from '../../../../contract/liquidity/uni-v2-like-pair-contract';
+import { UniV2LikeFactoryContract } from '../../../../contract/liquidity/uni-v2-like-factory-contract';
 import {
   RecipeERC20Info,
   RecipeInput,
@@ -46,6 +47,8 @@ const LP_TOKEN: RecipeERC20Info = {
 let dateStub: SinonStub;
 let uniswapV2PairGetReserves: SinonStub;
 let uniswapV2PairTotalSupply: SinonStub;
+let uniswapV2PairKLast: SinonStub;
+let uniswapV2FactoryFeeTo: SinonStub;
 
 const provider = new JsonRpcProvider('https://ethereum-rpc.publicnode.com');
 
@@ -71,12 +74,36 @@ describe('uniswap-v2-remove-liquidity-recipe', () => {
       UniV2LikePairContract.prototype,
       'totalSupply',
     ).resolves(oneInDecimals18 * 2_000_000n);
+
+    // `kLast` and `feeTo` feed the SAME protocol-fee computation as the
+    // reserves above, so leaving them live made the fixture incoherent: a real
+    // mainnet `kLast` against these invented reserves. It went unnoticed only
+    // because Uniswap's fee switch was off, which short-circuits the fee to
+    // zero, and then because the RPC this pointed at went dark. The switch is
+    // on now.
+    //
+    // `kLast == reserveA * reserveB` is the fee-settled state — every fee up to
+    // now already minted — so the expected amounts below stay exact. `feeTo` is
+    // still non-zero, so the fee math runs rather than short-circuiting; the
+    // stale-`kLast` case is covered in the SDK's own tests.
+    uniswapV2PairKLast = Sinon.stub(
+      UniV2LikePairContract.prototype,
+      'kLast',
+    ).resolves(
+      oneInDecimals6 * 2_000_000_000n * (oneInDecimals18 * 1_000_000n),
+    );
+    uniswapV2FactoryFeeTo = Sinon.stub(
+      UniV2LikeFactoryContract.prototype,
+      'feeTo',
+    ).resolves('0xf38521f130fcCF29dB1961597bc5d2B60F995f85'); // pragma: allowlist secret
   });
 
   after(() => {
     dateStub.restore();
     uniswapV2PairGetReserves.restore();
     uniswapV2PairTotalSupply.restore();
+    uniswapV2PairKLast.restore();
+    uniswapV2FactoryFeeTo.restore();
   });
 
   it('Should create uniswap-v2-remove-liquidity-recipe', async () => {

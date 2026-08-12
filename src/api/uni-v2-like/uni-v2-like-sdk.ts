@@ -371,9 +371,26 @@ export class UniV2LikeSDK {
         provider,
       );
 
-    const newLiquidity = lpERC20Amount.amount - lpFeeAmount;
-    const expectedAmountA = (newLiquidity * reserveA) / totalSupply;
-    const expectedAmountB = (newLiquidity * reserveB) / totalSupply;
+    // `lpFeeAmount` is the protocol-fee liquidity `_mintFee` would mint to
+    // `feeTo` — a POOL-WIDE quantity, not a share of this caller's balance. It
+    // DILUTES the supply the burn divides by; it is not deducted from the
+    // amount being burnt.
+    //
+    // Subtracting it from the caller's LP amount, as this did, is wrong twice
+    // over: it understates every withdrawal, and it goes NEGATIVE for any
+    // caller whose LP balance is smaller than the pool's accrued fee — which
+    // is most callers once `kLast` is a few blocks stale. The recipe then fails
+    // to build at all, on `amountAMin` being out of uint256 range.
+    //
+    // Harmless while Uniswap's fee switch was off (`feeTo == 0` short-circuits
+    // `getLPFeeAmount` to zero). It is on now, which is what exposed this.
+    //
+    // `burn()` calls `_mintFee` FIRST and then divides by the raised supply, so
+    // dilution is the faithful model — and it is already what the add path
+    // uses, via `newTotalSupply`.
+    const newTotalSupply = totalSupply + lpFeeAmount;
+    const expectedAmountA = (lpERC20Amount.amount * reserveA) / newTotalSupply;
+    const expectedAmountB = (lpERC20Amount.amount * reserveB) / newTotalSupply;
 
     const routerContractAddress = this.getRouterContractAddress(
       uniswapV2Fork,
