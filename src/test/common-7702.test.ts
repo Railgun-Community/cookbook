@@ -734,7 +734,23 @@ export const measure7702BatchGasFloor = async (
           })),
         );
         if (isDefined(relayAdaptError)) {
-          reason = `relay-adapt subcall revert: ${relayAdaptError}`;
+          // The decoded form is a UTF-8 read of the revert payload, which is
+          // mojibake for anything that is not a plain `Error(string)` — a
+          // `Panic(uint256)` renders as "NH{q" and a custom error as noise. That
+          // is unusable for diagnosis, and it cost a full run to work out that
+          // "NH{q" was 0x4e487b71 rather than a broken recipe. Carry the raw
+          // bytes alongside so the selector is readable.
+          // Under 7702 the batch executes AS the ephemeral EOA — it carries the
+          // delegated RelayAdapt code — so `CallError` is emitted from that
+          // address, not from the relay-adapt contract.
+          const executorAddress = (transaction.to ?? '').toLowerCase();
+          const rawPayloads = txReceipt.logs
+            .filter(log => log.address.toLowerCase() === executorAddress)
+            .map(log => log.data)
+            .filter(data => data !== '0x' && data.length > 2);
+          const raw =
+            rawPayloads.length > 0 ? ` raw=${rawPayloads.join(',')}` : '';
+          reason = `relay-adapt subcall revert: ${relayAdaptError}${raw}`;
         } else {
           // The load-bearing check. A batch can mine with status 1 and still
           // have skipped the shield entirely, because requireSuccess is false.
