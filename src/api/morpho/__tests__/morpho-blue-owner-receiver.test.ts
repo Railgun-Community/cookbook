@@ -322,7 +322,14 @@ describe('MorphoBlueAPI owner/receiver — legs with no receiver', () => {
       provider: makeStubProvider({ reads }),
     });
     expect(quote.onBehalf).to.equal(OWNER);
-    expect(quote.repayAssets).to.equal(OWNER_OWED_ASSETS);
+    // Owed MINUS ONE, not owed. `owedAssets` is `toAssetsUp(borrowShares)` and
+    // `repay` converts back with `toSharesDown`, which can return
+    // `borrowShares + 1` and underflow `position.borrowShares -= shares`.
+    // Measured: a batch repaying exactly the owed figure reverted
+    // `Panic(0x11)` — raw payload `4e487b71...0011` — at every gas limit, and
+    // `requireSuccess = false` swallowed it, so the batch mined having repaid
+    // nothing. Mirror of the one-unit borrow de-rate on the ceiling.
+    expect(quote.repayAssets).to.equal(OWNER_OWED_ASSETS - 1n);
     expect(reads).to.include(`position(${OWNER})`);
     expect(reads.some(read => read.startsWith('isAuthorized'))).to.equal(false);
   });

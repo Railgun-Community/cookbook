@@ -675,8 +675,35 @@ export class MorphoBlueAPI {
     if (owedAssets <= 0n) {
       throw new Error('morpho: no debt to repay');
     }
-    const repayAssets =
-      params.repayAssets < owedAssets ? params.repayAssets : owedAssets;
+    // De-rate by one unit when the request would clear the whole debt.
+    //
+    // `owedAssets` is `toAssetsUp(borrowShares)` — rounded UP — and `repay`
+    // converts back with `toSharesDown`, which can return `borrowShares + 1`.
+    // `position.borrowShares -= shares` then underflows and Blue reverts
+    // `Panic(0x11)`. MEASURED: a 7702 batch repaying exactly this figure failed
+    // with raw payload `4e487b71...0011` at the repay call index, on every gas
+    // limit — the failure is arithmetic, not gas, and under
+    // `requireSuccess = false` it is swallowed, so the batch mines having repaid
+    // nothing.
+    //
+    // This is the exact mirror of the one-unit BORROW de-rate measured for the
+    // ceiling (see `combo-meals/morpho/util.ts`): both come from Blue rounding
+    // in favour of the protocol at each conversion. Like that one it is
+    // position-dependent — a sweep over an unrelated large borrower showed no
+    // gap — which is why it survived until a full-debt repay was actually
+    // executed.
+    //
+    // Costs one unit of dust left owed. A caller who needs the debt at exactly
+    // zero must use `getRepaySharesQuote`, which is shares-denominated and has
+    // no conversion to round against; that is what it is for.
+    const clearsWholeDebt = params.repayAssets >= owedAssets;
+    const repayAssets = clearsWholeDebt ? owedAssets - 1n : params.repayAssets;
+    if (repayAssets <= 0n) {
+      throw new Error(
+        `morpho: debt of ${owedAssets} is too small to repay by assets — ` +
+          'use getRepaySharesQuote, which needs no assets/shares conversion',
+      );
+    }
     return {
       params: params.market,
       marketId,
