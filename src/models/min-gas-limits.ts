@@ -122,32 +122,40 @@ export const MIN_GAS_LIMIT_FXMINT_OPEN: bigint = 2_690_000n;
 // is the only member that moves BOTH axes of operate() and shields an ERC20 and
 // the NFT back; one constant has to clear topup, borrow-more and repay-debt too.
 export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 2_880_000n;
-//   CLOSE
-//     cost floor          3_109_375   (max failing probe 3_070_312, fork block
-//                                      25742266, 7 probes — measured on the FULL
-//                                      close, 2026-08-13)
-//     pre-check overhead    112_500   (measured 2026-08-13: forced require K
-//                                      4_000_000, floor with it 4_112_500,
-//                                      5 probes)
-//     K                   2_996_875   -> 3_000_000
+//   CLOSE — both branches measured 2026-08-13, and they do NOT coincide.
+//     FULL  cost floor    3_109_375   (max failing 3_070_312, block 25742266)
+//     PART  cost floor    3_031_250   (max failing 2_992_187, block 25742576)
+//     pre-check overhead    112_500   (forced require K 4_000_000, floor with it
+//                                      4_112_500, 5 probes)
+//     K = 3_109_375 - 112_500
+//                         2_996_875   -> 3_000_000
 //
-// K is now PINNED rather than bounded. The previous note here carried the
-// overhead as NOT MEASURED — the earlier re-bisection died when the squid
-// returned 502 mid-run — and borrowed ADJUST's 112_500 as a stand-in. The
-// measurement returned exactly that, so the shipped value did not move; only its
+// Sized on the FULL close, because it is the dearer branch and one constant has
+// to clear both. Sizing on the partial would give K = 2_918_750, which the full
+// close would then breach.
+//
+// The earlier note had this BACKWARDS. It attributed 3_109_375 to the PARTIAL
+// close and called that "the dearer branch, since the position survives and the
+// NFT is shielded back". Two things are wrong with that. The rationale is
+// superseded — f(x) does not burn on close (0 burns measured over 200k blocks)
+// and the step declares the NFT unconditionally, so BOTH branches carry the
+// shield leg. And the ordering is inverted: measured against the same fixture,
+// the full close costs MORE. The gap is the repay size, not the NFT.
+//
+// The two are separated by more than the search can blur: the bracketing
+// intervals (2_992_187, 3_031_250] and (3_070_312, 3_109_375] are disjoint, so
+// the difference is real and at least 39_062 gas, not a lattice artefact.
+//
+// K is now PINNED rather than bounded. The overhead was previously carried as
+// NOT MEASURED — the earlier re-bisection died when the squid returned 502
+// mid-run — with ADJUST's 112_500 borrowed as a stand-in. The measurement
+// returned exactly that, so the shipped value did not move; only its
 // justification did.
 //
-// Read the agreement carefully before treating it as two independent results.
+// Read that agreement carefully before treating it as two independent results.
 // Both overheads come from the same window [K, K + 600_000] at a 50_000
-// tolerance, and 112_500 is a lattice point of that search. Adjust and close
-// agree to within the search's own resolution — that is not the same as their
-// overheads being equal.
-//
-// The old attribution said 3_109_375 came from the PARTIAL close, "the dearer
-// branch, since the position survives and the NFT is shielded back". That
-// rationale is superseded: f(x) does not burn on close (0 burns measured over
-// 200k blocks) and the step declares the NFT unconditionally, so BOTH branches
-// carry the shield leg. Any gap between them is the repay size, not the NFT.
+// tolerance, and 112_500 is a lattice point of it. Adjust and close agree to
+// within the search's own resolution — which is not the same as being equal.
 //
 // Direction of error, if this is ever re-derived: over-provisioning is the
 // harmful side. An excessive floor makes the batch carry gas it cannot use and
