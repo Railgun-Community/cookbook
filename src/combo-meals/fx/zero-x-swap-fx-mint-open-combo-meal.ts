@@ -6,7 +6,7 @@ import {
   FxMintOpenRecipeOpts,
 } from '../../recipes/borrow/fx/fx-mint-open-recipe';
 import { ComboMeal } from '../combo-meal';
-import { MIN_GAS_LIMIT_COMBO_MEAL } from '../../models/min-gas-limits';
+import { MIN_GAS_LIMIT_ZEROX_FXMINT_OPEN_COMBO } from '../../models/min-gas-limits';
 import { EphemeralExecutor, resolveExecutorAddress } from '../../utils/7702';
 import { assertSwapTokenIsNotCollateral, fxCollateralERC20Info } from './util';
 
@@ -41,7 +41,12 @@ export class ZeroXSwap_FxMintOpen_ComboMeal extends ComboMeal {
     name: '0x Swap + f(x) Open Position',
     description:
       'Swaps into the pool collateral and opens an f(x) position, long or short (shields the borrowed debt token and the position NFT).',
-    minGasLimit: MIN_GAS_LIMIT_COMBO_MEAL,
+    // Its OWN measured floor, not the generic combo one. Aggregation could not
+    // rescue this: the generic 2_900_000 beat its dearest constituent
+    // (FXMINT_OPEN, 2_690_000), so `max(...)` returned 2_900_000 while the
+    // measured floor is 3_121_581. This is the §4.1 shape that ran out of gas
+    // on mainnet at 3_016_590.
+    minGasLimit: MIN_GAS_LIMIT_ZEROX_FXMINT_OPEN_COMBO,
   };
 
   private readonly swapRecipe: ZeroXV2SwapRecipe;

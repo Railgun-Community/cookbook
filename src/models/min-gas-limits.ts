@@ -1,7 +1,41 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 
 // Combo Meals
+//
+// The generic floor, still UNMEASURED on the 7702 path. Combos that have not
+// been measured individually keep it, and `ComboMeal.getComboMealOutput` raises
+// whatever they declare to `max(config, ...recipes)`, so none can sit below its
+// own worst leg. That aggregation is a safety net, not a measurement: it cannot
+// know what the combo's own overhead adds on top of its dearest recipe.
 export const MIN_GAS_LIMIT_COMBO_MEAL: bigint = 2_900_000n; // 2.741
+// MEASURED on the 7702 path, 2026-08-13, and it is the one combo we know the
+// generic floor was too low for.
+//
+//   cost floor          3_121_581   (max failing probe 3_107_177, block 25748101)
+//   pre-check overhead    112_500   (BORROWED — the dearest measured sibling;
+//                                    this combo has no overhead bisection of
+//                                    its own)
+//   K                   3_009_081   -> 3_010_000
+//
+// This is the §4.1 flow that failed on mainnet: unshield WETH, swap to wstETH,
+// open the position. That batch carried 3_016_590 and ran out of gas at the
+// shield. The measured floor is 3_121_581, which is ABOVE it — so the mainnet
+// failure is reproduced and explained rather than inferred.
+//
+// Aggregation alone did not save it. The combo took the generic 2_900_000 and
+// its dearest constituent is FXMINT_OPEN at 2_690_000, so `max(...)` returned
+// 2_900_000 — still ~221k under the real floor. A combo costs more than the sum
+// of its parts' declared floors because the swap leg and the extra shield
+// request are not in any constituent's number.
+//
+// The overhead is borrowed, so K is bounded rather than pinned. The direction is
+// safe: this combo carries MORE calldata than any leg measured (a swap plus an
+// open), so its true overhead should be >= 112_500, which makes the real K
+// SMALLER and this value slightly conservative. Measure it to tighten.
+//
+// One block only. Given that ADJUST's floor moved 1.3% between two dates, treat
+// this as sized on a single sample of a quantity known to drift.
+export const MIN_GAS_LIMIT_ZEROX_FXMINT_OPEN_COMBO: bigint = 3_010_000n;
 
 // Recipes
 export const MIN_GAS_LIMIT_ANY_RECIPE: bigint = 2_800_000n;
