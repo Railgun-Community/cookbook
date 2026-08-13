@@ -122,23 +122,37 @@ export const MIN_GAS_LIMIT_FXMINT_OPEN: bigint = 2_690_000n;
 // is the only member that moves BOTH axes of operate() and shields an ERC20 and
 // the NFT back; one constant has to clear topup, borrow-more and repay-debt too.
 export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 2_880_000n;
-//   CLOSE (partial — the dearer branch, since the position survives and the NFT
-//   is shielded back)
-//     cost floor          3_109_375   (max failing probe 3_070_312)
-//     pre-check overhead    NOT MEASURED — the re-bisection died when the squid
-//                           returned 502 mid-run and wedged the TXID sync.
+//   CLOSE
+//     cost floor          3_109_375   (max failing probe 3_070_312, fork block
+//                                      25742266, 7 probes — measured on the FULL
+//                                      close, 2026-08-13)
+//     pre-check overhead    112_500   (measured 2026-08-13: forced require K
+//                                      4_000_000, floor with it 4_112_500,
+//                                      5 probes)
+//     K                   2_996_875   -> 3_000_000
 //
-// So K is bounded, not pinned: K = 3_109_375 - overhead, and overhead is
-// strictly positive. Using ADJUST's measured 112_500 gives 2_996_875. That is
-// the LARGER of the two sibling overheads (OPEN measured 87_377), and using the
-// larger one is deliberate — it yields the SMALLER K, and over-provisioning is
-// the harmful direction here: an excessive floor makes the batch carry gas it
-// cannot use and can revert on the floor check itself.
+// K is now PINNED rather than bounded. The previous note here carried the
+// overhead as NOT MEASURED — the earlier re-bisection died when the squid
+// returned 502 mid-run — and borrowed ADJUST's 112_500 as a stand-in. The
+// measurement returned exactly that, so the shipped value did not move; only its
+// justification did.
 //
-// Re-measure the close overhead to replace this bound with a measurement. Until
-// then the assumption is stated rather than hidden: close carries at least as
-// much calldata as adjust, so its overhead should be >= 112_500, which would
-// make this value slightly conservative rather than slightly high.
+// Read the agreement carefully before treating it as two independent results.
+// Both overheads come from the same window [K, K + 600_000] at a 50_000
+// tolerance, and 112_500 is a lattice point of that search. Adjust and close
+// agree to within the search's own resolution — that is not the same as their
+// overheads being equal.
+//
+// The old attribution said 3_109_375 came from the PARTIAL close, "the dearer
+// branch, since the position survives and the NFT is shielded back". That
+// rationale is superseded: f(x) does not burn on close (0 burns measured over
+// 200k blocks) and the step declares the NFT unconditionally, so BOTH branches
+// carry the shield leg. Any gap between them is the repay size, not the NFT.
+//
+// Direction of error, if this is ever re-derived: over-provisioning is the
+// harmful side. An excessive floor makes the batch carry gas it cannot use and
+// can revert on the floor check itself, so prefer the LARGER overhead (which
+// yields the smaller K) when two candidates are within the search resolution.
 export const MIN_GAS_LIMIT_FXMINT_CLOSE: bigint = 3_000_000n;
 export const MIN_GAS_LIMIT_LP_V2_ADD_LIQUIDITY: bigint = 2_700_000n; // 2.588
 export const MIN_GAS_LIMIT_LP_V2_REMOVE_LIQUIDITY: bigint = 2_300_000n; // 2.194
