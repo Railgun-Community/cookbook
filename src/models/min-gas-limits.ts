@@ -114,14 +114,32 @@ export const MIN_GAS_LIMIT_FXMINT_OPEN: bigint = 2_690_000n;
 // Same derivation as the two above: K = cost floor - pre-check overhead.
 //
 //   ADJUST (topup + borrow, the dearest member of the family)
-//     cost floor          2_992_187   (max failing probe 2_953_125)
-//     pre-check overhead    112_500   (measured, require-bound re-bisection)
-//     K                   2_879_687   -> 2_880_000
+//     cost floor 2026-08-05  2_992_187   (max failing 2_953_125)
+//     cost floor 2026-08-13  3_031_250   (max failing 2_992_187, block 25742656)
+//     pre-check overhead       112_500   (reproduced on both dates: forced
+//                                         require K 4_000_000 -> 4_112_500)
+//     K = 3_031_250 - 112_500
+//                            2_918_750   -> 2_920_000
 //
-// The old 3_000_000 over-constrained by ~120k. Sized on topup+borrow because it
-// is the only member that moves BOTH axes of operate() and shields an ERC20 and
-// the NFT back; one constant has to clear topup, borrow-more and repay-debt too.
-export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 2_880_000n;
+// Derived from the DEARER of the two measurements. Note what the second one
+// says about the first: 2_992_187 was the measured floor on 2026-08-05 and is a
+// FAILING probe on 2026-08-13. The cost rose by 39_063, about 1.3%, which is the
+// tree-state spread F11 documents (~1%) rather than a change in the recipe.
+//
+// That is why this is 2_920_000 and not the 2_880_000 shipped before. The old
+// value was correct for the state it was measured against and under-provisions
+// against a dearer tree. A floor that is too low does not merely fail the
+// harness window — it under-provisions the batch on chain.
+//
+// Two measurements is the minimum this deserves; the method calls for a spread
+// across >= 3 blocks. Treat 2_920_000 as sized on the dearer of two rather than
+// on a settled distribution, and widen it if a third comes in higher.
+//
+// The 3_000_000 before that over-constrained by ~120k. Sized on topup+borrow
+// because it is the only member that moves BOTH axes of operate() and shields an
+// ERC20 and the NFT back; one constant has to clear topup, borrow-more and
+// repay-debt too.
+export const MIN_GAS_LIMIT_FXMINT_ADJUST: bigint = 2_920_000n;
 //   CLOSE — both branches measured 2026-08-13, and they do NOT coincide.
 //     FULL  cost floor    3_109_375   (max failing 3_070_312, block 25742266)
 //     PART  cost floor    3_031_250   (max failing 2_992_187, block 25742576)
