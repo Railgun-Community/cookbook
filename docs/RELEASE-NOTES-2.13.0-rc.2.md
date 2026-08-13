@@ -1,14 +1,28 @@
-# 2.13.0-rc.1 — release candidate
+# 2.13.0-rc.2 — release candidate
 
-Branch `zy0n/7702-morpho-addons`, cut from `2.12.4`. 265 files changed.
+Branch `zy0n/7702-morpho-addons`, cut onto `origin/release`. 265 files changed
+against `2.12.4`.
 
 The theme: an EIP-7702 ephemeral executor makes **the account the position
 handle**, so address-bound protocols — Morpho Blue, f(x) positions — become
 expressible behind RAILGUN for the first time. Everything below follows from
 that.
 
-Prior `2.13.0-fx.N` tarballs were private test builds. This is the first
-candidate intended for public consumption.
+## If you are already on the `dev` tag, upgrade
+
+`2.13.0-rc.0` and `2.13.0-rc.1` are published and `dev` currently points at
+`rc.1`. **That build has a broken f(x) write path** — it predates the fix by 96
+commits, so on it:
+
+- a full close reverts on both LONG pools and panics on `WBTC-Short`
+- a repay that clears the whole debt always reverts
+- `getFxDebtScalingFactor` throws on both LONG pools
+- a *successful* full close leaves the position NFT public
+
+All four are fixed here. If you are pinned to `rc.1`, treat this as a required
+upgrade rather than an optional one; see **Fixes** below for what each one did.
+
+The `2.13.0-fx.N` tarballs were private test builds and were never published.
 
 ---
 
